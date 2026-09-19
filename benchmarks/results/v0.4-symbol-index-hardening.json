@@ -1,0 +1,498 @@
+{
+  "generatedAt": "2026-09-19T16:09:30.644Z",
+  "symbolIdentity": "file::package::enclosing-type-chain::kind::name(parameter-signature)",
+  "tasks": 15,
+  "requiredSymbols": 15,
+  "requiredSymbolsRetrieved": 15,
+  "retrievalRecall": 1,
+  "symbolIndexFailureRate": 0,
+  "symbolFactLossRate": 0,
+  "failureAttribution": {
+    "SYMBOL_NOT_INDEXED": 0,
+    "SYMBOL_AMBIGUITY": 0,
+    "SYMBOL_ID_COLLISION": 0
+  },
+  "comparison": {
+    "v03": {
+      "requiredFactRecall": 0.9394,
+      "medianTokenReduction": 0.9505,
+      "resolutionHarmRate": 0,
+      "resolutionFactLossRate": 0
+    },
+    "v04": {
+      "requiredFactRecall": 1,
+      "retrievalRecall": 1
+    }
+  },
+  "currentRegression": {
+    "requiredFactRecall": 1,
+    "medianTokenReduction": 94.52
+  },
+  "retrieval": [
+    {
+      "repository": "spring-petclinic",
+      "task": "petclinic-owner-update-explain",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "OwnerController.processUpdateOwnerForm",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java::org.springframework.samples.petclinic.owner::OwnerController::method::processUpdateOwnerForm(Owner owner, BindingResult result, int ownerId, RedirectAttributes redirectAttributes)",
+          "qualifiedName": "org.springframework.samples.petclinic.owner.OwnerController.processUpdateOwnerForm",
+          "signature": "processUpdateOwnerForm(Owner owner, BindingResult result, int ownerId, RedirectAttributes redirectAttributes): String",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 45,
+        "symbolsIndexed": 252,
+        "methodsIndexed": 179,
+        "constructorsIndexed": 6,
+        "classesIndexed": 62,
+        "interfacesIndexed": 5,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 30,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "spring-petclinic",
+      "task": "petclinic-owner-callers",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "OwnerController.showOwner",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java::org.springframework.samples.petclinic.owner::OwnerController::method::showOwner(int ownerId)",
+          "qualifiedName": "org.springframework.samples.petclinic.owner.OwnerController.showOwner",
+          "signature": "showOwner(int ownerId): ModelAndView",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 45,
+        "symbolsIndexed": 252,
+        "methodsIndexed": 179,
+        "constructorsIndexed": 6,
+        "classesIndexed": 62,
+        "interfacesIndexed": 5,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 30,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "spring-petclinic",
+      "task": "petclinic-owner-impact",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "OwnerController.processCreationForm",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java::org.springframework.samples.petclinic.owner::OwnerController::method::processCreationForm(Owner owner, BindingResult result, RedirectAttributes redirectAttributes)",
+          "qualifiedName": "org.springframework.samples.petclinic.owner.OwnerController.processCreationForm",
+          "signature": "processCreationForm(Owner owner, BindingResult result, RedirectAttributes redirectAttributes): String",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 45,
+        "symbolsIndexed": 252,
+        "methodsIndexed": 179,
+        "constructorsIndexed": 6,
+        "classesIndexed": 62,
+        "interfacesIndexed": 5,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 30,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "spring-petclinic",
+      "task": "petclinic-vet-explain",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "VetController.showResourcesVetList",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/vet/VetController.java::org.springframework.samples.petclinic.vet::VetController::method::showResourcesVetList",
+          "qualifiedName": "org.springframework.samples.petclinic.vet.VetController.showResourcesVetList",
+          "signature": "showResourcesVetList(): Vets",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/vet/VetController.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 45,
+        "symbolsIndexed": 252,
+        "methodsIndexed": 179,
+        "constructorsIndexed": 6,
+        "classesIndexed": 62,
+        "interfacesIndexed": 5,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 30,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "spring-petclinic",
+      "task": "petclinic-pet-change",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "PetController.processCreationForm",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java::org.springframework.samples.petclinic.owner::PetController::method::processCreationForm(Owner owner, Pet pet, BindingResult result, RedirectAttributes redirectAttributes)",
+          "qualifiedName": "org.springframework.samples.petclinic.owner.PetController.processCreationForm",
+          "signature": "processCreationForm(Owner owner, Pet pet, BindingResult result, RedirectAttributes redirectAttributes): String",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 45,
+        "symbolsIndexed": 252,
+        "methodsIndexed": 179,
+        "constructorsIndexed": 6,
+        "classesIndexed": 62,
+        "interfacesIndexed": 5,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 30,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "petclinic-rest",
+      "task": "rest-owner-list",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "OwnerRestControllerV1.listOwners",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java::org.springframework.samples.petclinic.rest.controller.v1::OwnerRestControllerV1::method::listOwners(String lastName)",
+          "qualifiedName": "org.springframework.samples.petclinic.rest.controller.v1.OwnerRestControllerV1.listOwners",
+          "signature": "listOwners(String lastName): ResponseEntity<List<OwnerDto>>",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 105,
+        "symbolsIndexed": 549,
+        "methodsIndexed": 396,
+        "constructorsIndexed": 24,
+        "classesIndexed": 96,
+        "interfacesIndexed": 33,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 54,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "petclinic-rest",
+      "task": "rest-owner-update",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "OwnerRestControllerV1.updateOwner",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java::org.springframework.samples.petclinic.rest.controller.v1::OwnerRestControllerV1::method::updateOwner(Integer ownerId, OwnerFieldsDto ownerFieldsDto)",
+          "qualifiedName": "org.springframework.samples.petclinic.rest.controller.v1.OwnerRestControllerV1.updateOwner",
+          "signature": "updateOwner(Integer ownerId, OwnerFieldsDto ownerFieldsDto): ResponseEntity<OwnerDto>",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 105,
+        "symbolsIndexed": 549,
+        "methodsIndexed": 396,
+        "constructorsIndexed": 24,
+        "classesIndexed": 96,
+        "interfacesIndexed": 33,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 54,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "petclinic-rest",
+      "task": "rest-clinic-delete",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "ClinicServiceImpl.deleteOwner",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java::org.springframework.samples.petclinic.service::ClinicServiceImpl::method::deleteOwner(Owner owner)",
+          "qualifiedName": "org.springframework.samples.petclinic.service.ClinicServiceImpl.deleteOwner",
+          "signature": "deleteOwner(Owner owner): void",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 105,
+        "symbolsIndexed": 549,
+        "methodsIndexed": 396,
+        "constructorsIndexed": 24,
+        "classesIndexed": 96,
+        "interfacesIndexed": 33,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 54,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "petclinic-rest",
+      "task": "rest-clinic-find",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "ClinicServiceImpl.findAllOwners",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java::org.springframework.samples.petclinic.service::ClinicServiceImpl::method::findAllOwners",
+          "qualifiedName": "org.springframework.samples.petclinic.service.ClinicServiceImpl.findAllOwners",
+          "signature": "findAllOwners(): Collection<Owner>",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 105,
+        "symbolsIndexed": 549,
+        "methodsIndexed": 396,
+        "constructorsIndexed": 24,
+        "classesIndexed": 96,
+        "interfacesIndexed": 33,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 54,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "petclinic-rest",
+      "task": "rest-user-save",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "UserServiceImpl.saveUser",
+      "candidates": [
+        {
+          "id": "src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java::org.springframework.samples.petclinic.service::UserServiceImpl::method::saveUser(User user)",
+          "qualifiedName": "org.springframework.samples.petclinic.service.UserServiceImpl.saveUser",
+          "signature": "saveUser(User user): void",
+          "filePath": "src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 105,
+        "symbolsIndexed": 549,
+        "methodsIndexed": 396,
+        "constructorsIndexed": 24,
+        "classesIndexed": 96,
+        "interfacesIndexed": 33,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 54,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "keycloak-services",
+      "task": "keycloak-session-flow",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "DefaultKeycloakSession.users",
+      "candidates": [
+        {
+          "id": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java::org.keycloak.services::DefaultKeycloakSession::method::users",
+          "qualifiedName": "org.keycloak.services.DefaultKeycloakSession.users",
+          "signature": "users(): UserProvider",
+          "filePath": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 419,
+        "symbolsIndexed": 4404,
+        "methodsIndexed": 3571,
+        "constructorsIndexed": 285,
+        "classesIndexed": 487,
+        "interfacesIndexed": 42,
+        "recordsIndexed": 9,
+        "enumsIndexed": 10,
+        "duplicateSimpleNames": 686,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "keycloak-services",
+      "task": "keycloak-session-provider",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "getProvider(Class<T> clazz): T",
+      "candidates": [
+        {
+          "id": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java::org.keycloak.services::DefaultKeycloakSession::method::getProvider(Class<T> clazz)",
+          "qualifiedName": "org.keycloak.services.DefaultKeycloakSession.getProvider",
+          "signature": "getProvider(Class<T> clazz): T",
+          "filePath": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 419,
+        "symbolsIndexed": 4404,
+        "methodsIndexed": 3571,
+        "constructorsIndexed": 285,
+        "classesIndexed": 487,
+        "interfacesIndexed": 42,
+        "recordsIndexed": 9,
+        "enumsIndexed": 10,
+        "duplicateSimpleNames": 686,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "keycloak-services",
+      "task": "keycloak-session-callers",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "DefaultKeycloakSession.getContext",
+      "candidates": [
+        {
+          "id": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java::org.keycloak.services::DefaultKeycloakSession::method::getContext",
+          "qualifiedName": "org.keycloak.services.DefaultKeycloakSession.getContext",
+          "signature": "getContext(): KeycloakContext",
+          "filePath": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 419,
+        "symbolsIndexed": 4404,
+        "methodsIndexed": 3571,
+        "constructorsIndexed": 285,
+        "classesIndexed": 487,
+        "interfacesIndexed": 42,
+        "recordsIndexed": 9,
+        "enumsIndexed": 10,
+        "duplicateSimpleNames": 686,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "keycloak-services",
+      "task": "keycloak-session-close",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "DefaultKeycloakSession.close",
+      "candidates": [
+        {
+          "id": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java::org.keycloak.services::DefaultKeycloakSession::method::close",
+          "qualifiedName": "org.keycloak.services.DefaultKeycloakSession.close",
+          "signature": "close(): void",
+          "filePath": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 419,
+        "symbolsIndexed": 4404,
+        "methodsIndexed": 3571,
+        "constructorsIndexed": 285,
+        "classesIndexed": 487,
+        "interfacesIndexed": 42,
+        "recordsIndexed": 9,
+        "enumsIndexed": 10,
+        "duplicateSimpleNames": 686,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    },
+    {
+      "repository": "keycloak-services",
+      "task": "keycloak-session-readonly",
+      "requiredSymbolsTotal": 1,
+      "requiredSymbolsRetrieved": 1,
+      "retrievalRecall": 1,
+      "target": "DefaultKeycloakSession.runAsReadOnly",
+      "candidates": [
+        {
+          "id": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java::org.keycloak.services::DefaultKeycloakSession::method::runAsReadOnly(Supplier<T> supplier)",
+          "qualifiedName": "org.keycloak.services.DefaultKeycloakSession.runAsReadOnly",
+          "signature": "runAsReadOnly(Supplier<T> supplier): T",
+          "filePath": "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java",
+          "kind": "method"
+        }
+      ],
+      "failure": null,
+      "diagnostics": {
+        "filesIndexed": 419,
+        "symbolsIndexed": 4404,
+        "methodsIndexed": 3571,
+        "constructorsIndexed": 285,
+        "classesIndexed": 487,
+        "interfacesIndexed": 42,
+        "recordsIndexed": 9,
+        "enumsIndexed": 10,
+        "duplicateSimpleNames": 686,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0
+      }
+    }
+  ]
+}

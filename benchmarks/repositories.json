@@ -1,0 +1,26 @@
+[
+  {
+    "id": "spring-petclinic",
+    "scale": "small",
+    "url": "https://github.com/spring-projects/spring-petclinic.git",
+    "commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe",
+    "source": "benchmarks/checkouts/spring-petclinic",
+    "scope": "src/main/java and src/test/java"
+  },
+  {
+    "id": "petclinic-rest",
+    "scale": "medium",
+    "url": "https://github.com/spring-petclinic/spring-petclinic-rest.git",
+    "commit": "4cd8e1b0cd42578e882247d8801f6be5d402f118",
+    "source": "benchmarks/checkouts/petclinic-rest",
+    "scope": "src/main/java and src/test/java"
+  },
+  {
+    "id": "keycloak-services",
+    "scale": "large",
+    "url": "https://github.com/keycloak/keycloak.git",
+    "commit": "dd4ae31d1b67c91a7f85f7c60df5c9718b111f0a",
+    "source": "benchmarks/checkouts/keycloak",
+    "scope": "services/src/main/java/org/keycloak/services and matching tests"
+  }
+]

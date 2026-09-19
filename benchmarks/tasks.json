@@ -1,0 +1,215 @@
+[
+  {
+    "id": "petclinic-owner-update-explain",
+    "repository": "spring-petclinic",
+    "category": "explain",
+    "task": "Explain how owner updates are validated and persisted.",
+    "targetSymbol": "OwnerController.processUpdateOwnerForm",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java", "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"],
+    "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
+    "requiredFacts": [
+      {"id":"valid","description":"The update method uses validation","verification":{"type":"source-fragment","patterns":["@Valid Owner owner","result.hasErrors"]}},
+      {"id":"save","description":"The owner is persisted through the repository","verification":{"type":"source-fragment","patterns":["owners.save(owner)"]}},
+      {"id":"redirect","description":"Successful update redirects to the owner page","verification":{"type":"source-fragment","patterns":["redirect:/owners/{ownerId}"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java", "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"]
+  },
+  {
+    "id": "petclinic-owner-callers",
+    "repository": "spring-petclinic",
+    "category": "locate",
+    "task": "Find entry points that invoke OwnerController.showOwner.",
+    "targetSymbol": "OwnerController.showOwner",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"mapping","description":"showOwner is mapped to the owner detail route","verification":{"type":"source-fragment","patterns":["@GetMapping(\"/owners/{ownerId}\")"]}},
+      {"id":"find","description":"showOwner loads the owner by id","verification":{"type":"source-fragment","patterns":["owners.findById(ownerId)"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java"]
+  },
+  {
+    "id": "petclinic-owner-impact",
+    "repository": "spring-petclinic",
+    "category": "impact",
+    "task": "Identify tests and persistence code affected by changing owner creation.",
+    "targetSymbol": "OwnerController.processCreationForm",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java", "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"],
+    "groundTruth": "Manual source inspection and test names at pinned commit",
+    "requiredFacts": [
+      {"id":"post","description":"Creation uses a POST mapping","verification":{"type":"source-fragment","patterns":["@PostMapping(\"/owners/new\")"]}},
+      {"id":"repository","description":"Creation saves through owners repository","verification":{"type":"source-fragment","patterns":["owners.save(owner)"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java", "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"]
+  },
+  {
+    "id": "petclinic-vet-explain",
+    "repository": "spring-petclinic",
+    "category": "explain",
+    "task": "Explain how the vet list endpoint obtains its data.",
+    "targetSymbol": "VetController.showResourcesVetList",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/vet/VetController.java", "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"response","description":"The endpoint returns a response body","verification":{"type":"source-fragment","patterns":["@ResponseBody"]}},
+      {"id":"repository","description":"The endpoint calls the vet repository","verification":{"type":"source-fragment","patterns":["vetRepository.findAll"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/vet/VetController.java", "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java"]
+  },
+  {
+    "id": "petclinic-pet-change",
+    "repository": "spring-petclinic",
+    "category": "change",
+    "task": "Assess context needed to add validation to pet creation.",
+    "targetSymbol": "PetController.processCreationForm",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/owner/PetController.java", "src/test/java/org/springframework/samples/petclinic/owner/PetControllerTests.java"],
+    "groundTruth": "Manual source inspection and PetControllerTests at pinned commit",
+    "requiredFacts": [
+      {"id":"validation","description":"Pet creation accepts a validated pet","verification":{"type":"source-fragment","patterns":["@Valid Pet pet","BindingResult"]}},
+      {"id":"owner","description":"Pet creation associates the pet with an owner","verification":{"type":"source-fragment","patterns":["owner.addPet(pet)"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/owner/PetController.java", "src/test/java/org/springframework/samples/petclinic/owner/PetControllerTests.java"]
+  },
+  {
+    "id": "rest-owner-list",
+    "repository": "petclinic-rest",
+    "category": "explain",
+    "task": "Explain the owner listing REST flow and access control.",
+    "targetSymbol": "OwnerRestControllerV1.listOwners",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"auth","description":"The endpoint requires owner admin role","verification":{"type":"source-fragment","patterns":["@PreAuthorize(\"hasRole(@roles.OWNER_ADMIN)\")"]}},
+      {"id":"service","description":"The endpoint delegates to ClinicService","verification":{"type":"source-fragment","patterns":["clinicService.findAllOwners"]}},
+      {"id":"notfound","description":"Empty owner results return not found","verification":{"type":"source-fragment","patterns":["HttpStatus.NOT_FOUND"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"]
+  },
+  {
+    "id": "rest-owner-update",
+    "repository": "petclinic-rest",
+    "category": "change",
+    "task": "Assess context needed to change owner update behavior.",
+    "targetSymbol": "OwnerRestControllerV1.updateOwner",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"lookup","description":"Update first loads the current owner","verification":{"type":"source-fragment","patterns":["clinicService.findOwnerById(ownerId)"]}},
+      {"id":"fields","description":"Update copies fields from OwnerFieldsDto","verification":{"type":"source-fragment","patterns":["ownerFieldsDto.getAddress","ownerFieldsDto.getTelephone"]}},
+      {"id":"save","description":"Update saves the current owner","verification":{"type":"source-fragment","patterns":["clinicService.saveOwner(currentOwner)"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"]
+  },
+  {
+    "id": "rest-clinic-delete",
+    "repository": "petclinic-rest",
+    "category": "impact",
+    "task": "Identify dependencies of deleting an owner in the service layer.",
+    "targetSymbol": "ClinicServiceImpl.deleteOwner",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicService.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"transactional","description":"Delete is transactional","verification":{"type":"source-fragment","patterns":["@Transactional"]}},
+      {"id":"repository-delete","description":"Delete delegates to ownerRepository.delete","verification":{"type":"source-fragment","patterns":["ownerRepository.delete(owner)"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicService.java"]
+  },
+  {
+    "id": "rest-clinic-find",
+    "repository": "petclinic-rest",
+    "category": "locate",
+    "task": "Find the persistence calls involved in listing owners.",
+    "targetSymbol": "ClinicServiceImpl.findAllOwners",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/repository/OwnerRepository.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"readonly","description":"Listing owners is read-only transactional","verification":{"type":"source-fragment","patterns":["@Transactional(readOnly = true)"]}},
+      {"id":"findall","description":"Listing calls ownerRepository.findAll","verification":{"type":"source-fragment","patterns":["ownerRepository.findAll()"]}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/repository/OwnerRepository.java"]
+  },
+  {
+    "id": "rest-user-save",
+    "repository": "petclinic-rest",
+    "category": "change",
+    "task": "Assess context needed to add a guard to user persistence.",
+    "targetSymbol": "UserServiceImpl.saveUser",
+    "groundTruthFiles": ["src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/repository/UserRepository.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"repository","description":"saveUser delegates to userRepository.save","verification":{"type":"source-fragment","patterns":["userRepository.save(user)"]}},
+      {"id":"service","description":"The target belongs to UserServiceImpl","verification":{"type":"symbol-present"}}
+    ],
+    "baselineFiles": ["src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/repository/UserRepository.java"]
+  },
+  {
+    "id": "keycloak-session-flow",
+    "repository": "keycloak-services",
+    "category": "explain",
+    "task": "Explain how a Keycloak session obtains a user provider.",
+    "targetSymbol": "DefaultKeycloakSession.users",
+    "groundTruthFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"datastore","description":"users obtains the datastore provider","verification":{"type":"source-fragment","patterns":["getDatastoreProvider().users()"]}},
+      {"id":"provider","description":"The target returns UserProvider","verification":{"type":"signature"}}
+    ],
+    "baselineFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"]
+  },
+  {
+    "id": "keycloak-session-provider",
+    "repository": "keycloak-services",
+    "category": "change",
+    "task": "Assess context needed to change provider creation behavior.",
+    "targetSymbol": "getProvider(Class<T> clazz): T",
+    "groundTruthFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"factory","description":"getProvider asks the factory for a provider factory","verification":{"type":"source-fragment","patterns":["factory.getProviderFactory(clazz)"]}},
+      {"id":"cache","description":"getProvider uses getOrCreateProvider","verification":{"type":"source-fragment","patterns":["getOrCreateProvider"]}}
+    ],
+    "baselineFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"]
+  },
+  {
+    "id": "keycloak-session-callers",
+    "repository": "keycloak-services",
+    "category": "locate",
+    "task": "Locate methods exposing the Keycloak session context and providers.",
+    "targetSymbol": "DefaultKeycloakSession.getContext",
+    "groundTruthFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java", "services/src/main/java/org/keycloak/services/KeycloakSessionFactoryImpl.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"context","description":"The target returns KeycloakContext","verification":{"type":"signature"}},
+      {"id":"session","description":"The target is on DefaultKeycloakSession","verification":{"type":"symbol-present"}}
+    ],
+    "baselineFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java", "services/src/main/java/org/keycloak/services/KeycloakSessionFactoryImpl.java"]
+  },
+  {
+    "id": "keycloak-session-close",
+    "repository": "keycloak-services",
+    "category": "impact",
+    "task": "Identify state affected when a Keycloak session closes.",
+    "targetSymbol": "DefaultKeycloakSession.close",
+    "groundTruthFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java", "services/src/test/java/org/keycloak/services/DefaultKeycloakContextTest.java"],
+    "groundTruth": "Manual source inspection and pinned test source",
+    "requiredFacts": [
+      {"id":"closed","description":"close changes the closed state","verification":{"type":"source-fragment","patterns":["closed = true"]}},
+      {"id":"transaction","description":"close interacts with transaction manager","verification":{"type":"source-fragment","patterns":["transactionManager"]}}
+    ],
+    "baselineFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java", "services/src/test/java/org/keycloak/services/DefaultKeycloakContextTest.java"]
+  },
+  {
+    "id": "keycloak-session-readonly",
+    "repository": "keycloak-services",
+    "category": "git-diff",
+    "task": "Review the read-only session flow and its restoration behavior.",
+    "targetSymbol": "DefaultKeycloakSession.runAsReadOnly",
+    "groundTruthFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
+    "groundTruth": "Manual source inspection at pinned commit",
+    "requiredFacts": [
+      {"id":"restore","description":"The previous read-only state is restored","verification":{"type":"source-fragment","patterns":["readOnly = previous"]}},
+      {"id":"finally","description":"Restoration occurs in finally","verification":{"type":"source-fragment","patterns":["finally"]}}
+    ],
+    "baselineFiles": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"]
+  }
+]

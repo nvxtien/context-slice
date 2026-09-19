@@ -1,0 +1,9 @@
+{
+  "name": "context-slice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "tsc -p tsconfig.json", "start": "node dist/src/server/mcp-server.js", "test": "tsx --test tests/**/*.test.ts", "benchmark": "tsx benchmarks/benchmark.ts", "benchmark:v03": "tsx benchmarks/v0.3-real-repositories.ts", "benchmark:v04": "npm run benchmark:v03 && tsx benchmarks/v0.4-symbol-index-hardening.ts"},
+  "dependencies": {"@modelcontextprotocol/sdk": "^1.12.0", "better-sqlite3": "^11.8.1", "tree-sitter": "^0.21.1", "tree-sitter-java": "^0.23.5", "zod": "^3.25.76"},
+  "devDependencies": {"@types/better-sqlite3": "^7.6.12", "@types/node": "^22.15.21", "tsx": "^4.19.4", "typescript": "^5.8.3"}
+}

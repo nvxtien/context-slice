@@ -1,0 +1,23 @@
+import { execFileSync } from "node:child_process";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+import { ProjectIndex } from "../indexer/index.js";
+import { estimateTokens } from "../planner/budget.js";
+import { renderSignature, renderSkeleton } from "../render/compact-context.js";
+
+const root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd();
+const index = new ProjectIndex(root);
+const summary = index.rebuild();
+const server = new McpServer({ name: "context-slice", version: "0.1.0" });
+const result = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }] });
+function one(symbol: string) { const candidates = index.resolveSymbol(symbol); if (!candidates.length) throw new Error(`Symbol not found: ${symbol}`); if (candidates.length > 1) throw new Error(`Ambiguous symbol: ${symbol}. Candidates: ${candidates.map((c) => c.id).join(", ")}`); return candidates[0]; }
+
+server.tool("context.search", "Tìm symbol Java liên quan mà không đọc toàn bộ file.", { query: z.string(), limit: z.number().int().positive().max(100).optional() }, async ({ query, limit }) => result({ indexed: summary, results: index.search(query, limit ?? 10) }));
+server.tool("context.symbol", "Lấy symbol theo mức signature, skeleton, body hoặc full.", { symbol: z.string(), detail: z.enum(["signature", "skeleton", "body", "full"]).optional() }, async ({ symbol, detail }) => { const target = one(symbol); const level = detail ?? "skeleton"; const calls = index.calls.filter((c) => c.callerId === target.id).map((c) => `${c.receiverText ? `${c.receiverText}.` : ""}${c.calleeName} [${c.confidence}]`); let text = renderSignature(target); if (level === "skeleton") text = renderSkeleton(target, calls); if (level === "body") text = target.body ?? target.source; if (level === "full") text = target.source; return result({ symbol: target, detail: level, rendered: text }); });
+server.tool("context.callers", "Tìm caller trực tiếp của một symbol.", { symbol: z.string(), depth: z.number().int().min(1).max(5).optional(), limit: z.number().int().positive().max(100).optional() }, async ({ symbol, limit }) => { const target = one(symbol); return result({ target: renderSignature(target), callers: index.callers(target).slice(0, limit ?? 10).map((caller) => ({ id: caller.id, signature: caller.signature, filePath: caller.filePath })) }); });
+server.tool("context.slice", "Lập context slice có ngân sách token và metadata giải thích.", { symbol: z.string(), intent: z.string().optional(), budget: z.number().int().positive().optional(), depth: z.number().int().min(1).max(5).optional() }, async ({ symbol, intent, budget }) => { const target = one(symbol); const max = budget ?? 4000; const items = [{ symbol: target, reason: "target" as const, confidence: "exact" as const, rendered: target.source }, ...index.dependencies(target).map((s) => ({ symbol: s, reason: "direct-callee" as const, confidence: "probable" as const, rendered: renderSkeleton(s) })), ...index.callers(target).map((s) => ({ symbol: s, reason: "direct-caller" as const, confidence: "probable" as const, rendered: renderSkeleton(s) }))]; let used = 0; const included = []; const rendered: string[] = []; for (const item of items) { const tokens = estimateTokens(item.rendered); if (used + tokens > max && included.length) continue; used += tokens; included.push({ symbolId: item.symbol.id, symbol: item.symbol.qualifiedName, reason: item.reason, relationship: item.reason, confidence: item.confidence, estimatedTokens: tokens, score: item.reason === "target" ? 1 : 0.8 }); rendered.push(item.rendered); } return result({ intent, budget: max, estimatedTokens: used, rendered: rendered.join("\n\n"), included }); });
+server.tool("context.diff", "Hiển thị thay đổi Git theo symbol thay vì toàn bộ file.", { base: z.string().optional(), head: z.string().optional(), budget: z.number().int().positive().optional() }, async ({ base, head }) => { const args = base || head ? [base ?? "HEAD", head ?? "HEAD"] : ["HEAD"]; let diff = ""; try { diff = execFileSync("git", ["diff", ...args], { cwd: root, encoding: "utf8", maxBuffer: 2_000_000 }); } catch (error) { throw new Error(`Git unavailable: ${error instanceof Error ? error.message : String(error)}`); } return result({ base: base ?? "HEAD", head: head ?? "working tree", changedFiles: [...diff.matchAll(/^diff --git a\/(.*?) b\/(.*?)$/gm)].map((m) => m[2]), estimatedTokens: estimateTokens(diff), diff }); });
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
