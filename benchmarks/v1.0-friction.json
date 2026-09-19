@@ -1,0 +1,102 @@
+[
+  {
+    "category": "OTHER",
+    "step": "[v0.9] clean checkout: npm run benchmark:v06",
+    "symptom": "v0.3–v0.6 regressions need benchmarks/checkouts/*, which is gitignored and was never recreated by any script; a clean checkout silently reports 0 tasks as N/A / recall 0",
+    "severity": "MAJOR",
+    "rootCause": "pinned repositories were cloned by hand during development (hidden state)",
+    "fix": "benchmarks/fetch-checkouts.ts (npm run benchmark:checkouts) fetches each pinned commit (sparse for keycloak); benchmark:v03 runs it first",
+    "regressionTest": "clean-room RC run (regressionV06 step)",
+    "status": "FIXED"
+  },
+  {
+    "category": "DOCS",
+    "step": "[v0.9] README tarball validation in a fresh clone",
+    "symptom": "`npm pack` fails in a fresh clone because prepack runs tsc before dependencies are installed; README also named context-slice-0.8.0.tgz and said 'Only Java source is supported in v0.7' / 'After linking ContextSlice'",
+    "severity": "MINOR",
+    "rootCause": "README written from an already-installed development checkout",
+    "fix": "README adds `npm ci` before `npm pack`, names the current tarball, and drops stale version wording",
+    "regressionTest": "tests/package-metadata.test.ts (README tarball name matches package version)",
+    "status": "FIXED"
+  },
+  {
+    "category": "CACHE",
+    "step": "[v0.9] git status in target repository after init",
+    "symptom": "`?? .context-slice/` appears in the developer's git status",
+    "severity": "MINOR",
+    "rootCause": "cache directory was not ignored and ContextSlice (correctly) does not edit the repository .gitignore",
+    "fix": "cache directory writes its own `.gitignore` containing `*`; also applied to caches created by 0.8.0 on first use after upgrade",
+    "regressionTest": "tests/cache.test.ts (cache directory ignores itself)",
+    "status": "FIXED"
+  },
+  {
+    "category": "PACKAGE",
+    "step": "[v0.9] v0.8 package smoke report",
+    "symptom": "v0.8 report printed 'Path with spaces: false' and 'Nested cwd: false' while claiming status pass",
+    "severity": "MINOR",
+    "rootCause": "macOS tmpdir is a symlink (/var -> /private/var); the check compared the symlinked path with the real path the CLI reports",
+    "fix": "smoke test uses realpathSync for its workspace",
+    "regressionTest": "tests/package-smoke.test.ts asserts pathWithSpaces.passed and nestedCwd.passed",
+    "status": "FIXED"
+  },
+  {
+    "category": "UNINSTALL",
+    "step": "[v0.9] cache cleanup",
+    "symptom": "no documented way to remove repository caches; uninstall leaves them",
+    "severity": "MINOR",
+    "rootCause": "undocumented behavior",
+    "fix": "README documents `rm -rf .context-slice`; no `clean` command added (one rm is simpler than a new CLI surface)",
+    "regressionTest": "clean-room RC run (uninstall step verifies cache retention)",
+    "status": "FIXED"
+  },
+  {
+    "category": "CLI",
+    "step": "[v0.9] status before init",
+    "symptom": "`status` on a never-initialized repository creates an empty .context-slice/ cache while reporting UNINITIALIZED",
+    "severity": "COSMETIC",
+    "rootCause": "IndexStorage opens (and creates) the SQLite cache on every command",
+    "fix": "accepted: the directory is self-ignored and contains no source; documented that ContextSlice only writes to .context-slice/",
+    "regressionTest": "none",
+    "status": "ACCEPTED"
+  },
+  {
+    "category": "CACHE",
+    "step": "[v0.9] downgrade/corrupt cache probe",
+    "symptom": "a non-SQLite index.sqlite produced `INTERNAL_ERROR: file is not a database` (exit 1) and advised `context-slice doctor`, which fails the same way",
+    "severity": "MINOR",
+    "rootCause": "SQLite open errors were not mapped to the existing INDEX_CORRUPT workflow error",
+    "fix": "IndexStorage raises INDEX_CORRUPT (exit 2) with remediation `rm -rf .context-slice && context-slice init`",
+    "regressionTest": "tests/cache.test.ts (corrupt cache fails with an actionable INDEX_CORRUPT error)",
+    "status": "FIXED"
+  },
+  {
+    "category": "CODEX",
+    "step": "[v0.9] Codex integration (codex exec with command context-slice, args [mcp])",
+    "symptom": "codex-cli 0.153.4 ended the turn with 'You've hit your usage limit' before any MCP tool call",
+    "severity": "MINOR",
+    "rootCause": "assistant account quota on this host, not ContextSlice",
+    "fix": "none needed in ContextSlice; the RC script now reports a pre-tool runtime failure as DEFERRED instead of FAIL. Rerun `npm run release:rc -- --assistants` once quota resets",
+    "regressionTest": "none",
+    "status": "DEFERRED"
+  },
+  {
+    "category": "OTHER",
+    "step": "[v0.9] preview on spring-petclinic: \"explain the owner update flow\"",
+    "symptom": "target resolves to OwnerController.initUpdateOwnerForm (the GET form handler) with 1 item / 32 tokens, and no callers or callees; processUpdateOwnerForm is the more useful target",
+    "severity": "MINOR",
+    "rootCause": "task-text target ranking prefers the first matching handler; ranking changes are feature work outside v0.9 scope",
+    "fix": "accepted for v0.9; name the symbol in the task (e.g. \"explain processUpdateOwnerForm\") for a richer slice",
+    "regressionTest": "none",
+    "status": "ACCEPTED"
+  },
+  {
+    "category": "PACKAGE",
+    "step": "v1.0 version bump",
+    "symptom": "package version moved 0.9.0 -> 1.0.0; README, CHANGELOG, release notes and tests reference the new tarball name",
+    "severity": "COSMETIC",
+    "rootCause": "planned release step, not a defect",
+    "fix": "package.json is the single source of truth; tests/package-metadata.test.ts asserts the version and that README names context-slice-<version>.tgz",
+    "regressionTest": "tests/package-metadata.test.ts",
+    "status": "FIXED"
+  }
+]

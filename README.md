@@ -8,6 +8,14 @@ It indexes Java source with Tree-sitter, keeps a local SQLite cache, and exposes
 
 Large context windows still waste attention when they contain unrelated files. ContextSlice makes the context package inspectable: it reports the target, estimated token budget, included symbols, omissions caused by budget, unresolved calls, and cache freshness.
 
+## Scope
+
+- Java source code only.
+- Tree-sitter structural and semantic analysis; no compiler, JDT, or LSP dependency.
+- A local stdio MCP server and a local SQLite cache under `.context-slice/`.
+- Integrates with Codex and Claude Code through one stable command: `context-slice mcp`.
+- Validated on macOS arm64 with Node 20 and Node 22. Other platforms are expected to work but are unverified.
+
 ## Installation
 
 ### Local development
@@ -27,7 +35,7 @@ The package is publish-ready but is not currently published to the npm registry.
 ```sh
 npm ci
 npm pack
-npm install -g ./context-slice-0.9.0.tgz
+npm install -g ./context-slice-1.0.0.tgz
 context-slice --version
 ```
 
@@ -168,6 +176,8 @@ Run `npm run benchmark:v08` for the tarball packaging, isolated installation, up
 
 Earlier semantic/context measurements remain available:
 
+In the current 15-task benchmark across three pinned Java repositories, ContextSlice reduced median context size by 94.55% while preserving 100% required-fact recall and 100% retrieval recall. Context sizes are deterministic estimates from the built-in estimator, not assistant telemetry, so this is an estimated token reduction rather than observed input token usage.
+
 - [v0.6 developer context efficiency](benchmarks/results/v0.6-developer-context-efficiency.md) compares auditable manual whole-file baselines with ContextSlice on pinned Java repositories. Token counts are deterministic estimates unless telemetry is explicitly available.
 - [v0.5 semantic call resolution](benchmarks/results/v0.5-semantic-call-resolution.md) documents declared versus runtime target limitations.
 - [v0.4 symbol index hardening](benchmarks/results/v0.4-symbol-index-hardening.md) documents stable symbol identity and lookup behavior.
@@ -175,9 +185,12 @@ Earlier semantic/context measurements remain available:
 ## Limitations
 
 - Java source only; no TypeScript, multi-language, embeddings, vector database, compiler, or LSP integration.
+- Target selection from task text is heuristic and may choose a nearby but not ideal symbol. Naming the method in the task gives a better slice.
 - Tree-sitter analysis cannot prove runtime dispatch, framework-generated implementations, or all generic/fluent call behavior.
 - Token counts are estimates, not model-provider usage telemetry.
 - The local index is an aid to request context, not a substitute for code review or tests.
+- Validated on macOS arm64 (Node 20.19.5 and 22.12.0). Linux and Windows are unverified.
+- Usability evidence comes from a scripted self clean-room trial; no external developer trial has been run yet.
 
 ## Development
 

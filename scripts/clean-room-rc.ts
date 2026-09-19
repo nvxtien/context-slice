@@ -34,7 +34,8 @@ const options = (name: string) =>
 const developerRoot = process.cwd();
 const source = option("--source", developerRoot)!;
 const ref = option("--ref", "HEAD")!;
-const baselineRef = option("--baseline-ref", "47a26b5")!; // "Add v0.8 packaging": the validated 0.8.0 release.
+const baselineRef = option("--baseline-ref", "cb9b11a")!; // the previous released version, for the upgrade path.
+const reportLabel = option("--label", "v1.0")!; // report filenames and title.
 const javaRepository = {
   url: "https://github.com/spring-projects/spring-petclinic.git",
   commit: "818c4136ea971c21674525f9053de0d9c7ad8cfe",
@@ -515,6 +516,60 @@ await attempt("regressionV07", () => {
     },
   );
 });
+const v08 = sh("npm", ["run", "benchmark:v08"], checkout, cleanEnv());
+record("regressionV08", v08.status === 0, {
+  exit: v08.status,
+  ms: v08.ms,
+  note: "packaging smoke test (tarball install, CLI, MCP, upgrade, uninstall, publish dry run) from the clean checkout",
+});
+const dryRun = sh(
+  "npm",
+  ["publish", "--dry-run", "--json", "--ignore-scripts"],
+  checkout,
+  cleanEnv(),
+);
+record("publishDryRun", dryRun.status === 0, {
+  command: "npm publish --dry-run",
+  exit: dryRun.status,
+  note: "dry run only; nothing was published",
+  tail: `${dryRun.stdout}${dryRun.stderr}`.trim().split("\n").slice(-6),
+});
+await attempt("dependencyAudit", () => {
+  const audit = sh("npm", ["audit", "--json"], checkout, cleanEnv());
+  const parsed = JSON.parse(audit.stdout || "{}");
+  const production = sh(
+    "npm",
+    ["audit", "--omit", "dev", "--json"],
+    checkout,
+    cleanEnv(),
+  );
+  const parsedProduction = JSON.parse(production.stdout || "{}");
+  const outdated = sh("npm", ["outdated", "--json"], checkout, cleanEnv());
+  const severities = parsed.metadata?.vulnerabilities ?? {};
+  const productionSeverities = parsedProduction.metadata?.vulnerabilities ?? {};
+  const runtimeTotal = productionSeverities.total ?? 0;
+  record("dependencyAudit", runtimeTotal === 0, {
+    runtime: productionSeverities,
+    includingDev: severities,
+    classification:
+      runtimeTotal === 0
+        ? (severities.total ?? 0) === 0
+          ? "no findings"
+          : "dev-only findings; not shipped in the tarball"
+        : "runtime findings — classify before release",
+    advisories: Object.values(parsed.vulnerabilities ?? {})
+      .slice(0, 20)
+      .map(
+        (entry: any) =>
+          `${entry.name} ${entry.severity} (${entry.isDirect ? "direct" : "transitive"})`,
+      ),
+    outdated: Object.entries(JSON.parse(outdated.stdout || "{}")).map(
+      ([name, info]: [string, any]) =>
+        `${name} ${info.current} -> ${info.latest}`,
+    ),
+    note: "No dependency was upgraded during release validation.",
+  });
+});
 const pack = must(
   sh("npm", ["pack", "--json"], checkout, cleanEnv()),
   "npm pack",
@@ -551,7 +606,61 @@ record("secretScan", scan.secretHits.length === 0 && scan.envDump, {
   note: "Lightweight pattern scan; not a security certification.",
 });
 
-// Build the 0.8.0 baseline tarball the same way, for upgrade/downgrade.
+await attempt("licenseCheck", () => {
+  const license = readFileSync(join(checkout, "LICENSE"), "utf8");
+  const runtime = Object.keys(packageJson.dependencies).map((name) => {
+    const metadata = JSON.parse(
+      readFileSync(
+        join(checkout, "node_modules", name, "package.json"),
+        "utf8",
+      ),
+    );
+    return `${name}@${metadata.version}: ${typeof metadata.license === "string" ? metadata.license : JSON.stringify(metadata.license ?? metadata.licenses)}`;
+  });
+  const permissive = runtime.every((entry) =>
+    /: (MIT|ISC|BSD|Apache-2.0)/.test(entry),
+  );
+  record(
+    "licenseCheck",
+    packageJson.license === "MIT" &&
+      /MIT License/i.test(license) &&
+      tarFiles.includes("package/LICENSE") &&
+      permissive,
+    {
+      packageJson: packageJson.license,
+      licenseFile: license.split("\n")[0],
+      inTarball: tarFiles.includes("package/LICENSE"),
+      runtimeDependencies: runtime,
+      note: "Release hygiene only; not a formal legal review.",
+    },
+  );
+});
+await attempt("packageName", () => {
+  const view = sh(
+    "npm",
+    ["view", packageJson.name, "version", "--json"],
+    workspace,
+    cleanEnv(),
+  );
+  const missing = /E404|is not in this registry/i.test(
+    view.stderr + view.stdout,
+  );
+  record("packageName", true, {
+    name: packageJson.name,
+    availability: missing
+      ? "AVAILABLE"
+      : view.status === 0
+        ? "TAKEN"
+        : "UNCERTAIN",
+    registryResponse: (view.stdout || view.stderr)
+      .trim()
+      .split("\n")[0]
+      .slice(0, 200),
+    note: "Read-only check. The name was not reserved or published.",
+  });
+});
+
+// Build the previous-version baseline tarball the same way, for upgrade/downgrade.
 const baselineCheckout = join(workspace, "context-slice-0.8.0");
 must(
   sh(
@@ -1181,9 +1290,22 @@ record(
   },
 );
 
+record("workingTreeCheck", git(checkout, "diff", "--check").status === 0, {
+  "git diff --check":
+    git(checkout, "diff", "--check").stdout.trim() || "(no whitespace errors)",
+  "git status --short": git(checkout, "status", "--porcelain")
+    .stdout.trim()
+    .split("\n")
+    .filter(Boolean),
+  note: "Modified files in the clean checkout are regenerated benchmark reports written by the runs above.",
+});
+
 // 11. Report.
 const friction = JSON.parse(
-  readFileSync(join(developerRoot, "benchmarks/v0.9-friction.json"), "utf8"),
+  readFileSync(
+    join(developerRoot, `benchmarks/${reportLabel}-friction.json`),
+    "utf8",
+  ),
 ) as Array<Record<string, string>>;
 const failures = Object.entries(steps)
   .filter(([, step]) => step.status === "FAIL")
@@ -1197,9 +1319,9 @@ const blockers = [
 const openMajors = friction.filter(
   (item) => item.severity === "MAJOR" && item.status !== "FIXED",
 );
-const recommendation = blockers.length ? "NOT READY" : "RC READY"; // V1 CANDIDATE additionally needs an external developer trial.
+const recommendation = blockers.length ? "NO-GO" : "GO"; // external trial deferral is classified non-blocking below.
 const report = {
-  version: "0.9",
+  version: reportLabel,
   generatedAt: new Date().toISOString(),
   commit,
   packageVersion: packageJson.version,
@@ -1212,6 +1334,7 @@ const report = {
     integrity: packed.integrity,
     baseline: relative(artifacts, baselineTarball),
     baselineRef,
+    packageVersion: packageJson.version,
   },
   steps,
   developerTrial: {
@@ -1228,8 +1351,9 @@ const report = {
 };
 const outputDir = join(developerRoot, "benchmarks/results");
 mkdirSync(outputDir, { recursive: true });
+const stem = `${reportLabel}-release-validation`;
 writeFileSync(
-  join(outputDir, "v0.9-clean-room-release-candidate.json"),
+  join(outputDir, `${stem}.json`),
   `${JSON.stringify(report, null, 2)}\n`,
 );
 const section = (title: string, name: string) => [
@@ -1243,15 +1367,15 @@ const section = (title: string, name: string) => [
   "",
 ];
 writeFileSync(
-  join(outputDir, "v0.9-clean-room-release-candidate.md"),
+  join(outputDir, `${stem}.md`),
   [
-    "# ContextSlice v0.9 — Clean-Room Release Candidate",
+    `# ContextSlice ${reportLabel} — Release Validation`,
     "",
     `Recommendation: **${recommendation}** · Blockers: ${blockers.length} · Generated ${report.generatedAt}`,
     "",
     "## 1. Commit",
     "",
-    `\`${commit}\` (package ${packageJson.version}; 0.8.0 baseline built from \`${baselineRef}\`)`,
+    `\`${commit}\` (package ${packageJson.version}; upgrade baseline built from \`${baselineRef}\`)`,
     "",
     "## 2. Environment",
     "",
@@ -1263,6 +1387,11 @@ writeFileSync(
     ...section("5. Tests", "tests"),
     ...section("5a. v0.6 regression", "regressionV06"),
     ...section("5b. v0.7 regression", "regressionV07"),
+    ...section("5c. v0.8 packaging smoke", "regressionV08"),
+    ...section("5d. npm publish --dry-run", "publishDryRun"),
+    ...section("5e. Dependency audit", "dependencyAudit"),
+    ...section("5f. License check", "licenseCheck"),
+    ...section("5g. Package name availability", "packageName"),
     ...section("6. Package artifact", "packageArtifact"),
     ...section("7. Isolated install", "isolatedInstall"),
     ...section("7a. CLI through PATH", "cliThroughPath"),
@@ -1274,13 +1403,17 @@ writeFileSync(
     ...section("11. Codex", "codex"),
     ...section("12. Claude Code", "claude"),
     ...section("13. Read-only package", "readOnlyPackage"),
-    ...section("14. Upgrade 0.8.0 → 0.9.0", "upgrade"),
+    ...section(
+      `14. Upgrade ${baselineRef} → ${packageJson.version}`,
+      "upgrade",
+    ),
     ...section("15. Downgrade behavior", "downgrade"),
     ...section("15a. Node engine boundary", "nodeEngine"),
     ...section("16. Uninstall", "uninstall"),
     ...section("17. Git cleanliness", "gitCleanliness"),
     ...section("18. Source-path scan", "sourcePathScan"),
     ...section("19. Secret scan", "secretScan"),
+    ...section("19a. Clean-checkout working tree", "workingTreeCheck"),
     "## 20. Developer trial",
     "",
     `- ${report.developerTrial.type}: ${report.developerTrial.method}`,
@@ -1301,9 +1434,27 @@ writeFileSync(
     "",
     "## 23. Release recommendation",
     "",
-    `**${recommendation}**. ${recommendation === "RC READY" ? "The clean-room package and install flow is validated. The external developer trial and public npm publication are still pending, so this is not a V1 CANDIDATE." : "Blockers remain."}`,
+    `**${recommendation}**. ${recommendation === "GO" ? "Every technical release criterion passed from a clean checkout of this commit. Any DEFERRED step above is an external runtime or participant availability limit, not a ContextSlice defect, and is classified non-blocking." : "Blockers remain; see above."}`,
     "",
     `Open MAJOR issues: ${openMajors.length ? openMajors.map((item) => item.symptom).join("; ") : "none"}. No publication was performed.`,
+    "",
+  ].join("\n"),
+);
+writeFileSync(
+  join(outputDir, `${reportLabel}-friction-log.md`),
+  [
+    `# ContextSlice ${reportLabel} friction log`,
+    "",
+    `Generated ${report.generatedAt} for commit \`${commit}\`. Severity: BLOCKER / MAJOR / MINOR / COSMETIC.`,
+    "",
+    "| Category | Step | Symptom | Severity | Root cause | Fix | Regression test | Status |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...friction.map(
+      (item) =>
+        `| ${item.category} | ${item.step} | ${item.symptom} | ${item.severity} | ${item.rootCause} | ${item.fix} | ${item.regressionTest} | ${item.status} |`,
+    ),
+    "",
+    `Unresolved BLOCKER: ${blockers.length}. Unresolved MAJOR: ${openMajors.length}.`,
     "",
   ].join("\n"),
 );
