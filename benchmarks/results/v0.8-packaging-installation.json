@@ -1,0 +1,146 @@
+{
+  "status": "pass",
+  "generatedAt": "2026-09-19T18:02:20.774Z",
+  "environment": {
+    "node": "v22.12.0",
+    "npm": "11.7.0",
+    "platform": "darwin"
+  },
+  "package": {
+    "name": "context-slice",
+    "version": "0.8.0",
+    "license": "MIT",
+    "repository": "git+https://github.com/nvxtien/context-slice.git"
+  },
+  "tarball": {
+    "name": "context-slice-0.8.0.tgz",
+    "bytes": 16275,
+    "fileCount": 20,
+    "files": [
+      "package/LICENSE",
+      "package/dist/src/planner/budget.js",
+      "package/dist/src/cli.js",
+      "package/dist/src/render/compact-context.js",
+      "package/dist/src/workflow/errors.js",
+      "package/dist/src/indexer/index.js",
+      "package/dist/src/parser/java-parser.js",
+      "package/dist/src/server/mcp-server.js",
+      "package/dist/src/types/model.js",
+      "package/dist/src/package-info.js",
+      "package/dist/src/workflow/preview.js",
+      "package/dist/src/planner/rank.js",
+      "package/dist/src/workflow/repository.js",
+      "package/dist/src/storage/sqlite.js",
+      "package/package.json",
+      "package/README.md",
+      "package/queries/java/annotations.scm",
+      "package/queries/java/calls.scm",
+      "package/queries/java/imports.scm",
+      "package/queries/java/symbols.scm"
+    ],
+    "requiredFiles": [
+      "package/dist/src/cli.js",
+      "package/dist/src/server/mcp-server.js",
+      "package/dist/src/package-info.js",
+      "package/queries/java/symbols.scm",
+      "package/README.md",
+      "package/LICENSE",
+      "package/package.json"
+    ],
+    "forbiddenPatterns": [
+      "node_modules/",
+      "benchmarks/checkouts/",
+      ".context-slice/",
+      "coverage/",
+      "test-fixtures/",
+      "package/dist/tests/",
+      "package/dist/benchmarks/",
+      "package/dist/scripts/"
+    ],
+    "forbiddenFound": []
+  },
+  "install": {
+    "isolatedPrefix": true,
+    "packageRoot": "/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-DNtkcf/npm prefix/node_modules/context-slice",
+    "packageDirectoryReadOnly": "deferred",
+    "npx": "publication-dependent"
+  },
+  "cli": {
+    "version": "0.8.0",
+    "help": true,
+    "init": true,
+    "status": "CURRENT",
+    "doctor": true,
+    "preview": true,
+    "nestedCwd": true,
+    "pathWithSpaces": true
+  },
+  "freshRepository": {
+    "init": true,
+    "preview": true,
+    "status": "CURRENT"
+  },
+  "existingRepository": {
+    "cacheCreated": true,
+    "statusAfterReinstall": "CURRENT",
+    "previewAfterReinstall": true
+  },
+  "mcp": {
+    "startedFromStableCommand": true,
+    "protocolSafe": true,
+    "responded": true,
+    "gracefulShutdown": true,
+    "stderr": ""
+  },
+  "upgrade": {
+    "simulated": true,
+    "cachePreserved": true,
+    "schema": "0.5.2"
+  },
+  "uninstall": {
+    "executableGone": true,
+    "repositoryPreserved": true,
+    "cachePreserved": true
+  },
+  "cleanCheckout": {
+    "status": "deferred",
+    "reason": "This run used the current checkout; the tarball install was clean-room isolated."
+  },
+  "pathWithSpaces": {
+    "passed": false,
+    "path": "/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-DNtkcf/context slice repo-RTwae2"
+  },
+  "nestedCwd": {
+    "passed": false,
+    "cwd": "/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-DNtkcf/context slice repo-RTwae2/src/main/java"
+  },
+  "publishDryRun": {
+    "status": "pass",
+    "exitCode": 0,
+    "output": "{\n  \"id\": \"context-slice@0.8.0\",\n  \"name\": \"context-slice\",\n  \"version\": \"0.8.0\",\n  \"size\": 16275,\n  \"unpackedSize\": 53909,\n  \"shasum\": \"f7e917a3e0b538801395a5744fcd813890caa716\",\n  \"integrity\": \"sha512-GI3PgTkQgHtFqo9YSubLorXSxkl0IoS2f0fRI9PW2id4tM8WeFATgDjtZe45IMy2MpVwzPvdg1GGDNeDvqRfjA==\",\n  \"filename\": \"context-slice-0.8.0.tgz\",\n  \"files\": [\n    {\n      \"path\": \"LICENSE\",\n      \"size\": 1082,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"README.md\",\n      \"size\": 8524,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/cli.js\",\n      \"size\": 7143,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/indexer/index.js\",\n      \"size\": 10358,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/package-info.js\",\n      \"size\": 492,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/parser/java-parser.js\",\n      \"size\": 8705,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/budget.js\",\n      \"size\": 68,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/rank.js\",\n      \"size\": 520,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/render/compact-context.js\",\n      \"size\": 299,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/server/mcp-server.js\",\n      \"size\": 5417,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/storage/sqlite.js\",\n      \"size\": 3056,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/types/model.js\",\n      \"size\": 11,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/errors.js\",\n      \"size\": 251,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/preview.js\",\n      \"size\": 4801,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/repository.js\",\n      \"size\": 1555,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"package.json\",\n      \"size\": 1419,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/annotations.scm\",\n      \"size\": 25,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/calls.scm\",\n      \"size\": 50,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/imports.scm\",\n      \"size\": 29,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/symbols.scm\",\n      \"size\": 104,\n      \"mode\": 420\n    }\n  ],\n  \"entryCount\": 20,\n  \"bundled\": []\n}\nnpm warn This command requires you to be logged in to https://registry.npmjs.org/ (dry-run)\nnpm notice Publishing to https://registry.npmjs.org/ with tag latest and default access (dry-run)\n"
+  },
+  "trial": {
+    "type": "clean-room self-trial",
+    "completed": true,
+    "externalDevelopers": "deferred",
+    "tasks": [
+      "install",
+      "init",
+      "preview",
+      "MCP query",
+      "reinstall",
+      "uninstall"
+    ],
+    "friction": []
+  },
+  "security": {
+    "suspiciousPaths": [],
+    "secretsFound": false,
+    "sourceCheckoutDependency": false
+  },
+  "limitations": [
+    "The package was exercised from a local tarball; public registry/npx remains publication-dependent.",
+    "External developers were unavailable, so this is a clean-room self-trial, not a multi-user study.",
+    "Package installation directory read-only validation is deferred on this host."
+  ]
+}

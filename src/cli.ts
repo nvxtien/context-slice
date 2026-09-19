@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { ProjectIndex } from "./indexer/index.js";
+import { packageInfo } from "./package-info.js";
 import { buildPreview } from "./workflow/preview.js";
 import { WorkflowError } from "./workflow/errors.js";
 import { resolveRepositoryRoot } from "./workflow/repository.js";
@@ -12,6 +13,7 @@ interface Arguments {
   json: boolean;
   explain: boolean;
   verbose: boolean;
+  version: boolean;
 }
 
 function usage() {
@@ -24,11 +26,19 @@ function usage() {
     "  --json            Emit stable JSON output",
     "  --explain         Include inclusion and omission explanations",
     "  --verbose         Include additional operational detail",
+    "",
+    "Commands:",
+    "  init              Create or refresh the repository index",
+    "  index             Refresh the repository index",
+    "  status            Show cache freshness and readiness",
+    "  doctor            Diagnose repository and cache setup",
+    "  preview <task>    Build a strict-budget context preview",
+    "  mcp               Start the stdio MCP server",
   ].join("\n");
 }
 
 function parse(argv: string[]): Arguments {
-  const result: Arguments = { positional: [], json: false, explain: false, verbose: false };
+  const result: Arguments = { positional: [], json: false, explain: false, verbose: false, version: false };
   for (let index = 0; index < argv.length; index++) {
     const value = argv[index];
     if (!result.command && !value.startsWith("-")) { result.command = value; continue; }
@@ -41,6 +51,7 @@ function parse(argv: string[]): Arguments {
     if (value === "--json") { result.json = true; continue; }
     if (value === "--explain") { result.explain = true; continue; }
     if (value === "--verbose") { result.verbose = true; continue; }
+    if (value === "--version") { result.version = true; continue; }
     if (value === "--help" || value === "-h") { result.command = "help"; continue; }
     if (value.startsWith("-")) throw new WorkflowError("INVALID_ARGUMENT", `Unknown option: ${value}`, "Run context-slice --help to see supported options.");
     result.positional.push(value);
@@ -66,6 +77,7 @@ function renderPreview(preview: ReturnType<typeof buildPreview>, explain: boolea
 
 async function execute(args: Arguments) {
   const command = args.command;
+  if (args.version) return print(packageInfo.version, args, "version", packageInfo.version);
   if (!command || command === "help") return print({ usage: usage() }, args, "help", usage());
   if (!["init", "index", "status", "doctor", "preview", "mcp"].includes(command)) throw new WorkflowError("INVALID_ARGUMENT", `Unknown command: ${command}`, usage());
 

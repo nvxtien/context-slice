@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { ProjectIndex } from "../indexer/index.js";
+import { packageInfo } from "../package-info.js";
 import { estimateTokens } from "../planner/budget.js";
 import { renderSignature, renderSkeleton } from "../render/compact-context.js";
 import { buildPreview } from "../workflow/preview.js";
@@ -13,7 +14,7 @@ const result = (value: unknown) => ({ content: [{ type: "text" as const, text: J
 
 export async function startMcpServer(root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd()) {
   const index = new ProjectIndex(root);
-  const server = new McpServer({ name: "context-slice", version: "0.7.0" });
+  const server = new McpServer({ name: packageInfo.name, version: packageInfo.version });
   const refresh = () => index.refresh();
   const one = (symbol: string) => {
     const candidates = index.resolveSymbol(symbol);

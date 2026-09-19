@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-19T17:41:15.317Z",
+  "generatedAt": "2026-09-19T18:01:39.249Z",
   "repositories": [
     {
       "id": "spring-petclinic",
@@ -61,8 +61,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -71,7 +71,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -96,8 +96,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -106,7 +106,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -131,8 +131,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -141,7 +141,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -166,8 +166,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -176,7 +176,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -201,8 +201,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -211,7 +211,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -236,8 +236,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -246,7 +246,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -271,8 +271,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -281,7 +281,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -306,8 +306,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -316,7 +316,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -341,8 +341,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -351,7 +351,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -376,8 +376,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -386,7 +386,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -411,8 +411,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -421,7 +421,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -446,8 +446,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -456,7 +456,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -481,8 +481,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -491,7 +491,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -516,8 +516,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -526,7 +526,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -551,8 +551,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -561,7 +561,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -586,8 +586,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -596,7 +596,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -621,8 +621,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -631,7 +631,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -656,8 +656,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -666,7 +666,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -691,8 +691,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -701,7 +701,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -726,8 +726,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -736,7 +736,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -761,8 +761,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -771,7 +771,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -796,8 +796,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -806,7 +806,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -831,8 +831,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -841,7 +841,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -866,8 +866,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -876,7 +876,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -901,8 +901,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -911,7 +911,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -936,8 +936,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -946,7 +946,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -971,8 +971,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -981,7 +981,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -1006,8 +1006,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1016,7 +1016,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -1041,8 +1041,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1051,7 +1051,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -1076,8 +1076,8 @@
       "unresolvedCallsSeen": 1454,
       "ambiguousCallsSeen": 40,
       "missingFacts": [],
-      "coldIndexMs": 207,
-      "warmQueryMs": 140,
+      "coldIndexMs": 240,
+      "warmQueryMs": 147,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1086,7 +1086,7 @@
         "symbols": 266,
         "symbolsUpdated": 266,
         "calls": 1643,
-        "elapsedMs": 140
+        "elapsedMs": 158
       }
     },
     {
@@ -1107,7 +1107,7 @@
           "symbols": 266,
           "symbolsUpdated": 266,
           "calls": 1643,
-          "elapsedMs": 207
+          "elapsedMs": 240
         },
         "warm": {
           "files": 50,
@@ -1117,7 +1117,7 @@
           "symbols": 266,
           "symbolsUpdated": 266,
           "calls": 1643,
-          "elapsedMs": 140
+          "elapsedMs": 147
         },
         "update": {
           "files": 50,
@@ -1127,7 +1127,7 @@
           "symbols": 266,
           "symbolsUpdated": 266,
           "calls": 1643,
-          "elapsedMs": 140
+          "elapsedMs": 158
         }
       }
     },
@@ -1153,8 +1153,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1163,7 +1163,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1188,8 +1188,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1198,7 +1198,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1223,8 +1223,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1233,7 +1233,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1258,8 +1258,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1268,7 +1268,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1293,8 +1293,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1303,7 +1303,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1328,8 +1328,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1338,7 +1338,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1363,8 +1363,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1373,7 +1373,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1398,8 +1398,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1408,7 +1408,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1433,8 +1433,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1443,7 +1443,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1468,8 +1468,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1478,7 +1478,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1503,8 +1503,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1513,7 +1513,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1538,8 +1538,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1548,7 +1548,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1573,8 +1573,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1583,7 +1583,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1608,8 +1608,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1618,7 +1618,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1643,8 +1643,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1653,7 +1653,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1678,8 +1678,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1688,7 +1688,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1713,8 +1713,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1723,7 +1723,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1748,8 +1748,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1758,7 +1758,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1783,8 +1783,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1793,7 +1793,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1818,8 +1818,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1828,7 +1828,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1853,8 +1853,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1863,7 +1863,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1888,8 +1888,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1898,7 +1898,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1923,8 +1923,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1933,7 +1933,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1958,8 +1958,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1968,7 +1968,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -1993,8 +1993,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2003,7 +2003,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -2028,8 +2028,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2038,7 +2038,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -2063,8 +2063,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2073,7 +2073,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -2098,8 +2098,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2108,7 +2108,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -2133,8 +2133,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2143,7 +2143,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -2168,8 +2168,8 @@
       "unresolvedCallsSeen": 3098,
       "ambiguousCallsSeen": 240,
       "missingFacts": [],
-      "coldIndexMs": 491,
-      "warmQueryMs": 363,
+      "coldIndexMs": 601,
+      "warmQueryMs": 427,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2178,7 +2178,7 @@
         "symbols": 693,
         "symbolsUpdated": 693,
         "calls": 3592,
-        "elapsedMs": 359
+        "elapsedMs": 418
       }
     },
     {
@@ -2199,7 +2199,7 @@
           "symbols": 693,
           "symbolsUpdated": 693,
           "calls": 3592,
-          "elapsedMs": 491
+          "elapsedMs": 601
         },
         "warm": {
           "files": 109,
@@ -2209,7 +2209,7 @@
           "symbols": 693,
           "symbolsUpdated": 693,
           "calls": 3592,
-          "elapsedMs": 363
+          "elapsedMs": 427
         },
         "update": {
           "files": 109,
@@ -2219,7 +2219,7 @@
           "symbols": 693,
           "symbolsUpdated": 693,
           "calls": 3592,
-          "elapsedMs": 359
+          "elapsedMs": 418
         }
       }
     },
@@ -2245,8 +2245,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2255,7 +2255,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2280,8 +2280,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2290,7 +2290,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2315,8 +2315,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2325,7 +2325,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2350,8 +2350,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2360,7 +2360,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2385,8 +2385,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2395,7 +2395,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2420,8 +2420,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2430,7 +2430,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2455,8 +2455,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2465,7 +2465,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2490,8 +2490,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2500,7 +2500,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2525,8 +2525,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2535,7 +2535,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2560,8 +2560,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2570,7 +2570,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2595,8 +2595,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2605,7 +2605,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2630,8 +2630,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2640,7 +2640,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2665,8 +2665,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2675,7 +2675,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2700,8 +2700,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2710,7 +2710,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2735,8 +2735,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2745,7 +2745,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2770,8 +2770,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2780,7 +2780,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2805,8 +2805,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2815,7 +2815,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2840,8 +2840,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2850,7 +2850,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2881,8 +2881,8 @@
           "attribution": "TOKEN_BUDGET"
         }
       ],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2891,7 +2891,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2916,8 +2916,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2926,7 +2926,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2951,8 +2951,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2961,7 +2961,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -2986,8 +2986,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2996,7 +2996,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3021,8 +3021,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3031,7 +3031,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3056,8 +3056,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3066,7 +3066,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3091,8 +3091,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3101,7 +3101,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3126,8 +3126,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3136,7 +3136,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3161,8 +3161,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3171,7 +3171,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3196,8 +3196,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3206,7 +3206,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3231,8 +3231,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3241,7 +3241,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3266,8 +3266,8 @@
       "unresolvedCallsSeen": 21243,
       "ambiguousCallsSeen": 6826,
       "missingFacts": [],
-      "coldIndexMs": 61704,
-      "warmQueryMs": 9545,
+      "coldIndexMs": 64053,
+      "warmQueryMs": 13105,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3276,7 +3276,7 @@
         "symbols": 5505,
         "symbolsUpdated": 5505,
         "calls": 24823,
-        "elapsedMs": 9257
+        "elapsedMs": 10730
       }
     },
     {
@@ -3297,7 +3297,7 @@
           "symbols": 5505,
           "symbolsUpdated": 5505,
           "calls": 24823,
-          "elapsedMs": 61704
+          "elapsedMs": 64053
         },
         "warm": {
           "files": 419,
@@ -3307,7 +3307,7 @@
           "symbols": 5505,
           "symbolsUpdated": 5505,
           "calls": 24823,
-          "elapsedMs": 9545
+          "elapsedMs": 13105
         },
         "update": {
           "files": 419,
@@ -3317,7 +3317,7 @@
           "symbols": 5505,
           "symbolsUpdated": 5505,
           "calls": 24823,
-          "elapsedMs": 9257
+          "elapsedMs": 10730
         }
       }
     }

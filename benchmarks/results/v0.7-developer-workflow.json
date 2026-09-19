@@ -1,6 +1,6 @@
 {
   "version": "0.7",
-  "generatedAt": "2026-09-19T17:40:20.244Z",
+  "generatedAt": "2026-09-19T18:00:34.952Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -28,70 +28,70 @@
     {
       "id": "fresh-init",
       "samplesMs": [
-        30.217,
-        19.105,
-        10.958
+        25.983,
+        11.904,
+        13.252
       ],
-      "medianMs": 19.105,
-      "worstMs": 30.217,
+      "medianMs": 13.252,
+      "worstMs": 25.983,
       "filesReparsed": 4
     },
     {
       "id": "cold-index",
       "samplesMs": [
-        9.497,
-        11.433,
-        10.891
+        12.651,
+        10.19,
+        12.891
       ],
-      "medianMs": 10.891,
-      "worstMs": 11.433,
+      "medianMs": 12.651,
+      "worstMs": 12.891,
       "filesReparsed": 4
     },
     {
       "id": "first-preview",
       "samplesMs": [
-        5.253,
-        5.558,
-        3.971
+        4.637,
+        5.013,
+        3.497
       ],
-      "medianMs": 5.253,
-      "worstMs": 5.558,
+      "medianMs": 4.637,
+      "worstMs": 5.013,
       "filesReparsed": 0
     },
     {
       "id": "warm-preview",
       "samplesMs": [
-        0.932,
-        1.16,
-        0.645
+        1.009,
+        0.813,
+        0.622
       ],
-      "medianMs": 0.932,
-      "worstMs": 1.16
+      "medianMs": 0.813,
+      "worstMs": 1.009
     },
     {
       "id": "one-file-edit-refresh",
       "samplesMs": [
-        5.587
+        8.911
       ],
-      "medianMs": 5.587,
-      "worstMs": 5.587,
+      "medianMs": 8.911,
+      "worstMs": 8.911,
       "filesReparsed": 1
     },
     {
       "id": "mcp-startup-query",
       "samplesMs": [
-        375.256
+        509.419
       ],
-      "medianMs": 375.256,
-      "worstMs": 375.256
+      "medianMs": 509.419,
+      "worstMs": 509.419
     },
     {
       "id": "mcp-subsequent-query",
       "samplesMs": [
-        11.253
+        11.799
       ],
-      "medianMs": 11.253,
-      "worstMs": 11.253
+      "medianMs": 11.799,
+      "worstMs": 11.799
     }
   ],
   "staleIndex": {

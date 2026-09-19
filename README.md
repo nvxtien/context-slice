@@ -8,7 +8,9 @@ It indexes Java source with Tree-sitter, keeps a local SQLite cache, and exposes
 
 Large context windows still waste attention when they contain unrelated files. ContextSlice makes the context package inspectable: it reports the target, estimated token budget, included symbols, omissions caused by budget, unresolved calls, and cache freshness.
 
-## Quick start
+## Installation
+
+### Local development
 
 ContextSlice is not published to npm. From this checkout, install and link the local executable:
 
@@ -17,6 +19,26 @@ npm install
 npm run build
 npm link
 ```
+
+### Tarball validation
+
+The package is publish-ready but is not currently published to the npm registry. Validate the installable artifact locally:
+
+```sh
+npm pack
+npm install -g ./context-slice-0.8.0.tgz
+context-slice --version
+```
+
+The isolated packaging smoke test uses a temporary npm prefix and does not depend on `npm link`:
+
+```sh
+npm run benchmark:v08
+```
+
+Registry installation (`npm install -g context-slice`) and `npx context-slice` remain publication-dependent and are not claimed as supported yet.
+
+### Quick start
 
 Then, in a Java repository:
 
@@ -27,6 +49,8 @@ context-slice preview "explain payment retry flow" --explain
 ```
 
 `init` creates `.context-slice/index.sqlite` automatically. Repository discovery uses `--repo` when given, otherwise the nearest Git root, otherwise the working directory. Only Java source is supported in v0.7.
+
+Use `context-slice --version` and `context-slice --help` to inspect the installed package without relying on the source checkout.
 
 ## CLI workflow
 
@@ -124,6 +148,8 @@ npm run benchmark:v07
 ```
 
 It writes [JSON](benchmarks/results/v0.7-developer-workflow.json) and [Markdown](benchmarks/results/v0.7-developer-workflow.md) reports with fresh init, cold index, first/warm preview, one-file refresh, and first/subsequent MCP query timings. Timings apply only to the recorded local fixture environment. Codex/Claude telemetry is optional and is reported as unavailable when the runtime provides none.
+
+Run `npm run benchmark:v08` for the tarball packaging, isolated installation, upgrade, uninstall, MCP, path-with-spaces, nested-cwd, publish-dry-run, and clean-room self-trial report in [JSON](benchmarks/results/v0.8-packaging-installation.json) and [Markdown](benchmarks/results/v0.8-packaging-installation.md). External developer participation is explicitly deferred; this is not a multi-user study.
 
 Earlier semantic/context measurements remain available:
 
