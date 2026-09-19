@@ -1,5 +1,8 @@
 import { existsSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { adapterFor, ignoredDirectories } from "../languages/adapter.js";
+import "../languages/java.js";
+import "../languages/typescript/index.js";
 import { WorkflowError } from "./errors.js";
 
 const ignored = new Set([
@@ -13,6 +16,7 @@ const ignored = new Set([
   ".idea",
   ".vscode",
   ".context-slice",
+  ...ignoredDirectories(),
 ]);
 
 export interface RepositoryOptions {
@@ -20,12 +24,12 @@ export interface RepositoryOptions {
   repository?: string;
 }
 
-function hasJavaSource(directory: string): boolean {
+function hasSupportedSource(directory: string): boolean {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (ignored.has(entry.name)) continue;
     const path = resolve(directory, entry.name);
-    if (entry.isFile() && entry.name.endsWith(".java")) return true;
-    if (entry.isDirectory() && hasJavaSource(path)) return true;
+    if (entry.isFile() && adapterFor(entry.name)) return true;
+    if (entry.isDirectory() && hasSupportedSource(path)) return true;
   }
   return false;
 }
@@ -51,11 +55,11 @@ export function resolveRepositoryRoot(options: RepositoryOptions = {}) {
       `Repository not found: ${root}`,
       "Pass an existing directory with --repo.",
     );
-  if (!hasJavaSource(root))
+  if (!hasSupportedSource(root))
     throw new WorkflowError(
       "NO_SUPPORTED_SOURCE",
-      `No Java source found in: ${root}`,
-      "Run ContextSlice in a Java repository or pass --repo.",
+      `No supported source found in: ${root}`,
+      "Run ContextSlice in a Java or TypeScript repository, or pass --repo.",
     );
   return root;
 }

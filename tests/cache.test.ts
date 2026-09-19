@@ -38,7 +38,10 @@ test("cache lạnh, cache ấm và cập nhật một file", () => {
 
 test("cache directory ignores itself so the target repository stays clean", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
-  cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
+  cpSync(join(process.cwd(), "test-fixtures/java"), root, {
+    recursive: true,
+    filter: (source) => !source.includes(".context-slice"),
+  });
   new ProjectIndex(root).rebuild();
   assert.equal(
     readFileSync(join(root, ".context-slice/.gitignore"), "utf8"),
@@ -48,7 +51,10 @@ test("cache directory ignores itself so the target repository stays clean", () =
 
 test("cache written by an unknown schema version is rebuilt, never reused", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
-  cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
+  cpSync(join(process.cwd(), "test-fixtures/java"), root, {
+    recursive: true,
+    filter: (source) => !source.includes(".context-slice"),
+  });
   new ProjectIndex(root).rebuild();
   const db = new Database(join(root, ".context-slice/index.sqlite"));
   db.prepare(
@@ -64,7 +70,10 @@ test("cache written by an unknown schema version is rebuilt, never reused", () =
 
 test("corrupt cache fails with an actionable INDEX_CORRUPT error", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
-  cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
+  cpSync(join(process.cwd(), "test-fixtures/java"), root, {
+    recursive: true,
+    filter: (source) => !source.includes(".context-slice"),
+  });
   mkdirSync(join(root, ".context-slice"), { recursive: true });
   writeFileSync(join(root, ".context-slice/index.sqlite"), "not a database");
   assert.throws(

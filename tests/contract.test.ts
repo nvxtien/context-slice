@@ -5,6 +5,7 @@ import { join } from "node:path";
 import Database from "better-sqlite3";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
+import { INDEX_VERSION } from "../src/storage/sqlite.js";
 
 test("caller depth expands transitively", () => {
   const index = new ProjectIndex(join(process.cwd(), "test-fixtures/java"));
@@ -30,6 +31,6 @@ test("file records use the current index version", () => {
   const row = db
     .prepare("SELECT indexing_version FROM files WHERE path = ?")
     .get("PaymentService.java") as { indexing_version: string };
-  assert.equal(row.indexing_version, "0.5.2");
+  assert.equal(row.indexing_version, INDEX_VERSION);
   db.close();
 });

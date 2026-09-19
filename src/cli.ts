@@ -190,7 +190,10 @@ async function execute(args: Arguments) {
     const human = [
       `Repository: ${repository}`,
       `Index: ${freshness.state}`,
-      `Java files: ${freshness.indexedFiles}/${freshness.javaFiles}`,
+      `Source files: ${freshness.indexedFiles}/${freshness.sourceFiles}`,
+      ...Object.entries(freshness.filesByExtension)
+        .sort()
+        .map(([extension, count]) => `  ${extension}: ${count}`),
       `Schema: ${freshness.schemaVersion}`,
       `Last refresh: ${freshness.lastRefreshedAt ?? "never"}`,
     ].join("\n");
@@ -203,7 +206,7 @@ async function execute(args: Arguments) {
       {
         name: "java-source",
         status: "ok",
-        detail: `${plural(freshness.javaFiles, "file")} found`,
+        detail: `${plural(freshness.sourceFiles, "file")} found`,
       },
       {
         name: "index",
