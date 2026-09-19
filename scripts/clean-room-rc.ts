@@ -689,6 +689,9 @@ copyFileSync(
   join(baselineCheckout, relative(artifacts, baselineTarball)),
   baselineTarball,
 );
+const baselineVersion = JSON.parse(
+  readFileSync(join(baselineCheckout, "package.json"), "utf8"),
+).version as string;
 
 // 3. Isolated install, following the README command literally from the tarball directory.
 const prefix = join(workspace, "install prefix");
@@ -956,8 +959,8 @@ if (argv.includes("--assistants")) {
         "--ephemeral",
         "--ignore-user-config",
         "--skip-git-repo-check",
-        "-s",
-        "read-only",
+        // codex exec refuses MCP tool calls under the default "never" approval policy.
+        "--approve-for-me",
         "--json",
         "-c",
         'mcp_servers.context-slice.command="context-slice"',
@@ -1097,7 +1100,7 @@ await attempt("upgrade", () => {
   const rebuilt = json(cs(["status", "--json"], repo, upEnv)).result.freshness;
   record(
     "upgrade",
-    oldVersion === "0.8.0" &&
+    oldVersion === baselineVersion &&
       newVersion === packageJson.version &&
       newStatus.state === "CURRENT" &&
       preview.status === 0 &&
@@ -1152,7 +1155,7 @@ await attempt("upgrade", () => {
   const corrupt09 = cs(["status"], repo, upEnv);
   record(
     "downgrade",
-    downVersion === "0.8.0" &&
+    downVersion === baselineVersion &&
       downStatus.state === "CURRENT" &&
       downPreview.status === 0 &&
       future.state === "UNINITIALIZED" &&
