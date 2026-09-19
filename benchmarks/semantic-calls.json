@@ -1,0 +1,8 @@
+[
+  {"id":"same-class-local","fixture":"Dispatch.java","caller":"Service.run","expected":[{"callee":"local","target":"Service.local","confidence":"exact","kind":"same-type"}]},
+  {"id":"typed-interface","fixture":"Dispatch.java","caller":"Service.run","expected":[{"callee":"save","target":"Repository.save","confidence":"probable","kind":"interface"}]},
+  {"id":"inherited","fixture":"Dispatch.java","caller":"Service.run","expected":[{"callee":"inherited","target":"Parent.inherited","confidence":"exact","kind":"inherited"}]},
+  {"id":"constructor","fixture":"Dispatch.java","caller":"Service.run","expected":[{"callee":"Item","target":"Item.Item","confidence":"exact","kind":"constructor"}]},
+  {"id":"static-library","fixture":"StaticAndChain.java","caller":"StaticAndChain.run","expected":[{"callee":"requireNonNull","target":null,"confidence":"unresolved","kind":"unresolved"}]},
+  {"id":"fluent-chain","fixture":"StaticAndChain.java","caller":"StaticAndChain.run","expected":[{"callee":"trim","target":null,"confidence":"unresolved","kind":"unresolved"}]}
+]

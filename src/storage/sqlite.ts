@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { CallEdge, SymbolRecord } from "../types/model.js";
 
-const INDEX_VERSION = "0.4";
+const INDEX_VERSION = "0.5.2";
 
 export class IndexStorage {
   private readonly db: Database.Database;

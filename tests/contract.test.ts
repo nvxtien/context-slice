@@ -23,6 +23,6 @@ test("file records use the current index version", () => {
   new ProjectIndex(root).rebuild();
   const db = new Database(join(root, ".context-slice/index.sqlite"));
   const row = db.prepare("SELECT indexing_version FROM files WHERE path = ?").get("PaymentService.java") as { indexing_version: string };
-  assert.equal(row.indexing_version, "0.4");
+  assert.equal(row.indexing_version, "0.5.2");
   db.close();
 });

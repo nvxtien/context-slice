@@ -1,0 +1,115 @@
+{
+  "generatedAt": "2026-09-19T16:32:06.341Z",
+  "v04Baseline": {
+    "retrievalRecall": 1,
+    "requiredFactRecall": 1
+  },
+  "semanticFixture": {
+    "expectedEdges": 6,
+    "foundEdges": 6,
+    "falseNegatives": 0,
+    "falsePositives": 0,
+    "semanticCallRecall": 1,
+    "semanticCallPrecision": 1,
+    "falseNegativeEdgeRate": 0,
+    "falsePositiveEdgeRate": 0,
+    "failures": []
+  },
+  "repositories": [
+    {
+      "repository": "spring-petclinic",
+      "scale": "small",
+      "status": "validated",
+      "diagnostics": {
+        "filesIndexed": 45,
+        "symbolsIndexed": 266,
+        "methodsIndexed": 187,
+        "constructorsIndexed": 12,
+        "classesIndexed": 62,
+        "interfacesIndexed": 5,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 30,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0,
+        "callEdgesTotal": 1643,
+        "callEdgesExact": 135,
+        "callEdgesProbable": 54,
+        "callEdgesUnresolved": 1454,
+        "resolutionKindCounts": {
+          "unresolved": 1366,
+          "same-type": 40,
+          "constructor": 74,
+          "explicit-receiver": 95,
+          "interface": 68
+        }
+      },
+      "commit": "818c4136ea971c21674525f9053de0d9c7ad8cfe"
+    },
+    {
+      "repository": "petclinic-rest",
+      "scale": "medium",
+      "status": "validated",
+      "diagnostics": {
+        "filesIndexed": 105,
+        "symbolsIndexed": 693,
+        "methodsIndexed": 516,
+        "constructorsIndexed": 48,
+        "classesIndexed": 96,
+        "interfacesIndexed": 33,
+        "recordsIndexed": 0,
+        "enumsIndexed": 0,
+        "duplicateSimpleNames": 86,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0,
+        "callEdgesTotal": 3592,
+        "callEdgesExact": 270,
+        "callEdgesProbable": 224,
+        "callEdgesUnresolved": 3098,
+        "resolutionKindCounts": {
+          "unresolved": 2881,
+          "constructor": 192,
+          "same-type": 144,
+          "explicit-receiver": 126,
+          "interface": 249
+        }
+      },
+      "commit": "4cd8e1b0cd42578e882247d8801f6be5d402f118"
+    },
+    {
+      "repository": "keycloak-services",
+      "scale": "large",
+      "status": "validated",
+      "diagnostics": {
+        "filesIndexed": 419,
+        "symbolsIndexed": 5505,
+        "methodsIndexed": 4358,
+        "constructorsIndexed": 599,
+        "classesIndexed": 487,
+        "interfacesIndexed": 42,
+        "recordsIndexed": 9,
+        "enumsIndexed": 10,
+        "duplicateSimpleNames": 876,
+        "ambiguousLookups": 0,
+        "symbolIdCollisions": 0,
+        "callEdgesTotal": 24823,
+        "callEdgesExact": 3119,
+        "callEdgesProbable": 461,
+        "callEdgesUnresolved": 21243,
+        "resolutionKindCounts": {
+          "unresolved": 19868,
+          "constructor": 1195,
+          "same-type": 2129,
+          "explicit-receiver": 699,
+          "interface": 670,
+          "static": 222,
+          "inherited": 40
+        }
+      },
+      "commit": "dd4ae31d1b67c91a7f85f7c60df5c9718b111f0a"
+    }
+  ],
+  "semanticResolutionHarmRate": 0,
+  "semanticResolutionFactLossRate": 0,
+  "jdtDecision": "deferred: semantic fixture failures, if any, do not demonstrate required-fact loss; real repository call ground truth remains separate from symbol indexing"
+}

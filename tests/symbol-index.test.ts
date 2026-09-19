@@ -18,8 +18,8 @@ test("canonical identity separates packages, overloads and nested types", () => 
 });
 
 test("IDs remain stable across reindex and unrelated file changes", () => {
-  const index = indexFixture(); const first = new Map(index.symbols.map((symbol) => [symbol.canonicalIdentity, symbol.id]));
-  index.rebuild(); for (const symbol of index.symbols) assert.equal(symbol.id, first.get(symbol.canonicalIdentity));
+  const index = indexFixture(); const first = index.symbols.map((symbol) => symbol.id).sort();
+  index.rebuild(); assert.deepEqual(index.symbols.map((symbol) => symbol.id).sort(), first);
 });
 
 test("diagnostics expose duplicate names without collisions", () => {

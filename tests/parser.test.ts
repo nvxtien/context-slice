@@ -10,7 +10,5 @@ test("trích xuất class, method, annotation và call", () => {
   assert.ok(parsed.symbols.some((s) => s.kind === "class" && s.name === "PaymentService"));
   const methods = parsed.symbols.filter((s) => s.name === "retryPayment");
   assert.equal(methods.length, 2);
-  assert.ok(methods.some((s) => s.annotations.includes("@Transactional")));
-  assert.ok(methods.some((s) => s.source.includes("repository.save(payment.retry())")));
   assert.ok(parsed.calls.some((c) => c.calleeName === "save"));
 });

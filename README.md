@@ -38,6 +38,13 @@ Chạy `npm run benchmark:v04` để chạy lại 15 task v0.3 rồi sinh [bench
 
 Kết quả v0.4 trên ba commit đã pin: retrieval recall `100%` (15/15 target), symbol-index failure rate `0%`, symbol fact loss rate `0%`, required-fact recall `100%`. Median token reduction của rerun là `95.05%`; unresolved call và inherited/anonymous semantic behavior vẫn là giới hạn riêng, chưa biện minh cho JDT/LSP.
 
+## Validation v0.5
+
+V0.5 tách declared target khỏi runtime target trong semantic call edge. Mỗi edge có confidence `exact/probable/unresolved`, `resolutionKind`, `argumentCount` và evidence. Interface/framework declaration có thể là target retrieval hợp lệ mà không bịa runtime implementation. Chạy `npm run benchmark:v05` để sinh [benchmarks/results/v0.5-semantic-call-resolution.md](benchmarks/results/v0.5-semantic-call-resolution.md) và JSON.
+
+Production vẫn chỉ dùng Tree-sitter, không thêm compiler/LSP dependency. Runtime dispatch, generic inference, fluent library types và framework-generated implementations được giữ conservative; quyết định JDT/LSP dựa trên semantic fact loss, không dựa riêng vào unresolved-call rate.
+Semantic edge cache dùng schema `0.5.2` để tự invalidate các cache cũ khi mô hình call edge thay đổi.
+
 ## Kiểm tra
 
 ```sh
