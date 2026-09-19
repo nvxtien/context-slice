@@ -1,7 +1,7 @@
 {
   "version": "v1.0",
-  "generatedAt": "2026-09-19T22:18:17.123Z",
-  "commit": "9d0c846e1911178a18a92b122eb3ba1abf4e8c3e",
+  "generatedAt": "2026-09-19T22:26:11.444Z",
+  "commit": "6e27d10b5a79c677624c4c841cebc118c4cc76f0",
   "packageVersion": "1.0.0",
   "environment": {
     "node": "v22.12.0",
@@ -29,7 +29,7 @@
       "status": "PASS",
       "evidence": {
         "source": "local repository (committed objects only)",
-        "commit": "9d0c846e1911178a18a92b122eb3ba1abf4e8c3e",
+        "commit": "6e27d10b5a79c677624c4c841cebc118c4cc76f0",
         "version": "1.0.0",
         "untrackedOrIgnored": "",
         "distPresent": false,
@@ -47,7 +47,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 4608,
+        "ms": 4475,
         "tail": [
           "added 142 packages in 4s",
           "npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available."
@@ -58,14 +58,14 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 2185
+        "ms": 2147
       }
     },
     "tests": {
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 13390,
+        "ms": 13564,
         "tests": 41,
         "pass": 41,
         "fail": 0
@@ -75,7 +75,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 207284,
+        "ms": 201423,
         "tasks": 15,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
@@ -89,7 +89,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 1024,
+        "ms": 949,
         "checklist": "12/12",
         "context": {
           "task": "explain retryPayment",
@@ -104,7 +104,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 8936,
+        "ms": 9044,
         "note": "packaging smoke test (tarball install, CLI, MCP, upgrade, uninstall, publish dry run) from the clean checkout"
       }
     },
@@ -242,7 +242,7 @@
         "prefix": "<workspace>/install prefix (contains a space)",
         "resolvedExecutable": "<workspace>/install prefix/bin/context-slice",
         "packageRealpathInsidePrefix": true,
-        "ms": 2826
+        "ms": 2828
       }
     },
     "cliThroughPath": {
@@ -271,7 +271,7 @@
           "Indexed 50 Java files (266 symbols).",
           "Next: context-slice preview \"explain <symbol>\""
         ],
-        "initMs": 307,
+        "initMs": 293,
         "statusAfter": {
           "state": "CURRENT",
           "javaFiles": 50,
@@ -315,7 +315,7 @@
         "unresolved": [],
         "confidence": "high",
         "wholeFileFallback": false,
-        "latencyMs": 297,
+        "latencyMs": 288,
         "humanHeader": [
           "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
           "Context: 32/1200 tokens; 1 item included"
@@ -340,7 +340,7 @@
         ],
         "preview": {
           "ok": true,
-          "ms": 242,
+          "ms": 210,
           "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
           "estimatedTokens": 32,
           "budget": 1200
@@ -387,7 +387,7 @@
       }
     },
     "codex": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "version": "codex-cli 0.153.4",
         "config": {
@@ -401,13 +401,11 @@
           {
             "server": "context-slice",
             "tool": "context.preview",
-            "status": "failed",
-            "error": {
-              "message": "MCP tool call requires approval, but approval policy is never"
-            }
+            "status": "completed",
+            "error": null
           }
         ],
-        "answer": "No target symbol returned: automatic approval review blocked `context.preview` because approval is required but the approval policy is `never`.",
+        "answer": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
         "stderrTail": [
           "Reading additional input from stdin..."
         ]
@@ -433,7 +431,7 @@
       }
     },
     "upgrade": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "from": "0.9.0",
         "to": "1.0.0",
@@ -454,7 +452,7 @@
       }
     },
     "downgrade": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "version": "0.9.0",
         "cacheFrom": "1.0.0",
@@ -469,11 +467,11 @@
         "corruptCache": {
           "v080": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-Y40zA1/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-k3EMLp/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           },
           "v090": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-Y40zA1/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-k3EMLp/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           }
         }
       }
@@ -662,14 +660,30 @@
       "fix": "package.json is the single source of truth; tests/package-metadata.test.ts asserts the version and that README names context-slice-<version>.tgz",
       "regressionTest": "tests/package-metadata.test.ts",
       "status": "FIXED"
+    },
+    {
+      "category": "CODEX",
+      "step": "v1.0 Codex integration",
+      "symptom": "codex exec connected and called context.preview, but Codex refused it: 'MCP tool call requires approval, but approval policy is never'",
+      "severity": "MINOR",
+      "rootCause": "validation harness ran codex exec without an approval mode; non-interactive runs need --approve-for-me. Not a ContextSlice defect: the server connected, the tool was visible and the arguments were correct",
+      "fix": "clean-room script passes --approve-for-me; rerun succeeded and returned the expected target symbol",
+      "regressionTest": "clean-room RC run (codex step)",
+      "status": "FIXED"
+    },
+    {
+      "category": "PACKAGE",
+      "step": "v1.0 upgrade/downgrade steps",
+      "symptom": "upgrade and downgrade steps reported FAIL although the recorded behavior was correct",
+      "severity": "MINOR",
+      "rootCause": "the assertions hard-coded the previous version as 0.8.0 while the v1.0 baseline is 0.9.0",
+      "fix": "assertions read the baseline version from the baseline checkout's package.json",
+      "regressionTest": "clean-room RC run (upgrade/downgrade steps)",
+      "status": "FIXED"
     }
   ],
-  "blockers": [
-    "automated step failed: codex",
-    "automated step failed: upgrade",
-    "automated step failed: downgrade"
-  ],
+  "blockers": [],
   "openMajors": [],
-  "recommendation": "NO-GO",
+  "recommendation": "GO",
   "publication": "none (no npm publish, tag, or GitHub release)"
 }
