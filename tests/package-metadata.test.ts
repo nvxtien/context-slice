@@ -11,13 +11,18 @@ const cli = join(root, "src/cli.ts");
 
 test("package metadata describes an intentional publish-ready runtime", () => {
   assert.equal(packageJson.name, "context-slice");
-  assert.equal(packageJson.version, "0.8.0");
+  assert.equal(packageJson.version, "0.9.0");
   assert.equal(packageJson.license, "MIT");
   assert.ok(packageJson.repository);
   assert.match(packageJson.engines.node, />=20/);
   assert.deepEqual(packageJson.files, ["dist/src", "queries", "README.md", "LICENSE"]);
   assert.equal(packageJson.bin["context-slice"], "dist/src/cli.js");
   assert.ok(packageJson.scripts["package-smoke"]);
+});
+
+test("README install commands name the current tarball", () => {
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  assert.deepEqual([...new Set(readme.match(/context-slice-\d+\.\d+\.\d+\.tgz/g))], [`context-slice-${packageJson.version}.tgz`]);
 });
 
 test("version and help work from the source entry point", () => {

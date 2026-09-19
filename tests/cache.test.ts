@@ -3,7 +3,9 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, readdirSync, cpSyn
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import Database from "better-sqlite3";
 import { ProjectIndex } from "../src/indexer/index.js";
+import { INDEX_VERSION } from "../src/storage/sqlite.js";
 
 test("cache lạnh, cache ấm và cập nhật một file", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
@@ -20,4 +22,24 @@ test("cache lạnh, cache ấm và cập nhật một file", () => {
   const third = new ProjectIndex(projectRoot).rebuild();
   assert.equal(third.filesParsed, 1);
   assert.equal(third.cacheHits, 3);
+});
+
+test("cache directory ignores itself so the target repository stays clean", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-"));
+  cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
+  new ProjectIndex(root).rebuild();
+  assert.equal(readFileSync(join(root, ".context-slice/.gitignore"), "utf8"), "*\n");
+});
+
+test("cache written by an unknown schema version is rebuilt, never reused", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-"));
+  cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
+  new ProjectIndex(root).rebuild();
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  db.prepare("UPDATE metadata SET value = '99.0.0' WHERE key = 'schema_version'").run(); db.close();
+  const index = new ProjectIndex(root);
+  assert.equal(index.inspect().state, "UNINITIALIZED");
+  const rebuilt = index.rebuild();
+  assert.equal(rebuilt.cacheHits, 0);
+  assert.equal(index.inspect().schemaVersion, INDEX_VERSION);
 });

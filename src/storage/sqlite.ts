@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CallEdge, SymbolRecord } from "../types/model.js";
 
@@ -10,6 +10,8 @@ export class IndexStorage {
   constructor(root: string) {
     const directory = join(root, ".context-slice");
     mkdirSync(directory, { recursive: true });
+    // Self-ignoring cache: keeps `git status` clean without editing the repository's own .gitignore.
+    if (!existsSync(join(directory, ".gitignore"))) writeFileSync(join(directory, ".gitignore"), "*\n");
     this.db = new Database(join(directory, "index.sqlite"));
     this.db.exec("CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, content_hash TEXT NOT NULL, parse_error INTEGER NOT NULL, indexing_version TEXT NOT NULL); CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, file_path TEXT NOT NULL, payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY AUTOINCREMENT, caller_id TEXT NOT NULL, callee_name TEXT NOT NULL, payload TEXT NOT NULL);");
     const version = this.db.prepare("SELECT value FROM metadata WHERE key = 'schema_version'").get() as { value?: string } | undefined;

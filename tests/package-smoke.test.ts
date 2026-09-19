@@ -14,7 +14,9 @@ test("package smoke verifies tarball installation outside the source checkout", 
   assert.ok(report.tarball.requiredFiles.every((file: string) => report.tarball.files.includes(file)));
   assert.deepEqual(report.tarball.forbiddenFound, []);
   assert.equal(report.install.isolatedPrefix, true);
-  assert.equal(report.cli.version, "0.8.0");
+  assert.equal(report.cli.version, report.package.version);
+  assert.equal(report.pathWithSpaces.passed, true);
+  assert.equal(report.nestedCwd.passed, true);
   assert.equal(report.cli.help, true);
   assert.equal(report.mcp.protocolSafe, true);
   assert.equal(report.upgrade.cachePreserved, true);

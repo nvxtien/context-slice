@@ -1,5 +1,5 @@
 import { execFileSync, spawn, spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 
@@ -153,7 +153,7 @@ function markdown(report: SmokeReport) {
 
 export async function runPackageSmoke(options: PackageSmokeOptions = {}): Promise<SmokeReport> {
   const root = options.root ?? process.cwd(); const outputDir = options.outputDir ?? join(root, "benchmarks/results");
-  const workspace = mkdtempSync(join(tmpdir(), "context-slice-v08-")); const prefix = join(workspace, "npm prefix"); mkdirSync(prefix, { recursive: true });
+  const workspace = realpathSync(mkdtempSync(join(tmpdir(), "context-slice-v08-"))); const prefix = join(workspace, "npm prefix"); mkdirSync(prefix, { recursive: true });
   let tarball = "";
   try {
     const pack = JSON.parse(run("npm", ["pack", "--json"], root))[0] as { filename: string };
