@@ -11,8 +11,13 @@ test("caller depth expands transitively", () => {
   index.rebuild();
   const target = index.resolveSymbol("PaymentService.retryPayment")[0];
   assert.ok(target);
-  assert.ok(index.callersAtDepth(target, 1).some((symbol) => symbol.name === "retry"));
-  assert.ok(index.callersAtDepth(target, 2).length >= index.callersAtDepth(target, 1).length);
+  assert.ok(
+    index.callersAtDepth(target, 1).some((symbol) => symbol.name === "retry"),
+  );
+  assert.ok(
+    index.callersAtDepth(target, 2).length >=
+      index.callersAtDepth(target, 1).length,
+  );
 });
 
 test("file records use the current index version", () => {
@@ -22,7 +27,9 @@ test("file records use the current index version", () => {
   copyFileSync(fixture, destination);
   new ProjectIndex(root).rebuild();
   const db = new Database(join(root, ".context-slice/index.sqlite"));
-  const row = db.prepare("SELECT indexing_version FROM files WHERE path = ?").get("PaymentService.java") as { indexing_version: string };
+  const row = db
+    .prepare("SELECT indexing_version FROM files WHERE path = ?")
+    .get("PaymentService.java") as { indexing_version: string };
   assert.equal(row.indexing_version, "0.5.2");
   db.close();
 });

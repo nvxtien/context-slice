@@ -21,7 +21,10 @@
     "url": "https://github.com/keycloak/keycloak.git",
     "commit": "dd4ae31d1b67c91a7f85f7c60df5c9718b111f0a",
     "source": "benchmarks/checkouts/keycloak",
-    "sparse": ["services/src/main/java/org/keycloak/services", "services/src/test/java/org/keycloak/services"],
+    "sparse": [
+      "services/src/main/java/org/keycloak/services",
+      "services/src/test/java/org/keycloak/services"
+    ],
     "scope": "services/src/main/java/org/keycloak/services and matching tests"
   }
 ]

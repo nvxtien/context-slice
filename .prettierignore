@@ -1,0 +1,11 @@
+# Generated benchmark output (rewritten by npm run benchmark:*)
+benchmarks/results/
+# Versioned prompts are kept verbatim
+docs/prompt/
+docs/superpowers/
+# Fixtures and lockfile
+test-fixtures/
+tests/fixtures/
+package-lock.json
+# Local agent notes
+.superpowers/

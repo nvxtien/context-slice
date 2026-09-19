@@ -6,8 +6,14 @@ import test from "node:test";
 const root = process.cwd();
 
 test("v0.8 report and release checklist expose packaging evidence honestly", () => {
-  const jsonPath = join(root, "benchmarks/results/v0.8-packaging-installation.json");
-  const markdownPath = join(root, "benchmarks/results/v0.8-packaging-installation.md");
+  const jsonPath = join(
+    root,
+    "benchmarks/results/v0.8-packaging-installation.json",
+  );
+  const markdownPath = join(
+    root,
+    "benchmarks/results/v0.8-packaging-installation.md",
+  );
   const frictionPath = join(root, "benchmarks/results/v0.8-friction-log.md");
   const checklistPath = join(root, "docs/release-readiness-v0.8.md");
   assert.ok(existsSync(jsonPath), "run benchmark:v08 before this assertion");
@@ -23,7 +29,13 @@ test("v0.8 report and release checklist expose packaging evidence honestly", () 
   assert.match(readFileSync(markdownPath, "utf8"), /MCP packaged integration/);
   assert.match(readFileSync(frictionPath, "utf8"), /self-trial/);
   assert.match(readFileSync(checklistPath, "utf8"), /npm pack succeeds/);
-  assert.match(readFileSync(checklistPath, "utf8"), /clean checkout.*deferred/i);
-  assert.match(readFileSync(join(root, "README.md"), "utf8"), /Tarball validation/);
+  assert.match(
+    readFileSync(checklistPath, "utf8"),
+    /clean checkout.*deferred/i,
+  );
+  assert.match(
+    readFileSync(join(root, "README.md"), "utf8"),
+    /Tarball validation/,
+  );
   assert.match(readFileSync(join(root, "README.md"), "utf8"), /not published/i);
 });

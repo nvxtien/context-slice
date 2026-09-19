@@ -14,7 +14,10 @@ function indexedFixture() {
 }
 
 test("preview selects a task target and explains every included item", () => {
-  const preview = buildPreview(indexedFixture(), "explain retryPayment behavior");
+  const preview = buildPreview(
+    indexedFixture(),
+    "explain retryPayment behavior",
+  );
 
   assert.equal(preview.target.name, "retryPayment");
   assert.equal(preview.included[0]?.symbolId, preview.target.id);
@@ -26,7 +29,9 @@ test("preview selects a task target and explains every included item", () => {
 
 test("preview stays within a strict budget and explains omissions", () => {
   const index = indexedFixture();
-  const target = index.resolveSymbol("retryPayment").find((symbol) => symbol.signature?.includes("String id)"));
+  const target = index
+    .resolveSymbol("retryPayment")
+    .find((symbol) => symbol.signature?.includes("String id)"));
   assert.ok(target);
   const budget = estimateTokens(target.source) + 1;
 
@@ -38,17 +43,26 @@ test("preview stays within a strict budget and explains omissions", () => {
 
 test("preview rejects a budget that cannot hold the target source", () => {
   const index = indexedFixture();
-  const target = index.resolveSymbol("retryPayment").find((symbol) => symbol.signature?.includes("String id)"));
+  const target = index
+    .resolveSymbol("retryPayment")
+    .find((symbol) => symbol.signature?.includes("String id)"));
   assert.ok(target);
 
   assert.throws(
-    () => buildPreview(index, "retryPayment", { budget: estimateTokens(target.source) - 1 }),
-    (error: unknown) => error instanceof WorkflowError && error.code === "BUDGET_TOO_SMALL",
+    () =>
+      buildPreview(index, "retryPayment", {
+        budget: estimateTokens(target.source) - 1,
+      }),
+    (error: unknown) =>
+      error instanceof WorkflowError && error.code === "BUDGET_TOO_SMALL",
   );
 });
 
 test("preview keeps benchmark implementations out of the developer context path", () => {
-  const source = readFileSync(join(process.cwd(), "src/workflow/preview.ts"), "utf8");
+  const source = readFileSync(
+    join(process.cwd(), "src/workflow/preview.ts"),
+    "utf8",
+  );
   assert.doesNotMatch(source, /benchmarks\//);
   assert.doesNotMatch(source, /manual-context/);
 });

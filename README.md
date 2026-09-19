@@ -76,14 +76,14 @@ context-slice preview "explain retryPayment" --json
 context-slice mcp
 ```
 
-| Command | Purpose |
-| --- | --- |
-| `init` | Discover the repository and create/refresh the local index. |
-| `index` | Refresh the index explicitly. |
-| `status` | Show readiness, schema, cache freshness, and last refresh. |
-| `doctor` | Check repository, Java source, cache, and MCP command readiness. |
-| `preview <task>` | Return a deterministic, strict-budget context preview. |
-| `mcp` | Start the stdio MCP server with the stable public command. |
+| Command          | Purpose                                                          |
+| ---------------- | ---------------------------------------------------------------- |
+| `init`           | Discover the repository and create/refresh the local index.      |
+| `index`          | Refresh the index explicitly.                                    |
+| `status`         | Show readiness, schema, cache freshness, and last refresh.       |
+| `doctor`         | Check repository, Java source, cache, and MCP command readiness. |
+| `preview <task>` | Return a deterministic, strict-budget context preview.           |
+| `mcp`            | Start the stdio MCP server with the stable public command.       |
 
 Use `--repo /absolute/path` to select a repository. `--json` provides a stable automation-oriented result. Normal commands are quiet; `--explain` displays why each item was included or omitted.
 

@@ -4,7 +4,9 @@ import { join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
 
 test("resolves same-class, interface, inherited and constructor calls", () => {
-  const index = new ProjectIndex(join(process.cwd(), "tests/fixtures/semantic-calls"));
+  const index = new ProjectIndex(
+    join(process.cwd(), "tests/fixtures/semantic-calls"),
+  );
   index.rebuild();
   const caller = index.resolveSymbol("Service.run")[0];
   assert.ok(caller);
@@ -19,10 +21,18 @@ test("resolves same-class, interface, inherited and constructor calls", () => {
 });
 
 test("keeps unknown library and fluent receivers unresolved", () => {
-  const index = new ProjectIndex(join(process.cwd(), "tests/fixtures/semantic-calls"));
+  const index = new ProjectIndex(
+    join(process.cwd(), "tests/fixtures/semantic-calls"),
+  );
   index.rebuild();
   const caller = index.resolveSymbol("StaticAndChain.run")[0];
   const edges = index.calls.filter((call) => call.callerId === caller.id);
-  assert.equal(edges.find((call) => call.calleeName === "requireNonNull")?.confidence, "unresolved");
-  assert.equal(edges.find((call) => call.calleeName === "trim")?.confidence, "unresolved");
+  assert.equal(
+    edges.find((call) => call.calleeName === "requireNonNull")?.confidence,
+    "unresolved",
+  );
+  assert.equal(
+    edges.find((call) => call.calleeName === "trim")?.confidence,
+    "unresolved",
+  );
 });

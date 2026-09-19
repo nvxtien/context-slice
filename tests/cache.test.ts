@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, readdirSync, cpSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  cpSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -10,7 +17,12 @@ import { INDEX_VERSION } from "../src/storage/sqlite.js";
 test("cache lạnh, cache ấm và cập nhật một file", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
   mkdirSync(join(root, "java"));
-  for (const file of readdirSync(join(process.cwd(), "test-fixtures/java"))) if (file.endsWith(".java")) cpSync(join(process.cwd(), "test-fixtures/java", file), join(root, "java", file));
+  for (const file of readdirSync(join(process.cwd(), "test-fixtures/java")))
+    if (file.endsWith(".java"))
+      cpSync(
+        join(process.cwd(), "test-fixtures/java", file),
+        join(root, "java", file),
+      );
   const projectRoot = join(root, "java");
   const first = new ProjectIndex(projectRoot).rebuild();
   const second = new ProjectIndex(projectRoot).rebuild();
@@ -28,7 +40,10 @@ test("cache directory ignores itself so the target repository stays clean", () =
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
   cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
   new ProjectIndex(root).rebuild();
-  assert.equal(readFileSync(join(root, ".context-slice/.gitignore"), "utf8"), "*\n");
+  assert.equal(
+    readFileSync(join(root, ".context-slice/.gitignore"), "utf8"),
+    "*\n",
+  );
 });
 
 test("cache written by an unknown schema version is rebuilt, never reused", () => {
@@ -36,7 +51,10 @@ test("cache written by an unknown schema version is rebuilt, never reused", () =
   cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
   new ProjectIndex(root).rebuild();
   const db = new Database(join(root, ".context-slice/index.sqlite"));
-  db.prepare("UPDATE metadata SET value = '99.0.0' WHERE key = 'schema_version'").run(); db.close();
+  db.prepare(
+    "UPDATE metadata SET value = '99.0.0' WHERE key = 'schema_version'",
+  ).run();
+  db.close();
   const index = new ProjectIndex(root);
   assert.equal(index.inspect().state, "UNINITIALIZED");
   const rebuilt = index.rebuild();
@@ -49,5 +67,10 @@ test("corrupt cache fails with an actionable INDEX_CORRUPT error", () => {
   cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
   mkdirSync(join(root, ".context-slice"), { recursive: true });
   writeFileSync(join(root, ".context-slice/index.sqlite"), "not a database");
-  assert.throws(() => new ProjectIndex(root), (error: any) => error.code === "INDEX_CORRUPT" && /rm -rf \.context-slice/.test(error.remediation));
+  assert.throws(
+    () => new ProjectIndex(root),
+    (error: any) =>
+      error.code === "INDEX_CORRUPT" &&
+      /rm -rf \.context-slice/.test(error.remediation),
+  );
 });

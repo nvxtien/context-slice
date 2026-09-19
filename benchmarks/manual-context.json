@@ -1,7 +1,10 @@
 [
   {
     "taskId": "petclinic-owner-update-explain",
-    "files": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java", "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+      "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java": "contains the update endpoint, validation branch, persistence call, and redirect",
       "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java": "shows the expected update behavior and validation coverage"
@@ -9,12 +12,19 @@
   },
   {
     "taskId": "petclinic-owner-callers",
-    "files": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java"],
-    "reasoning": {"src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java": "contains the target endpoint and its route mapping"}
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java"
+    ],
+    "reasoning": {
+      "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java": "contains the target endpoint and its route mapping"
+    }
   },
   {
     "taskId": "petclinic-owner-impact",
-    "files": ["src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java", "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+      "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java": "contains the creation flow and repository boundary",
       "src/test/java/org/springframework/samples/petclinic/owner/OwnerControllerTests.java": "contains tests affected by creation behavior changes"
@@ -22,7 +32,10 @@
   },
   {
     "taskId": "petclinic-vet-explain",
-    "files": ["src/main/java/org/springframework/samples/petclinic/vet/VetController.java", "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/vet/VetController.java",
+      "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/vet/VetController.java": "contains the endpoint and response behavior",
       "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java": "contains the persistence query used by the endpoint"
@@ -30,7 +43,10 @@
   },
   {
     "taskId": "petclinic-pet-change",
-    "files": ["src/main/java/org/springframework/samples/petclinic/owner/PetController.java", "src/test/java/org/springframework/samples/petclinic/owner/PetControllerTests.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+      "src/test/java/org/springframework/samples/petclinic/owner/PetControllerTests.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/owner/PetController.java": "contains pet creation validation and owner association",
       "src/test/java/org/springframework/samples/petclinic/owner/PetControllerTests.java": "contains validation and creation test coverage"
@@ -38,7 +54,10 @@
   },
   {
     "taskId": "rest-owner-list",
-    "files": ["src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+      "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java": "contains the REST route, authorization, and response handling",
       "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java": "contains the service delegation behind owner listing"
@@ -46,7 +65,10 @@
   },
   {
     "taskId": "rest-owner-update",
-    "files": ["src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+      "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java": "contains the update endpoint and request handling",
       "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java": "contains the service operation affected by the update"
@@ -54,7 +76,10 @@
   },
   {
     "taskId": "rest-clinic-delete",
-    "files": ["src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/service/ClinicService.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+      "src/main/java/org/springframework/samples/petclinic/service/ClinicService.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java": "contains delete implementation and transaction behavior",
       "src/main/java/org/springframework/samples/petclinic/service/ClinicService.java": "contains the service contract for the delete operation"
@@ -62,7 +87,10 @@
   },
   {
     "taskId": "rest-clinic-find",
-    "files": ["src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/repository/OwnerRepository.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+      "src/main/java/org/springframework/samples/petclinic/repository/OwnerRepository.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java": "contains the read-only service method",
       "src/main/java/org/springframework/samples/petclinic/repository/OwnerRepository.java": "contains the repository query used to list owners"
@@ -70,7 +98,10 @@
   },
   {
     "taskId": "rest-user-save",
-    "files": ["src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java", "src/main/java/org/springframework/samples/petclinic/repository/UserRepository.java"],
+    "files": [
+      "src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java",
+      "src/main/java/org/springframework/samples/petclinic/repository/UserRepository.java"
+    ],
     "reasoning": {
       "src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java": "contains the user persistence service method",
       "src/main/java/org/springframework/samples/petclinic/repository/UserRepository.java": "contains the persistence boundary used by saveUser"
@@ -78,22 +109,37 @@
   },
   {
     "taskId": "keycloak-session-flow",
-    "files": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
-    "reasoning": {"services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains the user-provider accessor and return type"}
+    "files": [
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"
+    ],
+    "reasoning": {
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains the user-provider accessor and return type"
+    }
   },
   {
     "taskId": "keycloak-session-provider",
-    "files": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
-    "reasoning": {"services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains provider factory lookup and provider creation caching"}
+    "files": [
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"
+    ],
+    "reasoning": {
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains provider factory lookup and provider creation caching"
+    }
   },
   {
     "taskId": "keycloak-session-callers",
-    "files": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
-    "reasoning": {"services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains the session context and provider accessors"}
+    "files": [
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"
+    ],
+    "reasoning": {
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains the session context and provider accessors"
+    }
   },
   {
     "taskId": "keycloak-session-close",
-    "files": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java", "services/src/test/java/org/keycloak/services/DefaultKeycloakContextTest.java"],
+    "files": [
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java",
+      "services/src/test/java/org/keycloak/services/DefaultKeycloakContextTest.java"
+    ],
     "reasoning": {
       "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains close state and transaction-manager behavior",
       "services/src/test/java/org/keycloak/services/DefaultKeycloakContextTest.java": "contains related lifecycle test expectations"
@@ -101,7 +147,11 @@
   },
   {
     "taskId": "keycloak-session-readonly",
-    "files": ["services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"],
-    "reasoning": {"services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains read-only state transitions and finally restoration"}
+    "files": [
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java"
+    ],
+    "reasoning": {
+      "services/src/main/java/org/keycloak/services/DefaultKeycloakSession.java": "contains read-only state transitions and finally restoration"
+    }
   }
 ]

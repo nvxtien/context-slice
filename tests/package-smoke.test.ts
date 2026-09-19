@@ -8,10 +8,16 @@ import { runPackageSmoke } from "../scripts/package-smoke-test.js";
 test("package smoke verifies tarball installation outside the source checkout", async () => {
   const outputDir = mkdtempSync(join(tmpdir(), "context-slice-v08-report-"));
   const report = await runPackageSmoke({ root: process.cwd(), outputDir });
-  const saved = JSON.parse(readFileSync(join(outputDir, "v0.8-packaging-installation.json"), "utf8"));
+  const saved = JSON.parse(
+    readFileSync(join(outputDir, "v0.8-packaging-installation.json"), "utf8"),
+  );
 
   assert.equal(report.status, "pass");
-  assert.ok(report.tarball.requiredFiles.every((file: string) => report.tarball.files.includes(file)));
+  assert.ok(
+    report.tarball.requiredFiles.every((file: string) =>
+      report.tarball.files.includes(file),
+    ),
+  );
   assert.deepEqual(report.tarball.forbiddenFound, []);
   assert.equal(report.install.isolatedPrefix, true);
   assert.equal(report.cli.version, report.package.version);

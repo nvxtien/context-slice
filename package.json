@@ -3,12 +3,56 @@
   "version": "0.9.0",
   "type": "module",
   "license": "MIT",
-  "repository": {"type": "git", "url": "git+https://github.com/nvxtien/context-slice.git"},
-  "bugs": {"url": "https://github.com/nvxtien/context-slice/issues"},
-  "engines": {"node": ">=20"},
-  "files": ["dist/src", "queries", "README.md", "LICENSE"],
-  "bin": {"context-slice": "dist/src/cli.js"},
-  "scripts": {"build": "tsc -p tsconfig.json", "prepack": "npm run build", "start": "node dist/src/server/mcp-server.js", "cli": "tsx src/cli.ts", "package-smoke": "tsx scripts/package-smoke-test.ts", "release:rc": "tsx scripts/clean-room-rc.ts", "test": "tsx --test tests/**/*.test.ts", "benchmark": "tsx benchmarks/benchmark.ts", "benchmark:checkouts": "tsx benchmarks/fetch-checkouts.ts", "benchmark:v03": "npm run benchmark:checkouts && tsx benchmarks/v0.3-real-repositories.ts", "benchmark:v04": "npm run benchmark:v03 && tsx benchmarks/v0.4-symbol-index-hardening.ts", "benchmark:v05": "npm run benchmark:v04 && tsx benchmarks/v0.5-semantic-call-resolution.ts", "benchmark:v06": "npm run benchmark:v05 && tsx benchmarks/v0.6-developer-context-efficiency.ts", "benchmark:v07": "tsx benchmarks/v0.7-developer-workflow.ts", "benchmark:v08": "npm run package-smoke"},
-  "dependencies": {"@modelcontextprotocol/sdk": "^1.12.0", "better-sqlite3": "^11.8.1", "tree-sitter": "^0.21.1", "tree-sitter-java": "^0.23.5", "zod": "^3.25.76"},
-  "devDependencies": {"@types/better-sqlite3": "^7.6.12", "@types/node": "^22.15.21", "tsx": "^4.19.4", "typescript": "^5.8.3"}
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nvxtien/context-slice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nvxtien/context-slice/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist/src",
+    "queries",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "context-slice": "dist/src/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "start": "node dist/src/server/mcp-server.js",
+    "cli": "tsx src/cli.ts",
+    "package-smoke": "tsx scripts/package-smoke-test.ts",
+    "release:rc": "tsx scripts/clean-room-rc.ts",
+    "test": "tsx --test tests/**/*.test.ts",
+    "benchmark": "tsx benchmarks/benchmark.ts",
+    "benchmark:checkouts": "tsx benchmarks/fetch-checkouts.ts",
+    "benchmark:v03": "npm run benchmark:checkouts && tsx benchmarks/v0.3-real-repositories.ts",
+    "benchmark:v04": "npm run benchmark:v03 && tsx benchmarks/v0.4-symbol-index-hardening.ts",
+    "benchmark:v05": "npm run benchmark:v04 && tsx benchmarks/v0.5-semantic-call-resolution.ts",
+    "benchmark:v06": "npm run benchmark:v05 && tsx benchmarks/v0.6-developer-context-efficiency.ts",
+    "benchmark:v07": "tsx benchmarks/v0.7-developer-workflow.ts",
+    "benchmark:v08": "npm run package-smoke",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "better-sqlite3": "^11.8.1",
+    "tree-sitter": "^0.21.1",
+    "tree-sitter-java": "^0.23.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.15.21",
+    "prettier": "^3.9.8",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
 }

@@ -58,12 +58,23 @@ function chooseTarget(index: ProjectIndex, task: string) {
   if (exact.length === 1) return exact[0];
   const normalized = task.toLowerCase();
   const exactName = index.symbols
-    .filter((symbol) => (symbol.kind === "method" || symbol.kind === "constructor") && normalized.includes(symbol.name.toLowerCase()))
-    .sort((a, b) => b.name.length - a.name.length || parameterCount(a) - parameterCount(b) || a.id.localeCompare(b.id));
+    .filter(
+      (symbol) =>
+        (symbol.kind === "method" || symbol.kind === "constructor") &&
+        normalized.includes(symbol.name.toLowerCase()),
+    )
+    .sort(
+      (a, b) =>
+        b.name.length - a.name.length ||
+        parameterCount(a) - parameterCount(b) ||
+        a.id.localeCompare(b.id),
+    );
   if (exactName.length) return exactName[0];
 
   const result = index.search(task, 1)[0];
-  const target = result ? index.symbols.find((symbol) => symbol.id === result.id) : undefined;
+  const target = result
+    ? index.symbols.find((symbol) => symbol.id === result.id)
+    : undefined;
   if (target) return target;
 
   throw new WorkflowError(
@@ -73,23 +84,46 @@ function chooseTarget(index: ProjectIndex, task: string) {
   );
 }
 
-function renderedSkeleton(index: ProjectIndex, symbol: SymbolRecord, relation: string) {
+function renderedSkeleton(
+  index: ProjectIndex,
+  symbol: SymbolRecord,
+  relation: string,
+) {
   const calls = index.calls
     .filter((call) => call.callerId === symbol.id)
-    .map((call) => `${call.receiverText ? `${call.receiverText}.` : ""}${call.calleeName}(…)`);
+    .map(
+      (call) =>
+        `${call.receiverText ? `${call.receiverText}.` : ""}${call.calleeName}(…)`,
+    );
   return `// ${relation}\n${renderSkeleton(symbol, calls)}`;
 }
 
 function ranked(symbols: SymbolRecord[], task: string) {
-  return [...symbols].sort((a, b) => rankSymbol(b, task, task) - rankSymbol(a, task, task) || a.id.localeCompare(b.id));
+  return [...symbols].sort(
+    (a, b) =>
+      rankSymbol(b, task, task) - rankSymbol(a, task, task) ||
+      a.id.localeCompare(b.id),
+  );
 }
 
-export function buildPreview(index: ProjectIndex, task: string, options: PreviewOptions = {}): PreviewResult {
+export function buildPreview(
+  index: ProjectIndex,
+  task: string,
+  options: PreviewOptions = {},
+): PreviewResult {
   if (!task.trim()) {
-    throw new WorkflowError("SYMBOL_NOT_FOUND", "Preview requires a non-empty developer task.", "Pass a task such as: context-slice preview \"explain retryPayment\".");
+    throw new WorkflowError(
+      "SYMBOL_NOT_FOUND",
+      "Preview requires a non-empty developer task.",
+      'Pass a task such as: context-slice preview "explain retryPayment".',
+    );
   }
   if (!index.symbols.length) {
-    throw new WorkflowError("INDEX_STALE", "No loaded index is available for preview.", "Run context-slice index before requesting a preview.");
+    throw new WorkflowError(
+      "INDEX_STALE",
+      "No loaded index is available for preview.",
+      "Run context-slice index before requesting a preview.",
+    );
   }
 
   const target = chooseTarget(index, task);
@@ -105,29 +139,73 @@ export function buildPreview(index: ProjectIndex, task: string, options: Preview
 
   const included: PreviewItem[] = [];
   const omitted: OmittedPreviewItem[] = [];
-  const composition: Record<PreviewReason, number> = { "task target": 0, "direct caller": 0, "direct callee": 0 };
+  const composition: Record<PreviewReason, number> = {
+    "task target": 0,
+    "direct caller": 0,
+    "direct callee": 0,
+  };
   let estimatedTokens = 0;
-  const add = (symbol: SymbolRecord, reason: PreviewReason, rendered: string, explanation: string) => {
+  const add = (
+    symbol: SymbolRecord,
+    reason: PreviewReason,
+    rendered: string,
+    explanation: string,
+  ) => {
     const tokens = estimateTokens(rendered);
     if (estimatedTokens + tokens > budget) {
-      omitted.push({ symbolId: symbol.id, symbol: symbol.qualifiedName ?? symbol.name, reason: "context budget", estimatedTokens: tokens });
+      omitted.push({
+        symbolId: symbol.id,
+        symbol: symbol.qualifiedName ?? symbol.name,
+        reason: "context budget",
+        estimatedTokens: tokens,
+      });
       return;
     }
-    included.push({ symbolId: symbol.id, symbol: symbol.qualifiedName ?? symbol.name, filePath: symbol.filePath, reason, explanation, estimatedTokens: tokens, rendered });
+    included.push({
+      symbolId: symbol.id,
+      symbol: symbol.qualifiedName ?? symbol.name,
+      filePath: symbol.filePath,
+      reason,
+      explanation,
+      estimatedTokens: tokens,
+      rendered,
+    });
     estimatedTokens += tokens;
     composition[reason] += tokens;
   };
 
-  add(target, "task target", target.source, `Selected because the task names ${target.name}.`);
+  add(
+    target,
+    "task target",
+    target.source,
+    `Selected because the task names ${target.name}.`,
+  );
   const related = [
-    ...ranked(index.callersAtDepth(target, options.depth ?? 1), task).map((symbol) => ({ symbol, reason: "direct caller" as const, relation: "Direct caller" })),
-    ...ranked(index.dependenciesAtDepth(target, options.depth ?? 1), task).map((symbol) => ({ symbol, reason: "direct callee" as const, relation: "Direct callee" })),
+    ...ranked(index.callersAtDepth(target, options.depth ?? 1), task).map(
+      (symbol) => ({
+        symbol,
+        reason: "direct caller" as const,
+        relation: "Direct caller",
+      }),
+    ),
+    ...ranked(index.dependenciesAtDepth(target, options.depth ?? 1), task).map(
+      (symbol) => ({
+        symbol,
+        reason: "direct callee" as const,
+        relation: "Direct callee",
+      }),
+    ),
   ];
   const includedIds = new Set([target.id]);
   for (const item of related) {
     if (includedIds.has(item.symbol.id)) continue;
     includedIds.add(item.symbol.id);
-    add(item.symbol, item.reason, renderedSkeleton(index, item.symbol, item.relation), `${item.relation} of ${target.qualifiedName ?? target.name}.`);
+    add(
+      item.symbol,
+      item.reason,
+      renderedSkeleton(index, item.symbol, item.relation),
+      `${item.relation} of ${target.qualifiedName ?? target.name}.`,
+    );
   }
 
   const unresolved = index.calls
