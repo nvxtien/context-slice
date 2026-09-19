@@ -44,7 +44,7 @@ Requirements: Node.js 20 or newer. Installation needs registry access to downloa
 - Token counts are estimates.
 - Downgrading is not supported as a feature. An older CLI facing a cache with an unknown schema discards and rebuilds it rather than misreading it. A corrupt (non-SQLite) cache file stops with `INDEX_CORRUPT` and the remediation `rm -rf .context-slice && context-slice init`.
 - Task-text targeting is heuristic. For "explain the owner update flow" on spring-petclinic, it picks `initUpdateOwnerForm` rather than `processUpdateOwnerForm`. Naming the method in the task gives a better slice.
-- Only one external-developer usability signal exists so far: a self clean-room trial. No study with independent developers has been run.
+- No external developer has tried it yet. The usability evidence is a scripted self clean-room trial.
 
 ## Package status
 
