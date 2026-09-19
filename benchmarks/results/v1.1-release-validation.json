@@ -1,7 +1,7 @@
 {
   "version": "v1.1",
-  "generatedAt": "2026-09-19T23:27:00.954Z",
-  "commit": "14426a9290b3eb929c0d58b6b7b7b9d0215b99d5",
+  "generatedAt": "2026-09-19T23:34:38.479Z",
+  "commit": "9265a83f7c2a58f03f804ba5f33f496e68838e13",
   "packageVersion": "1.1.0",
   "environment": {
     "node": "v22.12.0",
@@ -29,7 +29,7 @@
       "status": "PASS",
       "evidence": {
         "source": "local repository (committed objects only)",
-        "commit": "14426a9290b3eb929c0d58b6b7b7b9d0215b99d5",
+        "commit": "9265a83f7c2a58f03f804ba5f33f496e68838e13",
         "version": "1.1.0",
         "untrackedOrIgnored": "",
         "distPresent": false,
@@ -47,9 +47,9 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 5522,
+        "ms": 4511,
         "tail": [
-          "added 144 packages in 5s",
+          "added 144 packages in 4s",
           "npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available."
         ]
       }
@@ -58,14 +58,14 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 1983
+        "ms": 2249
       }
     },
     "tests": {
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 13442,
+        "ms": 13355,
         "tests": 61,
         "pass": 61,
         "fail": 0
@@ -75,7 +75,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 201824,
+        "ms": 201795,
         "tasks": 15,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
@@ -89,7 +89,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 986,
+        "ms": 1014,
         "checklist": "12/12",
         "context": {
           "task": "explain retryPayment",
@@ -104,7 +104,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 9939,
+        "ms": 9992,
         "note": "packaging smoke test (tarball install, CLI, MCP, upgrade, uninstall, publish dry run) from the clean checkout"
       }
     },
@@ -248,7 +248,7 @@
         "prefix": "<workspace>/install prefix (contains a space)",
         "resolvedExecutable": "<workspace>/install prefix/bin/context-slice",
         "packageRealpathInsidePrefix": true,
-        "ms": 3724
+        "ms": 3341
       }
     },
     "cliThroughPath": {
@@ -278,7 +278,7 @@
           "Indexed 50 Java files (266 symbols).",
           "Next: context-slice preview \"explain <symbol>\""
         ],
-        "initMs": 339,
+        "initMs": 308,
         "statusAfter": {
           "state": "CURRENT",
           "schema": "1.1.0"
@@ -321,7 +321,7 @@
         "unresolved": [],
         "confidence": "high",
         "wholeFileFallback": false,
-        "latencyMs": 315,
+        "latencyMs": 295,
         "humanHeader": [
           "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
           "Context: 32/1200 tokens; 1 item included"
@@ -346,7 +346,7 @@
         ],
         "preview": {
           "ok": true,
-          "ms": 208,
+          "ms": 209,
           "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
           "estimatedTokens": 32,
           "budget": 1200
@@ -367,9 +367,38 @@
       }
     },
     "typeScriptRepository": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
-        "error": "Unexpected token 'N', \"No indexed\"... is not valid JSON"
+        "repository": "https://github.com/w3cj/express-api-starter-ts.git@c46ad4526400e0ae6640fdaa94d037aa7573600c",
+        "statusBeforeInit": true,
+        "filesByExtension": {
+          ".ts": 10
+        },
+        "init": [
+          "Repository: <workspace>/ts repos/express api starter",
+          "Indexed 10 Java files (19 symbols).",
+          "Next: context-slice preview \"explain <symbol>\""
+        ],
+        "task": "explain how errors are turned into JSON responses",
+        "target": "errorHandler",
+        "language": "typescript",
+        "estimatedTokens": 76,
+        "budget": 1200,
+        "included": [
+          "task target: errorHandler"
+        ],
+        "previewMs": 106,
+        "mcp": {
+          "tools": 6,
+          "previewOk": true,
+          "staleRefresh": {
+            "filesParsed": 1,
+            "cacheHits": 9,
+            "state": "CURRENT"
+          },
+          "protocolSafe": true
+        },
+        "gitClean": true
       }
     },
     "claude": {
@@ -464,26 +493,30 @@
       }
     },
     "downgrade": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "version": "1.0.0",
-        "cacheFrom": "1.1.0",
-        "stateOn090Cache": "UNINITIALIZED",
+        "cacheWrittenBy": "1.1.0",
+        "stateOnNewerCache": "UNINITIALIZED",
         "previewExit": 1,
-        "newerSchemaCache": {
+        "previewStderr": "INTERNAL_ERROR: NOT NULL constraint failed: files.language",
+        "schemaChangedSincePreviousRelease": true,
+        "requiresManualCacheDeletion": true,
+        "recoveredAfterCacheDeletion": true,
+        "newerSchemaSameShape": {
           "forgedSchema": "99.0.0",
-          "stateSeenBy080": "UNINITIALIZED",
-          "previewExit": 1,
+          "stateSeen": "UNINITIALIZED",
+          "previewExit": 0,
           "behavior": "discarded and rebuilt; never reused"
         },
         "corruptCache": {
-          "v080": {
+          "previousRelease": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-7aIz4n/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-9Sm3HA/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           },
-          "v090": {
+          "current": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-7aIz4n/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-9Sm3HA/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           }
         }
       }
@@ -762,12 +795,20 @@
       "fix": "accepted and reported: required-fact recall is 95.56%, not 100%, and the gap is attributed to context composition rather than hidden",
       "regressionTest": "v1.1 benchmark task result",
       "status": "ACCEPTED"
+    },
+    {
+      "category": "CACHE",
+      "step": "v1.1 downgrade 1.1.0 -> 1.0.0",
+      "symptom": "the 1.0.0 CLI cannot use a cache written by 1.1.0: it exits 1 with a SQLite error until `.context-slice` is deleted",
+      "severity": "MINOR",
+      "rootCause": "the 1.1.0 schema adds a NOT NULL language column, and the already-released 1.0.0 code inserts without it. 1.0.0 cannot be changed retroactively",
+      "fix": "documented in the changelog, release notes and docs/typescript-support.md: downgrading requires `rm -rf .context-slice`. No data is misread; the failure is loud. Forward upgrades and same-shape schema changes rebuild automatically",
+      "regressionTest": "clean-room downgrade step asserts the failure is loud and that cleanup restores it",
+      "status": "ACCEPTED"
     }
   ],
   "blockers": [
-    "automated step failed: typeScriptRepository",
-    "automated step failed: upgrade",
-    "automated step failed: downgrade"
+    "automated step failed: upgrade"
   ],
   "openMajors": [],
   "recommendation": "NO-GO",

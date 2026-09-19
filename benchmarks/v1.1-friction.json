@@ -198,5 +198,15 @@
     "fix": "documented in the changelog, release notes and docs/typescript-support.md: downgrading requires `rm -rf .context-slice`. No data is misread; the failure is loud. Forward upgrades and same-shape schema changes rebuild automatically",
     "regressionTest": "clean-room downgrade step asserts the failure is loud and that cleanup restores it",
     "status": "ACCEPTED"
+  },
+  {
+    "category": "CLI",
+    "step": "v1.1 clean-room TypeScript repository",
+    "symptom": "`init` reported \"Indexed 10 Java files\" in a TypeScript repository, and `doctor` labelled its check \"java-source\"",
+    "severity": "MINOR",
+    "rootCause": "wording predating multi-language support",
+    "fix": "init reports source files with a per-language breakdown; the doctor check is named \"source\"",
+    "regressionTest": "tests/cli.test.ts and tests/typescript.test.ts assert the wording",
+    "status": "FIXED"
   }
 ]

@@ -221,7 +221,14 @@ async function mcpSession(
       );
       poll();
     });
-  const text = (response: any) => JSON.parse(response.result.content[0].text);
+  const text = (response: any) => {
+    const raw = response.result?.content?.[0]?.text ?? "";
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return { error: raw.slice(0, 300) };
+    }
+  };
   try {
     const init = await request("initialize", {
       protocolVersion: "2025-03-26",
@@ -250,7 +257,8 @@ async function mcpSession(
     } finally {
       writeFileSync(probeFile, original);
     }
-    const previewBody = preview.error ? undefined : text(preview);
+    const decoded = preview.error ? undefined : text(preview);
+    const previewBody = decoded?.target ? decoded : undefined;
     const staleBody = stale.error ? undefined : text(stale);
     child.stdin.end(); // graceful shutdown: client closes stdin
     const exit = await Promise.race([
@@ -1156,6 +1164,14 @@ await attempt("upgrade", () => {
   const newStatus = json(cs(["status", "--json"], repo, upEnv)).result
     .freshness;
   const preview = cs(["preview", task], repo, upEnv);
+  const afterPreview = json(cs(["status", "--json"], repo, upEnv)).result
+    .freshness;
+  const schemaChanged = newStatus.schemaVersion !== oldStatus.schemaVersion;
+  // Same schema: the cache is reused. Changed schema: it is dropped and the next
+  // command rebuilds it. Either way the developer deletes nothing by hand.
+  const cacheHandled = schemaChanged
+    ? newStatus.state === "UNINITIALIZED" && afterPreview.state === "CURRENT"
+    : newStatus.state === "CURRENT";
   const db = new Database(join(repo, ".context-slice/index.sqlite"));
   db.prepare(
     "UPDATE metadata SET value = '0.4.0' WHERE key = 'schema_version'",
@@ -1169,7 +1185,7 @@ await attempt("upgrade", () => {
     "upgrade",
     oldVersion === baselineVersion &&
       newVersion === packageJson.version &&
-      newStatus.state === "CURRENT" &&
+      cacheHandled &&
       preview.status === 0 &&
       incompatible.state === "UNINITIALIZED" &&
       rebuildPreview.status === 0 &&
@@ -1182,6 +1198,9 @@ await attempt("upgrade", () => {
       schemaBefore: oldStatus.schemaVersion,
       stateAfterUpgrade: newStatus.state,
       schemaAfter: newStatus.schemaVersion,
+      schemaChanged,
+      stateAfterFirstCommand: afterPreview.state,
+      manualCacheDeletionRequired: false,
       previewAfterUpgrade: preview.stdout.split("\n")[0],
       gitStatusWith080Cache: oldGit || "(clean)",
       gitStatusAfterUpgrade:

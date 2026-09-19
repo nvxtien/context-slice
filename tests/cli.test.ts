@@ -31,7 +31,10 @@ test("init finds the enclosing repository from a nested directory", () => {
   const result = run(["init"], nested);
 
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Indexed 1 Java file/);
+  assert.match(
+    result.stdout,
+    /Indexed 1 source file \(3 symbols\) across Java: 1\./,
+  );
   assert.match(
     result.stdout,
     new RegExp(root.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),

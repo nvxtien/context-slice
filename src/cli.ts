@@ -175,7 +175,11 @@ async function execute(args: Arguments) {
     const body = { repository, ...refreshed };
     const human = [
       `Repository: ${repository}`,
-      `Indexed ${plural(refreshed.summary.files, "Java file")} (${plural(refreshed.summary.symbols, "symbol")}).`,
+      `Indexed ${plural(refreshed.summary.files, "source file")} (${plural(refreshed.summary.symbols, "symbol")}) across ${Object.entries(
+        refreshed.summary.filesByLanguage,
+      )
+        .map(([language, count]) => `${language}: ${count}`)
+        .join(", ")}.`,
       'Next: context-slice preview "explain <symbol>"',
     ].join("\n");
     return print(body, args, command, human);
@@ -204,7 +208,7 @@ async function execute(args: Arguments) {
     const checks = [
       { name: "repository", status: "ok", detail: repository },
       {
-        name: "java-source",
+        name: "source",
         status: "ok",
         detail: `${plural(freshness.sourceFiles, "file")} found`,
       },

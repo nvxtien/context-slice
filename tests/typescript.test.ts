@@ -355,7 +355,10 @@ test("CLI preview works in a TypeScript repository", () => {
       [join(process.cwd(), "src/cli.ts"), ...args, "--repo", root],
       { cwd: process.cwd(), encoding: "utf8" },
     );
-  assert.equal(cli(["init"]).status, 0);
+  const init = cli(["init"]);
+  assert.equal(init.status, 0);
+  // The CLI must not call TypeScript files "Java files".
+  assert.match(init.stdout, /Indexed 12 source files .* TypeScript: 12/);
   const status = JSON.parse(cli(["status", "--json"]).stdout);
   assert.equal(status.result.freshness.state, "CURRENT");
   assert.equal(status.result.freshness.filesByLanguage.TypeScript, 12);
