@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-19T17:42:58.067Z",
+  "generatedAt": "2026-09-19T18:03:30.699Z",
   "productPositioning": "developer context efficiency",
   "repositories": [
     {
@@ -3694,21 +3694,21 @@
   "cache": [
     {
       "repository": "spring-petclinic",
-      "coldIndexMs": 194,
-      "warmQueryMs": 141,
-      "singleFileRefreshMs": 184
+      "coldIndexMs": 206,
+      "warmQueryMs": 172,
+      "singleFileRefreshMs": 140
     },
     {
       "repository": "petclinic-rest",
-      "coldIndexMs": 462,
-      "warmQueryMs": 358,
-      "singleFileRefreshMs": 360
+      "coldIndexMs": 514,
+      "warmQueryMs": 488,
+      "singleFileRefreshMs": 391
     },
     {
       "repository": "keycloak-services",
-      "coldIndexMs": 62417,
-      "warmQueryMs": 10251,
-      "singleFileRefreshMs": 8682
+      "coldIndexMs": 67885,
+      "warmQueryMs": 10680,
+      "singleFileRefreshMs": 8579
     }
   ],
   "historical": {
