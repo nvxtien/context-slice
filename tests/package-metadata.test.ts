@@ -5,27 +5,46 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 const root = process.cwd();
-const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const packageJson = JSON.parse(
+  readFileSync(join(root, "package.json"), "utf8"),
+);
 const tsx = join(root, "node_modules/.bin/tsx");
 const cli = join(root, "src/cli.ts");
 
 test("package metadata describes an intentional publish-ready runtime", () => {
   assert.equal(packageJson.name, "context-slice");
-  assert.equal(packageJson.version, "0.8.0");
+  assert.equal(packageJson.version, "0.9.0");
   assert.equal(packageJson.license, "MIT");
   assert.ok(packageJson.repository);
   assert.match(packageJson.engines.node, />=20/);
-  assert.deepEqual(packageJson.files, ["dist/src", "queries", "README.md", "LICENSE"]);
+  assert.deepEqual(packageJson.files, [
+    "dist/src",
+    "queries",
+    "README.md",
+    "LICENSE",
+  ]);
   assert.equal(packageJson.bin["context-slice"], "dist/src/cli.js");
   assert.ok(packageJson.scripts["package-smoke"]);
 });
 
+test("README install commands name the current tarball", () => {
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  assert.deepEqual(
+    [...new Set(readme.match(/context-slice-\d+\.\d+\.\d+\.tgz/g))],
+    [`context-slice-${packageJson.version}.tgz`],
+  );
+});
+
 test("version and help work from the source entry point", () => {
-  const version = spawnSync(tsx, [cli, "--version"], { cwd: root, encoding: "utf8" });
+  const version = spawnSync(tsx, [cli, "--version"], {
+    cwd: root,
+    encoding: "utf8",
+  });
   const help = spawnSync(tsx, [cli, "--help"], { cwd: root, encoding: "utf8" });
 
   assert.equal(version.status, 0, version.stderr);
   assert.equal(version.stdout.trim(), packageJson.version);
   assert.equal(help.status, 0, help.stderr);
-  for (const command of ["init", "index", "status", "doctor", "preview", "mcp"]) assert.match(help.stdout, new RegExp(`\\b${command}\\b`));
+  for (const command of ["init", "index", "status", "doctor", "preview", "mcp"])
+    assert.match(help.stdout, new RegExp(`\\b${command}\\b`));
 });

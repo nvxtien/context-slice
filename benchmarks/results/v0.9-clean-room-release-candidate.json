@@ -1,0 +1,548 @@
+{
+  "version": "0.9",
+  "generatedAt": "2026-09-19T18:46:30.884Z",
+  "commit": "70b6ee2dd9faa11796def4f14c2ba88a56c2ddc0",
+  "packageVersion": "0.9.0",
+  "environment": {
+    "node": "v22.12.0",
+    "npm": "11.7.0",
+    "os": "darwin 25.2.0 arm64",
+    "git": "git version 2.50.1 (Apple Git-155)",
+    "home": "temporary",
+    "npmCache": "temporary (empty)",
+    "registry": "https://registry.npmjs.org/",
+    "path": "<workspace>/tool bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "requiredEnvironment": "none (HOME, PATH only)"
+  },
+  "artifact": {
+    "filename": "context-slice-0.9.0.tgz",
+    "bytes": 16960,
+    "fileCount": 20,
+    "shasum": "9cd79a1420eecafd85ae7560facf09ac3fd7c7f1",
+    "integrity": "sha512-fLdDgeyNqOOZJdqbECjEnkLUOJafFjQnvylGLH3HBPePO72uwggNWPlbny2qhdmS/iVCtIyy6VgjR6T41HnlNQ==",
+    "baseline": "context-slice-0.8.0.tgz",
+    "baselineRef": "47a26b5"
+  },
+  "steps": {
+    "cleanCheckout": {
+      "status": "PASS",
+      "evidence": {
+        "source": "local repository (committed objects only)",
+        "commit": "70b6ee2dd9faa11796def4f14c2ba88a56c2ddc0",
+        "version": "0.9.0",
+        "untrackedOrIgnored": "",
+        "distPresent": false,
+        "trackedRuntimeAssets": [
+          "package-lock.json",
+          "queries/java/annotations.scm",
+          "queries/java/calls.scm",
+          "queries/java/imports.scm",
+          "queries/java/symbols.scm",
+          "src/cli.ts"
+        ]
+      }
+    },
+    "npmCi": {
+      "status": "PASS",
+      "evidence": {
+        "exit": 0,
+        "ms": 4852,
+        "tail": [
+          "added 141 packages in 5s",
+          "npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available."
+        ]
+      }
+    },
+    "build": {
+      "status": "PASS",
+      "evidence": {
+        "exit": 0,
+        "ms": 2138
+      }
+    },
+    "tests": {
+      "status": "PASS",
+      "evidence": {
+        "exit": 0,
+        "ms": 13245,
+        "tests": 41,
+        "pass": 41,
+        "fail": 0
+      }
+    },
+    "regressionV06": {
+      "status": "PASS",
+      "evidence": {
+        "exit": 0,
+        "ms": 205363,
+        "tasks": 15,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextWindowReduction": 0.9455136893467064,
+        "v04RetrievalRecall": 1,
+        "v05SemanticCallRecall": 1,
+        "checkoutsFetchedByScript": true
+      }
+    },
+    "regressionV07": {
+      "status": "PASS",
+      "evidence": {
+        "exit": 0,
+        "ms": 1029,
+        "checklist": "12/12",
+        "context": {
+          "task": "explain retryPayment",
+          "estimatedTokens": 162,
+          "budget": 1200,
+          "wholeFileFallback": false,
+          "omittedItems": 0
+        }
+      }
+    },
+    "packageArtifact": {
+      "status": "PASS",
+      "evidence": {
+        "filename": "context-slice-0.9.0.tgz",
+        "bytes": 16960,
+        "unpackedBytes": 56078,
+        "fileCount": 20,
+        "shasum": "9cd79a1420eecafd85ae7560facf09ac3fd7c7f1",
+        "integrity": "sha512-fLdDgeyNqOOZJdqbECjEnkLUOJafFjQnvylGLH3HBPePO72uwggNWPlbny2qhdmS/iVCtIyy6VgjR6T41HnlNQ==",
+        "files": [
+          "package/LICENSE",
+          "package/README.md",
+          "package/dist/src/cli.js",
+          "package/dist/src/indexer/index.js",
+          "package/dist/src/package-info.js",
+          "package/dist/src/parser/java-parser.js",
+          "package/dist/src/planner/budget.js",
+          "package/dist/src/planner/rank.js",
+          "package/dist/src/render/compact-context.js",
+          "package/dist/src/server/mcp-server.js",
+          "package/dist/src/storage/sqlite.js",
+          "package/dist/src/types/model.js",
+          "package/dist/src/workflow/errors.js",
+          "package/dist/src/workflow/preview.js",
+          "package/dist/src/workflow/repository.js",
+          "package/package.json",
+          "package/queries/java/annotations.scm",
+          "package/queries/java/calls.scm",
+          "package/queries/java/imports.scm",
+          "package/queries/java/symbols.scm"
+        ],
+        "forbidden": []
+      }
+    },
+    "sourcePathScan": {
+      "status": "PASS",
+      "evidence": {
+        "patterns": [
+          "/Volumes/",
+          "/Users/",
+          "/home/",
+          "C:\\",
+          "context-slice/src"
+        ],
+        "matches": []
+      }
+    },
+    "secretScan": {
+      "status": "PASS",
+      "evidence": {
+        "matches": [],
+        "note": "Lightweight pattern scan; not a security certification."
+      }
+    },
+    "isolatedInstall": {
+      "status": "PASS",
+      "evidence": {
+        "command": "npm install -g ./context-slice-0.9.0.tgz",
+        "prefix": "<workspace>/install prefix (contains a space)",
+        "resolvedExecutable": "<workspace>/install prefix/bin/context-slice",
+        "packageRealpathInsidePrefix": true,
+        "ms": 2922
+      }
+    },
+    "cliThroughPath": {
+      "status": "PASS",
+      "evidence": {
+        "version": "0.9.0",
+        "expected": "0.9.0",
+        "help": true,
+        "invocation": "context-slice (resolved through PATH)"
+      }
+    },
+    "freshRepository": {
+      "status": "PASS",
+      "evidence": {
+        "repository": "https://github.com/spring-projects/spring-petclinic.git@818c4136ea971c21674525f9053de0d9c7ad8cfe",
+        "cacheBeforeInit": false,
+        "statusBeforeInit": [
+          "Repository: <workspace>/java repos/spring petclinic",
+          "Index: UNINITIALIZED",
+          "Java files: 0/50",
+          "Schema: 0.5.2",
+          "Last refresh: never"
+        ],
+        "init": [
+          "Repository: <workspace>/java repos/spring petclinic",
+          "Indexed 50 Java files (266 symbols).",
+          "Next: context-slice preview \"explain <symbol>\""
+        ],
+        "initMs": 297,
+        "statusAfter": {
+          "state": "CURRENT",
+          "javaFiles": 50,
+          "schema": "0.5.2"
+        },
+        "doctor": [
+          "OK repository: <workspace>/java repos/spring petclinic",
+          "OK java-source: 50 files found",
+          "OK index: ready",
+          "OK mcp: Configure command: context-slice mcp"
+        ]
+      }
+    },
+    "nestedCwd": {
+      "status": "PASS",
+      "evidence": {
+        "cwd": "src/main/java/org/springframework/samples/petclinic/owner",
+        "detectedRoot": "<workspace>/java repos/spring petclinic"
+      }
+    },
+    "pathWithSpaces": {
+      "status": "PASS",
+      "evidence": {
+        "repository": "<workspace>/java repos/spring petclinic",
+        "prefix": "<workspace>/install prefix",
+        "repoFlagFromOutside": "CURRENT"
+      }
+    },
+    "preview": {
+      "status": "PASS",
+      "evidence": {
+        "task": "explain the owner update flow",
+        "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+        "estimatedTokens": 32,
+        "budget": 1200,
+        "withinBudget": true,
+        "included": [
+          "task target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm"
+        ],
+        "omitted": [],
+        "unresolved": [],
+        "confidence": "high",
+        "wholeFileFallback": false,
+        "latencyMs": 301,
+        "humanHeader": [
+          "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+          "Context: 32/1200 tokens; 1 item included"
+        ]
+      }
+    },
+    "mcp": {
+      "status": "PASS",
+      "evidence": {
+        "server": {
+          "name": "context-slice",
+          "version": "0.9.0"
+        },
+        "protocolVersion": "2025-03-26",
+        "tools": [
+          "context.search",
+          "context.symbol",
+          "context.callers",
+          "context.preview",
+          "context.slice",
+          "context.diff"
+        ],
+        "preview": {
+          "ok": true,
+          "ms": 219,
+          "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+          "estimatedTokens": 32,
+          "budget": 1200
+        },
+        "staleRefresh": {
+          "filesParsed": 1,
+          "cacheHits": 49,
+          "state": "CURRENT"
+        },
+        "stdoutProtocolOnly": true,
+        "invalidStdout": [],
+        "stderr": "",
+        "shutdown": {
+          "via": "stdin closed",
+          "code": 0,
+          "signal": null
+        }
+      }
+    },
+    "claude": {
+      "status": "PASS",
+      "evidence": {
+        "version": "2.1.277 (Claude Code)",
+        "config": {
+          "command": "context-slice",
+          "args": [
+            "mcp"
+          ]
+        },
+        "mcpStatus": "connected",
+        "toolsVisible": [
+          "mcp__context-slice__context_callers",
+          "mcp__context-slice__context_diff",
+          "mcp__context-slice__context_preview",
+          "mcp__context-slice__context_search",
+          "mcp__context-slice__context_slice",
+          "mcp__context-slice__context_symbol"
+        ],
+        "toolCalls": [
+          "mcp__context-slice__context_preview"
+        ],
+        "toolCallSucceeded": true,
+        "answer": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm"
+      }
+    },
+    "codex": {
+      "status": "DEFERRED",
+      "evidence": {
+        "status": "DEFERRED — runtime unavailable: You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at 4:11 AM.",
+        "version": "codex-cli 0.153.4",
+        "config": {
+          "command": "context-slice",
+          "args": [
+            "mcp"
+          ]
+        },
+        "exit": 1,
+        "toolCalls": [],
+        "stderrTail": [
+          "Reading additional input from stdin..."
+        ]
+      }
+    },
+    "readOnlyPackage": {
+      "status": "PASS",
+      "evidence": {
+        "chmod": "a-w recursively on the installed package directory",
+        "writeProbeBlocked": true,
+        "filesHashed": 3888,
+        "changedFiles": [],
+        "commandsRun": [
+          "--version",
+          "--help",
+          "status",
+          "init",
+          "status --json",
+          "doctor",
+          "preview",
+          "mcp"
+        ]
+      }
+    },
+    "upgrade": {
+      "status": "PASS",
+      "evidence": {
+        "from": "0.8.0",
+        "to": "0.9.0",
+        "schemaBefore": "0.5.2",
+        "stateAfterUpgrade": "CURRENT",
+        "schemaAfter": "0.5.2",
+        "previewAfterUpgrade": "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+        "gitStatusWith080Cache": "?? .context-slice/",
+        "gitStatusAfterUpgrade": "(clean)",
+        "incompatibleCache": {
+          "forgedSchema": "0.4.0",
+          "stateSeen": "UNINITIALIZED",
+          "previewExit": 0,
+          "stateAfterPreview": "CURRENT",
+          "schemaAfterRebuild": "0.5.2",
+          "manualDeletion": false
+        }
+      }
+    },
+    "downgrade": {
+      "status": "PASS",
+      "evidence": {
+        "version": "0.8.0",
+        "cacheFrom": "0.9.0",
+        "stateOn090Cache": "CURRENT",
+        "previewExit": 0,
+        "newerSchemaCache": {
+          "forgedSchema": "99.0.0",
+          "stateSeenBy080": "UNINITIALIZED",
+          "previewExit": 0,
+          "behavior": "discarded and rebuilt; never reused"
+        },
+        "corruptCache": {
+          "v080": {
+            "exit": 1,
+            "stderr": "INTERNAL_ERROR: file is not a database\nRun context-slice doctor for repository readiness."
+          },
+          "v090": {
+            "exit": 2,
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-qTpl6H/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+          }
+        }
+      }
+    },
+    "nodeEngine": {
+      "status": "PASS",
+      "evidence": {
+        "declared": ">=20",
+        "engines": [
+          {
+            "node": "v22.12.0",
+            "result": "full clean-room flow above"
+          },
+          {
+            "node": "v20.19.5",
+            "install": 0,
+            "version": "0.9.0",
+            "init": 0,
+            "preview": 0,
+            "target": "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+            "stderr": ""
+          },
+          {
+            "node": "v18.20.8",
+            "engineStrictInstall": 1,
+            "rejected": true,
+            "message": "npm error code EBADENGINE"
+          }
+        ],
+        "minimumExercised": true
+      }
+    },
+    "uninstall": {
+      "status": "PASS",
+      "evidence": {
+        "executableRemoved": true,
+        "resolvesAfterUninstall": false,
+        "cacheRetained": true,
+        "cachePolicy": "Repository caches are kept; README documents rm -rf .context-slice."
+      }
+    },
+    "gitCleanliness": {
+      "status": "PASS",
+      "evidence": {
+        "after": [
+          "init",
+          "status",
+          "doctor",
+          "preview",
+          "mcp (incl. stale probe)",
+          "claude",
+          "codex",
+          "uninstall"
+        ],
+        "status": "(clean)",
+        "ignored": "!! .context-slice/",
+        "headUnchanged": true,
+        "gitignoreEdited": false
+      }
+    }
+  },
+  "developerTrial": {
+    "type": "SELF CLEAN-ROOM TRIAL",
+    "externalDeveloperTrial": "DEFERRED — no external developer available",
+    "method": "Scripted: README commands executed literally from a clean clone, packed tarball, temporary HOME and npm cache, and PATH-only invocation."
+  },
+  "friction": [
+    {
+      "category": "OTHER",
+      "step": "clean checkout: npm run benchmark:v06",
+      "symptom": "v0.3–v0.6 regressions need benchmarks/checkouts/*, which is gitignored and was never recreated by any script; a clean checkout silently reports 0 tasks as N/A / recall 0",
+      "severity": "MAJOR",
+      "rootCause": "pinned repositories were cloned by hand during development (hidden state)",
+      "fix": "benchmarks/fetch-checkouts.ts (npm run benchmark:checkouts) fetches each pinned commit (sparse for keycloak); benchmark:v03 runs it first",
+      "regressionTest": "clean-room RC run (regressionV06 step)",
+      "status": "FIXED"
+    },
+    {
+      "category": "DOCS",
+      "step": "README tarball validation in a fresh clone",
+      "symptom": "`npm pack` fails in a fresh clone because prepack runs tsc before dependencies are installed; README also named context-slice-0.8.0.tgz and said 'Only Java source is supported in v0.7' / 'After linking ContextSlice'",
+      "severity": "MINOR",
+      "rootCause": "README written from an already-installed development checkout",
+      "fix": "README adds `npm ci` before `npm pack`, names the current tarball, and drops stale version wording",
+      "regressionTest": "tests/package-metadata.test.ts (README tarball name matches package version)",
+      "status": "FIXED"
+    },
+    {
+      "category": "CACHE",
+      "step": "git status in target repository after init",
+      "symptom": "`?? .context-slice/` appears in the developer's git status",
+      "severity": "MINOR",
+      "rootCause": "cache directory was not ignored and ContextSlice (correctly) does not edit the repository .gitignore",
+      "fix": "cache directory writes its own `.gitignore` containing `*`; also applied to caches created by 0.8.0 on first use after upgrade",
+      "regressionTest": "tests/cache.test.ts (cache directory ignores itself)",
+      "status": "FIXED"
+    },
+    {
+      "category": "PACKAGE",
+      "step": "v0.8 package smoke report",
+      "symptom": "v0.8 report printed 'Path with spaces: false' and 'Nested cwd: false' while claiming status pass",
+      "severity": "MINOR",
+      "rootCause": "macOS tmpdir is a symlink (/var -> /private/var); the check compared the symlinked path with the real path the CLI reports",
+      "fix": "smoke test uses realpathSync for its workspace",
+      "regressionTest": "tests/package-smoke.test.ts asserts pathWithSpaces.passed and nestedCwd.passed",
+      "status": "FIXED"
+    },
+    {
+      "category": "UNINSTALL",
+      "step": "cache cleanup",
+      "symptom": "no documented way to remove repository caches; uninstall leaves them",
+      "severity": "MINOR",
+      "rootCause": "undocumented behavior",
+      "fix": "README documents `rm -rf .context-slice`; no `clean` command added (one rm is simpler than a new CLI surface)",
+      "regressionTest": "clean-room RC run (uninstall step verifies cache retention)",
+      "status": "FIXED"
+    },
+    {
+      "category": "CLI",
+      "step": "status before init",
+      "symptom": "`status` on a never-initialized repository creates an empty .context-slice/ cache while reporting UNINITIALIZED",
+      "severity": "COSMETIC",
+      "rootCause": "IndexStorage opens (and creates) the SQLite cache on every command",
+      "fix": "accepted: the directory is self-ignored and contains no source; documented that ContextSlice only writes to .context-slice/",
+      "regressionTest": "none",
+      "status": "ACCEPTED"
+    },
+    {
+      "category": "CACHE",
+      "step": "downgrade/corrupt cache probe",
+      "symptom": "a non-SQLite index.sqlite produced `INTERNAL_ERROR: file is not a database` (exit 1) and advised `context-slice doctor`, which fails the same way",
+      "severity": "MINOR",
+      "rootCause": "SQLite open errors were not mapped to the existing INDEX_CORRUPT workflow error",
+      "fix": "IndexStorage raises INDEX_CORRUPT (exit 2) with remediation `rm -rf .context-slice && context-slice init`",
+      "regressionTest": "tests/cache.test.ts (corrupt cache fails with an actionable INDEX_CORRUPT error)",
+      "status": "FIXED"
+    },
+    {
+      "category": "CODEX",
+      "step": "Codex integration (codex exec with command context-slice, args [mcp])",
+      "symptom": "codex-cli 0.153.4 ended the turn with 'You've hit your usage limit' before any MCP tool call",
+      "severity": "MINOR",
+      "rootCause": "assistant account quota on this host, not ContextSlice",
+      "fix": "none needed in ContextSlice; the RC script now reports a pre-tool runtime failure as DEFERRED instead of FAIL. Rerun `npm run release:rc -- --assistants` once quota resets",
+      "regressionTest": "none",
+      "status": "DEFERRED"
+    },
+    {
+      "category": "OTHER",
+      "step": "preview on spring-petclinic: \"explain the owner update flow\"",
+      "symptom": "target resolves to OwnerController.initUpdateOwnerForm (the GET form handler) with 1 item / 32 tokens, and no callers or callees; processUpdateOwnerForm is the more useful target",
+      "severity": "MINOR",
+      "rootCause": "task-text target ranking prefers the first matching handler; ranking changes are feature work outside v0.9 scope",
+      "fix": "accepted for v0.9; name the symbol in the task (e.g. \"explain processUpdateOwnerForm\") for a richer slice",
+      "regressionTest": "none",
+      "status": "ACCEPTED"
+    }
+  ],
+  "blockers": [],
+  "openMajors": [],
+  "recommendation": "RC READY",
+  "publication": "none (no npm publish, tag, or GitHub release)"
+}

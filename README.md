@@ -15,20 +15,23 @@ Large context windows still waste attention when they contain unrelated files. C
 ContextSlice is not published to npm. From this checkout, install and link the local executable:
 
 ```sh
-npm install
+npm ci
 npm run build
 npm link
 ```
 
 ### Tarball validation
 
-The package is publish-ready but is not currently published to the npm registry. Validate the installable artifact locally:
+The package is publish-ready but is not currently published to the npm registry. Build and install the release-candidate tarball from a checkout (`npm ci` is required because `npm pack` compiles TypeScript first):
 
 ```sh
+npm ci
 npm pack
-npm install -g ./context-slice-0.8.0.tgz
+npm install -g ./context-slice-0.9.0.tgz
 context-slice --version
 ```
+
+Node.js 20 or newer is required. `npm install` downloads the native `better-sqlite3` and `tree-sitter` builds for your platform, so it needs registry access.
 
 The isolated packaging smoke test uses a temporary npm prefix and does not depend on `npm link`:
 
@@ -48,9 +51,19 @@ context-slice init
 context-slice preview "explain payment retry flow" --explain
 ```
 
-`init` creates `.context-slice/index.sqlite` automatically. Repository discovery uses `--repo` when given, otherwise the nearest Git root, otherwise the working directory. Only Java source is supported in v0.7.
+`init` creates `.context-slice/index.sqlite` automatically. Repository discovery uses `--repo` when given, otherwise the nearest Git root, otherwise the working directory. Only Java source is supported.
 
 Use `context-slice --version` and `context-slice --help` to inspect the installed package without relying on the source checkout.
+
+### Cache, cleanup, and uninstall
+
+The only files ContextSlice writes are in `<repository>/.context-slice/`. That directory contains its own `.gitignore`, so it never shows up in `git status` and you do not need to edit your repository's `.gitignore`. ContextSlice never writes into its installed package directory.
+
+- Rebuild from scratch: `rm -rf .context-slice && context-slice init`
+- Remove ContextSlice from a repository: `rm -rf .context-slice`
+- Uninstall the CLI: `npm uninstall -g context-slice` (repository caches are left in place; remove them as above)
+
+Caches are versioned. A cache written by a different index schema, older or newer, is discarded and rebuilt automatically; it is never reused.
 
 ## CLI workflow
 
@@ -63,14 +76,14 @@ context-slice preview "explain retryPayment" --json
 context-slice mcp
 ```
 
-| Command | Purpose |
-| --- | --- |
-| `init` | Discover the repository and create/refresh the local index. |
-| `index` | Refresh the index explicitly. |
-| `status` | Show readiness, schema, cache freshness, and last refresh. |
-| `doctor` | Check repository, Java source, cache, and MCP command readiness. |
-| `preview <task>` | Return a deterministic, strict-budget context preview. |
-| `mcp` | Start the stdio MCP server with the stable public command. |
+| Command          | Purpose                                                          |
+| ---------------- | ---------------------------------------------------------------- |
+| `init`           | Discover the repository and create/refresh the local index.      |
+| `index`          | Refresh the index explicitly.                                    |
+| `status`         | Show readiness, schema, cache freshness, and last refresh.       |
+| `doctor`         | Check repository, Java source, cache, and MCP command readiness. |
+| `preview <task>` | Return a deterministic, strict-budget context preview.           |
+| `mcp`            | Start the stdio MCP server with the stable public command.       |
 
 Use `--repo /absolute/path` to select a repository. `--json` provides a stable automation-oriented result. Normal commands are quiet; `--explain` displays why each item was included or omitted.
 
@@ -92,7 +105,7 @@ The target body is always first. Related symbols use compact skeletons. The comm
 
 ## Codex setup
 
-After linking ContextSlice, register its one stable MCP command for a Java repository:
+After installing ContextSlice, register its one stable MCP command for a Java repository:
 
 ```sh
 codex mcp add context-slice -- context-slice mcp --repo /absolute/path/to/my-java-project
@@ -149,6 +162,8 @@ npm run benchmark:v07
 
 It writes [JSON](benchmarks/results/v0.7-developer-workflow.json) and [Markdown](benchmarks/results/v0.7-developer-workflow.md) reports with fresh init, cold index, first/warm preview, one-file refresh, and first/subsequent MCP query timings. Timings apply only to the recorded local fixture environment. Codex/Claude telemetry is optional and is reported as unavailable when the runtime provides none.
 
+`npm run benchmark:v03` through `benchmark:v06` first run `npm run benchmark:checkouts`, which fetches the pinned benchmark repositories from `benchmarks/repositories.json` (network required; about 120 MB).
+
 Run `npm run benchmark:v08` for the tarball packaging, isolated installation, upgrade, uninstall, MCP, path-with-spaces, nested-cwd, publish-dry-run, and clean-room self-trial report in [JSON](benchmarks/results/v0.8-packaging-installation.json) and [Markdown](benchmarks/results/v0.8-packaging-installation.md). External developer participation is explicitly deferred; this is not a multi-user study.
 
 Earlier semantic/context measurements remain available:
@@ -167,9 +182,10 @@ Earlier semantic/context measurements remain available:
 ## Development
 
 ```sh
-npm test
+npm ci
 npm run build
+npm test
 npm run benchmark:v07
 ```
 
-The V0.7 implementation and acceptance criteria are in [docs/prompt/CONTEXTSLICE_V0.7_DEVELOPER_WORKFLOW_INTEGRATION.md](docs/prompt/CONTEXTSLICE_V0.7_DEVELOPER_WORKFLOW_INTEGRATION.md).
+`npm run release:rc` performs the v0.9 clean-room release-candidate validation: fresh clone, `npm ci`, build, tests, regressions, `npm pack`, and an isolated install with a temporary `HOME` and npm cache against a freshly cloned Java repository. See [docs/release-readiness-v0.9.md](docs/release-readiness-v0.9.md) and [CHANGELOG.md](CHANGELOG.md).

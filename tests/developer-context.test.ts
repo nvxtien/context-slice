@@ -64,17 +64,45 @@ test("reports context composition by category and total tokens", () => {
 
 test("validates that every benchmark task has one auditable manual baseline", () => {
   assert.doesNotThrow(() => validateManualBaselines([baseline], ["task-1"]));
-  assert.throws(() => validateManualBaselines([], ["task-1"]), /missing manual baseline/);
-  assert.throws(() => validateManualBaselines([baseline, baseline], ["task-1"]), /duplicate manual baseline/);
-  assert.throws(() => validateManualBaselines([{ ...baseline, reasoning: {} }], ["task-1"]), /reasoning/);
+  assert.throws(
+    () => validateManualBaselines([], ["task-1"]),
+    /missing manual baseline/,
+  );
+  assert.throws(
+    () => validateManualBaselines([baseline, baseline], ["task-1"]),
+    /duplicate manual baseline/,
+  );
+  assert.throws(
+    () => validateManualBaselines([{ ...baseline, reasoning: {} }], ["task-1"]),
+    /reasoning/,
+  );
 });
 
 test("reports context-window fit and pressure without model-specific claims", () => {
-  assert.deepEqual(fitsContextWindows(8_192), { "8K": true, "16K": true, "32K": true, "64K": true, "128K": true });
-  assert.deepEqual(fitsContextWindows(16_385), { "8K": false, "16K": false, "32K": true, "64K": true, "128K": true });
+  assert.deepEqual(fitsContextWindows(8_192), {
+    "8K": true,
+    "16K": true,
+    "32K": true,
+    "64K": true,
+    "128K": true,
+  });
+  assert.deepEqual(fitsContextWindows(16_385), {
+    "8K": false,
+    "16K": false,
+    "32K": true,
+    "64K": true,
+    "128K": true,
+  });
 });
 
 test("counts duplicate context only after the first occurrence", () => {
   assert.equal(duplicateContextTokens(["1234567890", "1234567890", "1234"]), 3);
-  assert.equal(duplicateContextTokensByKey([{ key: "A.java", tokens: 10 }, { key: "B.java", tokens: 5 }, { key: "A.java", tokens: 10 }]), 10);
+  assert.equal(
+    duplicateContextTokensByKey([
+      { key: "A.java", tokens: 10 },
+      { key: "B.java", tokens: 5 },
+      { key: "A.java", tokens: 10 },
+    ]),
+    10,
+  );
 });
