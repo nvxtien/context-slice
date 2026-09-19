@@ -1003,12 +1003,24 @@ if (argv.includes("--assistants")) {
     const connected = init?.mcp_servers?.find(
       (server: any) => server.name === "context-slice",
     )?.status;
+    const finalText = events.find((event) => event.type === "result")?.result;
+    // A quota or session limit ends the turn before any tool call: the assistant
+    // runtime was unavailable, which is not a ContextSlice defect.
+    const unavailable =
+      uses.length === 0 &&
+      typeof finalText === "string" &&
+      /usage limit|session limit|rate limit|quota/i.test(finalText);
     record(
       "claude",
-      connected === "connected" &&
-        uses.length > 0 &&
-        results.some((part: any) => !part.is_error),
+      unavailable
+        ? "deferred"
+        : connected === "connected" &&
+            uses.length > 0 &&
+            results.some((part: any) => !part.is_error),
       {
+        status: unavailable
+          ? `DEFERRED — runtime unavailable: ${finalText}`
+          : undefined,
         version: sh(
           "claude",
           ["--version"],

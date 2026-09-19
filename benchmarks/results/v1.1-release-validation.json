@@ -1,7 +1,7 @@
 {
   "version": "v1.1",
-  "generatedAt": "2026-09-19T23:34:38.479Z",
-  "commit": "9265a83f7c2a58f03f804ba5f33f496e68838e13",
+  "generatedAt": "2026-09-19T23:41:24.905Z",
+  "commit": "63002fe7fba1ff3a9afad5b3c34bb6b267b33cb2",
   "packageVersion": "1.1.0",
   "environment": {
     "node": "v22.12.0",
@@ -16,10 +16,10 @@
   },
   "artifact": {
     "filename": "context-slice-1.1.0.tgz",
-    "bytes": 30578,
+    "bytes": 30599,
     "fileCount": 25,
-    "shasum": "fce345c95d45374454b7fc6b287ebdffdd85a4c5",
-    "integrity": "sha512-A1jrSpi9iZy8ZZLqH+cVBsFG/4GAWK3DJ4DYaMbr/s8xuyh33QRgSoBWrstcNWc2JuRXJxz+kzSZnKOaFj1KEg==",
+    "shasum": "ee7a0f10fa67d47147b2af7f4bd9167465fc3d6c",
+    "integrity": "sha512-SaAuJNrdLF0Kgi7dxMZc41JrsSAjrwtlCckkKtDCm4UFow4fMvjf8RgMEgosRSCKMV7q0N/GvcwNocW32jEzPQ==",
     "baseline": "context-slice-1.0.0.tgz",
     "baselineRef": "08d991c",
     "packageVersion": "1.1.0"
@@ -29,7 +29,7 @@
       "status": "PASS",
       "evidence": {
         "source": "local repository (committed objects only)",
-        "commit": "9265a83f7c2a58f03f804ba5f33f496e68838e13",
+        "commit": "63002fe7fba1ff3a9afad5b3c34bb6b267b33cb2",
         "version": "1.1.0",
         "untrackedOrIgnored": "",
         "distPresent": false,
@@ -47,7 +47,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 4511,
+        "ms": 4333,
         "tail": [
           "added 144 packages in 4s",
           "npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available."
@@ -58,14 +58,14 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 2249
+        "ms": 2180
       }
     },
     "tests": {
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 13355,
+        "ms": 13183,
         "tests": 61,
         "pass": 61,
         "fail": 0
@@ -75,7 +75,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 201795,
+        "ms": 203349,
         "tasks": 15,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
@@ -89,7 +89,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 1014,
+        "ms": 1130,
         "checklist": "12/12",
         "context": {
           "task": "explain retryPayment",
@@ -104,7 +104,7 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 9992,
+        "ms": 9856,
         "note": "packaging smoke test (tarball install, CLI, MCP, upgrade, uninstall, publish dry run) from the clean checkout"
       }
     },
@@ -160,11 +160,11 @@
       "status": "PASS",
       "evidence": {
         "filename": "context-slice-1.1.0.tgz",
-        "bytes": 30578,
-        "unpackedBytes": 126429,
+        "bytes": 30599,
+        "unpackedBytes": 126583,
         "fileCount": 25,
-        "shasum": "fce345c95d45374454b7fc6b287ebdffdd85a4c5",
-        "integrity": "sha512-A1jrSpi9iZy8ZZLqH+cVBsFG/4GAWK3DJ4DYaMbr/s8xuyh33QRgSoBWrstcNWc2JuRXJxz+kzSZnKOaFj1KEg==",
+        "shasum": "ee7a0f10fa67d47147b2af7f4bd9167465fc3d6c",
+        "integrity": "sha512-SaAuJNrdLF0Kgi7dxMZc41JrsSAjrwtlCckkKtDCm4UFow4fMvjf8RgMEgosRSCKMV7q0N/GvcwNocW32jEzPQ==",
         "files": [
           "package/LICENSE",
           "package/README.md",
@@ -248,7 +248,7 @@
         "prefix": "<workspace>/install prefix (contains a space)",
         "resolvedExecutable": "<workspace>/install prefix/bin/context-slice",
         "packageRealpathInsidePrefix": true,
-        "ms": 3341
+        "ms": 3532
       }
     },
     "cliThroughPath": {
@@ -275,17 +275,17 @@
         ],
         "init": [
           "Repository: <workspace>/java repos/spring petclinic",
-          "Indexed 50 Java files (266 symbols).",
+          "Indexed 50 source files (266 symbols) across Java: 50.",
           "Next: context-slice preview \"explain <symbol>\""
         ],
-        "initMs": 308,
+        "initMs": 331,
         "statusAfter": {
           "state": "CURRENT",
           "schema": "1.1.0"
         },
         "doctor": [
           "OK repository: <workspace>/java repos/spring petclinic",
-          "OK java-source: 50 files found",
+          "OK source: 50 files found",
           "OK index: ready",
           "OK mcp: Configure command: context-slice mcp"
         ]
@@ -321,7 +321,7 @@
         "unresolved": [],
         "confidence": "high",
         "wholeFileFallback": false,
-        "latencyMs": 295,
+        "latencyMs": 337,
         "humanHeader": [
           "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
           "Context: 32/1200 tokens; 1 item included"
@@ -346,7 +346,7 @@
         ],
         "preview": {
           "ok": true,
-          "ms": 209,
+          "ms": 252,
           "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
           "estimatedTokens": 32,
           "budget": 1200
@@ -376,7 +376,7 @@
         },
         "init": [
           "Repository: <workspace>/ts repos/express api starter",
-          "Indexed 10 Java files (19 symbols).",
+          "Indexed 10 source files (19 symbols) across TypeScript: 10.",
           "Next: context-slice preview \"explain <symbol>\""
         ],
         "task": "explain how errors are turned into JSON responses",
@@ -387,7 +387,7 @@
         "included": [
           "task target: errorHandler"
         ],
-        "previewMs": 106,
+        "previewMs": 112,
         "mcp": {
           "tools": 6,
           "previewOk": true,
@@ -402,7 +402,7 @@
       }
     },
     "claude": {
-      "status": "PASS",
+      "status": "FAIL",
       "evidence": {
         "version": "2.1.277 (Claude Code)",
         "config": {
@@ -420,11 +420,9 @@
           "mcp__context-slice__context_slice",
           "mcp__context-slice__context_symbol"
         ],
-        "toolCalls": [
-          "mcp__context-slice__context_preview"
-        ],
-        "toolCallSucceeded": true,
-        "answer": "`org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm`"
+        "toolCalls": [],
+        "toolCallSucceeded": false,
+        "answer": "You've hit your session limit · resets 9:40am (Asia/Saigon)"
       }
     },
     "codex": {
@@ -472,13 +470,16 @@
       }
     },
     "upgrade": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "from": "1.0.0",
         "to": "1.1.0",
         "schemaBefore": "0.5.2",
         "stateAfterUpgrade": "UNINITIALIZED",
         "schemaAfter": "1.1.0",
+        "schemaChanged": true,
+        "stateAfterFirstCommand": "CURRENT",
+        "manualCacheDeletionRequired": false,
         "previewAfterUpgrade": "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
         "gitStatusWith080Cache": "(clean)",
         "gitStatusAfterUpgrade": "(clean)",
@@ -512,11 +513,11 @@
         "corruptCache": {
           "previousRelease": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-9Sm3HA/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-uphrDu/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           },
           "current": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-9Sm3HA/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-uphrDu/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           }
         }
       }
@@ -805,10 +806,20 @@
       "fix": "documented in the changelog, release notes and docs/typescript-support.md: downgrading requires `rm -rf .context-slice`. No data is misread; the failure is loud. Forward upgrades and same-shape schema changes rebuild automatically",
       "regressionTest": "clean-room downgrade step asserts the failure is loud and that cleanup restores it",
       "status": "ACCEPTED"
+    },
+    {
+      "category": "CLI",
+      "step": "v1.1 clean-room TypeScript repository",
+      "symptom": "`init` reported \"Indexed 10 Java files\" in a TypeScript repository, and `doctor` labelled its check \"java-source\"",
+      "severity": "MINOR",
+      "rootCause": "wording predating multi-language support",
+      "fix": "init reports source files with a per-language breakdown; the doctor check is named \"source\"",
+      "regressionTest": "tests/cli.test.ts and tests/typescript.test.ts assert the wording",
+      "status": "FIXED"
     }
   ],
   "blockers": [
-    "automated step failed: upgrade"
+    "automated step failed: claude"
   ],
   "openMajors": [],
   "recommendation": "NO-GO",
