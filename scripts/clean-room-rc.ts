@@ -40,6 +40,11 @@ const javaRepository = {
   url: "https://github.com/spring-projects/spring-petclinic.git",
   commit: "818c4136ea971c21674525f9053de0d9c7ad8cfe",
 };
+const typeScriptRepository = {
+  url: "https://github.com/w3cj/express-api-starter-ts.git",
+  commit: "c46ad4526400e0ae6640fdaa94d037aa7573600c",
+};
+const typeScriptTask = "explain how errors are turned into JSON responses";
 const task = "explain the owner update flow";
 
 const workspace = realpathSync(
@@ -861,6 +866,65 @@ await attempt("mcp", async () => {
   );
 });
 
+// 5b. The same flow in a freshly cloned TypeScript repository.
+const typeScriptRoot = join(workspace, "ts repos", "express api starter");
+await attempt("typeScriptRepository", async () => {
+  fetchPinned(
+    typeScriptRoot,
+    typeScriptRepository.url,
+    typeScriptRepository.commit,
+  );
+  const nestedTs = join(typeScriptRoot, "src/api");
+  const statusBefore = cs(["status"], typeScriptRoot, env);
+  const init = cs(["init"], nestedTs, env);
+  const status = json(cs(["status", "--json"], nestedTs, env));
+  const preview = cs(
+    ["preview", typeScriptTask, "--json", "--explain"],
+    nestedTs,
+    env,
+  );
+  const body = json(preview).result;
+  const session = await mcpSession(
+    nestedTs,
+    env,
+    join(typeScriptRoot, "src/middlewares.ts"),
+  );
+  record(
+    "typeScriptRepository",
+    init.status === 0 &&
+      status.result.freshness.state === "CURRENT" &&
+      status.result.freshness.filesByExtension[".ts"] > 0 &&
+      preview.status === 0 &&
+      body.target.language === "typescript" &&
+      body.estimatedTokens <= body.budget &&
+      session.preview.ok === true &&
+      session.stdoutProtocolOnly &&
+      gitClean(typeScriptRoot),
+    {
+      repository: `${typeScriptRepository.url}@${typeScriptRepository.commit}`,
+      statusBeforeInit: /UNINITIALIZED/.test(statusBefore.stdout),
+      filesByExtension: status.result.freshness.filesByExtension,
+      init: init.stdout.trim().replace(workspace, "<workspace>").split("\n"),
+      task: typeScriptTask,
+      target: body.target.qualifiedName,
+      language: body.target.language,
+      estimatedTokens: body.estimatedTokens,
+      budget: body.budget,
+      included: body.included.map(
+        (item: any) => `${item.reason}: ${item.symbol}`,
+      ),
+      previewMs: preview.ms,
+      mcp: {
+        tools: session.tools.length,
+        previewOk: session.preview.ok,
+        staleRefresh: session.staleRefresh,
+        protocolSafe: session.stdoutProtocolOnly,
+      },
+      gitClean: gitClean(typeScriptRoot),
+    },
+  );
+});
+
 // 6. Optional assistant integrations: real HOME for auth, but `context-slice` still resolves to the RC prefix.
 if (argv.includes("--assistants")) {
   const assistantEnv = {
@@ -1403,6 +1467,7 @@ writeFileSync(
     ...section("8b. Path with spaces", "pathWithSpaces"),
     ...section("9. Preview", "preview"),
     ...section("10. MCP", "mcp"),
+    ...section("10a. TypeScript clean-room repository", "typeScriptRepository"),
     ...section("11. Codex", "codex"),
     ...section("12. Claude Code", "claude"),
     ...section("13. Read-only package", "readOnlyPackage"),

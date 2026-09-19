@@ -1,0 +1,146 @@
+[
+  {
+    "taskId": "express-not-found-locate",
+    "files": ["src/middlewares.ts", "src/app.ts"],
+    "reasoning": {
+      "src/middlewares.ts": "declares the notFound handler, its status code and the error it forwards",
+      "src/app.ts": "shows where the handler is registered in the middleware chain"
+    }
+  },
+  {
+    "taskId": "express-error-handler-explain",
+    "files": ["src/middlewares.ts", "src/interfaces/error-response.ts"],
+    "reasoning": {
+      "src/middlewares.ts": "contains the error handler, the status fallback and the production stack rule",
+      "src/interfaces/error-response.ts": "defines the JSON error body the handler must produce"
+    }
+  },
+  {
+    "taskId": "express-env-explain",
+    "files": ["src/env.ts", "src/index.ts"],
+    "reasoning": {
+      "src/env.ts": "declares the schema, defaults and the failure path",
+      "src/index.ts": "shows the validated port being consumed at startup"
+    }
+  },
+  {
+    "taskId": "express-add-route-change",
+    "files": ["src/api/index.ts", "src/api/emojis.ts", "src/app.ts"],
+    "reasoning": {
+      "src/api/index.ts": "the router a new resource must be mounted on",
+      "src/api/emojis.ts": "an existing resource router to copy the shape from",
+      "src/app.ts": "shows the /api/v1 mount point"
+    }
+  },
+  {
+    "taskId": "express-listen-impact",
+    "files": ["src/index.ts", "src/app.ts", "src/env.ts"],
+    "reasoning": {
+      "src/index.ts": "owns listen and the server error handling",
+      "src/app.ts": "the application instance being listened on",
+      "src/env.ts": "supplies the port value"
+    }
+  },
+  {
+    "taskId": "nest-factory-create-explain",
+    "files": [
+      "packages/core/nest-factory.ts",
+      "packages/core/nest-application.ts"
+    ],
+    "reasoning": {
+      "packages/core/nest-factory.ts": "contains create, adapter selection, container construction and initialization",
+      "packages/core/nest-application.ts": "the application type that create returns"
+    }
+  },
+  {
+    "taskId": "nest-exception-filters-locate",
+    "files": [
+      "packages/core/exceptions/exceptions-handler.ts",
+      "packages/core/test/exceptions/exceptions-handler.spec.ts"
+    ],
+    "reasoning": {
+      "packages/core/exceptions/exceptions-handler.ts": "declares filter selection and the fallback to the base filter",
+      "packages/core/test/exceptions/exceptions-handler.spec.ts": "documents the expected selection behaviour"
+    }
+  },
+  {
+    "taskId": "nest-guards-explain",
+    "files": [
+      "packages/core/guards/guards-consumer.ts",
+      "packages/core/test/guards/guards-consumer.spec.ts"
+    ],
+    "reasoning": {
+      "packages/core/guards/guards-consumer.ts": "contains the activation loop, context creation and async handling",
+      "packages/core/test/guards/guards-consumer.spec.ts": "shows the expected true/false outcomes"
+    }
+  },
+  {
+    "taskId": "nest-injector-cycle-impact",
+    "files": [
+      "packages/core/injector/injector.ts",
+      "packages/core/injector/instance-wrapper.ts"
+    ],
+    "reasoning": {
+      "packages/core/injector/injector.ts": "holds loadInstance and the cycle, pending and resolved branches",
+      "packages/core/injector/instance-wrapper.ts": "defines the instance host and settlement signal the branches inspect"
+    }
+  },
+  {
+    "taskId": "nest-middleware-builder-change",
+    "files": [
+      "packages/core/middleware/builder.ts",
+      "packages/core/middleware/routes-mapper.ts"
+    ],
+    "reasoning": {
+      "packages/core/middleware/builder.ts": "the builder, its config proxy and the configuration collection to extend",
+      "packages/core/middleware/routes-mapper.ts": "the collaborator that turns routes into route info"
+    }
+  },
+  {
+    "taskId": "excalidraw-shortcut-explain",
+    "files": [
+      "packages/excalidraw/actions/manager.tsx",
+      "packages/excalidraw/actions/types.ts"
+    ],
+    "reasoning": {
+      "packages/excalidraw/actions/manager.tsx": "contains key handling, priority ordering and action execution",
+      "packages/excalidraw/actions/types.ts": "declares keyTest, keyPriority and perform on the Action type"
+    }
+  },
+  {
+    "taskId": "excalidraw-render-action-locate",
+    "files": [
+      "packages/excalidraw/actions/manager.tsx",
+      "packages/excalidraw/components/Actions.tsx"
+    ],
+    "reasoning": {
+      "packages/excalidraw/actions/manager.tsx": "declares renderAction and the panel update path",
+      "packages/excalidraw/components/Actions.tsx": "shows the call sites that render action buttons"
+    }
+  },
+  {
+    "taskId": "excalidraw-hint-viewer-explain",
+    "files": ["packages/excalidraw/components/HintViewer.tsx"],
+    "reasoning": {
+      "packages/excalidraw/components/HintViewer.tsx": "contains the hint selection, the empty case and the shortcut markup handling"
+    }
+  },
+  {
+    "taskId": "excalidraw-zoom-actions-change",
+    "files": [
+      "packages/excalidraw/components/Actions.tsx",
+      "packages/excalidraw/actions/actionCanvas.tsx"
+    ],
+    "reasoning": {
+      "packages/excalidraw/components/Actions.tsx": "holds the zoom control layout a button must be added to",
+      "packages/excalidraw/actions/actionCanvas.tsx": "defines the zoom actions being rendered"
+    }
+  },
+  {
+    "taskId": "excalidraw-delete-points-impact",
+    "files": ["packages/excalidraw/actions/actionDeleteSelected.tsx"],
+    "reasoning": {
+      "packages/excalidraw/actions/actionDeleteSelected.tsx": "contains every branch of the linear-element deletion behaviour"
+    }
+  }
+]

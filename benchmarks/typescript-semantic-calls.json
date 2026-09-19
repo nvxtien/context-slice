@@ -1,0 +1,247 @@
+[
+  {
+    "id": "same-file-call",
+    "fixture": "typescript",
+    "caller": "utils/math.ts::function::outer(number)",
+    "expected": [
+      {
+        "callee": "inner",
+        "target": "utils/math.ts::outer::function::inner()",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "same-file"
+      }
+    ]
+  },
+  {
+    "id": "overload-implementation-call",
+    "fixture": "typescript",
+    "caller": "validation.ts::function::validateOrder(CreateOrderInput)",
+    "expected": [
+      {
+        "callee": "parse",
+        "target": "validation.ts::function::parse(string | number)",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "same-file"
+      }
+    ]
+  },
+  {
+    "id": "imported-and-aliased-calls",
+    "fixture": "typescript",
+    "caller": "consumer.ts::function::placeOrder(CreateOrderInput)",
+    "expected": [
+      {
+        "callee": "createOrder",
+        "target": "order-api.ts::function::createOrder(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "imported"
+      },
+      {
+        "callee": "makeOrder",
+        "target": "order-api.ts::function::createOrder(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "re-export"
+      },
+      {
+        "callee": "calculateTotal",
+        "target": "utils/math.ts::function::calculateTotal(OrderItem[])",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "re-export"
+      },
+      {
+        "callee": "checkOrder",
+        "target": "validation.ts::function::validateOrder(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "aliased-import",
+        "category": "aliased-import"
+      },
+      {
+        "callee": "handler",
+        "target": "order-api.ts::function::createOrder(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "default-import",
+        "category": "default-import"
+      },
+      {
+        "callee": "save",
+        "target": "repository.ts::SqlOrderRepository::method::save(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "declared-type",
+        "category": "constructed-receiver"
+      }
+    ]
+  },
+  {
+    "id": "namespace-and-external-calls",
+    "fixture": "typescript",
+    "caller": "order-api.ts::function::createOrder(CreateOrderInput)",
+    "expected": [
+      {
+        "callee": "calculateTotal",
+        "target": "utils/math.ts::function::calculateTotal(OrderItem[])",
+        "confidence": "exact",
+        "kind": "namespace-import",
+        "category": "namespace-import"
+      },
+      {
+        "callee": "create",
+        "target": "order-service.ts::OrderService::method::create(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "declared-type",
+        "category": "declared-type"
+      },
+      {
+        "callee": "OrderService",
+        "target": "order-service.ts::OrderService::constructor::constructor()",
+        "confidence": "exact",
+        "kind": "constructor",
+        "category": "constructor"
+      },
+      {
+        "callee": "express",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "external-package",
+        "category": "external-package"
+      }
+    ]
+  },
+  {
+    "id": "class-member-calls",
+    "fixture": "typescript",
+    "caller": "order-service.ts::OrderService::method::create(CreateOrderInput)",
+    "expected": [
+      {
+        "callee": "assertValid",
+        "target": "order-service.ts::OrderService::method::assertValid(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "this-member",
+        "category": "class-method"
+      },
+      {
+        "callee": "save",
+        "target": "repository.ts::SqlOrderRepository::method::save(CreateOrderInput)",
+        "confidence": "exact",
+        "kind": "declared-type",
+        "category": "property-type"
+      },
+      {
+        "callee": "calculateTotal",
+        "target": "utils/math.ts::function::calculateTotal(OrderItem[])",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "imported"
+      }
+    ]
+  },
+  {
+    "id": "private-member-call",
+    "fixture": "typescript",
+    "caller": "repository.ts::SqlOrderRepository::method::save(CreateOrderInput)",
+    "expected": [
+      {
+        "callee": "nextId",
+        "target": "repository.ts::SqlOrderRepository::method::nextId(string)",
+        "confidence": "exact",
+        "kind": "this-member",
+        "category": "class-method"
+      }
+    ]
+  },
+  {
+    "id": "unresolved-inferred-receiver",
+    "fixture": "typescript",
+    "caller": "consumer.ts::function::unknownReceiver({ build(): { run(): void } })",
+    "expected": [
+      {
+        "callee": "build",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "unresolved",
+        "category": "inferred-receiver"
+      },
+      {
+        "callee": "run",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "unresolved",
+        "category": "inferred-receiver"
+      }
+    ]
+  },
+  {
+    "id": "commonjs-require",
+    "fixture": "typescript",
+    "caller": "legacy-commonjs.ts::function::legacyTotal(unknown[])",
+    "expected": [
+      {
+        "callee": "calculateTotal",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "unresolved",
+        "category": "commonjs"
+      }
+    ]
+  },
+  {
+    "id": "tsx-handler-calls",
+    "fixture": "tsx",
+    "caller": "CheckoutButton.tsx::CheckoutButton::function::handleClick()",
+    "expected": [
+      {
+        "callee": "checkout",
+        "target": "checkout.ts::function::checkout(string)",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "imported"
+      }
+    ]
+  },
+  {
+    "id": "tsx-component-calls",
+    "fixture": "tsx",
+    "caller": "CheckoutButton.tsx::function::CheckoutButton({ cartId: string })",
+    "expected": [
+      {
+        "callee": "handleClick",
+        "target": "CheckoutButton.tsx::CheckoutButton::function::handleClick()",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "same-file"
+      },
+      {
+        "callee": "OrderSummary",
+        "target": "OrderSummary.tsx::function::OrderSummary(OrderSummaryProps)",
+        "confidence": "exact",
+        "kind": "jsx-reference",
+        "category": "jsx-reference"
+      },
+      {
+        "callee": "useEffect",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "external-package",
+        "category": "external-package"
+      }
+    ]
+  },
+  {
+    "id": "tsx-arrow-component-call",
+    "fixture": "tsx",
+    "caller": "OrderSummary.tsx::function::OrderSummary(OrderSummaryProps)",
+    "expected": [
+      {
+        "callee": "formatPrice",
+        "target": "checkout.ts::function::formatPrice(number)",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "imported"
+      }
+    ]
+  }
+]

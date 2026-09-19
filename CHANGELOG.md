@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0 — TypeScript and TSX support (unpublished)
+
+- **TypeScript and TSX.** `.ts`, `.tsx`, `.mts`, `.cts` and `.d.ts` are indexed with Tree-sitter: classes, interfaces, type aliases, enums, namespaces, functions, methods, accessors, and function-valued variables including arrow functions at any nesting depth.
+- **Imports and exports.** Named, default, namespace and type-only imports are recorded per binding. Relative specifiers, directory index files and simple `tsconfig` `baseUrl`/`paths` aliases resolve; re-exports and barrel files are followed with cycle protection; other modules are recorded as external packages.
+- **Call resolution.** Same-file, imported, aliased, default, namespace, `this` member, declared-receiver-type, constructor, static and JSX-reference edges, each with evidence. Receivers that need type inference, CommonJS `require`, and imports leaving the checked-out source stay unresolved rather than guessed.
+- **Language adapters.** A language boundary replaces language checks in the core; Java is unchanged behind the same interface. Cache schema 1.1.0 stores a language per file, symbol and call, and an incompatible cache is rebuilt automatically.
+- **Same workflow.** No new CLI commands and no TypeScript-specific MCP tools. `status` now reports file counts per extension.
+- **Benchmark.** 15 TypeScript tasks across three pinned repositories (an Express starter, NestJS core, and Excalidraw's TSX packages): 95.56% required-fact recall, 100% retrieval recall, 83.32% median context reduction, 100% semantic call recall and precision on the fixture ground truth. Java's benchmark is unchanged at 100%/100%/94.55%.
+- **No tsserver.** No required fact was lost to missing type inference, so the compiler API was not added. Evidence is in `benchmarks/results/v1.1-typescript-support.md`.
+- Fixed: files of 32KB or more were silently skipped by the Tree-sitter node binding; they are now parsed in chunks.
+
+Not published to npm. No Git tag or GitHub Release was created.
+
 ## 1.0.0 — release validation (unpublished)
 
 First release-ready version. No new features since 0.9.0; this version closes the remaining release-evidence gaps.

@@ -138,11 +138,8 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   /** Top-level statements need an owner so their calls are not dropped. */
   const moduleOwner = () => {
     if (!moduleSymbol) {
-      const name =
-        filePath
-          .split("/")
-          .at(-1)
-          ?.replace(/\.(d\.ts|tsx?|mts|cts)$/, "") ?? filePath;
+      // Named after the file so it can never shadow a declared symbol.
+      const name = filePath;
       moduleSymbol = {
         id: `${filePath}::module::${name}`,
         language: LANGUAGE_ID,
@@ -794,6 +791,33 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   }
 
   walk(tree.rootNode, undefined, []);
+
+  if (moduleSymbol) {
+    // Represent the file's top-level code: imports, configuration and side effects.
+    const declarationTypes = new Set([
+      "class_declaration",
+      "abstract_class_declaration",
+      "interface_declaration",
+      "type_alias_declaration",
+      "enum_declaration",
+      "function_declaration",
+      "generator_function_declaration",
+      "function_signature",
+      "internal_module",
+      "module",
+    ]);
+    const isDeclaration = (node: Node) => {
+      const inner =
+        node.type === "export_statement"
+          ? (field(node, "declaration") ?? node)
+          : node;
+      return declarationTypes.has(inner.type);
+    };
+    moduleSymbol.source = tree.rootNode.namedChildren
+      .filter((child) => !isDeclaration(child))
+      .map((child) => child.text)
+      .join("\n");
+  }
 
   // Two declarations can share a canonical identity (overloads, sibling scopes).
   const identityCounts = new Map<string, number>();

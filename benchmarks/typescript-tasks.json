@@ -1,0 +1,583 @@
+[
+  {
+    "id": "express-not-found-locate",
+    "repository": "express-api-starter-ts",
+    "category": "locate",
+    "task": "Where is the 404 not found handler defined?",
+    "targetSymbol": "notFound",
+    "groundTruthFiles": ["src/middlewares.ts", "src/app.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "status",
+        "description": "The handler sets a 404 status code",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["res.status(404)"]
+        }
+      },
+      {
+        "id": "forward",
+        "description": "It forwards an Error to the next middleware rather than responding itself",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["next(error)"]
+        }
+      },
+      {
+        "id": "url",
+        "description": "The error message includes the requested URL",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["req.originalUrl"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/middlewares.ts", "src/app.ts"]
+  },
+  {
+    "id": "express-error-handler-explain",
+    "repository": "express-api-starter-ts",
+    "category": "explain",
+    "task": "Explain how errors are turned into JSON responses.",
+    "targetSymbol": "errorHandler",
+    "groundTruthFiles": [
+      "src/middlewares.ts",
+      "src/interfaces/error-response.ts"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "status",
+        "description": "A non-200 status is preserved, otherwise the response falls back to 500",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["res.statusCode !== 200 ? res.statusCode : 500"]
+        }
+      },
+      {
+        "id": "body",
+        "description": "The response body carries the error message",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["message: err.message"]
+        }
+      },
+      {
+        "id": "stack",
+        "description": "The stack trace is hidden in production",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["env.NODE_ENV === \"production\""]
+        }
+      }
+    ],
+    "baselineFiles": ["src/middlewares.ts", "src/interfaces/error-response.ts"]
+  },
+  {
+    "id": "express-env-explain",
+    "repository": "express-api-starter-ts",
+    "category": "explain",
+    "task": "Explain how environment configuration is validated at startup.",
+    "targetSymbol": "src/env.ts",
+    "groundTruthFiles": ["src/env.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "schema",
+        "description": "A zod schema declares NODE_ENV and PORT",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["envSchema", "PORT"]
+        }
+      },
+      {
+        "id": "default-port",
+        "description": "PORT is coerced to a number and defaults to 3000",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["z.coerce.number().default(3000)"]
+        }
+      },
+      {
+        "id": "exit",
+        "description": "Invalid configuration terminates the process",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["process.exit(1)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/env.ts", "src/index.ts"]
+  },
+  {
+    "id": "express-add-route-change",
+    "repository": "express-api-starter-ts",
+    "category": "change",
+    "task": "Add a new resource route under the v1 API router.",
+    "targetSymbol": "src/api/index.ts",
+    "groundTruthFiles": ["src/api/index.ts", "src/app.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "router",
+        "description": "The API module creates an express Router",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["express.Router()"]
+        }
+      },
+      {
+        "id": "mount",
+        "description": "Sub-routers are mounted with router.use",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["router.use(\"/emojis\", emojis)"]
+        }
+      },
+      {
+        "id": "export",
+        "description": "The router is the module's default export",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["export default router"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/api/index.ts", "src/api/emojis.ts", "src/app.ts"]
+  },
+  {
+    "id": "express-listen-impact",
+    "repository": "express-api-starter-ts",
+    "category": "impact",
+    "task": "What handles a port already in use when the server starts?",
+    "targetSymbol": "src/index.ts",
+    "groundTruthFiles": ["src/index.ts", "src/env.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "listen",
+        "description": "The server listens on the configured port",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["app.listen(port"]
+        }
+      },
+      {
+        "id": "eaddrinuse",
+        "description": "EADDRINUSE is detected explicitly",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["EADDRINUSE"]
+        }
+      },
+      {
+        "id": "exit",
+        "description": "Startup failure exits the process",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["process.exit(1)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/index.ts", "src/app.ts", "src/env.ts"]
+  },
+  {
+    "id": "nest-factory-create-explain",
+    "repository": "nest-core",
+    "category": "explain",
+    "task": "Explain how NestFactory.create bootstraps an application.",
+    "targetSymbol": "packages/core/nest-factory.ts::NestFactoryStatic::method::create(IEntryNestModule, AbstractHttpAdapter | NestApplicationOptions, NestApplicationOptions)",
+    "groundTruthFiles": ["packages/core/nest-factory.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "adapter",
+        "description": "An HTTP adapter is created when the caller did not supply a server",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "this.isHttpServer(serverOrOptions!)",
+            "await this.createHttpAdapter()"
+          ]
+        }
+      },
+      {
+        "id": "container",
+        "description": "A NestContainer is created with the application config",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["new NestContainer(applicationConfig, appOptions)"]
+        }
+      },
+      {
+        "id": "initialize",
+        "description": "Initialization is awaited before the application is returned",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["await this.initialize("]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/core/nest-factory.ts",
+      "packages/core/nest-application.ts"
+    ]
+  },
+  {
+    "id": "nest-exception-filters-locate",
+    "repository": "nest-core",
+    "category": "locate",
+    "task": "Where are custom exception filters selected for a thrown exception?",
+    "targetSymbol": "ExceptionsHandler.invokeCustomFilters",
+    "groundTruthFiles": ["packages/core/exceptions/exceptions-handler.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "empty",
+        "description": "No custom filters means the handler declines",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["isEmptyArray(this.filters)", "return false"]
+        }
+      },
+      {
+        "id": "select",
+        "description": "A filter is chosen by metadata selection",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["selectExceptionFilterMetadata(this.filters, exception)"]
+        }
+      },
+      {
+        "id": "invoke",
+        "description": "The selected filter is invoked with the exception and host",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["filter.func(exception, ctx)"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/core/exceptions/exceptions-handler.ts",
+      "packages/core/test/exceptions/exceptions-handler.spec.ts"
+    ]
+  },
+  {
+    "id": "nest-guards-explain",
+    "repository": "nest-core",
+    "category": "explain",
+    "task": "Explain how guards decide whether a route handler may run.",
+    "targetSymbol": "GuardsConsumer.tryActivate",
+    "groundTruthFiles": ["packages/core/guards/guards-consumer.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "no-guards",
+        "description": "Activation succeeds when there are no guards",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["isEmptyArray(guards)", "return true"]
+        }
+      },
+      {
+        "id": "context",
+        "description": "An execution context is built from the handler arguments",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["this.createContext(args, instance, callback)"]
+        }
+      },
+      {
+        "id": "async",
+        "description": "Non-boolean guard results are awaited before deciding",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["await this.pickResult(result)"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/core/guards/guards-consumer.ts",
+      "packages/core/test/guards/guards-consumer.spec.ts"
+    ]
+  },
+  {
+    "id": "nest-injector-cycle-impact",
+    "repository": "nest-core",
+    "category": "impact",
+    "task": "How are circular dependencies detected while instantiating providers?",
+    "targetSymbol": "Injector.loadInstance",
+    "groundTruthFiles": ["packages/core/injector/injector.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "cycle",
+        "description": "A cycle in the settlement signal raises CircularDependencyException",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "settlementSignal?.isCycle(",
+            "throw new CircularDependencyException("
+          ]
+        }
+      },
+      {
+        "id": "pending",
+        "description": "A pending instance is awaited through its done promise",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["instanceHost.isPending", "instanceHost.donePromise!"]
+        }
+      },
+      {
+        "id": "resolved",
+        "description": "An already resolved instance completes the signal without re-instantiating",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["instanceHost.isResolved", "settlementSignal.complete()"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/core/injector/injector.ts",
+      "packages/core/injector/instance-wrapper.ts"
+    ]
+  },
+  {
+    "id": "nest-middleware-builder-change",
+    "repository": "nest-core",
+    "category": "change",
+    "task": "Add a new option when applying route middleware in the middleware builder.",
+    "targetSymbol": "MiddlewareBuilder.apply",
+    "groundTruthFiles": ["packages/core/middleware/builder.ts"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "proxy",
+        "description": "apply returns a configuration proxy holding the flattened middleware",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "new MiddlewareBuilder.ConfigProxy(",
+            "middleware.flat()"
+          ]
+        }
+      },
+      {
+        "id": "collection",
+        "description": "Configurations accumulate in a Set owned by the builder",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["middlewareCollection"]
+        }
+      },
+      {
+        "id": "build",
+        "description": "build returns the accumulated configurations",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["public build(): MiddlewareConfiguration[]"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/core/middleware/builder.ts",
+      "packages/core/middleware/routes-mapper.ts"
+    ]
+  },
+  {
+    "id": "excalidraw-shortcut-explain",
+    "repository": "excalidraw",
+    "category": "explain",
+    "task": "Explain how a keyboard shortcut triggers an editor action.",
+    "targetSymbol": "ActionManager.handleKeyDown",
+    "groundTruthFiles": ["packages/excalidraw/actions/manager.tsx"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "match",
+        "description": "Candidate actions are filtered by their keyTest predicate",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["action.keyTest"]
+        }
+      },
+      {
+        "id": "priority",
+        "description": "Actions are ordered by key priority and an ambiguous match is cancelled",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["keyPriority", "data.length !== 1"]
+        }
+      },
+      {
+        "id": "perform",
+        "description": "The matched action is performed through the updater",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["this.updater(data[0].perform("]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/excalidraw/actions/manager.tsx",
+      "packages/excalidraw/actions/types.ts"
+    ]
+  },
+  {
+    "id": "excalidraw-render-action-locate",
+    "repository": "excalidraw",
+    "category": "locate",
+    "task": "Where does the UI render the panel component for an action button?",
+    "targetSymbol": "ActionManager.renderAction",
+    "groundTruthFiles": ["packages/excalidraw/actions/manager.tsx"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "panel",
+        "description": "Only actions that declare a PanelComponent are rendered",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["\"PanelComponent\" in this.actions[name]"]
+        }
+      },
+      {
+        "id": "ui-options",
+        "description": "Rendering honours the canvasActions UI options",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["this.app.props.UIOptions.canvasActions"]
+        }
+      },
+      {
+        "id": "update",
+        "description": "The panel updates state by performing the action",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["const updateData = (formState?: any)"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/excalidraw/actions/manager.tsx",
+      "packages/excalidraw/components/Actions.tsx"
+    ]
+  },
+  {
+    "id": "excalidraw-hint-viewer-explain",
+    "repository": "excalidraw",
+    "category": "explain",
+    "task": "Explain how the hint viewer decides which hint to display.",
+    "targetSymbol": "HintViewer",
+    "groundTruthFiles": ["packages/excalidraw/components/HintViewer.tsx"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "source",
+        "description": "Hints come from getHints using the app state",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["const hints = getHints({"]
+        }
+      },
+      {
+        "id": "empty",
+        "description": "Nothing renders when there is no hint",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if (!hints)", "return null"]
+        }
+      },
+      {
+        "id": "shortcut",
+        "description": "Shortcut markup is converted into kbd elements",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["<kbd>"]
+        }
+      }
+    ],
+    "baselineFiles": ["packages/excalidraw/components/HintViewer.tsx"]
+  },
+  {
+    "id": "excalidraw-zoom-actions-change",
+    "repository": "excalidraw",
+    "category": "change",
+    "task": "Add another button to the zoom controls in the actions bar.",
+    "targetSymbol": "ZoomActions",
+    "groundTruthFiles": ["packages/excalidraw/components/Actions.tsx"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "buttons",
+        "description": "The existing zoom buttons are rendered through renderAction",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["renderAction(\"zoomOut\")", "renderAction(\"zoomIn\")"]
+        }
+      },
+      {
+        "id": "reset",
+        "description": "A reset zoom control sits between them",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["renderAction(\"resetZoom\")"]
+        }
+      },
+      {
+        "id": "layout",
+        "description": "The controls are laid out in a stack with the zoom actions class",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["CLASSES.ZOOM_ACTIONS"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "packages/excalidraw/components/Actions.tsx",
+      "packages/excalidraw/actions/actionCanvas.tsx"
+    ]
+  },
+  {
+    "id": "excalidraw-delete-points-impact",
+    "repository": "excalidraw",
+    "category": "impact",
+    "task": "What happens when deleting while editing the points of a linear element?",
+    "targetSymbol": "actionDeleteSelected",
+    "groundTruthFiles": [
+      "packages/excalidraw/actions/actionDeleteSelected.tsx"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "no-selection",
+        "description": "Deleting with no point selected does nothing",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if (selectedPointsIndices == null)", "return false"]
+        }
+      },
+      {
+        "id": "all-points",
+        "description": "Deleting every point marks the whole element deleted",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "selectedPointsIndices.length >= linearElement.points.length",
+            "newElementWith(el, { isDeleted: true })"
+          ]
+        }
+      },
+      {
+        "id": "partial",
+        "description": "Otherwise only the selected points are removed",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["LinearElementEditor.deletePoints("]
+        }
+      }
+    ],
+    "baselineFiles": ["packages/excalidraw/actions/actionDeleteSelected.tsx"]
+  }
+]
