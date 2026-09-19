@@ -1,24 +1,63 @@
 import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { ProjectIndex } from "../indexer/index.js";
 import { estimateTokens } from "../planner/budget.js";
-import { rankSymbol } from "../planner/rank.js";
 import { renderSignature, renderSkeleton } from "../render/compact-context.js";
+import { buildPreview } from "../workflow/preview.js";
 
-const root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd();
-const index = new ProjectIndex(root);
-const summary = index.rebuild();
-const server = new McpServer({ name: "context-slice", version: "0.4.0" });
 const result = (value: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }] });
-function one(symbol: string) { const candidates = index.resolveSymbol(symbol); if (!candidates.length) throw new Error(`Symbol not found: ${symbol}`); if (candidates.length > 1) throw new Error(`Ambiguous symbol: ${symbol}. Candidates: ${candidates.map((c) => c.id).join(", ")}`); return candidates[0]; }
 
-server.tool("context.search", "Tìm symbol Java liên quan mà không đọc toàn bộ file.", { query: z.string(), limit: z.number().int().positive().max(100).optional() }, async ({ query, limit }) => result({ indexed: summary, results: index.search(query, limit ?? 10) }));
-server.tool("context.symbol", "Lấy symbol theo mức signature, skeleton, body hoặc full.", { symbol: z.string(), detail: z.enum(["signature", "skeleton", "body", "full"]).optional() }, async ({ symbol, detail }) => { const target = one(symbol); const level = detail ?? "skeleton"; const calls = index.calls.filter((c) => c.callerId === target.id).map((c) => `${c.receiverText ? `${c.receiverText}.` : ""}${c.calleeName} [${c.confidence}]`); let text = renderSignature(target); if (level === "skeleton") text = renderSkeleton(target, calls); if (level === "body") text = target.body ?? target.source; if (level === "full") text = target.source; return result({ symbol: target, detail: level, rendered: text }); });
-server.tool("context.callers", "Tìm caller theo độ sâu giới hạn.", { symbol: z.string(), depth: z.number().int().min(1).max(5).optional(), limit: z.number().int().positive().max(100).optional() }, async ({ symbol, depth, limit }) => { const target = one(symbol); const actualDepth = depth ?? 1; return result({ target: renderSignature(target), depth: actualDepth, callers: index.callersAtDepth(target, actualDepth).slice(0, limit ?? 10).map((caller) => ({ id: caller.id, signature: caller.signature, filePath: caller.filePath })) }); });
-server.tool("context.slice", "Lập context slice có ngân sách token bắt buộc.", { symbol: z.string(), intent: z.string().optional(), budget: z.number().int().positive().optional(), depth: z.number().int().min(1).max(5).optional() }, async ({ symbol, intent, budget, depth }) => { const target = one(symbol); const max = budget ?? 4000; const targetTokens = estimateTokens(target.source); if (targetTokens > max) throw new Error(`Token budget too small: target requires ${targetTokens}, budget is ${max}`); const actualDepth = depth ?? 1; const items = [{ symbol: target, reason: "target" as const, confidence: "exact" as const, rendered: target.source }, ...index.dependenciesAtDepth(target, actualDepth).map((s) => ({ symbol: s, reason: "direct-callee" as const, confidence: "probable" as const, rendered: renderSkeleton(s) })), ...index.callersAtDepth(target, actualDepth).map((s) => ({ symbol: s, reason: "direct-caller" as const, confidence: "probable" as const, rendered: renderSkeleton(s) }))].sort((a, b) => a.reason === "target" ? -1 : b.reason === "target" ? 1 : rankSymbol(b.symbol, intent ?? target.name, intent ?? "") - rankSymbol(a.symbol, intent ?? target.name, intent ?? "") || a.symbol.id.localeCompare(b.symbol.id)); let used = 0; const included = []; const rendered: string[] = []; for (const item of items) { const tokens = estimateTokens(item.rendered); if (used + tokens > max) continue; used += tokens; included.push({ symbolId: item.symbol.id, symbol: item.symbol.qualifiedName, reason: item.reason, relationship: item.reason, confidence: item.confidence, estimatedTokens: tokens, score: item.reason === "target" ? 1 : rankSymbol(item.symbol, intent ?? target.name, intent ?? "") }); rendered.push(item.rendered); } return result({ intent, depth: actualDepth, budget: max, estimatedTokens: used, rendered: rendered.join("\n\n"), included }); });
-server.tool("context.diff", "Hiển thị thay đổi Git theo symbol với budget cứng.", { base: z.string().optional(), head: z.string().optional(), budget: z.number().int().positive().optional() }, async ({ base, head, budget }) => { const args = base || head ? [base ?? "HEAD", head ?? "HEAD"] : ["HEAD"]; let diff = ""; try { diff = execFileSync("git", ["diff", ...args], { cwd: root, encoding: "utf8", maxBuffer: 2_000_000 }); } catch (error) { throw new Error(`Git unavailable: ${error instanceof Error ? error.message : String(error)}`); } const max = budget ?? estimateTokens(diff); const truncated = estimateTokens(diff) > max; if (truncated) diff = diff.slice(0, Math.max(1, max * 4)); return result({ base: base ?? "HEAD", head: head ?? "working tree", budget: max, truncated, changedFiles: [...diff.matchAll(/^diff --git a\/(.*?) b\/(.*?)$/gm)].map((m) => m[2]), estimatedTokens: estimateTokens(diff), diff }); });
+export async function startMcpServer(root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd()) {
+  const index = new ProjectIndex(root);
+  const server = new McpServer({ name: "context-slice", version: "0.7.0" });
+  const refresh = () => index.refresh();
+  const one = (symbol: string) => {
+    const candidates = index.resolveSymbol(symbol);
+    if (!candidates.length) throw new Error(`Symbol not found: ${symbol}`);
+    if (candidates.length > 1) throw new Error(`Ambiguous symbol: ${symbol}. Candidates: ${candidates.map((candidate) => candidate.id).join(", ")}`);
+    return candidates[0];
+  };
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+  server.tool("context.search", "Find relevant Java symbols without reading every source file.", { query: z.string(), limit: z.number().int().positive().max(100).optional() }, async ({ query, limit }) => {
+    const refreshed = refresh();
+    return result({ refresh: refreshed, results: index.search(query, limit ?? 10) });
+  });
+  server.tool("context.symbol", "Read a Java symbol as a signature, skeleton, body, or full source.", { symbol: z.string(), detail: z.enum(["signature", "skeleton", "body", "full"]).optional() }, async ({ symbol, detail }) => {
+    const refreshed = refresh(); const target = one(symbol); const level = detail ?? "skeleton";
+    const calls = index.calls.filter((call) => call.callerId === target.id).map((call) => `${call.receiverText ? `${call.receiverText}.` : ""}${call.calleeName} [${call.confidence}]`);
+    let rendered = renderSignature(target);
+    if (level === "skeleton") rendered = renderSkeleton(target, calls);
+    if (level === "body") rendered = target.body ?? target.source;
+    if (level === "full") rendered = target.source;
+    return result({ refresh: refreshed, symbol: target, detail: level, rendered });
+  });
+  server.tool("context.callers", "Find callers with bounded traversal depth.", { symbol: z.string(), depth: z.number().int().min(1).max(5).optional(), limit: z.number().int().positive().max(100).optional() }, async ({ symbol, depth, limit }) => {
+    const refreshed = refresh(); const target = one(symbol); const actualDepth = depth ?? 1;
+    return result({ refresh: refreshed, target: renderSignature(target), depth: actualDepth, callers: index.callersAtDepth(target, actualDepth).slice(0, limit ?? 10).map((caller) => ({ id: caller.id, signature: caller.signature, filePath: caller.filePath })) });
+  });
+  server.tool("context.preview", "Compose an explainable, budget-bounded developer context preview.", { task: z.string(), budget: z.number().int().positive().optional(), depth: z.number().int().min(1).max(5).optional() }, async ({ task, budget, depth }) => {
+    const refreshed = refresh();
+    return result({ refresh: refreshed, ...buildPreview(index, task, { budget, depth }) });
+  });
+  server.tool("context.slice", "Compose a strict-budget context slice for a symbol.", { symbol: z.string(), intent: z.string().optional(), budget: z.number().int().positive().optional(), depth: z.number().int().min(1).max(5).optional() }, async ({ symbol, intent, budget, depth }) => {
+    const refreshed = refresh(); const target = one(symbol);
+    return result({ refresh: refreshed, ...buildPreview(index, target.id, { budget, depth }), intent });
+  });
+  server.tool("context.diff", "Show a Git diff with a strict token budget.", { base: z.string().optional(), head: z.string().optional(), budget: z.number().int().positive().optional() }, async ({ base, head, budget }) => {
+    const refreshed = refresh(); const args = base || head ? [base ?? "HEAD", head ?? "HEAD"] : ["HEAD"]; let diff = "";
+    try { diff = execFileSync("git", ["diff", ...args], { cwd: root, encoding: "utf8", maxBuffer: 2_000_000 }); }
+    catch (error) { throw new Error(`Git unavailable: ${error instanceof Error ? error.message : String(error)}`); }
+    const max = budget ?? estimateTokens(diff); const truncated = estimateTokens(diff) > max;
+    if (truncated) diff = diff.slice(0, Math.max(1, max * 4));
+    return result({ refresh: refreshed, base: base ?? "HEAD", head: head ?? "working tree", budget: max, truncated, changedFiles: [...diff.matchAll(/^diff --git a\/(.*?) b\/(.*?)$/gm)].map((match) => match[2]), estimatedTokens: estimateTokens(diff), diff });
+  });
+
+  await server.connect(new StdioServerTransport());
+  return server;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await startMcpServer();

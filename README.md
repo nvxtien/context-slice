@@ -1,63 +1,149 @@
 # ContextSlice
 
-ContextSlice helps developers reduce the amount of source code placed into an AI coding assistant's context window. It builds a task-specific, minimum sufficient code slice so developers can use fewer input tokens and avoid sending irrelevant whole files.
+ContextSlice is a local, read-only Java developer tool that builds a small, task-specific code context before it is sent to a coding assistant. Instead of opening and pasting whole files, ask for the method, its callers, callees, and explicit omissions that matter to the task.
 
-Less code in context. Fewer tokens. Same required information.
+It indexes Java source with Tree-sitter, keeps a local SQLite cache, and exposes the same workflow through a CLI and stdio MCP server. It does not edit the target repository.
 
-MCP server cục bộ cho Java, giúp developer truy xuất context theo symbol thay vì đọc toàn bộ file.
+## Why use it
 
-## Chạy
+Large context windows still waste attention when they contain unrelated files. ContextSlice makes the context package inspectable: it reports the target, estimated token budget, included symbols, omissions caused by budget, unresolved calls, and cache freshness.
+
+## Quick start
+
+ContextSlice is not published to npm. From this checkout, install and link the local executable:
 
 ```sh
 npm install
 npm run build
-npm start
+npm link
 ```
 
-Server dùng stdio. Có thể cấu hình trong `.vscode/mcp.json`. Đặt `CONTEXT_SLICE_ROOT` nếu chạy server với repository khác.
+Then, in a Java repository:
 
-Năm tool được cung cấp: `context.search`, `context.symbol`, `context.callers`, `context.slice`, `context.diff`.
+```sh
+cd /absolute/path/to/my-java-project
+context-slice init
+context-slice preview "explain payment retry flow" --explain
+```
 
-## Validation v0.2
+`init` creates `.context-slice/index.sqlite` automatically. Repository discovery uses `--repo` when given, otherwise the nearest Git root, otherwise the working directory. Only Java source is supported in v0.7.
 
-Benchmark v0.2 được định nghĩa trong `benchmarks/tasks.json` và sinh `benchmarks/results/latest.md` cùng dữ liệu JSON tương ứng. Mỗi task đo required-fact recall, context efficiency, các budget từ 256 đến 8192 token, minimum sufficient budget, unresolved-call rate và cold/warm cache metrics.
+## CLI workflow
 
-Kết quả 48.89% trước đây chỉ là fixture `retryPayment` của v0.1, không phải tuyên bố chung cho sản phẩm. Token reduction chỉ có ý nghĩa khi required-fact recall vẫn đạt 100%; agent baseline không được báo cáo nếu runtime không cung cấp telemetry.
+```sh
+context-slice init
+context-slice status
+context-slice doctor
+context-slice preview "explain retryPayment" --budget 1200 --explain
+context-slice preview "explain retryPayment" --json
+context-slice mcp
+```
 
-Validation hiện tại có fixture nhỏ và failure corpus cho các giới hạn Tree-sitter như overload, interface dispatch, chained calls và unresolved receiver. Việc benchmark trên ba repository Java/Spring thực tế cần checkout các repository bên ngoài và chưa được giả lập trong report. Dữ liệu hiện tại chưa đủ để biện minh cho JDT/LSP; quyết định v0.3 phải dựa trên unresolved-call rate và số required facts bị mất trong các repository thực tế.
+| Command | Purpose |
+| --- | --- |
+| `init` | Discover the repository and create/refresh the local index. |
+| `index` | Refresh the index explicitly. |
+| `status` | Show readiness, schema, cache freshness, and last refresh. |
+| `doctor` | Check repository, Java source, cache, and MCP command readiness. |
+| `preview <task>` | Return a deterministic, strict-budget context preview. |
+| `mcp` | Start the stdio MCP server with the stable public command. |
 
-## Validation v0.3
+Use `--repo /absolute/path` to select a repository. `--json` provides a stable automation-oriented result. Normal commands are quiet; `--explain` displays why each item was included or omitted.
 
-V0.3 đánh giá ba scope Java được pin bằng commit: Spring Petclinic (small), Petclinic REST (medium) và module `services` của Keycloak (large). Checkout nằm trong `benchmarks/checkouts/` và bị loại khỏi Git; cấu hình URL, SHA, scope nằm trong [benchmarks/repositories.json](benchmarks/repositories.json). Chạy `npm run benchmark:v03` để sinh [benchmarks/results/v0.3-real-repositories.md](benchmarks/results/v0.3-real-repositories.md) và JSON tương ứng.
+Exit codes are `0` for success, `2` for user or configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
 
-Runner có 15 task grounded độc lập trong [benchmarks/tasks.json](benchmarks/tasks.json), budget sweep 256-8192, required-fact recall, attribution (`PARSER`, `SYMBOL_INDEX`, `CALL_RESOLUTION`, `RANKING`, `TOKEN_BUDGET`), unresolved/ambiguous call rate, cold/warm/single-file cache metrics và resolution harm. Agent telemetry được ghi `N/A` khi runtime không cung cấp.
+## Example: inspectable context reduction
 
-Kết quả v0.3 hiện tại: 15 task, required-fact recall 93.94%, median token reduction 95.05%, resolution harm 0%, resolution fact-loss 0%. Một task bị unsatisfied do `SYMBOL_INDEX`; đây là failure được giữ lại trong aggregate, không bị loại. Các con số này chỉ áp dụng cho ba commit/scope đã ghi ở trên, không phải cam kết tổng quát.
+```text
+Target: demo.PaymentService.retryPayment
+Context: 286/1200 tokens; 3 items included
 
-## Validation v0.4
+Included:
+- task target: demo.PaymentService.retryPayment — Selected because the task names retryPayment.
+- direct caller: demo.PaymentController.retry — Direct caller of demo.PaymentService.retryPayment.
+- direct callee: demo.PaymentService.audit — Direct callee of demo.PaymentService.retryPayment.
+```
 
-V0.4 harden symbol identity và lookup trước khi cân nhắc JDT/LSP. ID canonical có dạng `package::enclosing-type-chain::kind::name(parameter-signature)`, nên overload, nested type và cùng tên ở package khác nhau giữ được identity riêng. Lookup chấp nhận stable ID, canonical/qualified name, signature và simple-name ambiguity; ranking có tie-break deterministic. SQLite schema được version `0.4` và tự rebuild khi gặp cache cũ.
+The target body is always first. Related symbols use compact skeletons. The command never silently exceeds its budget; skipped candidates are reported as `context budget`, and unresolved calls remain unresolved rather than being guessed.
 
-Chạy `npm run benchmark:v04` để chạy lại 15 task v0.3 rồi sinh [benchmarks/results/v0.4-symbol-index-hardening.md](benchmarks/results/v0.4-symbol-index-hardening.md). Stress corpus nằm trong `tests/fixtures/symbol-index/`, với test cho package duplicate, overload, constructor, nested type, record, enum, interface và stable ID.
+## Codex setup
 
-Kết quả v0.4 trên ba commit đã pin: retrieval recall `100%` (15/15 target), symbol-index failure rate `0%`, symbol fact loss rate `0%`, required-fact recall `100%`. Median token reduction của rerun là `95.05%`; unresolved call và inherited/anonymous semantic behavior vẫn là giới hạn riêng, chưa biện minh cho JDT/LSP.
+After linking ContextSlice, register its one stable MCP command for a Java repository:
 
-## Validation v0.6
+```sh
+codex mcp add context-slice -- context-slice mcp --repo /absolute/path/to/my-java-project
+codex mcp list
+```
 
-V0.6 đo developer context efficiency: manual whole-file context so với ContextSlice trên cùng 15 task và ba repository/commit đã pin. Baseline thủ công được lưu audit được trong [benchmarks/manual-context.json](benchmarks/manual-context.json); báo cáo sinh tại `benchmarks/results/v0.6-developer-context-efficiency.md` và `.json`.
+Codex also supports project-scoped configuration in `.codex/config.toml` for trusted projects. See the [official OpenAI MCP documentation](https://developers.openai.com/es-419/docs/extend/mcp?surface=cli) for the current Codex CLI and configuration options.
 
-Chạy `npm run benchmark:v06` để chạy lại v0.5 rồi sinh report V0.6. Các số token dùng deterministic estimator và được ghi là estimated khi không có assistant telemetry. Required-fact recall và retrieval recall vẫn là correctness guardrail; whole-file avoidance, fallback, context composition, context-window thresholds, cache responsiveness và bounded multi-step context được báo cáo riêng.
+Suggested assistant instruction:
 
-## Validation v0.5
+```text
+For Java implementation or explanation tasks, request context.preview with the task first.
+Use the target, inclusion explanations, omissions, and unresolved calls to decide whether to
+request context.symbol, context.callers, or context.slice. Do not assume unresolved runtime
+dispatch has a concrete implementation.
+```
 
-V0.5 tách declared target khỏi runtime target trong semantic call edge. Mỗi edge có confidence `exact/probable/unresolved`, `resolutionKind`, `argumentCount` và evidence. Interface/framework declaration có thể là target retrieval hợp lệ mà không bịa runtime implementation. Chạy `npm run benchmark:v05` để sinh [benchmarks/results/v0.5-semantic-call-resolution.md](benchmarks/results/v0.5-semantic-call-resolution.md) và JSON.
+## Claude Code setup
 
-Production vẫn chỉ dùng Tree-sitter, không thêm compiler/LSP dependency. Runtime dispatch, generic inference, fluent library types và framework-generated implementations được giữ conservative; quyết định JDT/LSP dựa trên semantic fact loss, không dựa riêng vào unresolved-call rate.
-Semantic edge cache dùng schema `0.5.2` để tự invalidate các cache cũ khi mô hình call edge thay đổi.
+Use the equivalent local stdio registration for the same command:
 
-## Kiểm tra
+```sh
+claude mcp add --transport stdio context-slice -- context-slice mcp --repo /absolute/path/to/my-java-project
+claude mcp list
+```
+
+Verify command syntax against `claude mcp --help` in the installed Claude Code version before sharing configuration. ContextSlice itself speaks standard stdio MCP; this repository does not claim to have exercised every Claude Code release.
+
+## How it works
+
+1. Discover a Java repository and scan source while ignoring common generated/build directories.
+2. Store symbols, call edges, hashes, schema version, and refresh time in a local SQLite cache.
+3. Refresh before preview or MCP tool execution so changed Java files are not silently served stale.
+4. Select a target from task text, then include the target body plus ranked direct callers/callees until the strict token budget is full.
+
+Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `context.preview`, `context.slice`, and `context.diff`. MCP stdout contains protocol messages only; diagnostics must not corrupt stdio framing.
+
+## Trust and explainability
+
+ContextSlice is deliberately conservative:
+
+- Context previews use only task text, repository source, index data, and configuration. They do not read benchmark answers, required facts, expected symbols, or manual baselines.
+- Call resolution distinguishes exact, probable, and unresolved edges. It does not invent runtime dispatch targets.
+- `CURRENT`, `STALE`, `REFRESHING`, and `ERROR` are the workflow state vocabulary. The CLI exposes the observable cache state; preview/MCP refresh before serving context.
+- Preview, status, doctor, and MCP lookup operations are read-only except for the local cache.
+
+## Benchmarks
+
+Run the workflow benchmark locally:
+
+```sh
+npm run benchmark:v07
+```
+
+It writes [JSON](benchmarks/results/v0.7-developer-workflow.json) and [Markdown](benchmarks/results/v0.7-developer-workflow.md) reports with fresh init, cold index, first/warm preview, one-file refresh, and first/subsequent MCP query timings. Timings apply only to the recorded local fixture environment. Codex/Claude telemetry is optional and is reported as unavailable when the runtime provides none.
+
+Earlier semantic/context measurements remain available:
+
+- [v0.6 developer context efficiency](benchmarks/results/v0.6-developer-context-efficiency.md) compares auditable manual whole-file baselines with ContextSlice on pinned Java repositories. Token counts are deterministic estimates unless telemetry is explicitly available.
+- [v0.5 semantic call resolution](benchmarks/results/v0.5-semantic-call-resolution.md) documents declared versus runtime target limitations.
+- [v0.4 symbol index hardening](benchmarks/results/v0.4-symbol-index-hardening.md) documents stable symbol identity and lookup behavior.
+
+## Limitations
+
+- Java source only; no TypeScript, multi-language, embeddings, vector database, compiler, or LSP integration.
+- Tree-sitter analysis cannot prove runtime dispatch, framework-generated implementations, or all generic/fluent call behavior.
+- Token counts are estimates, not model-provider usage telemetry.
+- The local index is an aid to request context, not a substitute for code review or tests.
+
+## Development
 
 ```sh
 npm test
-npm run benchmark
+npm run build
+npm run benchmark:v07
 ```
+
+The V0.7 implementation and acceptance criteria are in [docs/prompt/CONTEXTSLICE_V0.7_DEVELOPER_WORKFLOW_INTEGRATION.md](docs/prompt/CONTEXTSLICE_V0.7_DEVELOPER_WORKFLOW_INTEGRATION.md).

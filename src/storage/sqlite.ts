@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { CallEdge, SymbolRecord } from "../types/model.js";
 
-const INDEX_VERSION = "0.5.2";
+export const INDEX_VERSION = "0.5.2";
 
 export class IndexStorage {
   private readonly db: Database.Database;
@@ -22,6 +22,10 @@ export class IndexStorage {
     const calls = (this.db.prepare("SELECT payload FROM calls").all() as Array<{ payload: string }>).map((row) => JSON.parse(row.payload) as CallEdge);
     return { files, symbols, calls };
   }
+  metadata() {
+    const rows = this.db.prepare("SELECT key, value FROM metadata").all() as Array<{ key: string; value: string }>;
+    return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+  }
   save(files: Map<string, string>, symbols: SymbolRecord[], calls: CallEdge[]) {
     const transaction = this.db.transaction(() => {
       this.db.prepare("DELETE FROM symbols").run();
@@ -32,6 +36,7 @@ export class IndexStorage {
       for (const symbol of symbols) symbolStatement.run(symbol.id, symbol.filePath, JSON.stringify(symbol));
       const callStatement = this.db.prepare("INSERT INTO calls(caller_id, callee_name, payload) VALUES (?, ?, ?)");
       for (const call of calls) callStatement.run(call.callerId, call.calleeName, JSON.stringify(call));
+      this.db.prepare("INSERT OR REPLACE INTO metadata(key, value) VALUES ('last_refreshed_at', ?)").run(new Date().toISOString());
     });
     transaction();
   }

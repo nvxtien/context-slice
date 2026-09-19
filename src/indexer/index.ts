@@ -4,13 +4,27 @@ import { join, relative, resolve } from "node:path";
 import { parseJava } from "../parser/java-parser.js";
 import type { CallEdge, SymbolRecord } from "../types/model.js";
 import { rankSymbol } from "../planner/rank.js";
-import { IndexStorage } from "../storage/sqlite.js";
+import { INDEX_VERSION, IndexStorage } from "../storage/sqlite.js";
 
 const ignored = new Set([".git", "node_modules", "target", "build", "dist", "out", ".gradle", ".idea", ".vscode", ".context-slice"]);
 export class ProjectIndex {
   readonly root: string; symbols: SymbolRecord[] = []; calls: CallEdge[] = []; private hashes = new Map<string, string>(); private readonly storage: IndexStorage;
   constructor(root: string) { this.root = resolve(root); this.storage = new IndexStorage(this.root); }
   private files(dir: string): string[] { return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => { if (ignored.has(entry.name)) return []; const path = join(dir, entry.name); return entry.isDirectory() ? this.files(path) : entry.isFile() && entry.name.endsWith(".java") ? [path] : []; }); }
+  inspect() {
+    const files = this.files(this.root);
+    const previous = this.storage.load();
+    const hashes = new Map<string, string>();
+    for (const file of files) {
+      const filePath = relative(this.root, file);
+      hashes.set(filePath, createHash("sha256").update(readFileSync(file, "utf8")).digest("hex"));
+    }
+    const hasIndex = previous.files.size > 0;
+    const stale = hasIndex && (hashes.size !== previous.files.size || [...hashes].some(([path, hash]) => previous.files.get(path) !== hash));
+    const metadata = this.storage.metadata();
+    return { state: hasIndex ? (stale ? "STALE" as const : "CURRENT" as const) : "UNINITIALIZED" as const, javaFiles: files.length, indexedFiles: previous.files.size, schemaVersion: metadata.schema_version ?? INDEX_VERSION, lastRefreshedAt: metadata.last_refreshed_at };
+  }
+  refresh() { const summary = this.rebuild(); return { summary, freshness: this.inspect() }; }
   rebuild() {
     const started = Date.now(); const files = this.files(this.root); const previous = this.storage.load();
     this.symbols = []; this.calls = []; this.hashes = new Map(); let filesParsed = 0; let cacheHits = 0;

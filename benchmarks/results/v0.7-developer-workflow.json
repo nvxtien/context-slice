@@ -1,0 +1,172 @@
+{
+  "version": "0.7",
+  "generatedAt": "2026-09-19T17:40:20.244Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "telemetry": {
+    "status": "unavailable",
+    "detail": "No Codex or Claude telemetry was provided by this local benchmark runtime."
+  },
+  "installation": {
+    "commands": [
+      "npm install",
+      "npm run build",
+      "npm link"
+    ],
+    "packagePublished": false
+  },
+  "commands": [
+    "context-slice init",
+    "context-slice status",
+    "context-slice doctor",
+    "context-slice preview \"explain retryPayment\"",
+    "context-slice mcp"
+  ],
+  "phases": [
+    {
+      "id": "fresh-init",
+      "samplesMs": [
+        30.217,
+        19.105,
+        10.958
+      ],
+      "medianMs": 19.105,
+      "worstMs": 30.217,
+      "filesReparsed": 4
+    },
+    {
+      "id": "cold-index",
+      "samplesMs": [
+        9.497,
+        11.433,
+        10.891
+      ],
+      "medianMs": 10.891,
+      "worstMs": 11.433,
+      "filesReparsed": 4
+    },
+    {
+      "id": "first-preview",
+      "samplesMs": [
+        5.253,
+        5.558,
+        3.971
+      ],
+      "medianMs": 5.253,
+      "worstMs": 5.558,
+      "filesReparsed": 0
+    },
+    {
+      "id": "warm-preview",
+      "samplesMs": [
+        0.932,
+        1.16,
+        0.645
+      ],
+      "medianMs": 0.932,
+      "worstMs": 1.16
+    },
+    {
+      "id": "one-file-edit-refresh",
+      "samplesMs": [
+        5.587
+      ],
+      "medianMs": 5.587,
+      "worstMs": 5.587,
+      "filesReparsed": 1
+    },
+    {
+      "id": "mcp-startup-query",
+      "samplesMs": [
+        375.256
+      ],
+      "medianMs": 375.256,
+      "worstMs": 375.256
+    },
+    {
+      "id": "mcp-subsequent-query",
+      "samplesMs": [
+        11.253
+      ],
+      "medianMs": 11.253,
+      "worstMs": 11.253
+    }
+  ],
+  "staleIndex": {
+    "behavior": "Preview and MCP refresh the index before serving repository context.",
+    "filesReparsed": 1
+  },
+  "context": {
+    "task": "explain retryPayment",
+    "estimatedTokens": 162,
+    "budget": 1200,
+    "wholeFileFallback": false,
+    "omittedItems": 0
+  },
+  "usabilityChecklist": [
+    {
+      "item": "install command documented",
+      "passed": true
+    },
+    {
+      "item": "init works in repository root",
+      "passed": true
+    },
+    {
+      "item": "init works from nested directory",
+      "passed": true
+    },
+    {
+      "item": "status reports ready state",
+      "passed": true
+    },
+    {
+      "item": "doctor identifies stale cache",
+      "passed": true
+    },
+    {
+      "item": "preview returns context",
+      "passed": true
+    },
+    {
+      "item": "preview respects budget",
+      "passed": true
+    },
+    {
+      "item": "preview can explain inclusions",
+      "passed": true
+    },
+    {
+      "item": "MCP starts with one stable command",
+      "passed": true
+    },
+    {
+      "item": "logs do not corrupt MCP stdout",
+      "passed": true
+    },
+    {
+      "item": "source edit triggers incremental refresh",
+      "passed": true
+    },
+    {
+      "item": "whole-file fallback is visible",
+      "passed": true
+    }
+  ],
+  "errors": {
+    "exitCodes": {
+      "success": 0,
+      "userOrConfiguration": 2,
+      "internal": 1
+    },
+    "observed": []
+  },
+  "limitations": [
+    "Java source parsing only; no multi-language support.",
+    "Token counts are deterministic estimates, not assistant telemetry.",
+    "Fixture timings do not represent universal latency."
+  ],
+  "nextStep": "Run the same workflow against pinned Java repositories when their checkouts are available."
+}
