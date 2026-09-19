@@ -113,7 +113,10 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   let parseError = false;
   let tree: Parser.Tree;
   try {
-    tree = parserFor(filePath).parse(source);
+    // The node binding rejects inputs of 32KB or more, so always feed it in small chunks.
+    tree = parserFor(filePath).parse((index: number) =>
+      source.slice(index, index + 4_096),
+    );
   } catch {
     return { symbols, calls, imports, exports, parseError: true };
   }
@@ -129,6 +132,35 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   };
   const noteBinding = (name: string, type: string | undefined) => {
     if (name && type) scopes.at(-1)!.types.set(name, type);
+  };
+
+  let moduleSymbol: SymbolRecord | undefined;
+  /** Top-level statements need an owner so their calls are not dropped. */
+  const moduleOwner = () => {
+    if (!moduleSymbol) {
+      const name =
+        filePath
+          .split("/")
+          .at(-1)
+          ?.replace(/\.(d\.ts|tsx?|mts|cts)$/, "") ?? filePath;
+      moduleSymbol = {
+        id: `${filePath}::module::${name}`,
+        language: LANGUAGE_ID,
+        kind: "namespace",
+        name,
+        qualifiedName: name,
+        canonicalIdentity: `${filePath}::module::${name}`,
+        signature: `module ${name}`,
+        filePath,
+        range: range(tree.rootNode),
+        annotations: [],
+        modifiers: [],
+        metadata: { moduleScope: true },
+        source: "",
+      };
+      symbols.push(moduleSymbol);
+    }
+    return moduleSymbol;
   };
 
   const addSymbol = (
@@ -739,16 +771,16 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
         return;
       }
       case "call_expression":
-        if (owner) addCall(node, owner);
+        addCall(node, owner ?? moduleOwner());
         walk(node, owner, chain);
         return;
       case "new_expression":
-        if (owner) addNew(node, owner);
+        addNew(node, owner ?? moduleOwner());
         walk(node, owner, chain);
         return;
       case "jsx_opening_element":
       case "jsx_self_closing_element":
-        if (owner) addJsxReference(node, owner);
+        addJsxReference(node, owner ?? moduleOwner());
         walk(node, owner, chain);
         return;
       case "statement_block":
@@ -762,6 +794,20 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   }
 
   walk(tree.rootNode, undefined, []);
+
+  // Two declarations can share a canonical identity (overloads, sibling scopes).
+  const identityCounts = new Map<string, number>();
+  for (const symbol of symbols) {
+    const identity = symbol.canonicalIdentity ?? symbol.id;
+    const count = identityCounts.get(identity) ?? 0;
+    if (count > 0) {
+      const previousId = symbol.id;
+      symbol.id = `${identity}#${count + 1}`;
+      for (const call of calls)
+        if (call.callerId === previousId) call.callerId = symbol.id;
+    }
+    identityCounts.set(identity, count + 1);
+  }
 
   // Declaration files describe APIs; they never contribute executable edges.
   const executableCalls = declarationOnly ? [] : calls;

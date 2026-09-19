@@ -4,6 +4,7 @@ export const renderSignature = (s: SymbolRecord) =>
 export function renderSkeleton(s: SymbolRecord, calls: string[] = []) {
   return [
     renderSignature(s),
+    s.metadata?.exported ? `\nEXPORT\n${s.metadata.exported}` : "",
     s.annotations.length ? `\nANNOTATIONS\n${s.annotations.join("\n")}` : "",
     calls.length ? `\nCALLS\n${calls.join("\n")}` : "",
   ]

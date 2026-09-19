@@ -1,0 +1,37 @@
+[
+  {
+    "id": "express-api-starter-ts",
+    "scale": "small",
+    "url": "https://github.com/w3cj/express-api-starter-ts.git",
+    "commit": "c46ad4526400e0ae6640fdaa94d037aa7573600c",
+    "source": "benchmarks/checkouts/express-api-starter-ts",
+    "scope": "src and test",
+    "kind": "backend"
+  },
+  {
+    "id": "nest-core",
+    "scale": "medium",
+    "url": "https://github.com/nestjs/nest.git",
+    "commit": "14b74ae705904626aa2bbe8ee30ad94f48d16381",
+    "sparse": ["packages/core", "packages/common"],
+    "source": "benchmarks/checkouts/nest-core",
+    "scope": "packages/core and packages/common",
+    "kind": "backend"
+  },
+  {
+    "id": "excalidraw",
+    "scale": "large",
+    "url": "https://github.com/excalidraw/excalidraw.git",
+    "commit": "97c68dd371e13c017a8dcca49f8b3995ba7890a8",
+    "sparse": [
+      "packages/excalidraw",
+      "packages/common",
+      "packages/element",
+      "packages/math",
+      "packages/utils"
+    ],
+    "source": "benchmarks/checkouts/excalidraw",
+    "scope": "packages/excalidraw, common, element, math, utils (React/TSX monorepo)",
+    "kind": "react"
+  }
+]

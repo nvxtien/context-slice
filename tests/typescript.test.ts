@@ -8,6 +8,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawn, spawnSync } from "node:child_process";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { parseTypeScript } from "../src/languages/typescript/parse.js";
@@ -345,3 +346,117 @@ test("parse errors are reported without throwing", () => {
   assert.equal(broken.parseError, true);
   assert.equal(Array.isArray(broken.symbols), true);
 });
+
+test("CLI preview works in a TypeScript repository", () => {
+  const root = fixture("typescript");
+  const cli = (args: string[]) =>
+    spawnSync(
+      join(process.cwd(), "node_modules/.bin/tsx"),
+      [join(process.cwd(), "src/cli.ts"), ...args, "--repo", root],
+      { cwd: process.cwd(), encoding: "utf8" },
+    );
+  assert.equal(cli(["init"]).status, 0);
+  const status = JSON.parse(cli(["status", "--json"]).stdout);
+  assert.equal(status.result.freshness.state, "CURRENT");
+  assert.equal(status.result.freshness.filesByLanguage.TypeScript, 12);
+  const preview = cli(["preview", "explain the order create flow", "--json"]);
+  assert.equal(preview.status, 0, preview.stderr);
+  const body = JSON.parse(preview.stdout).result;
+  assert.equal(body.target.language, "typescript");
+  assert.equal(body.target.qualifiedName, "OrderService.create");
+  assert.ok(body.estimatedTokens <= body.budget);
+  assert.ok(
+    body.included.some((item: { symbol: string }) =>
+      item.symbol.includes("calculateTotal"),
+    ),
+  );
+  rmSync(root, { recursive: true, force: true });
+});
+
+test(
+  "MCP serves TypeScript symbols through the same tools",
+  { timeout: 20_000 },
+  async () => {
+    const root = fixture("tsx");
+    const child = spawn(
+      join(process.cwd(), "node_modules/.bin/tsx"),
+      [join(process.cwd(), "src/cli.ts"), "mcp", "--repo", root],
+      { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] },
+    );
+    const messages: Array<Record<string, any>> = [];
+    const invalid: string[] = [];
+    let buffer = "";
+    let nextId = 1;
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string) => {
+      buffer += chunk;
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines.filter(Boolean)) {
+        try {
+          messages.push(JSON.parse(line));
+        } catch {
+          invalid.push(line);
+        }
+      }
+    });
+    const request = (method: string, params: Record<string, unknown>) =>
+      new Promise<Record<string, any>>((resolve, reject) => {
+        const id = nextId++;
+        const timer = setTimeout(
+          () => reject(new Error(`Timed out waiting for MCP ${method}`)),
+          10_000,
+        );
+        const poll = () => {
+          const at = messages.findIndex((message) => message.id === id);
+          if (at >= 0) {
+            clearTimeout(timer);
+            const message = messages.splice(at, 1)[0];
+            if (message.error) reject(new Error(message.error.message));
+            else resolve(message);
+            return;
+          }
+          setTimeout(poll, 10);
+        };
+        child.stdin.write(
+          `${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`,
+        );
+        poll();
+      });
+    try {
+      await request("initialize", {
+        protocolVersion: "2025-03-26",
+        capabilities: {},
+        clientInfo: { name: "typescript-test", version: "1" },
+      });
+      child.stdin.write(
+        `${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} })}\n`,
+      );
+      const search = await request("tools/call", {
+        name: "context.search",
+        arguments: { query: "CheckoutButton" },
+      });
+      const found = JSON.parse(search.result.content[0].text);
+      assert.equal(found.results[0].language, "typescript");
+      assert.equal(found.results[0].name, "CheckoutButton");
+      const callers = await request("tools/call", {
+        name: "context.callers",
+        arguments: {
+          symbol: "checkout.ts::function::checkout(string)",
+          depth: 1,
+        },
+      });
+      const body = JSON.parse(callers.result.content[0].text);
+      assert.ok(
+        body.callers.some((caller: { id: string }) =>
+          caller.id.includes("handleClick"),
+        ),
+      );
+      assert.deepEqual(invalid, []);
+    } finally {
+      child.kill("SIGTERM");
+      await new Promise((resolve) => child.once("exit", resolve));
+      rmSync(root, { recursive: true, force: true });
+    }
+  },
+);

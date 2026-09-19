@@ -9,6 +9,11 @@ import type {
 import type { ResolveContext } from "../adapter.js";
 
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".mts", ".cts", ".d.ts"];
+/** Imports that can never hold a call target, so they are not "unresolved source". */
+const ASSET_EXTENSIONS =
+  /\.(css|scss|sass|less|styl|svg|png|jpe?g|gif|webp|avif|ico|json|ya?ml|woff2?|ttf|otf|eot|mp[34]|wav|webm|wasm|txt|md|html|graphql|gql)$/i;
+export const isAssetSpecifier = (specifier: string) =>
+  ASSET_EXTENSIONS.test(specifier.split("?")[0]);
 
 /** `paths`/`baseUrl` from the repository tsconfig; the compiler project system is out of scope. */
 export function readTsconfigAliases(root: string) {
@@ -126,6 +131,13 @@ export function buildGraph(context: ResolveContext): TypeScriptGraph {
   const importsByFile = new Map<string, ImportRecord[]>();
   const unresolvedImports: ImportRecord[] = [];
   for (const record of imports) {
+    if (isAssetSpecifier(record.module)) {
+      record.asset = true;
+      const list = importsByFile.get(record.filePath) ?? [];
+      list.push(record);
+      importsByFile.set(record.filePath, list);
+      continue;
+    }
     const resolved = resolveModule(
       record.module,
       record.filePath,
@@ -563,7 +575,7 @@ export function resolveTypeScriptCalls(context: ResolveContext) {
 
 export function typeScriptDiagnostics(context: ResolveContext) {
   const graph = buildGraph(context);
-  const imports = context.imports;
+  const imports = context.imports.filter((record) => !record.asset);
   const exports = context.exports;
   const resolvedImports = imports.filter(
     (record) => record.resolvedFile,
@@ -577,6 +589,7 @@ export function typeScriptDiagnostics(context: ResolveContext) {
       record.kind === "named" && record.importedName !== record.localName,
   );
   return {
+    assetImports: context.imports.filter((record) => record.asset).length,
     importsTotal: imports.length,
     importsResolved: resolvedImports,
     relativeImportResolutionRate: rate(

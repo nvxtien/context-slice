@@ -55,6 +55,8 @@ export interface SymbolMetadata {
   /** Declared type of a function-valued variable's receiver, when syntactic. */
   declaredType?: string;
   async?: boolean;
+  /** Synthetic owner for a file's top-level statements. */
+  moduleScope?: boolean;
 }
 export interface SymbolRecord {
   id: string;
@@ -93,6 +95,8 @@ export interface ImportRecord {
   resolvedFile?: string;
   /** External package name when the module is not repository source. */
   externalPackage?: string;
+  /** Stylesheet, image or other non-source import: never a call target. */
+  asset?: boolean;
   range: SourceRange;
 }
 export interface ExportRecord {

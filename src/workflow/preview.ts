@@ -93,7 +93,7 @@ function renderedSkeleton(
     .filter((call) => call.callerId === symbol.id)
     .map(
       (call) =>
-        `${call.receiverText ? `${call.receiverText}.` : ""}${call.calleeName}(…)`,
+        `${call.receiverText ? `${call.receiverText}.` : ""}${call.calleeName}(…)${call.externalPackage ? ` [external: ${call.externalPackage}]` : ""}`,
     );
   return `// ${relation}\n${renderSkeleton(symbol, calls)}`;
 }

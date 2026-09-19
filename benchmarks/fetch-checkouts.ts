@@ -11,9 +11,14 @@ type Repository = {
   sparse?: string[];
 };
 const root = process.cwd();
-const repositories = JSON.parse(
-  readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
-) as Repository[];
+const manifests = [
+  "benchmarks/repositories.json",
+  "benchmarks/typescript-repositories.json",
+];
+const repositories = manifests.flatMap(
+  (manifest) =>
+    JSON.parse(readFileSync(join(root, manifest), "utf8")) as Repository[],
+);
 const git = (cwd: string, ...args: string[]) =>
   execFileSync("git", args, {
     cwd,
