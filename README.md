@@ -1,6 +1,10 @@
 # ContextSlice
 
-MCP server cục bộ cho Java, giúp coding agent truy xuất context theo symbol thay vì đọc toàn bộ file.
+ContextSlice helps developers reduce the amount of source code placed into an AI coding assistant's context window. It builds a task-specific, minimum sufficient code slice so developers can use fewer input tokens and avoid sending irrelevant whole files.
+
+Less code in context. Fewer tokens. Same required information.
+
+MCP server cục bộ cho Java, giúp developer truy xuất context theo symbol thay vì đọc toàn bộ file.
 
 ## Chạy
 
@@ -37,6 +41,12 @@ V0.4 harden symbol identity và lookup trước khi cân nhắc JDT/LSP. ID cano
 Chạy `npm run benchmark:v04` để chạy lại 15 task v0.3 rồi sinh [benchmarks/results/v0.4-symbol-index-hardening.md](benchmarks/results/v0.4-symbol-index-hardening.md). Stress corpus nằm trong `tests/fixtures/symbol-index/`, với test cho package duplicate, overload, constructor, nested type, record, enum, interface và stable ID.
 
 Kết quả v0.4 trên ba commit đã pin: retrieval recall `100%` (15/15 target), symbol-index failure rate `0%`, symbol fact loss rate `0%`, required-fact recall `100%`. Median token reduction của rerun là `95.05%`; unresolved call và inherited/anonymous semantic behavior vẫn là giới hạn riêng, chưa biện minh cho JDT/LSP.
+
+## Validation v0.6
+
+V0.6 đo developer context efficiency: manual whole-file context so với ContextSlice trên cùng 15 task và ba repository/commit đã pin. Baseline thủ công được lưu audit được trong [benchmarks/manual-context.json](benchmarks/manual-context.json); báo cáo sinh tại `benchmarks/results/v0.6-developer-context-efficiency.md` và `.json`.
+
+Chạy `npm run benchmark:v06` để chạy lại v0.5 rồi sinh report V0.6. Các số token dùng deterministic estimator và được ghi là estimated khi không có assistant telemetry. Required-fact recall và retrieval recall vẫn là correctness guardrail; whole-file avoidance, fallback, context composition, context-window thresholds, cache responsiveness và bounded multi-step context được báo cáo riêng.
 
 ## Validation v0.5
 
