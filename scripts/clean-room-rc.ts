@@ -256,7 +256,10 @@ if (argv.includes("--assistants")) {
     const events = run.stdout.split("\n").filter(Boolean).flatMap((line) => { try { return [JSON.parse(line)]; } catch { return []; } });
     const calls = events.filter((event) => event.item?.type === "mcp_tool_call" && event.type === "item.completed").map((event) => event.item);
     const answer = events.filter((event) => event.item?.type === "agent_message").at(-1)?.item?.text;
-    record("codex", calls.some((call: any) => call.server === "context-slice" && call.status === "completed"), { version: sh("codex", ["--version"], workspace, assistantEnv).stdout.trim(), config: { command: "context-slice", args: ["mcp"] }, exit: run.status, toolCalls: calls.map((call: any) => ({ server: call.server, tool: call.tool, status: call.status, error: call.error })), answer, stderrTail: run.stderr.trim().split("\n").slice(-5) });
+    // A failed turn before any MCP call (usage limit, auth) means the assistant runtime was unavailable, not that ContextSlice failed.
+    const runtimeError = events.find((event) => event.type === "turn.failed")?.error?.message as string | undefined;
+    const unavailable = calls.length === 0 && runtimeError !== undefined && !/mcp|context-slice/i.test(runtimeError);
+    record("codex", unavailable ? "deferred" : calls.some((call: any) => call.server === "context-slice" && call.status === "completed"), { status: unavailable ? `DEFERRED — runtime unavailable: ${runtimeError}` : undefined, version: sh("codex", ["--version"], workspace, assistantEnv).stdout.trim(), config: { command: "context-slice", args: ["mcp"] }, exit: run.status, toolCalls: calls.map((call: any) => ({ server: call.server, tool: call.tool, status: call.status, error: call.error })), answer, stderrTail: run.stderr.trim().split("\n").slice(-5) });
   });
 } else {
   record("claude", "deferred", { reason: "Run with --assistants to exercise Claude Code." });

@@ -43,3 +43,11 @@ test("cache written by an unknown schema version is rebuilt, never reused", () =
   assert.equal(rebuilt.cacheHits, 0);
   assert.equal(index.inspect().schemaVersion, INDEX_VERSION);
 });
+
+test("corrupt cache fails with an actionable INDEX_CORRUPT error", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-"));
+  cpSync(join(process.cwd(), "test-fixtures/java"), root, { recursive: true });
+  mkdirSync(join(root, ".context-slice"), { recursive: true });
+  writeFileSync(join(root, ".context-slice/index.sqlite"), "not a database");
+  assert.throws(() => new ProjectIndex(root), (error: any) => error.code === "INDEX_CORRUPT" && /rm -rf \.context-slice/.test(error.remediation));
+});

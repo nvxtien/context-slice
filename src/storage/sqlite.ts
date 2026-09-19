@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CallEdge, SymbolRecord } from "../types/model.js";
+import { WorkflowError } from "../workflow/errors.js";
 
 export const INDEX_VERSION = "0.5.2";
 
@@ -13,6 +14,11 @@ export class IndexStorage {
     // Self-ignoring cache: keeps `git status` clean without editing the repository's own .gitignore.
     if (!existsSync(join(directory, ".gitignore"))) writeFileSync(join(directory, ".gitignore"), "*\n");
     this.db = new Database(join(directory, "index.sqlite"));
+    try { this.db.pragma("schema_version"); }
+    catch (error) {
+      this.db.close();
+      throw new WorkflowError("INDEX_CORRUPT", `Unreadable index cache: ${join(directory, "index.sqlite")} (${error instanceof Error ? error.message : String(error)})`, "Delete the cache and rebuild it: rm -rf .context-slice && context-slice init");
+    }
     this.db.exec("CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, content_hash TEXT NOT NULL, parse_error INTEGER NOT NULL, indexing_version TEXT NOT NULL); CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, file_path TEXT NOT NULL, payload TEXT NOT NULL); CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY AUTOINCREMENT, caller_id TEXT NOT NULL, callee_name TEXT NOT NULL, payload TEXT NOT NULL);");
     const version = this.db.prepare("SELECT value FROM metadata WHERE key = 'schema_version'").get() as { value?: string } | undefined;
     if (version?.value !== INDEX_VERSION) { this.db.exec(`DELETE FROM files; DELETE FROM symbols; DELETE FROM calls; INSERT OR REPLACE INTO metadata(key, value) VALUES ('schema_version', '${INDEX_VERSION}');`); }

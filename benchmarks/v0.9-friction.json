@@ -58,5 +58,35 @@
     "fix": "accepted: the directory is self-ignored and contains no source; documented that ContextSlice only writes to .context-slice/",
     "regressionTest": "none",
     "status": "ACCEPTED"
+  },
+  {
+    "category": "CACHE",
+    "step": "downgrade/corrupt cache probe",
+    "symptom": "a non-SQLite index.sqlite produced `INTERNAL_ERROR: file is not a database` (exit 1) and advised `context-slice doctor`, which fails the same way",
+    "severity": "MINOR",
+    "rootCause": "SQLite open errors were not mapped to the existing INDEX_CORRUPT workflow error",
+    "fix": "IndexStorage raises INDEX_CORRUPT (exit 2) with remediation `rm -rf .context-slice && context-slice init`",
+    "regressionTest": "tests/cache.test.ts (corrupt cache fails with an actionable INDEX_CORRUPT error)",
+    "status": "FIXED"
+  },
+  {
+    "category": "CODEX",
+    "step": "Codex integration (codex exec with command context-slice, args [mcp])",
+    "symptom": "codex-cli 0.153.4 ended the turn with 'You've hit your usage limit' before any MCP tool call",
+    "severity": "MINOR",
+    "rootCause": "assistant account quota on this host, not ContextSlice",
+    "fix": "none needed in ContextSlice; the RC script now reports a pre-tool runtime failure as DEFERRED instead of FAIL. Rerun `npm run release:rc -- --assistants` once quota resets",
+    "regressionTest": "none",
+    "status": "DEFERRED"
+  },
+  {
+    "category": "OTHER",
+    "step": "preview on spring-petclinic: \"explain the owner update flow\"",
+    "symptom": "target resolves to OwnerController.initUpdateOwnerForm (the GET form handler) with 1 item / 32 tokens, and no callers or callees; processUpdateOwnerForm is the more useful target",
+    "severity": "MINOR",
+    "rootCause": "task-text target ranking prefers the first matching handler; ranking changes are feature work outside v0.9 scope",
+    "fix": "accepted for v0.9; name the symbol in the task (e.g. \"explain processUpdateOwnerForm\") for a richer slice",
+    "regressionTest": "none",
+    "status": "ACCEPTED"
   }
 ]

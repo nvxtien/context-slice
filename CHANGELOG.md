@@ -9,6 +9,7 @@ Clean-room release-candidate validation; no new features.
 - `npm run benchmark:checkouts` fetches the pinned benchmark repositories, so regressions no longer depend on hand-made local clones.
 - `npm run release:rc` runs the clean-room validation.
 - README: `npm ci` before `npm pack`, current tarball name, and documented cache cleanup and uninstall.
+- A corrupt index cache now fails with `INDEX_CORRUPT` and a `rm -rf .context-slice && context-slice init` remediation, instead of `INTERNAL_ERROR`.
 - Fixed the package smoke test's path-with-spaces and nested-cwd checks on macOS, where tmpdir is a symlink.
 
 ## 0.8.0 — packaging milestone (unpublished)
