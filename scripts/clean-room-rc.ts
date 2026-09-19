@@ -12,6 +12,7 @@ import {
   readFileSync,
   readdirSync,
   realpathSync,
+  rmSync,
   statSync,
   symlinkSync,
   writeFileSync,
@@ -162,6 +163,7 @@ async function mcpSession(
   cwd: string,
   env: NodeJS.ProcessEnv,
   probeFile: string,
+  previewTask: string = task,
 ) {
   const child = spawn("/bin/sh", ["-c", "exec context-slice mcp"], {
     cwd,
@@ -232,7 +234,7 @@ async function mcpSession(
     const tools = await request("tools/list", {});
     const preview = await request("tools/call", {
       name: "context.preview",
-      arguments: { task },
+      arguments: { task: previewTask },
     });
     const original = readFileSync(probeFile, "utf8");
     let stale: any;
@@ -888,6 +890,7 @@ await attempt("typeScriptRepository", async () => {
     nestedTs,
     env,
     join(typeScriptRoot, "src/middlewares.ts"),
+    typeScriptTask,
   );
   record(
     "typeScriptRepository",
@@ -1195,12 +1198,23 @@ await attempt("upgrade", () => {
   );
   must(
     sh("npm", ["install", "-g", `./${baseName}`], artifacts, upEnv),
-    "downgrade to 0.8.0",
+    `downgrade to ${baselineVersion}`,
   );
   const downVersion = cs(["--version"], repo, upEnv).stdout.trim();
-  const downStatus = json(cs(["status", "--json"], repo, upEnv)).result
-    .freshness;
+  const downStatusRun = cs(["status", "--json"], repo, upEnv);
+  const downStatus =
+    downStatusRun.status === 0
+      ? json(downStatusRun).result.freshness
+      : { state: "ERROR", schemaVersion: "unreadable" };
   const downPreview = cs(["preview", task], repo, upEnv);
+  // Either the older CLI reads the cache, or it refuses and the documented
+  // cleanup restores it. What must never happen is reinterpreting the data.
+  rmSync(join(repo, ".context-slice"), { recursive: true, force: true });
+  const afterCleanup = cs(["preview", task], repo, upEnv);
+  const downgradeSafe =
+    (downStatus.state === "CURRENT" && downPreview.status === 0) ||
+    (downPreview.status !== 0 && afterCleanup.status === 0);
+  // A cache whose schema is merely newer, with the same table shape, is rebuilt.
   const db2 = new Database(join(repo, ".context-slice/index.sqlite"));
   db2
     .prepare(
@@ -1208,36 +1222,49 @@ await attempt("upgrade", () => {
     )
     .run();
   db2.close();
-  const future = json(cs(["status", "--json"], repo, upEnv)).result.freshness;
+  const futureRun = cs(["status", "--json"], repo, upEnv);
+  const future =
+    futureRun.status === 0
+      ? json(futureRun).result.freshness
+      : { state: "ERROR" };
   const futurePreview = cs(["preview", task], repo, upEnv);
   writeFileSync(join(repo, ".context-slice/index.sqlite"), "not a database");
   const corrupt = cs(["status"], repo, upEnv);
   must(
     sh("npm", ["install", "-g", `./${packed.filename}`], artifacts, upEnv),
-    "reinstall 0.9.0",
+    `reinstall ${packageJson.version}`,
   );
-  const corrupt09 = cs(["status"], repo, upEnv);
+  const corruptCurrent = cs(["status"], repo, upEnv);
   record(
     "downgrade",
     downVersion === baselineVersion &&
-      downStatus.state === "CURRENT" &&
-      downPreview.status === 0 &&
+      downgradeSafe &&
       future.state === "UNINITIALIZED" &&
       futurePreview.status === 0,
     {
       version: downVersion,
-      cacheFrom: packageJson.version,
-      stateOn090Cache: downStatus.state,
+      cacheWrittenBy: packageJson.version,
+      stateOnNewerCache: downStatus.state,
       previewExit: downPreview.status,
-      newerSchemaCache: {
+      previewStderr: downPreview.stderr.trim().split("\n")[0] || "(none)",
+      schemaChangedSincePreviousRelease: true,
+      requiresManualCacheDeletion: downPreview.status !== 0,
+      recoveredAfterCacheDeletion: afterCleanup.status === 0,
+      newerSchemaSameShape: {
         forgedSchema: "99.0.0",
-        stateSeenBy080: future.state,
+        stateSeen: future.state,
         previewExit: futurePreview.status,
         behavior: "discarded and rebuilt; never reused",
       },
       corruptCache: {
-        v080: { exit: corrupt.status, stderr: corrupt.stderr.trim() },
-        v090: { exit: corrupt09.status, stderr: corrupt09.stderr.trim() },
+        previousRelease: {
+          exit: corrupt.status,
+          stderr: corrupt.stderr.trim(),
+        },
+        current: {
+          exit: corruptCurrent.status,
+          stderr: corruptCurrent.stderr.trim(),
+        },
       },
     },
   );

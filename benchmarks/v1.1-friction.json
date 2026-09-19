@@ -188,5 +188,15 @@
     "fix": "accepted and reported: required-fact recall is 95.56%, not 100%, and the gap is attributed to context composition rather than hidden",
     "regressionTest": "v1.1 benchmark task result",
     "status": "ACCEPTED"
+  },
+  {
+    "category": "CACHE",
+    "step": "v1.1 downgrade 1.1.0 -> 1.0.0",
+    "symptom": "the 1.0.0 CLI cannot use a cache written by 1.1.0: it exits 1 with a SQLite error until `.context-slice` is deleted",
+    "severity": "MINOR",
+    "rootCause": "the 1.1.0 schema adds a NOT NULL language column, and the already-released 1.0.0 code inserts without it. 1.0.0 cannot be changed retroactively",
+    "fix": "documented in the changelog, release notes and docs/typescript-support.md: downgrading requires `rm -rf .context-slice`. No data is misread; the failure is loud. Forward upgrades and same-shape schema changes rebuild automatically",
+    "regressionTest": "clean-room downgrade step asserts the failure is loud and that cleanup restores it",
+    "status": "ACCEPTED"
   }
 ]

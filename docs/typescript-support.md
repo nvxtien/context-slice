@@ -6,11 +6,11 @@ Measured behaviour is in [benchmarks/results/v1.1-typescript-support.md](../benc
 
 ## Files
 
-| Extension | Behaviour |
-| --- | --- |
-| `.ts`, `.mts`, `.cts` | Full indexing and call extraction |
-| `.tsx` | Full indexing, plus JSX component references |
-| `.d.ts` | Declarations are indexed as API symbols and marked `declarationOnly`; they never produce call edges |
+| Extension             | Behaviour                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| `.ts`, `.mts`, `.cts` | Full indexing and call extraction                                                                   |
+| `.tsx`                | Full indexing, plus JSX component references                                                        |
+| `.d.ts`               | Declarations are indexed as API symbols and marked `declarationOnly`; they never produce call edges |
 
 Ignored directories: `node_modules`, `dist`, `build`, `out`, `coverage`, `.next`, `.nuxt`, `.turbo`, `.cache`, `storybook-static`.
 
@@ -52,19 +52,19 @@ Stylesheet and image imports (`.css`, `.scss`, `.svg`, …) are marked as assets
 
 ## Call resolution
 
-| Kind | Example | Confidence |
-| --- | --- | --- |
-| `same-file` | `helper()` declared in the same file | exact |
-| `imported` | `createOrder()` from `./order-api` | exact |
-| `aliased-import` | `import { createOrder as makeOrder }` | exact |
-| `default-import` | `import handler from "./order-api"` | exact |
-| `namespace-import` | `math.calculateTotal()` | exact |
-| `this-member` | `this.assertValid()` | exact |
-| `declared-type` | `const service: OrderService`, `this.repository` | exact, or probable for an interface |
-| `constructor` | `new OrderService()` | exact |
-| `static` | `OrderService.create()` | exact |
-| `jsx-reference` | `<OrderSummary />` | exact, separate edge kind |
-| `external-package` | `express()`, `useEffect()` | unresolved, package recorded |
+| Kind               | Example                                          | Confidence                          |
+| ------------------ | ------------------------------------------------ | ----------------------------------- |
+| `same-file`        | `helper()` declared in the same file             | exact                               |
+| `imported`         | `createOrder()` from `./order-api`               | exact                               |
+| `aliased-import`   | `import { createOrder as makeOrder }`            | exact                               |
+| `default-import`   | `import handler from "./order-api"`              | exact                               |
+| `namespace-import` | `math.calculateTotal()`                          | exact                               |
+| `this-member`      | `this.assertValid()`                             | exact                               |
+| `declared-type`    | `const service: OrderService`, `this.repository` | exact, or probable for an interface |
+| `constructor`      | `new OrderService()`                             | exact                               |
+| `static`           | `OrderService.create()`                          | exact                               |
+| `jsx-reference`    | `<OrderSummary />`                               | exact, separate edge kind           |
+| `external-package` | `express()`, `useEffect()`                       | unresolved, package recorded        |
 
 `await` does not change a call's meaning, and optional chaining (`service?.run()`) is preserved as a call without inventing a receiver type.
 
@@ -81,6 +81,18 @@ By design, and reported rather than guessed:
 ## Mixed repositories
 
 Java and TypeScript coexist in one index. Each language resolves only its own call edges, symbol identities cannot collide across languages, and `context-slice status` reports the file count per extension. Cross-language calls are not resolved.
+
+## Cache compatibility
+
+The cache schema is `1.1.0` and records a language per file, symbol and call. Upgrading from an earlier version drops the old cache and rebuilds it on the next command, with nothing to delete by hand.
+
+Downgrading to 1.0.0 or earlier requires deleting the cache first:
+
+```sh
+rm -rf .context-slice
+```
+
+Older versions predate the language column and will fail with an error until the directory is removed. A cache written by a different schema is never reinterpreted.
 
 ## Why no tsserver
 

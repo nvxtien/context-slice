@@ -10,6 +10,7 @@
 - **Benchmark.** 15 TypeScript tasks across three pinned repositories (an Express starter, NestJS core, and Excalidraw's TSX packages): 95.56% required-fact recall, 100% retrieval recall, 83.32% median context reduction, 100% semantic call recall and precision on the fixture ground truth. Java's benchmark is unchanged at 100%/100%/94.55%.
 - **No tsserver.** No required fact was lost to missing type inference, so the compiler API was not added. Evidence is in `benchmarks/results/v1.1-typescript-support.md`.
 - Fixed: files of 32KB or more were silently skipped by the Tree-sitter node binding; they are now parsed in chunks.
+- **Upgrading** from 1.0.0 rebuilds the cache automatically on the next command; nothing to delete. **Downgrading** to 1.0.0 requires `rm -rf .context-slice` first, because 1.0.0 predates the language-aware schema. The older version fails loudly rather than misreading the cache.
 
 Not published to npm. No Git tag or GitHub Release was created.
 
