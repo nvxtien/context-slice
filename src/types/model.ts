@@ -57,6 +57,9 @@ export interface SymbolMetadata {
   async?: boolean;
   /** Synthetic owner for a file's top-level statements. */
   moduleScope?: boolean;
+  /** Python `@classmethod` / `@staticmethod`. */
+  classMethod?: boolean;
+  staticMethod?: boolean;
 }
 export interface SymbolRecord {
   id: string;

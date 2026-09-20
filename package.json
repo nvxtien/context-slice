@@ -48,6 +48,7 @@
     "better-sqlite3": "^11.8.1",
     "tree-sitter": "^0.21.1",
     "tree-sitter-java": "^0.23.5",
+    "tree-sitter-python": "^0.21.0",
     "tree-sitter-typescript": "^0.23.2",
     "zod": "^3.25.76"
   },

@@ -22,6 +22,7 @@ import {
 } from "../languages/adapter.js";
 import "../languages/java.js";
 import "../languages/typescript/index.js";
+import "../languages/python/index.js";
 
 const coreIgnored = new Set([
   ".git",
