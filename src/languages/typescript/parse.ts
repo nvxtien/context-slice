@@ -706,6 +706,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
           parameters,
           signature: `${name}(${parameters})${returnType(node) ? `: ${returnType(node)}` : ""}`,
           bodyNode: body,
+          parentId: owner?.id,
           metadata: {
             async: node.text.startsWith("async "),
             reactComponent: looksLikeComponent(name, node, filePath),
@@ -739,6 +740,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
               parameters,
               signature: `${name}(${parameters})${returnType(value!) ? `: ${returnType(value!)}` : ""}`,
               bodyNode: body,
+              parentId: owner?.id,
               metadata: {
                 async: value!.text.startsWith("async "),
                 reactComponent: looksLikeComponent(name, value!, filePath),

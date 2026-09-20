@@ -3,13 +3,30 @@ import { estimateTokens } from "../planner/budget.js";
 import { rankSymbol } from "../planner/rank.js";
 import { renderSkeleton } from "../render/compact-context.js";
 import type { SymbolRecord } from "../types/model.js";
+import {
+  ALL_COMPOSITION_RULES,
+  composeSiblings,
+  type CompositionReason,
+  type CompositionRules,
+} from "../planner/composition.js";
 import { WorkflowError } from "./errors.js";
 
-export type PreviewReason = "task target" | "direct caller" | "direct callee";
+export type PreviewReason =
+  "task target" | "direct caller" | "direct callee" | CompositionReason;
+
+const COMPOSITION_REASONS: CompositionReason[] = [
+  "same-type shared state",
+  "state accessor",
+  "constructor dependency",
+  "lexical shared state",
+  "enclosing type",
+];
 
 export interface PreviewOptions {
   budget?: number;
   depth?: number;
+  /** Composition heuristics to apply; all of them by default. */
+  composition?: Partial<CompositionRules>;
 }
 
 export interface PreviewItem {
@@ -20,14 +37,26 @@ export interface PreviewItem {
   explanation: string;
   estimatedTokens: number;
   rendered: string;
+  /** Composition entries carry their evidence and score. */
+  evidence?: string[];
+  score?: number;
+  confidence?: "exact" | "probable";
 }
 
 export interface OmittedPreviewItem {
   symbolId?: string;
   symbol: string;
-  reason: "context budget";
+  reason:
+    "context budget" | "composition budget share" | "weak same-type relevance";
   estimatedTokens: number;
+  evidence?: string[];
 }
+
+/**
+ * Composition may use at most this share of the budget, so sibling context
+ * fills spare capacity and never crowds out the target, callers or callees.
+ */
+export const COMPOSITION_BUDGET_SHARE = 0.35;
 
 export interface UnresolvedPreviewCall {
   calleeName: string;
@@ -143,6 +172,9 @@ export function buildPreview(
     "task target": 0,
     "direct caller": 0,
     "direct callee": 0,
+    ...(Object.fromEntries(
+      COMPOSITION_REASONS.map((reason) => [reason, 0]),
+    ) as Record<CompositionReason, number>),
   };
   let estimatedTokens = 0;
   const add = (
@@ -150,6 +182,7 @@ export function buildPreview(
     reason: PreviewReason,
     rendered: string,
     explanation: string,
+    extra: Pick<PreviewItem, "evidence" | "score" | "confidence"> = {},
   ) => {
     const tokens = estimateTokens(rendered);
     if (estimatedTokens + tokens > budget) {
@@ -169,6 +202,7 @@ export function buildPreview(
       explanation,
       estimatedTokens: tokens,
       rendered,
+      ...extra,
     });
     estimatedTokens += tokens;
     composition[reason] += tokens;
@@ -205,6 +239,41 @@ export function buildPreview(
       item.reason,
       renderedSkeleton(index, item.symbol, item.relation),
       `${item.relation} of ${target.qualifiedName ?? target.name}.`,
+    );
+  }
+
+  // Same-enclosing-type composition runs after callers and callees, so it can
+  // only use budget they left, and never replaces them.
+  const rules: CompositionRules = {
+    ...ALL_COMPOSITION_RULES,
+    ...(options.composition ?? {}),
+  };
+  let compositionTokens = 0;
+  const compositionAllowance = Math.floor(budget * COMPOSITION_BUDGET_SHARE);
+  for (const candidate of composeSiblings(index, target, rules, includedIds)) {
+    if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
+    if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
+      omitted.push({
+        symbolId: candidate.symbol?.id,
+        symbol: candidate.label,
+        reason: "composition budget share",
+        estimatedTokens: candidate.estimatedTokens,
+        evidence: candidate.evidence,
+      });
+      continue;
+    }
+    if (candidate.symbol) includedIds.add(candidate.symbol.id);
+    compositionTokens += candidate.estimatedTokens;
+    add(
+      candidate.symbol ?? target,
+      candidate.reason,
+      candidate.rendered,
+      candidate.evidence.join("; "),
+      {
+        evidence: candidate.evidence,
+        score: candidate.score,
+        confidence: candidate.confidence,
+      },
     );
   }
 

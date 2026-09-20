@@ -44,7 +44,7 @@ The package is publish-ready but is not currently published to the npm registry.
 ```sh
 npm ci
 npm pack
-npm install -g ./context-slice-1.1.0.tgz
+npm install -g ./context-slice-1.2.0.tgz
 context-slice --version
 ```
 
@@ -138,6 +138,8 @@ Included:
 - direct callee: demo.PaymentService.audit — Direct callee of demo.PaymentService.retryPayment.
 ```
 
+ContextSlice may also include sibling members that share state or local semantics with the target — a field it writes, the getter that exposes it, the constructor that supplies a dependency — plus a declaration-line skeleton of the enclosing type. It does not expand to the whole class or file. See [docs/context-composition.md](docs/context-composition.md).
+
 The target body is always first. Related symbols use compact skeletons. The command never silently exceeds its budget; skipped candidates are reported as `context budget`, and unresolved calls remain unresolved rather than being guessed.
 
 ## Codex setup
@@ -220,6 +222,7 @@ Run the TypeScript benchmark with `npm run benchmark:v11`; its report is [v1.1 T
 - Target selection from task text is heuristic and may choose a nearby but not ideal symbol. Naming the method in the task gives a better slice.
 - Tree-sitter analysis cannot prove runtime dispatch, framework-generated implementations, or all generic/fluent call behavior.
 - Token counts are estimates, not model-provider usage telemetry.
+- Sibling composition uses syntactic evidence (`this.field` and Java field names). State shared through an intermediate object is not detected.
 - The local index is an aid to request context, not a substitute for code review or tests.
 - Validated on macOS arm64 (Node 20.19.5 and 22.12.0). Linux and Windows are unverified.
 - Usability evidence comes from a scripted self clean-room trial; no external developer trial has been run yet.

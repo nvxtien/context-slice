@@ -1,6 +1,6 @@
 {
   "version": "1.1",
-  "generatedAt": "2026-09-19T23:18:32.214Z",
+  "generatedAt": "2026-09-20T00:23:26.331Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -49,8 +49,8 @@
         "cyclicExportChains": 0
       },
       "performance": {
-        "coldIndexMs": 19,
-        "warmIndexMs": 5,
+        "coldIndexMs": 21,
+        "warmIndexMs": 4,
         "singleFileRefreshMs": 5,
         "previewMs": 10,
         "filesIndexed": 10
@@ -74,19 +74,19 @@
       "types": 84,
       "reactComponents": 0,
       "callEdges": 18570,
-      "callEdgesExact": 4925,
+      "callEdgesExact": 4965,
       "callEdgesProbable": 35,
-      "callEdgesUnresolved": 13610,
+      "callEdgesUnresolved": 13570,
       "externalCallEdges": 458,
       "resolutionKindCounts": {
-        "unresolved": 12876,
-        "imported": 496,
+        "unresolved": 12836,
+        "imported": 494,
         "constructor": 1758,
-        "same-file": 381,
+        "same-file": 392,
         "external-package": 458,
         "static": 264,
-        "this-member": 585,
-        "declared-type": 1752
+        "this-member": 608,
+        "declared-type": 1760
       },
       "imports": {
         "assetImports": 0,
@@ -104,10 +104,10 @@
         "cyclicExportChains": 0
       },
       "performance": {
-        "coldIndexMs": 1107,
-        "warmIndexMs": 807,
-        "singleFileRefreshMs": 832,
-        "previewMs": 111,
+        "coldIndexMs": 1175,
+        "warmIndexMs": 774,
+        "singleFileRefreshMs": 758,
+        "previewMs": 128,
         "filesIndexed": 567
       }
     },
@@ -131,18 +131,18 @@
       "types": 524,
       "reactComponents": 237,
       "callEdges": 54428,
-      "callEdgesExact": 22775,
+      "callEdgesExact": 22750,
       "callEdgesProbable": 5,
-      "callEdgesUnresolved": 31648,
+      "callEdgesUnresolved": 31673,
       "externalCallEdges": 1300,
       "resolutionKindCounts": {
-        "unresolved": 29323,
+        "unresolved": 29348,
         "static": 4887,
-        "same-file": 4767,
+        "same-file": 4745,
         "constructor": 967,
-        "declared-type": 1812,
-        "this-member": 652,
-        "imported": 9446,
+        "declared-type": 1820,
+        "this-member": 658,
+        "imported": 9429,
         "external-package": 1300,
         "jsx-reference": 1162,
         "aliased-import": 4,
@@ -165,10 +165,10 @@
         "cyclicExportChains": 0
       },
       "performance": {
-        "coldIndexMs": 3207,
-        "warmIndexMs": 3395,
-        "singleFileRefreshMs": 3669,
-        "previewMs": 402,
+        "coldIndexMs": 3353,
+        "warmIndexMs": 3815,
+        "singleFileRefreshMs": 3784,
+        "previewMs": 331,
         "filesIndexed": 597
       }
     }

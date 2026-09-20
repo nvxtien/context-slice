@@ -271,15 +271,26 @@ export function resolveTypeScriptCalls(context: ResolveContext) {
           ? candidates[0]
           : undefined;
   };
-  const localCallable = (file: string, name: string) =>
-    primary(
-      (symbolsByFile.get(file) ?? []).filter(
-        (candidate) =>
-          candidate.name === name &&
-          !candidate.parentId &&
-          CALLABLE.has(candidate.kind),
-      ),
+  /**
+   * A bare call resolves to the nearest lexical scope: a callable nested in the
+   * caller, a sibling in the same scope, then a module-level declaration.
+   */
+  const localCallable = (file: string, name: string, caller?: SymbolRecord) => {
+    const candidates = (symbolsByFile.get(file) ?? []).filter(
+      (candidate) => candidate.name === name && CALLABLE.has(candidate.kind),
     );
+    const scopes = [
+      (candidate: SymbolRecord) => candidate.parentId === caller?.id,
+      (candidate: SymbolRecord) =>
+        Boolean(caller?.parentId) && candidate.parentId === caller?.parentId,
+      (candidate: SymbolRecord) => !candidate.parentId,
+    ];
+    for (const inScope of scopes) {
+      const found = primary(candidates.filter(inScope));
+      if (found) return found;
+    }
+    return undefined;
+  };
   const localType = (file: string, name: string) =>
     (symbolsByFile.get(file) ?? []).find(
       (candidate) =>
@@ -352,7 +363,7 @@ export function resolveTypeScriptCalls(context: ResolveContext) {
     }
 
     if (call.resolutionKind === "jsx-reference") {
-      const local = localCallable(file, call.calleeName);
+      const local = localCallable(file, call.calleeName, caller);
       if (local) {
         settle(
           call,
@@ -517,7 +528,7 @@ export function resolveTypeScriptCalls(context: ResolveContext) {
     }
 
     // Bare call: same-file, then imported.
-    const local = localCallable(file, call.calleeName);
+    const local = localCallable(file, call.calleeName, caller);
     if (local) {
       settle(
         call,

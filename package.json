@@ -1,6 +1,6 @@
 {
   "name": "context-slice",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -40,7 +40,8 @@
     "benchmark:v08": "npm run package-smoke",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "benchmark:v11": "npm run benchmark:checkouts && tsx benchmarks/v1.1-typescript-support.ts"
+    "benchmark:v11": "npm run benchmark:checkouts && tsx benchmarks/v1.1-typescript-support.ts",
+    "benchmark:v12": "npm run benchmark:checkouts && tsx benchmarks/v1.2-context-composition.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
