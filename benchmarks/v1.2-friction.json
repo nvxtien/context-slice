@@ -241,12 +241,12 @@
   },
   {
     "category": "OTHER",
-    "step": "v1.2 per-rule retention",
-    "symptom": "four of five composition rules recovered no required fact in the 30 real tasks",
+    "step": "v1.2 rule retention review",
+    "symptom": "four of five composition rules recovered no required fact across the 30 benchmark tasks while costing 966 tokens, and Java lost 0.63 points of context reduction",
     "severity": "MINOR",
-    "rootCause": "the benchmark corpus does not contain those patterns; they are real but unmeasured there",
-    "fix": "retained on a targeted corpus (6 positive, 4 negative cases) and reported as recovering nothing on the real tasks, with their token cost stated",
-    "regressionTest": "tests/composition.test.ts and the v1.2 benchmark targeted-corpus section",
-    "status": "ACCEPTED"
+    "rootCause": "the rules were kept on a targeted fixture corpus written to justify them, not on measured benefit",
+    "fix": "removed shared-state, accessor, constructor-dependency and lexical-closure composition with their fixtures and tests; only the enclosing-type skeleton remains. Java context reduction returned to 94.55% and TypeScript recall stayed at 100%",
+    "regressionTest": "tests/composition.test.ts (4 tests) and the v1.2 benchmark comparison",
+    "status": "FIXED"
   }
 ]

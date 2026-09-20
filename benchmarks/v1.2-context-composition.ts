@@ -2,11 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { estimateTokens } from "../src/planner/budget.js";
-import {
-  ALL_COMPOSITION_RULES,
-  composeSiblings,
-  type CompositionRules,
-} from "../src/planner/composition.js";
+import { composeSiblings } from "../src/planner/composition.js";
 import type { SymbolRecord } from "../src/types/model.js";
 import { COMPOSITION_BUDGET_SHARE } from "../src/workflow/preview.js";
 import {
@@ -64,46 +60,17 @@ const suites: Suite[] = [
   },
 ];
 
-/** v1.1 composition: target, callers, callees. No sibling expansion. */
-const NO_COMPOSITION: CompositionRules = {
-  sharedState: false,
-  accessors: false,
-  constructorDependency: false,
-  lexicalSharedState: false,
-  enclosingType: false,
-};
-const only = (rule: keyof CompositionRules): CompositionRules => ({
-  ...NO_COMPOSITION,
-  [rule]: true,
-});
 const configurations: Array<{
   id: string;
   label: string;
-  rules: CompositionRules;
+  composition: boolean;
 }> = [
-  { id: "v1.1-baseline", label: "v1.1 baseline", rules: NO_COMPOSITION },
+  { id: "v1.1-baseline", label: "v1.1 baseline", composition: false },
   {
-    id: "shared-state",
-    label: "+ shared-state rule",
-    rules: only("sharedState"),
+    id: "v1.2-all",
+    label: "v1.2 (enclosing-type skeleton)",
+    composition: true,
   },
-  { id: "accessors", label: "+ accessor rule", rules: only("accessors") },
-  {
-    id: "constructor-dependency",
-    label: "+ constructor-dependency rule",
-    rules: only("constructorDependency"),
-  },
-  {
-    id: "lexical-shared-state",
-    label: "+ lexical-shared-state rule",
-    rules: only("lexicalSharedState"),
-  },
-  {
-    id: "enclosing-type",
-    label: "+ enclosing-type skeleton",
-    rules: only("enclosingType"),
-  },
-  { id: "v1.2-all", label: "v1.2 (all rules)", rules: ALL_COMPOSITION_RULES },
 ];
 
 type Entry = {
@@ -126,7 +93,7 @@ function targetFor(index: ProjectIndex, name: string) {
 function contextEntries(
   index: ProjectIndex,
   target: SymbolRecord,
-  rules: CompositionRules,
+  composition: boolean,
 ): Entry[] {
   const entries: Entry[] = [
     {
@@ -157,7 +124,9 @@ function contextEntries(
       reason: "direct callee",
     });
   }
-  for (const candidate of composeSiblings(index, target, rules, seen)) {
+  for (const candidate of composition
+    ? composeSiblings(index, target, seen)
+    : []) {
     if (candidate.symbol && seen.has(candidate.symbol.id)) continue;
     if (candidate.symbol) seen.add(candidate.symbol.id);
     entries.push({
@@ -272,7 +241,7 @@ function evaluate() {
         const manual = manualTokens(repositoryRoot, baseline);
         for (const configuration of configurations) {
           const entries = target
-            ? contextEntries(index, target, configuration.rules)
+            ? contextEntries(index, target, configuration.composition)
             : [];
           const sweep = budgets.map((budget) => {
             const selected = select(entries, budget);
@@ -401,91 +370,9 @@ function aggregate(rows: any[], language: string, configuration: string) {
   };
 }
 
-/**
- * The targeted corpus exercises composition patterns the 30 real tasks do not
- * contain. It is reported separately and never mixed into benchmark numbers.
- */
-function targetedCorpus() {
-  const corpusRoot = resolve(root, "tests/fixtures/context-composition");
-  if (!existsSync(corpusRoot)) return [];
-  const index = new ProjectIndex(corpusRoot);
-  index.rebuild();
-  const find = (qualified: string) =>
-    index.symbols.find(
-      (symbol) =>
-        symbol.qualifiedName === qualified && symbol.kind !== "namespace",
-    );
-  const positives: Array<{
-    target: string;
-    expects: string;
-    rule: keyof CompositionRules;
-  }> = [
-    { target: "Cart.add", expects: "Cart.getTotal", rule: "accessors" },
-    { target: "Cart.add", expects: "Cart.total", rule: "sharedState" },
-    {
-      target: "OrderService.create",
-      expects: "OrderService.constructor",
-      rule: "constructorDependency",
-    },
-    {
-      target: "Checkout.submit",
-      expects: "Checkout.preview",
-      rule: "lexicalSharedState",
-    },
-    {
-      target: "demo.Counter.increment",
-      expects: "demo.Counter.current",
-      rule: "sharedState",
-    },
-    {
-      target: "BigService.target",
-      expects: "BigService",
-      rule: "enclosingType",
-    },
-  ];
-  const negatives = [
-    { target: "Cart.add", forbids: "Cart.unrelated" },
-    { target: "OrderService.create", forbids: "OrderService.announce" },
-    { target: "Checkout.submit", forbids: "Checkout.unrelatedHelper" },
-    { target: "demo.Counter.increment", forbids: "demo.Counter.describe" },
-  ];
-  return [
-    ...positives.map((item) => {
-      const target = find(item.target);
-      const labels = target
-        ? composeSiblings(index, target, {
-            ...NO_COMPOSITION,
-            [item.rule]: true,
-          }).map((candidate) => candidate.label)
-        : [];
-      return {
-        kind: "positive" as const,
-        rule: item.rule as string,
-        target: item.target,
-        expects: item.expects,
-        satisfied: labels.includes(item.expects),
-      };
-    }),
-    ...negatives.map((item) => {
-      const target = find(item.target);
-      const labels = target
-        ? composeSiblings(index, target).map((candidate) => candidate.label)
-        : [];
-      return {
-        kind: "negative" as const,
-        rule: "all",
-        target: item.target,
-        expects: `not ${item.forbids}`,
-        satisfied: !labels.includes(item.forbids),
-      };
-    }),
-  ];
-}
-
 function run() {
   mkdirSync(outputDir, { recursive: true });
   const rows = evaluate();
-  const targeted = targetedCorpus();
   const languages = ["typescript", "java"] as const;
   const summary = Object.fromEntries(
     languages.map((language) => [
@@ -539,33 +426,15 @@ function run() {
           );
         })
         .map((row) => row.task);
-      const ruleKey = (
-        {
-          "shared-state": "sharedState",
-          accessors: "accessors",
-          "constructor-dependency": "constructorDependency",
-          "lexical-shared-state": "lexicalSharedState",
-          "enclosing-type": "enclosingType",
-        } as Record<string, string>
-      )[configuration.id];
-      const targetedCases = targeted.filter(
-        (item) => item.kind === "positive" && item.rule === ruleKey,
-      );
       return {
         rule: configuration.id,
         label: configuration.label,
         recoveredFacts: recovered,
         recoveredCount: recovered.length,
-        targetedCasesSatisfied: targetedCases.filter((item) => item.satisfied)
-          .length,
-        targetedCasesTotal: targetedCases.length,
         loweredMinimumBudget: loweredBudget,
         addedTokens: tokens,
         factRecoveryEfficiency: tokens ? recovered.length / tokens : 0,
-        retained:
-          recovered.length > 0 ||
-          loweredBudget.length > 0 ||
-          targetedCases.some((item) => item.satisfied),
+        retained: recovered.length > 0 || loweredBudget.length > 0,
       };
     });
 
@@ -605,19 +474,6 @@ function run() {
       "After callers and callees, compose members of the target's enclosing type that share state with it, plus a declaration-line skeleton of the type. Sibling bodies require shared-state evidence; the skeleton never includes bodies.",
     summary,
     attribution,
-    targetedCorpus: {
-      cases: targeted,
-      positivesSatisfied: targeted.filter(
-        (item) => item.kind === "positive" && item.satisfied,
-      ).length,
-      positivesTotal: targeted.filter((item) => item.kind === "positive")
-        .length,
-      negativesSatisfied: targeted.filter(
-        (item) => item.kind === "negative" && item.satisfied,
-      ).length,
-      negativesTotal: targeted.filter((item) => item.kind === "negative")
-        .length,
-    },
     inflation: {
       rows: inflation,
       medianDelta: median(inflation.map((row) => row.delta)),
@@ -669,28 +525,13 @@ function run() {
     "",
     "Each rule measured alone against the v1.1 baseline.",
     "",
-    "| Rule | Facts recovered (30 real tasks) | Targeted cases | Added tokens | Facts per 1k tokens | Retained |",
-    "| --- | --- | --- | --- | --- | --- |",
+    "| Rule | Facts recovered | Added tokens | Facts per 1k tokens | Retained |",
+    "| --- | --- | --- | --- | --- |",
     ...attribution.map(
       (row) =>
-        `| ${row.label} | ${row.recoveredCount} | ${row.targetedCasesTotal ? `${row.targetedCasesSatisfied}/${row.targetedCasesTotal}` : "—"} | ${row.addedTokens} | ${(row.factRecoveryEfficiency * 1000).toFixed(2)} | ${row.retained ? "yes" : "no"} |`,
+        `| ${row.label} | ${row.recoveredCount} | ${row.addedTokens} | ${(row.factRecoveryEfficiency * 1000).toFixed(2)} | ${row.retained ? "yes" : "no"} |`,
     ),
     "",
-    `Targeted corpus: ${report.targetedCorpus.positivesSatisfied}/${report.targetedCorpus.positivesTotal} positive cases composed the expected sibling; ${report.targetedCorpus.negativesSatisfied}/${report.targetedCorpus.negativesTotal} negative cases correctly left the unrelated sibling out. These patterns do not occur in the 30 real tasks.`,
-    "",
-    attribution.some((row) => row.recoveredCount === 0)
-      ? `Rules that recovered no required fact in the 30 real tasks: ${attribution
-          .filter((row) => row.recoveredCount === 0)
-          .map((row) => row.label)
-          .join(
-            ", ",
-          )}. They are retained on targeted-corpus evidence, and together cost ${attribution
-          .filter((row) => row.recoveredCount === 0)
-          .reduce(
-            (sum, row) => sum + row.addedTokens,
-            0,
-          )} tokens across all 30 tasks.`
-      : "Every rule recovered at least one required fact in the real tasks.",
     "",
     "## Context inflation",
     "",

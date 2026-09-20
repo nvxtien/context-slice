@@ -12,7 +12,7 @@ Evidence:
 ## Definition of done
 
 - [x] build passes
-- [x] all tests pass (70, including 9 targeted composition tests)
+- [x] all tests pass (65, including 4 composition tests)
 - [x] Java regressions pass: required-fact recall 100%, retrieval recall 100%
 - [x] TypeScript regressions pass: semantic call recall 100%, precision 100%
 - [x] targeted composition tests pass, including negative cases
@@ -20,7 +20,7 @@ Evidence:
 - [x] TypeScript required-fact recall reaches 100%
 - [x] retrieval recall remains 100%
 - [x] semantic call metrics do not regress
-- [x] context reduction reported: TypeScript 86.39%, Java 93.92%
+- [x] context reduction reported: TypeScript 86.39%, Java 94.55% (unchanged)
 - [x] context inflation reported: median 0 tokens per task, worst case +181
 - [x] whole-file fallback reported: 6.67% → 0%
 - [x] whole-class fallback reported: 0%
@@ -44,28 +44,23 @@ Evidence:
 | TS median context reduction   | 85.94% | 86.39%   |
 | Java required-fact recall     | 100%   | 100%     |
 | Java retrieval recall         | 100%   | 100%     |
-| Java median context reduction | 94.55% | 93.92%   |
+| Java median context reduction | 94.55% | 94.55%   |
 | Whole-class fallback          | n/a    | 0%       |
 
 ## Heuristics retained
 
-| Rule                    | Facts recovered (30 real tasks) | Targeted cases | Retained because                                          |
-| ----------------------- | ------------------------------- | -------------- | --------------------------------------------------------- |
-| enclosing-type skeleton | 2                               | 1/1            | recovered both missing facts at 11.56 facts per 1k tokens |
-| shared-state            | 0                               | 2/2            | targeted corpus; the real tasks contain no such pattern   |
-| accessor                | 0                               | 1/1            | targeted corpus                                           |
-| constructor-dependency  | 0                               | 1/1            | targeted corpus                                           |
-| lexical-shared-state    | 0                               | 1/1            | targeted corpus; costs 0 tokens on the real tasks         |
+| Rule                    | Facts recovered | Added tokens | Facts per 1k tokens | Retained |
+| ----------------------- | --------------- | ------------ | ------------------- | -------- |
+| enclosing-type skeleton | 2               | 173          | 11.56               | yes      |
 
-The four state-sharing rules recovered nothing on the 30 benchmark tasks and cost 966 tokens across them. They are kept on targeted-corpus evidence, and that trade is stated rather than hidden. If a later benchmark still shows no benefit, remove them.
+Four state-sharing rules (shared field, accessor, constructor dependency, lexical closure) were implemented, measured, and **removed**: across the 30 benchmark tasks they recovered no required fact and cost 966 tokens. Only the skeleton earned its place.
 
 ## Known limitations
 
-- Shared state is detected syntactically. State reached through an intermediate object, a passed closure, or reflection is not detected.
+- Declaration lines only: a required detail inside a sibling's body is not carried.
 - Java fields are analysed from source but not indexed, so they never appear in search results.
 - The skeleton caps at 12 member declaration lines; the rest is a count.
-- Composition looks one level out, to the enclosing type or function, and never across files.
-- Java pays about 0.6 points of context reduction for composition that recovers no Java fact, because Java recall was already complete.
+- Composition looks one level out, to the enclosing type, and never across files.
 
 ## Not done
 

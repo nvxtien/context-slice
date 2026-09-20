@@ -4,29 +4,21 @@ import { rankSymbol } from "../planner/rank.js";
 import { renderSkeleton } from "../render/compact-context.js";
 import type { SymbolRecord } from "../types/model.js";
 import {
-  ALL_COMPOSITION_RULES,
   composeSiblings,
   type CompositionReason,
-  type CompositionRules,
 } from "../planner/composition.js";
 import { WorkflowError } from "./errors.js";
 
 export type PreviewReason =
   "task target" | "direct caller" | "direct callee" | CompositionReason;
 
-const COMPOSITION_REASONS: CompositionReason[] = [
-  "same-type shared state",
-  "state accessor",
-  "constructor dependency",
-  "lexical shared state",
-  "enclosing type",
-];
+const COMPOSITION_REASONS: CompositionReason[] = ["enclosing type"];
 
 export interface PreviewOptions {
   budget?: number;
   depth?: number;
-  /** Composition heuristics to apply; all of them by default. */
-  composition?: Partial<CompositionRules>;
+  /** Set false to slice without the enclosing-type skeleton. */
+  composition?: boolean;
 }
 
 export interface PreviewItem {
@@ -244,13 +236,13 @@ export function buildPreview(
 
   // Same-enclosing-type composition runs after callers and callees, so it can
   // only use budget they left, and never replaces them.
-  const rules: CompositionRules = {
-    ...ALL_COMPOSITION_RULES,
-    ...(options.composition ?? {}),
-  };
   let compositionTokens = 0;
   const compositionAllowance = Math.floor(budget * COMPOSITION_BUDGET_SHARE);
-  for (const candidate of composeSiblings(index, target, rules, includedIds)) {
+  const siblings =
+    options.composition === false
+      ? []
+      : composeSiblings(index, target, includedIds);
+  for (const candidate of siblings) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
       omitted.push({
@@ -271,8 +263,6 @@ export function buildPreview(
       candidate.evidence.join("; "),
       {
         evidence: candidate.evidence,
-        score: candidate.score,
-        confidence: candidate.confidence,
       },
     );
   }

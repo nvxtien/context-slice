@@ -2,15 +2,14 @@
 
 ## 1.2.0 — context composition hardening (unpublished)
 
-Closes the v1.1 composition gap: required facts that live in a sibling of the target rather than in the target itself.
+Closes the v1.1 composition gap: required facts that live beside the target rather than inside it.
 
-- **Same-type composition.** After callers and callees, a slice may include members of the target's enclosing type that share state with it: a field the target reads or writes, a getter or setter for that field, a constructor that supplies a dependency, or a sibling closure sharing a local. Each carries its evidence.
-- **Enclosing-type skeleton.** Declaration lines only — the type's own line, its fields, and up to 12 member signatures — so the assistant sees what sits next to the target without receiving any of their bodies.
-- **Never a whole-class dump.** Composition may use at most 35% of the token budget, is reported item by item in `--explain`, and records why a candidate was left out. Whole-class fallback rate: 0%.
-- **Results (15 TypeScript tasks).** Required-fact recall 95.56% → **100%**, sibling-context recall 0% → **100%**, whole-file fallback 6.67% → **0%**, median context reduction 85.94% → 86.39%. The worst task dropped from 1,614 to 244 tokens because it now reaches full recall at a much smaller budget.
-- **Java (15 tasks).** Required-fact recall and retrieval recall stay at 100%. Median context reduction moves 94.55% → 93.92%: composition recovers no fact there, because recall was already complete, and costs about 0.6 points.
-- **Per-rule evidence.** Each heuristic was measured alone. The skeleton recovered both missing facts (11.56 facts per 1k tokens). The four state-sharing rules recovered none of the 30 real tasks' facts and are retained on a targeted corpus of 6 positive and 4 negative cases.
-- Fixed: nested callables now record their enclosing callable, and a bare call resolves to the nearest lexical scope rather than only module level.
+- **Enclosing-type skeleton.** A slice for a class member now carries its type's declaration line, field declarations and up to 12 member declaration lines — never a body, so it can never become a whole-class dump. Java fields are read from source for this without being indexed as symbols.
+- **Budgeted.** Composition runs after callers and callees and may use at most 35% of the budget, so sibling context fills spare capacity instead of displacing primary context. Omissions are reported with a reason.
+- **Results (15 TypeScript tasks).** Required-fact recall 95.56% → **100%**, sibling-context recall 0% → **100%**, whole-file fallback 6.67% → **0%**, whole-class fallback 0%, median context reduction 85.94% → 86.39%. The worst task fell from 1,614 to 244 tokens by reaching full recall at a smaller budget.
+- **Java unchanged.** Required-fact recall, retrieval recall and median context reduction (94.55%) all hold exactly.
+- **Four rules built, measured, deleted.** Shared-field, accessor, constructor-dependency and lexical-closure composition recovered no required fact across the 30 benchmark tasks and cost 966 tokens, so they were removed rather than kept on synthetic evidence.
+- Fixed: nested callables now record their enclosing callable, and a bare call resolves to the nearest lexical scope rather than module level only.
 
 Not published to npm. No Git tag or GitHub Release was created.
 
