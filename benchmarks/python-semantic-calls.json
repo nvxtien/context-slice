@@ -1,0 +1,205 @@
+[
+  {
+    "id": "same-module-and-lexical",
+    "fixture": "python",
+    "caller": "src/orders/service.py::function::outer()",
+    "expected": [
+      {
+        "callee": "inner",
+        "target": "src/orders/service.py::outer::function::inner()",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "same-module"
+      }
+    ]
+  },
+  {
+    "id": "nested-function-call",
+    "fixture": "python",
+    "caller": "src/orders/service.py::outer::function::inner()",
+    "expected": [
+      {
+        "callee": "helper",
+        "target": "src/orders/service.py::function::helper()",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "same-module"
+      }
+    ]
+  },
+  {
+    "id": "self-and-attribute-receivers",
+    "fixture": "python",
+    "caller": "src/orders/service.py::OrderService::method::create(self, order)",
+    "expected": [
+      {
+        "callee": "count",
+        "target": "src/orders/service.py::OrderService::method::count(self)",
+        "confidence": "exact",
+        "kind": "this-member",
+        "category": "self-method"
+      },
+      {
+        "callee": "save",
+        "target": "src/orders/repo/sql.py::SqlRepo::method::save(self, order)",
+        "confidence": "exact",
+        "kind": "declared-type",
+        "category": "self-field-receiver"
+      },
+      {
+        "callee": "check_order",
+        "target": "src/orders/validation.py::function::validate_order(order)",
+        "confidence": "exact",
+        "kind": "aliased-import",
+        "category": "aliased-import"
+      }
+    ]
+  },
+  {
+    "id": "cls-receivers",
+    "fixture": "python",
+    "caller": "src/orders/service.py::OrderService::method::build(cls)",
+    "expected": [
+      {
+        "callee": "default",
+        "target": "src/orders/service.py::OrderService::method::default(cls)",
+        "confidence": "exact",
+        "kind": "this-member",
+        "category": "cls-method"
+      }
+    ]
+  },
+  {
+    "id": "cls-construction",
+    "fixture": "python",
+    "caller": "src/orders/service.py::OrderService::method::default(cls)",
+    "expected": [
+      {
+        "callee": "cls",
+        "target": "src/orders/service.py::OrderService::constructor::__init__(self, repo)",
+        "confidence": "exact",
+        "kind": "constructor",
+        "category": "cls-construction"
+      },
+      {
+        "callee": "SqlRepo",
+        "target": "src/orders/repo/sql.py::SqlRepo::constructor::__init__(self, table)",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "imported-constructor"
+      }
+    ]
+  },
+  {
+    "id": "private-method-call",
+    "fixture": "python",
+    "caller": "src/orders/repo/sql.py::SqlRepo::method::save(self, order)",
+    "expected": [
+      {
+        "callee": "_key",
+        "target": "src/orders/repo/sql.py::SqlRepo::method::_key(self, order_id)",
+        "confidence": "exact",
+        "kind": "this-member",
+        "category": "self-method"
+      }
+    ]
+  },
+  {
+    "id": "module-level-and-package-import",
+    "fixture": "python",
+    "caller": "src/app.py::module::src/app.py",
+    "expected": [
+      {
+        "callee": "create_order",
+        "target": "src/orders/service.py::function::create_order(order)",
+        "confidence": "exact",
+        "kind": "imported",
+        "category": "package-reexport"
+      },
+      {
+        "callee": "build",
+        "target": "src/orders/service.py::OrderService::method::build(cls)",
+        "confidence": "exact",
+        "kind": "static",
+        "category": "class-receiver"
+      }
+    ]
+  },
+  {
+    "id": "external-and-local-construction",
+    "fixture": "python",
+    "caller": "src/orders/service.py::function::create_order(order)",
+    "expected": [
+      {
+        "callee": "OrderService",
+        "target": "src/orders/service.py::OrderService::constructor::__init__(self, repo)",
+        "confidence": "exact",
+        "kind": "constructor",
+        "category": "same-module-constructor"
+      },
+      {
+        "callee": "count",
+        "target": "src/orders/service.py::OrderService::method::count(self)",
+        "confidence": "exact",
+        "kind": "declared-type",
+        "category": "instance-receiver"
+      },
+      {
+        "callee": "normalize",
+        "target": "src/orders/service.py::function::normalize(value)",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "lambda-binding"
+      },
+      {
+        "callee": "dumps",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "external-package",
+        "category": "external-package"
+      },
+      {
+        "callee": "post",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "external-package",
+        "category": "external-package"
+      }
+    ]
+  },
+  {
+    "id": "dynamic-boundary",
+    "fixture": "python",
+    "caller": "src/orders/dynamic.py::function::run_dynamic(name)",
+    "expected": [
+      {
+        "callee": "factory",
+        "target": "src/orders/dynamic.py::function::factory()",
+        "confidence": "exact",
+        "kind": "same-file",
+        "category": "same-module"
+      },
+      {
+        "callee": "create",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "unresolved",
+        "category": "dynamic-receiver"
+      },
+      {
+        "callee": "getattr",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "unresolved",
+        "category": "dynamic-attribute"
+      },
+      {
+        "callee": "import_module",
+        "target": null,
+        "confidence": "unresolved",
+        "kind": "external-package",
+        "category": "dynamic-import"
+      }
+    ]
+  }
+]

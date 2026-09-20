@@ -14,6 +14,7 @@ const root = process.cwd();
 const manifests = [
   "benchmarks/repositories.json",
   "benchmarks/typescript-repositories.json",
+  "benchmarks/python-repositories.json",
 ];
 const repositories = manifests.flatMap(
   (manifest) =>

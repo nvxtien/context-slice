@@ -1,0 +1,1037 @@
+{
+  "version": "1.3",
+  "generatedAt": "2026-09-20T14:27:13.722Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
+  "repositories": [
+    {
+      "repository": "itsdangerous",
+      "scale": "small",
+      "kind": "library",
+      "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+      "scope": "src/itsdangerous and tests (src layout library)",
+      "files": {
+        ".py": 15
+      },
+      "parseErrors": 0,
+      "symbols": 184,
+      "classes": 29,
+      "functions": 17,
+      "methods": 83,
+      "decoratedSymbols": 32,
+      "callEdges": 346,
+      "callEdgesExact": 111,
+      "callEdgesUnresolved": 235,
+      "externalCallEdges": 96,
+      "resolutionKindCounts": {
+        "external-package": 96,
+        "unresolved": 136,
+        "same-file": 30,
+        "imported": 50,
+        "this-member": 25,
+        "constructor": 4,
+        "declared-type": 5
+      },
+      "python": {
+        "importsTotal": 120,
+        "importsResolved": 69,
+        "relativeImportResolutionRate": 1,
+        "packageReexportResolutionRate": 0.75,
+        "externalImports": 51,
+        "unresolvedImports": 0,
+        "cyclicExportChains": 0,
+        "selfMethodResolutionRate": 0.8065,
+        "clsMethodResolutionRate": 1,
+        "instanceReceiverResolutionRate": 0.0323,
+        "dynamicUnresolvedRate": 0.4017,
+        "decoratedSymbols": 32
+      },
+      "performance": {
+        "coldIndexMs": 43,
+        "warmIndexMs": 14,
+        "singleFileRefreshMs": 15,
+        "previewMs": 14,
+        "filesIndexed": 15
+      }
+    },
+    {
+      "repository": "flask",
+      "scale": "medium",
+      "kind": "web-framework",
+      "commit": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+      "scope": "src/flask and tests (web framework)",
+      "files": {
+        ".py": 65
+      },
+      "parseErrors": 0,
+      "symbols": 1807,
+      "classes": 156,
+      "functions": 1001,
+      "methods": 342,
+      "decoratedSymbols": 624,
+      "callEdges": 3201,
+      "callEdgesExact": 732,
+      "callEdgesUnresolved": 2469,
+      "externalCallEdges": 740,
+      "resolutionKindCounts": {
+        "imported": 131,
+        "external-package": 740,
+        "unresolved": 1650,
+        "same-file": 114,
+        "constructor": 140,
+        "this-member": 120,
+        "declared-type": 17,
+        "static": 2,
+        "namespace-import": 287
+      },
+      "python": {
+        "importsTotal": 572,
+        "importsResolved": 267,
+        "relativeImportResolutionRate": 1,
+        "packageReexportResolutionRate": 0.6034,
+        "externalImports": 305,
+        "unresolvedImports": 0,
+        "cyclicExportChains": 0,
+        "selfMethodResolutionRate": 0.7595,
+        "clsMethodResolutionRate": 1,
+        "instanceReceiverResolutionRate": 0.0087,
+        "dynamicUnresolvedRate": 0.5401,
+        "decoratedSymbols": 624
+      },
+      "performance": {
+        "coldIndexMs": 245,
+        "warmIndexMs": 97,
+        "singleFileRefreshMs": 89,
+        "previewMs": 21,
+        "filesIndexed": 65
+      }
+    },
+    {
+      "repository": "django-orm",
+      "scale": "large",
+      "kind": "framework-subsystem",
+      "commit": "446d9cf602a5c42862da118b714a5679bb61cf27",
+      "scope": "django/db, django/core, django/utils (large subsystem)",
+      "files": {
+        ".py": 286
+      },
+      "parseErrors": 0,
+      "symbols": 7835,
+      "classes": 862,
+      "functions": 767,
+      "methods": 3704,
+      "decoratedSymbols": 623,
+      "callEdges": 19317,
+      "callEdgesExact": 5166,
+      "callEdgesUnresolved": 14151,
+      "externalCallEdges": 4694,
+      "resolutionKindCounts": {
+        "imported": 1228,
+        "unresolved": 8807,
+        "namespace-import": 7,
+        "constructor": 898,
+        "external-package": 4694,
+        "same-file": 1347,
+        "this-member": 2133,
+        "aliased-import": 74,
+        "declared-type": 94,
+        "static": 35
+      },
+      "python": {
+        "importsTotal": 2863,
+        "importsResolved": 1812,
+        "relativeImportResolutionRate": 1,
+        "packageReexportResolutionRate": 0.744,
+        "externalImports": 814,
+        "unresolvedImports": 237,
+        "cyclicExportChains": 0,
+        "selfMethodResolutionRate": 0.7833,
+        "clsMethodResolutionRate": 0.9535,
+        "instanceReceiverResolutionRate": 0.0134,
+        "dynamicUnresolvedRate": 0.4896,
+        "decoratedSymbols": 623
+      },
+      "performance": {
+        "coldIndexMs": 1337,
+        "warmIndexMs": 872,
+        "singleFileRefreshMs": 732,
+        "previewMs": 154,
+        "filesIndexed": 286
+      }
+    }
+  ],
+  "aggregate": {
+    "totalTasks": 15,
+    "categories": "locate, explain, impact, change",
+    "requiredFactRecall": 1,
+    "retrievalRecall": 1,
+    "medianContextReduction": 0.9414032382420972,
+    "medianManualTokens": 4566,
+    "medianContextTokens": 296,
+    "medianMinimumSufficientBudget": 256,
+    "wholeFileFallbackRate": 0,
+    "wholeModuleFallbackRate": 0
+  },
+  "taskResults": [
+    {
+      "task": "itsdangerous-unsign-locate",
+      "repository": "itsdangerous",
+      "category": "locate",
+      "targetSymbol": "Signer.unsign",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 3213,
+      "manualFiles": 2,
+      "suppliedContextTokens": 242,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9246809835045129,
+      "metrics": {
+        "contextWindowReduction": 0.9246809835045129,
+        "inputTokenReduction": 0.9246809835045129,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.012396694214876033,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.029541015625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "separator",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "split",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "verify",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "itsdangerous-sign-explain",
+      "repository": "itsdangerous",
+      "category": "explain",
+      "targetSymbol": "Signer.sign",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 2412,
+      "manualFiles": 1,
+      "suppliedContextTokens": 225,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9067164179104478,
+      "metrics": {
+        "contextWindowReduction": 0.9067164179104478,
+        "inputTokenReduction": 0.9067164179104478,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008888888888888889,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0274658203125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "bytes",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "compose",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "itsdangerous-derive-key-explain",
+      "repository": "itsdangerous",
+      "category": "explain",
+      "targetSymbol": "Signer.derive_key",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 2412,
+      "manualFiles": 1,
+      "suppliedContextTokens": 343,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8577943615257049,
+      "metrics": {
+        "contextWindowReduction": 0.8577943615257049,
+        "inputTokenReduction": 0.8577943615257049,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008746355685131196,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0418701171875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "default",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "concat",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "django",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "itsdangerous-expiry-impact",
+      "repository": "itsdangerous",
+      "category": "impact",
+      "targetSymbol": "TimestampSigner.unsign",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 2823,
+      "manualFiles": 2,
+      "suppliedContextTokens": 823,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.7084661707403471,
+      "metrics": {
+        "contextWindowReduction": 0.7084661707403471,
+        "inputTokenReduction": 0.7084661707403471,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.002430133657351154,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.1004638671875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "age",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "expired",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "itsdangerous-loads-change",
+      "repository": "itsdangerous",
+      "category": "change",
+      "targetSymbol": "Serializer.loads",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 3891,
+      "manualFiles": 1,
+      "suppliedContextTokens": 228,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9414032382420972,
+      "metrics": {
+        "contextWindowReduction": 0.9414032382420972,
+        "inputTokenReduction": 0.9414032382420972,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.013157894736842105,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.02783203125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "iterate",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "payload",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "last",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "flask-dispatch-explain",
+      "repository": "flask",
+      "category": "explain",
+      "targetSymbol": "Flask.dispatch_request",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 16368,
+      "manualFiles": 1,
+      "suppliedContextTokens": 319,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.980510752688172,
+      "metrics": {
+        "contextWindowReduction": 0.980510752688172,
+        "inputTokenReduction": 0.980510752688172,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.009404388714733543,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0389404296875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "routing",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "options",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "view",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "flask-add-url-rule-locate",
+      "repository": "flask",
+      "category": "locate",
+      "targetSymbol": "App.add_url_rule",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 9874,
+      "manualFiles": 1,
+      "suppliedContextTokens": 567,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9425764634393357,
+      "metrics": {
+        "contextWindowReduction": 0.9425764634393357,
+        "inputTokenReduction": 0.9425764634393357,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.005291005291005291,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0692138671875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "endpoint",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "methods",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "string",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "flask-config-env-explain",
+      "repository": "flask",
+      "category": "explain",
+      "targetSymbol": "Config.from_prefixed_env",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 3305,
+      "manualFiles": 1,
+      "suppliedContextTokens": 530,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8396369137670197,
+      "metrics": {
+        "contextWindowReduction": 0.8396369137670197,
+        "inputTokenReduction": 0.8396369137670197,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.005660377358490566,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.064697265625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "prefix",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "strip",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "nested",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "flask-context-push-impact",
+      "repository": "flask",
+      "category": "impact",
+      "targetSymbol": "AppContext.push",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 4566,
+      "manualFiles": 1,
+      "suppliedContextTokens": 296,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9351730179588261,
+      "metrics": {
+        "contextWindowReduction": 0.9351730179588261,
+        "inputTokenReduction": 0.9351730179588261,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.010135135135135136,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0361328125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "count",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "reentrant",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "bind",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "flask-full-dispatch-change",
+      "repository": "flask",
+      "category": "change",
+      "targetSymbol": "Flask.full_dispatch_request",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 16368,
+      "manualFiles": 1,
+      "suppliedContextTokens": 264,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9838709677419355,
+      "metrics": {
+        "contextWindowReduction": 0.9838709677419355,
+        "inputTokenReduction": 0.9838709677419355,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.011363636363636364,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0322265625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "signal",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "before",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "finalize",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "django-filter-explain",
+      "repository": "django-orm",
+      "category": "explain",
+      "targetSymbol": "QuerySet._filter_or_exclude",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 30450,
+      "manualFiles": 1,
+      "suppliedContextTokens": 254,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9916584564860427,
+      "metrics": {
+        "contextWindowReduction": 0.9916584564860427,
+        "inputTokenReduction": 0.9916584564860427,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.011811023622047244,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.031005859375,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "sliced",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "clone",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "apply",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "django-get-or-create-explain",
+      "repository": "django-orm",
+      "category": "explain",
+      "targetSymbol": "QuerySet.get_or_create",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 30450,
+      "manualFiles": 1,
+      "suppliedContextTokens": 264,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9913300492610837,
+      "metrics": {
+        "contextWindowReduction": 0.9913300492610837,
+        "inputTokenReduction": 0.9913300492610837,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.011363636363636364,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0322265625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "write",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "missing",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "atomic",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "django-save-impact",
+      "repository": "django-orm",
+      "category": "impact",
+      "targetSymbol": "Model.save_base",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 25008,
+      "manualFiles": 1,
+      "suppliedContextTokens": 637,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9745281509916827,
+      "metrics": {
+        "contextWindowReduction": 0.9745281509916827,
+        "inputTokenReduction": 0.9745281509916827,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.004709576138147566,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0777587890625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "router",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "guard",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "signal",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "django-atomic-locate",
+      "repository": "django-orm",
+      "category": "locate",
+      "targetSymbol": "Atomic.__enter__",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 3268,
+      "manualFiles": 1,
+      "suppliedContextTokens": 450,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8623011015911872,
+      "metrics": {
+        "contextWindowReduction": 0.8623011015911872,
+        "inputTokenReduction": 0.8623011015911872,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.006666666666666667,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.054931640625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "durable",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "reject",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "outermost",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "django-field-contribute-change",
+      "repository": "django-orm",
+      "category": "change",
+      "targetSymbol": "Field.contribute_to_class",
+      "targetFound": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 3,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
+      "manualTokens": 25720,
+      "manualFiles": 1,
+      "suppliedContextTokens": 278,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9891912908242613,
+      "metrics": {
+        "contextWindowReduction": 0.9891912908242613,
+        "inputTokenReduction": 0.9891912908242613,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.01079136690647482,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.033935546875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "names",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "register",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "descriptor",
+          "preserved": true,
+          "attribution": "PRESERVED"
+        }
+      ]
+    }
+  ],
+  "semanticCalls": {
+    "edgesEvaluated": 20,
+    "resolvableEdges": 15,
+    "semanticCallRecall": 1,
+    "semanticCallPrecision": 1,
+    "falsePositiveEdgeRate": 0,
+    "kindAgreement": 1,
+    "byCategory": {
+      "same-module": {
+        "edges": 3,
+        "correct": 3
+      },
+      "self-method": {
+        "edges": 2,
+        "correct": 2
+      },
+      "self-field-receiver": {
+        "edges": 1,
+        "correct": 1
+      },
+      "aliased-import": {
+        "edges": 1,
+        "correct": 1
+      },
+      "cls-method": {
+        "edges": 1,
+        "correct": 1
+      },
+      "cls-construction": {
+        "edges": 1,
+        "correct": 1
+      },
+      "imported-constructor": {
+        "edges": 1,
+        "correct": 1
+      },
+      "package-reexport": {
+        "edges": 1,
+        "correct": 1
+      },
+      "class-receiver": {
+        "edges": 1,
+        "correct": 1
+      },
+      "same-module-constructor": {
+        "edges": 1,
+        "correct": 1
+      },
+      "instance-receiver": {
+        "edges": 1,
+        "correct": 1
+      },
+      "lambda-binding": {
+        "edges": 1,
+        "correct": 1
+      },
+      "external-package": {
+        "edges": 2,
+        "correct": 2
+      },
+      "dynamic-receiver": {
+        "edges": 1,
+        "correct": 1
+      },
+      "dynamic-attribute": {
+        "edges": 1,
+        "correct": 1
+      },
+      "dynamic-import": {
+        "edges": 1,
+        "correct": 1
+      }
+    },
+    "failures": []
+  },
+  "ruleAttribution": [
+    {
+      "rule": "core",
+      "label": "core resolution only",
+      "semanticCallRecall": 0.8,
+      "semanticCallPrecision": 1,
+      "resolvedEdges": 12
+    },
+    {
+      "rule": "self-field",
+      "label": "+ self attribute receiver",
+      "semanticCallRecall": 0.8666666666666667,
+      "semanticCallPrecision": 1,
+      "resolvedEdges": 13
+    },
+    {
+      "rule": "instance",
+      "label": "+ instance receiver",
+      "semanticCallRecall": 0.8666666666666667,
+      "semanticCallPrecision": 1,
+      "resolvedEdges": 13
+    },
+    {
+      "rule": "class-receiver",
+      "label": "+ class receiver",
+      "semanticCallRecall": 0.8666666666666667,
+      "semanticCallPrecision": 1,
+      "resolvedEdges": 13
+    },
+    {
+      "rule": "all",
+      "label": "v1.3 (all rules)",
+      "semanticCallRecall": 1,
+      "semanticCallPrecision": 1,
+      "resolvedEdges": 15
+    }
+  ],
+  "failureAttribution": {},
+  "dynamicUnresolvedRate": 0.4896,
+  "comparison": {
+    "java": {
+      "totalTasks": 15,
+      "totalRequiredFacts": 33,
+      "overallRequiredFactRecall": 1,
+      "overallManualRequiredFactRecall": 1,
+      "overallRetrievalRecall": 1,
+      "medianContextWindowReduction": 0.9455136893467064,
+      "meanContextWindowReduction": 0.9061961453017608,
+      "minimumContextWindowReduction": 0.4171597633136095,
+      "maximumContextWindowReduction": 0.975415512465374,
+      "medianInputTokenReduction": 0.9455136893467064,
+      "medianManualContextTokens": 3689,
+      "medianContextSliceTokens": 173,
+      "wholeFileAvoidanceRate": 1,
+      "wholeFileFallbackRate": 0,
+      "wholeFilesFallbackTotal": 0,
+      "medianMinimumSufficientBudget": 256,
+      "medianDeveloperContextEfficiency": 0.012658227848101266,
+      "medianManualDeveloperContextEfficiency": 0.0006925207756232687,
+      "medianContextWasteRatio": 0.8346456692913385,
+      "medianIrrelevantContextElimination": 0.9841682419659735,
+      "contextComposition": {
+        "target-source": 1919,
+        "caller-context": 281,
+        "callee-context": 642,
+        "annotations": 0,
+        "types": 0,
+        "tests": 0,
+        "diff": 0,
+        "metadata": 0,
+        "total": 2842
+      },
+      "manualContextWindowFitCounts": {
+        "8K": 15,
+        "16K": 15,
+        "32K": 15,
+        "64K": 15,
+        "128K": 15
+      },
+      "contextSliceWindowFitCounts": {
+        "8K": 15,
+        "16K": 15,
+        "32K": 15,
+        "64K": 15,
+        "128K": 15
+      }
+    },
+    "typescript": {
+      "tasks": 15,
+      "requiredFactRecall": 1,
+      "siblingContextRecall": 1,
+      "siblingFactsTotal": 2,
+      "retrievalRecall": 1,
+      "medianReduction": 0.8639240506329113,
+      "medianTokens": 183,
+      "medianCompositionTokens": 0,
+      "expansionCostRatio": 0.04292803970223325,
+      "wholeFileFallbackRate": 0,
+      "medianMinimumSufficientBudget": 256,
+      "unresolvedTasks": []
+    }
+  },
+  "typeCheckerDecision": {
+    "factsLostToTypeInference": 0,
+    "tasksHarmed": 0,
+    "unresolvedImports": 237,
+    "decision": "Do not add Pyright, mypy or Jedi.",
+    "rationale": "No required fact in this benchmark was lost because a Python type could not be inferred. Structural resolution (packages, imports, self/cls, constructor evidence) covered every measured task, so a type checker would add a heavy dependency without a measured benefit. Dynamic calls remain reported as unresolved rather than guessed."
+  },
+  "limitations": [
+    "Benchmark scope is 15 tasks across 3 pinned Python repositories; results do not generalize to all Python projects.",
+    "Context sizes are deterministic estimates from the built-in estimator, not assistant telemetry.",
+    "Resolution is structural. Receivers needing runtime type inference, monkey patching, getattr and dynamic imports stay unresolved by design.",
+    "Django is measured as a sparse checkout of django/db, django/core and django/utils; imports leaving those packages are reported unresolved rather than guessed.",
+    "Python fields are not indexed as symbols, so a class skeleton lists methods and class-level assignments only."
+  ],
+  "nextStep": "Watch the dynamic unresolved rate against required-fact loss: it only becomes a product problem when a task actually needs the missing edge."
+}

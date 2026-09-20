@@ -46,6 +46,11 @@ const typeScriptRepository = {
   commit: "c46ad4526400e0ae6640fdaa94d037aa7573600c",
 };
 const typeScriptTask = "explain how errors are turned into JSON responses";
+const pythonRepository = {
+  url: "https://github.com/pallets/itsdangerous.git",
+  commit: "672971d66a2ef9f85151e53283113f33d642dabd",
+};
+const pythonTask = "explain how a value is signed";
 const task = "explain the owner update flow";
 
 const workspace = realpathSync(
@@ -936,6 +941,62 @@ await attempt("typeScriptRepository", async () => {
   );
 });
 
+// 5c. The same flow in a freshly cloned Python repository.
+const pythonRoot = join(workspace, "py repos", "itsdangerous clone");
+await attempt("pythonRepository", async () => {
+  fetchPinned(pythonRoot, pythonRepository.url, pythonRepository.commit);
+  const nestedPy = join(pythonRoot, "src/itsdangerous");
+  const statusBefore = cs(["status"], pythonRoot, env);
+  const init = cs(["init"], nestedPy, env);
+  const status = json(cs(["status", "--json"], nestedPy, env));
+  const preview = cs(
+    ["preview", pythonTask, "--json", "--explain"],
+    nestedPy,
+    env,
+  );
+  const body = json(preview).result;
+  const session = await mcpSession(
+    nestedPy,
+    env,
+    join(nestedPy, "signer.py"),
+    pythonTask,
+  );
+  record(
+    "pythonRepository",
+    init.status === 0 &&
+      status.result.freshness.state === "CURRENT" &&
+      status.result.freshness.filesByExtension[".py"] > 0 &&
+      preview.status === 0 &&
+      body.target.language === "python" &&
+      body.estimatedTokens <= body.budget &&
+      session.preview.ok === true &&
+      session.stdoutProtocolOnly &&
+      gitClean(pythonRoot),
+    {
+      repository: `${pythonRepository.url}@${pythonRepository.commit}`,
+      statusBeforeInit: /UNINITIALIZED/.test(statusBefore.stdout),
+      filesByExtension: status.result.freshness.filesByExtension,
+      init: init.stdout.trim().replace(workspace, "<workspace>").split("\n"),
+      task: pythonTask,
+      target: body.target.qualifiedName,
+      language: body.target.language,
+      estimatedTokens: body.estimatedTokens,
+      budget: body.budget,
+      included: body.included.map(
+        (item: any) => `${item.reason}: ${item.symbol}`,
+      ),
+      previewMs: preview.ms,
+      mcp: {
+        tools: session.tools.length,
+        previewOk: session.preview.ok,
+        staleRefresh: session.staleRefresh,
+        protocolSafe: session.stdoutProtocolOnly,
+      },
+      gitClean: gitClean(pythonRoot),
+    },
+  );
+});
+
 // 6. Optional assistant integrations: real HOME for auth, but `context-slice` still resolves to the RC prefix.
 if (argv.includes("--assistants")) {
   const assistantEnv = {
@@ -1526,6 +1587,7 @@ writeFileSync(
     ...section("9. Preview", "preview"),
     ...section("10. MCP", "mcp"),
     ...section("10a. TypeScript clean-room repository", "typeScriptRepository"),
+    ...section("10b. Python clean-room repository", "pythonRepository"),
     ...section("11. Codex", "codex"),
     ...section("12. Claude Code", "claude"),
     ...section("13. Read-only package", "readOnlyPackage"),

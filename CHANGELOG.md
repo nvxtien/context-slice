@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.0 — Python support (unpublished)
+
+- **Python and `.pyi`.** Modules, functions, async functions, nested functions, named lambdas, classes, `__init__`, methods, properties, `@classmethod`, `@staticmethod` and dataclass fields, with decorators kept verbatim as searchable metadata.
+- **Packages.** Module paths come from the directory layout, anchored at the highest package ancestor, which covers both `src/` layouts and namespace-style directories without `__init__.py`. Package re-exports are followed through `__init__.py` chains with cycle protection; `__all__` is read when it is a plain list.
+- **Call resolution.** Same-module (nearest lexical scope), imported, aliased, module alias, `self`, `cls`, `cls(...)`, constructor-typed attributes (`self.repo.save()`), instance receivers, class receivers, and external packages. Module-level calls are attributed to a module symbol, because Python runs code at import time.
+- **Conservative by design.** Factory receivers, `getattr`, dynamic imports and monkey patching stay unresolved. About half of all call edges in the benchmark repositories are unresolved, which cost zero required facts.
+- **Benchmark (15 tasks, 3 pinned repositories: itsdangerous, Flask, Django ORM).** Required-fact recall **100%**, retrieval recall **100%**, median context reduction **94.14%**, whole-file fallback **0%**, semantic call recall and precision **100%** on the fixture ground truth. 286 Python files parse with 0 errors in 1.5 s.
+- **No type checker.** Zero required facts were lost to dynamic ambiguity, so Pyright, mypy and Jedi were not added. Each of the three receiver rules was measured alone and each recovers an edge no other rule does.
+- Fixed: an overload signature no longer shadows its implementation when a symbol is looked up by name.
+
+Not published to npm. No Git tag or GitHub Release was created.
+
 ## 1.2.0 — context composition hardening (unpublished)
 
 Closes the v1.1 composition gap: required facts that live beside the target rather than inside it.

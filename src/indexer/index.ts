@@ -220,6 +220,13 @@ export class ProjectIndex {
       .slice(0, limit);
   }
   resolveSymbol(input: string): SymbolRecord[] {
+    // An overload signature is API surface; the implementation is the target.
+    const preferImplementation = (matches: SymbolRecord[]) => {
+      const implementations = matches.filter(
+        (symbol) => !symbol.metadata?.overloadSignature,
+      );
+      return implementations.length ? implementations : matches;
+    };
     const exact = this.symbols.filter(
       (s) =>
         s.id === input ||
@@ -227,13 +234,15 @@ export class ProjectIndex {
         s.qualifiedName === input ||
         s.signature === input,
     );
-    if (exact.length) return exact;
+    if (exact.length) return preferImplementation(exact);
     const qualifiedSuffix = this.symbols.filter((s) =>
       s.qualifiedName?.endsWith(`.${input}`),
     );
-    return qualifiedSuffix.length
-      ? qualifiedSuffix
-      : this.symbols.filter((s) => s.name === input);
+    return preferImplementation(
+      qualifiedSuffix.length
+        ? qualifiedSuffix
+        : this.symbols.filter((s) => s.name === input),
+    );
   }
   callers(target: SymbolRecord) {
     const ids = new Set([target.id]);

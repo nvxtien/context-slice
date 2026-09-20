@@ -1,6 +1,6 @@
 # ContextSlice
 
-ContextSlice is a local, read-only developer tool for Java, TypeScript and TSX that builds a small, task-specific code context before it is sent to a coding assistant. Instead of opening and pasting whole files, ask for the method, its callers, callees, and explicit omissions that matter to the task.
+ContextSlice is a local, read-only developer tool for Java, TypeScript, TSX and Python that builds a small, task-specific code context before it is sent to a coding assistant. Instead of opening and pasting whole files, ask for the method, its callers, callees, and explicit omissions that matter to the task.
 
 It indexes source with Tree-sitter, keeps a local SQLite cache, and exposes the same workflow through a CLI and stdio MCP server. It does not edit the target repository.
 
@@ -10,17 +10,18 @@ Large context windows still waste attention when they contain unrelated files. C
 
 ## Supported languages
 
-| Language   | Extensions                     | Notes                                                       |
-| ---------- | ------------------------------ | ----------------------------------------------------------- |
-| Java       | `.java`                        | Classes, interfaces, records, enums, methods, constructors  |
-| TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts` | Imports, re-exports and barrels, overloads, arrow functions |
-| TSX        | `.tsx`                         | React components, handlers, JSX component references        |
+| Language   | Extensions                     | Notes                                                                     |
+| ---------- | ------------------------------ | ------------------------------------------------------------------------- |
+| Java       | `.java`                        | Classes, interfaces, records, enums, methods, constructors                |
+| TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts` | Imports, re-exports and barrels, overloads, arrow functions               |
+| TSX        | `.tsx`                         | React components, handlers, JSX component references                      |
+| Python     | `.py`, `.pyi`                  | Packages and `__init__` re-exports, decorators, `self`/`cls`, dataclasses |
 
-One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md) for what TypeScript resolution does and does not cover.
+One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md) and [docs/python-support.md](docs/python-support.md) for what each language's resolution does and does not cover.
 
 ## Scope
 
-- Tree-sitter structural and semantic analysis; no compiler, JDT, tsserver, or LSP dependency.
+- Tree-sitter structural and semantic analysis; no compiler, JDT, tsserver, Pyright, mypy, or LSP dependency, and no code is executed.
 - A local stdio MCP server and a local SQLite cache under `.context-slice/`.
 - Integrates with Codex and Claude Code through one stable command: `context-slice mcp`.
 - Validated on macOS arm64 with Node 20 and Node 22. Other platforms are expected to work but are unverified.
@@ -44,7 +45,7 @@ The package is publish-ready but is not currently published to the npm registry.
 ```sh
 npm ci
 npm pack
-npm install -g ./context-slice-1.2.0.tgz
+npm install -g ./context-slice-1.3.0.tgz
 context-slice --version
 ```
 
@@ -217,7 +218,8 @@ Run the TypeScript benchmark with `npm run benchmark:v11`; its report is [v1.1 T
 
 ## Limitations
 
-- Java, TypeScript and TSX only; no other languages, embeddings, vector database, compiler, tsserver, or LSP integration.
+- Java, TypeScript, TSX and Python only; no other languages, embeddings, vector database, compiler, tsserver, type checker, or LSP integration.
+- Python is dynamic: receivers built by factories, `getattr`, dynamic imports and monkey patching stay unresolved rather than guessed.
 - TypeScript resolution is structural. Receivers whose type needs inference, CommonJS `require`, and imports that leave the checked-out source stay unresolved rather than guessed.
 - Target selection from task text is heuristic and may choose a nearby but not ideal symbol. Naming the method in the task gives a better slice.
 - Tree-sitter analysis cannot prove runtime dispatch, framework-generated implementations, or all generic/fluent call behavior.

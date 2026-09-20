@@ -1,0 +1,109 @@
+[
+  {
+    "taskId": "itsdangerous-unsign-locate",
+    "files": ["src/itsdangerous/signer.py", "src/itsdangerous/exc.py"],
+    "reasoning": {
+      "src/itsdangerous/signer.py": "declares unsign, the separator check and signature verification",
+      "src/itsdangerous/exc.py": "defines BadSignature raised on failure"
+    }
+  },
+  {
+    "taskId": "itsdangerous-sign-explain",
+    "files": ["src/itsdangerous/signer.py"],
+    "reasoning": {
+      "src/itsdangerous/signer.py": "contains sign and the signature composition"
+    }
+  },
+  {
+    "taskId": "itsdangerous-derive-key-explain",
+    "files": ["src/itsdangerous/signer.py"],
+    "reasoning": {
+      "src/itsdangerous/signer.py": "contains every key derivation branch"
+    }
+  },
+  {
+    "taskId": "itsdangerous-expiry-impact",
+    "files": ["src/itsdangerous/timed.py", "src/itsdangerous/exc.py"],
+    "reasoning": {
+      "src/itsdangerous/timed.py": "contains the timestamp parsing and age comparison",
+      "src/itsdangerous/exc.py": "defines SignatureExpired"
+    }
+  },
+  {
+    "taskId": "itsdangerous-loads-change",
+    "files": ["src/itsdangerous/serializer.py"],
+    "reasoning": {
+      "src/itsdangerous/serializer.py": "holds the signer iteration a new fallback must join"
+    }
+  },
+  {
+    "taskId": "flask-dispatch-explain",
+    "files": ["src/flask/app.py"],
+    "reasoning": {
+      "src/flask/app.py": "contains dispatch_request and the view lookup"
+    }
+  },
+  {
+    "taskId": "flask-add-url-rule-locate",
+    "files": ["src/flask/sansio/app.py"],
+    "reasoning": {
+      "src/flask/sansio/app.py": "declares add_url_rule and its method handling"
+    }
+  },
+  {
+    "taskId": "flask-config-env-explain",
+    "files": ["src/flask/config.py"],
+    "reasoning": {
+      "src/flask/config.py": "contains the environment scan and nested key handling"
+    }
+  },
+  {
+    "taskId": "flask-context-push-impact",
+    "files": ["src/flask/ctx.py"],
+    "reasoning": {
+      "src/flask/ctx.py": "contains push, the re-entrancy guard and the context variable"
+    }
+  },
+  {
+    "taskId": "flask-full-dispatch-change",
+    "files": ["src/flask/app.py"],
+    "reasoning": {
+      "src/flask/app.py": "contains the full request cycle a change must hook into"
+    }
+  },
+  {
+    "taskId": "django-filter-explain",
+    "files": ["django/db/models/query.py"],
+    "reasoning": {
+      "django/db/models/query.py": "contains _filter_or_exclude and the clone chain"
+    }
+  },
+  {
+    "taskId": "django-get-or-create-explain",
+    "files": ["django/db/models/query.py"],
+    "reasoning": {
+      "django/db/models/query.py": "contains get_or_create and its atomic create path"
+    }
+  },
+  {
+    "taskId": "django-save-impact",
+    "files": ["django/db/models/base.py"],
+    "reasoning": {
+      "django/db/models/base.py": "contains save_base, routing and signals"
+    }
+  },
+  {
+    "taskId": "django-atomic-locate",
+    "files": ["django/db/transaction.py"],
+    "reasoning": {
+      "django/db/transaction.py": "contains Atomic.__enter__ and the durable check"
+    }
+  },
+  {
+    "taskId": "django-field-contribute-change",
+    "files": ["django/db/models/fields/__init__.py"],
+    "reasoning": {
+      "django/db/models/fields/__init__.py": "contains contribute_to_class and the descriptor install"
+    }
+  }
+]

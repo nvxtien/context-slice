@@ -36,6 +36,7 @@ class OrderService:
 
 def create_order(order: Order) -> str:
     service = OrderService(SqlRepo("orders"))
+    service.count()
     payload = json.dumps({"id": order.id})
     requests.post("https://example.test", data=payload)
     return normalize(order.id)

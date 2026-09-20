@@ -1,0 +1,31 @@
+[
+  {
+    "id": "itsdangerous",
+    "scale": "small",
+    "url": "https://github.com/pallets/itsdangerous.git",
+    "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+    "source": "benchmarks/checkouts/itsdangerous",
+    "scope": "src/itsdangerous and tests (src layout library)",
+    "kind": "library"
+  },
+  {
+    "id": "flask",
+    "scale": "medium",
+    "url": "https://github.com/pallets/flask.git",
+    "commit": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+    "sparse": ["src/flask", "tests"],
+    "source": "benchmarks/checkouts/flask",
+    "scope": "src/flask and tests (web framework)",
+    "kind": "web-framework"
+  },
+  {
+    "id": "django-orm",
+    "scale": "large",
+    "url": "https://github.com/django/django.git",
+    "commit": "446d9cf602a5c42862da118b714a5679bb61cf27",
+    "sparse": ["django/db", "django/core", "django/utils"],
+    "source": "benchmarks/checkouts/django-orm",
+    "scope": "django/db, django/core, django/utils (large subsystem)",
+    "kind": "framework-subsystem"
+  }
+]

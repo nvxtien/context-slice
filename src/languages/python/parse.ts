@@ -310,6 +310,9 @@ export function parsePython(filePath: string, source: string): ParsedFile {
             async: isAsync(definition),
             classMethod: decorators.includes("classmethod"),
             staticMethod: decorators.includes("staticmethod"),
+            overloadSignature: decorators.some((decorator) =>
+              /(^|\.)overload$/.test(decorator),
+            ),
           },
         });
         walk(field(definition, "body") ?? definition, symbol, [...chain, name]);

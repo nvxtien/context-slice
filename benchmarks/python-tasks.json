@@ -1,0 +1,541 @@
+[
+  {
+    "id": "itsdangerous-unsign-locate",
+    "repository": "itsdangerous",
+    "category": "locate",
+    "task": "Where is a signature verified when unsigning a value?",
+    "targetSymbol": "Signer.unsign",
+    "groundTruthFiles": ["src/itsdangerous/signer.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "separator",
+        "description": "A missing separator is rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if self.sep not in signed_value:", "raise BadSignature"]
+        }
+      },
+      {
+        "id": "split",
+        "description": "The value and signature are split on the last separator",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["value, sig = signed_value.rsplit(self.sep, 1)"]
+        }
+      },
+      {
+        "id": "verify",
+        "description": "The signature is verified before the value is returned",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if self.verify_signature(value, sig):"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/itsdangerous/signer.py", "src/itsdangerous/exc.py"]
+  },
+  {
+    "id": "itsdangerous-sign-explain",
+    "repository": "itsdangerous",
+    "category": "explain",
+    "task": "Explain how a value is signed.",
+    "targetSymbol": "Signer.sign",
+    "groundTruthFiles": ["src/itsdangerous/signer.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "bytes",
+        "description": "The value is coerced to bytes first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["value = want_bytes(value)"]
+        }
+      },
+      {
+        "id": "compose",
+        "description": "The signature is appended after the separator",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["return value + self.sep + self.get_signature(value)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/itsdangerous/signer.py"]
+  },
+  {
+    "id": "itsdangerous-derive-key-explain",
+    "repository": "itsdangerous",
+    "category": "explain",
+    "task": "Explain how the signing key is derived from the secret key.",
+    "targetSymbol": "Signer.derive_key",
+    "groundTruthFiles": ["src/itsdangerous/signer.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "default",
+        "description": "The last secret key is used by default",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["secret_key = self.secret_keys[-1]"]
+        }
+      },
+      {
+        "id": "concat",
+        "description": "Salt and key are concatenated for the concat derivation",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if self.key_derivation == \"concat\":"]
+        }
+      },
+      {
+        "id": "django",
+        "description": "The django-concat derivation inserts a signer marker",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["elif self.key_derivation == \"django-concat\":"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/itsdangerous/signer.py"]
+  },
+  {
+    "id": "itsdangerous-expiry-impact",
+    "repository": "itsdangerous",
+    "category": "impact",
+    "task": "What happens when a timed signature is older than the maximum age?",
+    "targetSymbol": "TimestampSigner.unsign",
+    "groundTruthFiles": ["src/itsdangerous/timed.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "age",
+        "description": "The age is computed from the current timestamp",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["age = self.get_timestamp() - ts_int"]
+        }
+      },
+      {
+        "id": "expired",
+        "description": "An age beyond max_age raises SignatureExpired",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if age > max_age:", "raise SignatureExpired("]
+        }
+      }
+    ],
+    "baselineFiles": ["src/itsdangerous/timed.py", "src/itsdangerous/exc.py"]
+  },
+  {
+    "id": "itsdangerous-loads-change",
+    "repository": "itsdangerous",
+    "category": "change",
+    "task": "Add another fallback signer when loading a signed payload.",
+    "targetSymbol": "Serializer.loads",
+    "groundTruthFiles": ["src/itsdangerous/serializer.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "iterate",
+        "description": "Every candidate signer is tried in turn",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["for signer in self.iter_unsigners(salt):"]
+        }
+      },
+      {
+        "id": "payload",
+        "description": "A successful unsign loads the payload",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["return self.load_payload(signer.unsign(s))"]
+        }
+      },
+      {
+        "id": "last",
+        "description": "The last failure is raised when none succeed",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["raise t.cast(BadSignature, last_exception)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/itsdangerous/serializer.py"]
+  },
+  {
+    "id": "flask-dispatch-explain",
+    "repository": "flask",
+    "category": "explain",
+    "task": "Explain how a request is dispatched to a view function.",
+    "targetSymbol": "Flask.dispatch_request",
+    "groundTruthFiles": ["src/flask/app.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "routing",
+        "description": "A routing exception is raised before dispatching",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if req.routing_exception is not None:"]
+        }
+      },
+      {
+        "id": "options",
+        "description": "Automatic OPTIONS requests get a default response",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["return self.make_default_options_response(ctx)"]
+        }
+      },
+      {
+        "id": "view",
+        "description": "The endpoint's view function is called with the URL arguments",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": ["src/flask/app.py"]
+  },
+  {
+    "id": "flask-add-url-rule-locate",
+    "repository": "flask",
+    "category": "locate",
+    "task": "Where are URL rules and their allowed methods registered?",
+    "targetSymbol": "App.add_url_rule",
+    "groundTruthFiles": ["src/flask/sansio/app.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "endpoint",
+        "description": "A missing endpoint name is derived from the view function",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["endpoint = _endpoint_from_view_func(view_func)"]
+        }
+      },
+      {
+        "id": "methods",
+        "description": "Methods are upper-cased into a set",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["methods = {item.upper() for item in methods}"]
+        }
+      },
+      {
+        "id": "string",
+        "description": "A bare string of methods is rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["Allowed methods must be a list of strings"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/flask/sansio/app.py"]
+  },
+  {
+    "id": "flask-config-env-explain",
+    "repository": "flask",
+    "category": "explain",
+    "task": "Explain how configuration is loaded from prefixed environment variables.",
+    "targetSymbol": "Config.from_prefixed_env",
+    "groundTruthFiles": ["src/flask/config.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "prefix",
+        "description": "Only variables with the prefix are read, in sorted order",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "for key in sorted(os.environ):",
+            "if not key.startswith(prefix):"
+          ]
+        }
+      },
+      {
+        "id": "strip",
+        "description": "The prefix is removed from the config key",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["key = key.removeprefix(prefix)"]
+        }
+      },
+      {
+        "id": "nested",
+        "description": "Double underscores address nested dictionary keys",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if \"__\" not in key:"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/flask/config.py"]
+  },
+  {
+    "id": "flask-context-push-impact",
+    "repository": "flask",
+    "category": "impact",
+    "task": "What happens when the same application context is pushed twice?",
+    "targetSymbol": "AppContext.push",
+    "groundTruthFiles": ["src/flask/ctx.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "count",
+        "description": "Each push increments a counter",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["self._push_count += 1"]
+        }
+      },
+      {
+        "id": "reentrant",
+        "description": "An already pushed context returns early",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["if self._cv_token is not None:"]
+        }
+      },
+      {
+        "id": "bind",
+        "description": "The first push binds the context variable",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["self._cv_token = _cv_app.set(self)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/flask/ctx.py"]
+  },
+  {
+    "id": "flask-full-dispatch-change",
+    "repository": "flask",
+    "category": "change",
+    "task": "Add processing around the request and response cycle.",
+    "targetSymbol": "Flask.full_dispatch_request",
+    "groundTruthFiles": ["src/flask/app.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "signal",
+        "description": "The request_started signal is sent first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "request_started.send(self, _async_wrapper=self.ensure_sync)"
+          ]
+        }
+      },
+      {
+        "id": "before",
+        "description": "Before-request handlers can short-circuit dispatching",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["rv = self.preprocess_request(ctx)", "if rv is None:"]
+        }
+      },
+      {
+        "id": "finalize",
+        "description": "The response is finalized even after an error",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["return self.finalize_request(ctx, rv)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/flask/app.py"]
+  },
+  {
+    "id": "django-filter-explain",
+    "repository": "django-orm",
+    "category": "explain",
+    "task": "Explain how filter produces a new queryset.",
+    "targetSymbol": "QuerySet._filter_or_exclude",
+    "groundTruthFiles": ["django/db/models/query.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "sliced",
+        "description": "Filtering a sliced query is rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["Cannot filter a query once a slice has been taken."]
+        }
+      },
+      {
+        "id": "clone",
+        "description": "A clone is chained rather than mutating in place",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["clone = self._chain()"]
+        }
+      },
+      {
+        "id": "apply",
+        "description": "The clone applies the filter unless it is deferred",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["clone._filter_or_exclude_inplace(negate, args, kwargs)"]
+        }
+      }
+    ],
+    "baselineFiles": ["django/db/models/query.py"]
+  },
+  {
+    "id": "django-get-or-create-explain",
+    "repository": "django-orm",
+    "category": "explain",
+    "task": "Explain how get_or_create avoids creating duplicates.",
+    "targetSymbol": "QuerySet.get_or_create",
+    "groundTruthFiles": ["django/db/models/query.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "write",
+        "description": "The lookup is routed to the write database",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["self._for_write = True"]
+        }
+      },
+      {
+        "id": "missing",
+        "description": "Creation happens only when the object does not exist",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["except self.model.DoesNotExist:"]
+        }
+      },
+      {
+        "id": "atomic",
+        "description": "The create runs inside an atomic block",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["with transaction.atomic(using=self.db):"]
+        }
+      }
+    ],
+    "baselineFiles": ["django/db/models/query.py"]
+  },
+  {
+    "id": "django-save-impact",
+    "repository": "django-orm",
+    "category": "impact",
+    "task": "Which database is chosen when a model instance is saved?",
+    "targetSymbol": "Model.save_base",
+    "groundTruthFiles": ["django/db/models/base.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "router",
+        "description": "The database router picks the write connection",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "using = using or router.db_for_write(self.__class__, instance=self)"
+          ]
+        }
+      },
+      {
+        "id": "guard",
+        "description": "Conflicting insert and update flags are rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "assert not (force_insert and (force_update or update_fields))"
+          ]
+        }
+      },
+      {
+        "id": "signal",
+        "description": "The pre_save signal is sent for non-auto-created models",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["pre_save.send("]
+        }
+      }
+    ],
+    "baselineFiles": ["django/db/models/base.py"]
+  },
+  {
+    "id": "django-atomic-locate",
+    "repository": "django-orm",
+    "category": "locate",
+    "task": "Where does a durable atomic block reject being nested?",
+    "targetSymbol": "Atomic.__enter__",
+    "groundTruthFiles": ["django/db/transaction.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "durable",
+        "description": "Durable blocks check for an enclosing atomic block",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["self.durable", "connection.atomic_blocks"]
+        }
+      },
+      {
+        "id": "reject",
+        "description": "Nesting a durable block raises RuntimeError",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "A durable atomic block cannot be nested within another "
+          ]
+        }
+      },
+      {
+        "id": "outermost",
+        "description": "The outermost block decides commit-on-exit",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["connection.commit_on_exit = True"]
+        }
+      }
+    ],
+    "baselineFiles": ["django/db/transaction.py"]
+  },
+  {
+    "id": "django-field-contribute-change",
+    "repository": "django-orm",
+    "category": "change",
+    "task": "Add behaviour when a field is attached to its model class.",
+    "targetSymbol": "Field.contribute_to_class",
+    "groundTruthFiles": ["django/db/models/fields/__init__.py"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "names",
+        "description": "Attribute names are derived from the field name",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["self.set_attributes_from_name(name)"]
+        }
+      },
+      {
+        "id": "register",
+        "description": "The field is registered on the model meta",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["cls._meta.add_field(self, private=private_only)"]
+        }
+      },
+      {
+        "id": "descriptor",
+        "description": "A descriptor is installed for columns",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "setattr(cls, self.attname, self.descriptor_class(self))"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": ["django/db/models/fields/__init__.py"]
+  }
+]

@@ -23,13 +23,16 @@ export function moduleIndex(files: string[]) {
   for (const file of files) {
     const directory = posix.dirname(file);
     const segments = directory === "." ? [] : directory.split("/");
-    const packageSegments: string[] = [];
-    // Walk up while each directory is a package.
-    for (let at = segments.length; at > 0; at--) {
-      const candidate = segments.slice(0, at).join("/");
-      if (!packageDirectories.has(candidate)) break;
-      packageSegments.unshift(segments[at - 1]);
-    }
+    // Anchor at the highest ancestor that is a package. Directories below it
+    // without `__init__.py` still count, which covers namespace-style layouts
+    // and keeps `src/` out of the module path.
+    let anchor = -1;
+    for (let at = 1; at <= segments.length; at++)
+      if (packageDirectories.has(segments.slice(0, at).join("/"))) {
+        anchor = at - 1;
+        break;
+      }
+    const packageSegments = anchor < 0 ? [] : segments.slice(anchor);
     const base = posix.basename(file, ".py");
     const parts =
       base === "__init__" ? packageSegments : [...packageSegments, base];
@@ -196,7 +199,26 @@ export function pythonGraph(context: ResolveContext) {
   };
 }
 
-export function resolvePythonCalls(context: ResolveContext) {
+/** Resolution rules that can be measured, and removed, independently. */
+export interface PythonRules {
+  /** `self.repo.save()` typed by the constructor. */
+  selfFieldReceiver: boolean;
+  /** `service = OrderService(); service.create()`. */
+  instanceReceiver: boolean;
+  /** `OrderService.build()` on a known class. */
+  classReceiver: boolean;
+}
+
+export const ALL_PYTHON_RULES: PythonRules = {
+  selfFieldReceiver: true,
+  instanceReceiver: true,
+  classReceiver: true,
+};
+
+export function resolvePythonCalls(
+  context: ResolveContext,
+  rules: PythonRules = ALL_PYTHON_RULES,
+) {
   const graph = pythonGraph(context);
   const { symbolsById, symbolsByFile, importsByFile, lookup } = graph;
 
@@ -335,7 +357,7 @@ export function resolvePythonCalls(context: ResolveContext) {
       continue;
     }
 
-    if (receiver?.startsWith("self.")) {
+    if (receiver?.startsWith("self.") && rules.selfFieldReceiver) {
       const fieldName = receiver.slice("self.".length);
       const container = selfFieldClass(caller, fieldName);
       const target = container && memberOf(container, call.calleeName);
@@ -378,7 +400,9 @@ export function resolvePythonCalls(context: ResolveContext) {
         }
       }
       // `service = OrderService(); service.create()`
-      const container = bindingClass(caller, receiver);
+      const container = rules.instanceReceiver
+        ? bindingClass(caller, receiver)
+        : undefined;
       const target = container && memberOf(container, call.calleeName);
       if (target) {
         settle(
@@ -390,9 +414,10 @@ export function resolvePythonCalls(context: ResolveContext) {
         continue;
       }
       // `OrderService.create()` on a known class.
-      const classReceiver = /^[A-Z]/.test(receiver)
-        ? classNamed(file, receiver)
-        : undefined;
+      const classReceiver =
+        rules.classReceiver && /^[A-Z]/.test(receiver)
+          ? classNamed(file, receiver)
+          : undefined;
       const classTarget =
         classReceiver && memberOf(classReceiver, call.calleeName);
       if (classTarget) {
