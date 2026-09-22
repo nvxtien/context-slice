@@ -3,7 +3,9 @@ import type { SymbolRecord } from "../types/model.js";
 import { estimateTokens } from "./budget.js";
 
 /** Why a sibling of the target was composed into the slice. */
-export type CompositionReason = "enclosing type";
+export type CompositionReason =
+  | "enclosing type"
+  | "enterprise relation";
 
 export interface CompositionCandidate {
   symbol?: SymbolRecord;
