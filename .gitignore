@@ -4,3 +4,4 @@ dist/
 .benchmarks/
 benchmarks/checkouts/
 .DS_Store
+.worktrees/
