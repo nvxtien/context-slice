@@ -12,8 +12,6 @@ import { WorkflowError } from "./errors.js";
 export type PreviewReason =
   "task target" | "direct caller" | "direct callee" | CompositionReason;
 
-const COMPOSITION_REASONS: CompositionReason[] = ["enclosing type"];
-
 export interface PreviewOptions {
   budget?: number;
   depth?: number;
@@ -164,9 +162,8 @@ export function buildPreview(
     "task target": 0,
     "direct caller": 0,
     "direct callee": 0,
-    ...(Object.fromEntries(
-      COMPOSITION_REASONS.map((reason) => [reason, 0]),
-    ) as Record<CompositionReason, number>),
+    "enclosing type": 0,
+    "enterprise relation": 0,
   };
   let estimatedTokens = 0;
   const add = (
