@@ -20,6 +20,8 @@ import {
   languages,
   type ResolveContext,
 } from "../languages/adapter.js";
+import type { EnterpriseRelation } from "../types/enterprise.js";
+import { extractEnterpriseRelations } from "../languages/java/enterprise/registry.js";
 import "../languages/java.js";
 import "../languages/typescript/index.js";
 import "../languages/python/index.js";
@@ -48,6 +50,7 @@ export class ProjectIndex {
   calls: CallEdge[] = [];
   imports: ImportRecord[] = [];
   exports: ExportRecord[] = [];
+  enterpriseRelations: EnterpriseRelation[] = [];
   private hashes = new Map<string, IndexedFileRecord>();
   private readonly storage: IndexStorage;
   constructor(root: string) {
@@ -123,6 +126,7 @@ export class ProjectIndex {
     this.calls = [];
     this.imports = [];
     this.exports = [];
+    this.enterpriseRelations = [];
     this.hashes = new Map();
     let filesParsed = 0;
     let cacheHits = 0;
@@ -134,10 +138,12 @@ export class ProjectIndex {
       const source = readFileSync(file, "utf8");
       const hash = createHash("sha256").update(source).digest("hex");
       this.hashes.set(filePath, { hash, language: adapter.id });
+      let fileSymbols: SymbolRecord[];
       if (previous.files.get(filePath)?.hash === hash) {
-        this.symbols.push(
-          ...previous.symbols.filter((symbol) => symbol.filePath === filePath),
+        fileSymbols = previous.symbols.filter(
+          (symbol) => symbol.filePath === filePath,
         );
+        this.symbols.push(...fileSymbols);
         this.calls.push(
           ...previous.calls.filter((call) => call.filePath === filePath),
         );
@@ -148,15 +154,21 @@ export class ProjectIndex {
           ...previous.exports.filter((record) => record.filePath === filePath),
         );
         cacheHits++;
-        continue;
+      } else {
+        const parsed = adapter.parse(filePath, source);
+        fileSymbols = parsed.symbols;
+        this.symbols.push(...parsed.symbols);
+        this.calls.push(...parsed.calls);
+        this.imports.push(...parsed.imports);
+        this.exports.push(...parsed.exports);
+        if (parsed.parseError) parseErrors++;
+        filesParsed++;
       }
-      const parsed = adapter.parse(filePath, source);
-      this.symbols.push(...parsed.symbols);
-      this.calls.push(...parsed.calls);
-      this.imports.push(...parsed.imports);
-      this.exports.push(...parsed.exports);
-      if (parsed.parseError) parseErrors++;
-      filesParsed++;
+      if (adapter.id === "java") {
+        this.enterpriseRelations.push(
+          ...extractEnterpriseRelations(fileSymbols, filePath, source),
+        );
+      }
     }
     // Each language resolves only its own edges; cross-language calls stay unresolved.
     for (const adapter of languages()) {
