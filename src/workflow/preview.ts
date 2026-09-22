@@ -72,33 +72,53 @@ function parameterCount(symbol: SymbolRecord) {
   return parameters ? parameters.split(",").length : 0;
 }
 
+/** Test sources answer "how is this tested", not "how does this work". */
+const isTestPath = (filePath: string) =>
+  /(^|\/)tests?\//i.test(filePath) ||
+  /(^|\/)test_[^/]*$/.test(filePath) ||
+  /_test\.[^/]+$/.test(filePath) ||
+  /Tests?\.java$/.test(filePath) ||
+  /\.(test|spec)\.[jt]sx?$/.test(filePath);
+/** Keep production candidates when there are any; otherwise keep everything. */
+function preferProduction(symbols: SymbolRecord[]) {
+  const production = symbols.filter((symbol) => !isTestPath(symbol.filePath));
+  return production.length ? production : symbols;
+}
+
 function chooseTarget(index: ProjectIndex, task: string) {
   const exact = index.resolveSymbol(task);
   if (exact.length === 1) return exact[0];
   const normalized = task.toLowerCase();
-  const exactName = index.symbols
-    .filter(
+  const named = new RegExp(
+    `\\b(${task.match(/[A-Za-z_][\w$]*/g)?.join("|") ?? ""})\\b`,
+  );
+  const exactName = preferProduction(
+    index.symbols.filter(
       (symbol) =>
-        (symbol.kind === "method" || symbol.kind === "constructor") &&
-        normalized.includes(symbol.name.toLowerCase()),
-    )
-    .sort(
-      (a, b) =>
-        b.name.length - a.name.length ||
-        parameterCount(a) - parameterCount(b) ||
-        a.id.localeCompare(b.id),
-    );
+        (symbol.kind === "method" ||
+          symbol.kind === "constructor" ||
+          symbol.kind === "function") &&
+        normalized.includes(symbol.name.toLowerCase()) &&
+        named.test(symbol.name),
+    ),
+  ).sort(
+    (a, b) =>
+      b.name.length - a.name.length ||
+      parameterCount(a) - parameterCount(b) ||
+      a.id.localeCompare(b.id),
+  );
   if (exactName.length) return exactName[0];
 
-  const result = index.search(task, 1)[0];
-  const target = result
-    ? index.symbols.find((symbol) => symbol.id === result.id)
-    : undefined;
+  const ranked = index
+    .search(task, 10)
+    .map((result) => index.symbols.find((symbol) => symbol.id === result.id))
+    .filter((symbol): symbol is SymbolRecord => Boolean(symbol));
+  const target = preferProduction(ranked)[0];
   if (target) return target;
 
   throw new WorkflowError(
     "SYMBOL_NOT_FOUND",
-    `No indexed Java symbol matches task: ${task}`,
+    `No indexed symbol matches task: ${task}`,
     "Run context-slice index, then use a task that names a method, type, or qualified symbol.",
   );
 }
