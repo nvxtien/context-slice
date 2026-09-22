@@ -77,4 +77,10 @@ test("preview composes the skeleton with evidence and respects the budget", () =
   assert.ok(tight.estimatedTokens <= 30);
 });
 
+test("CompositionReason accepts 'enterprise relation' (type-level, no runtime producer yet)", () => {
+  const reason: import("../src/planner/composition.js").CompositionReason =
+    "enterprise relation";
+  assert.equal(reason, "enterprise relation");
+});
+
 test.after(() => rmSync(root, { recursive: true, force: true }));
