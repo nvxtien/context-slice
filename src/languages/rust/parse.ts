@@ -109,6 +109,90 @@ function itemName(node: Node): string {
   return text(field(node, "name"));
 }
 
+/**
+ * Flattens a `scoped_identifier` chain (or a bare `crate`/`self`/`super`/
+ * `identifier` leaf) into its segments in source order, e.g.
+ * `crate::service::create_order` -> ["crate", "service", "create_order"].
+ */
+function pathSegments(node: Node): string[] {
+  if (node.type === "scoped_identifier") {
+    const path = field(node, "path");
+    const name = text(field(node, "name"));
+    return path ? [...pathSegments(path), name] : [name];
+  }
+  return [text(node)];
+}
+
+/** One `use` statement can bind several names (a grouped list) — always returns an array, even for the common single-binding case. */
+function parseUseDeclaration(
+  node: Node,
+  filePath: string,
+): ImportRecord[] {
+  const argument = field(node, "argument");
+  if (!argument) return [];
+  const isPubUse = isPub(node);
+  void isPubUse; // re-exports are Task 4's concern; this task only emits ImportRecords
+  const baseRecord = {
+    filePath,
+    language: LANGUAGE_ID,
+    kind: "named" as const,
+    typeOnly: false,
+    range: range(node),
+  };
+
+  if (argument.type === "use_wildcard") {
+    const prefix = argument.namedChild(0);
+    if (!prefix) return [];
+    const segments = pathSegments(prefix);
+    return [{ ...baseRecord, module: segments.join("::"), wildcard: true }];
+  }
+
+  if (argument.type === "use_as_clause") {
+    const pathNode = field(argument, "path");
+    const alias = text(field(argument, "alias"));
+    if (!pathNode) return [];
+    const segments = pathSegments(pathNode);
+    const importedName = segments.at(-1) ?? "";
+    const module =
+      segments.length > 1 ? segments.slice(0, -1).join("::") : importedName;
+    return [{ ...baseRecord, module, importedName, localName: alias }];
+  }
+
+  if (argument.type === "scoped_use_list") {
+    const pathNode = field(argument, "path");
+    const listNode = field(argument, "list");
+    if (!listNode) return [];
+    const prefix = pathNode ? pathSegments(pathNode) : [];
+    const module = prefix.join("::");
+    const records: ImportRecord[] = [];
+    for (const item of listNode.namedChildren) {
+      // Flat groups only: a bare identifier, or an aliased leaf. A nested
+      // path/group/wildcard inside `{ }` (e.g. `use std::{fmt, io::Write}`)
+      // is conservatively skipped — nested use groups are deferred (see
+      // plan header). This must never guess a wrong target.
+      if (item.type === "identifier") {
+        const importedName = text(item);
+        records.push({ ...baseRecord, module, importedName, localName: importedName });
+      } else if (item.type === "use_as_clause") {
+        const itemPath = field(item, "path");
+        if (!itemPath || itemPath.type !== "identifier") continue;
+        const importedName = text(itemPath);
+        const localName = text(field(item, "alias"));
+        records.push({ ...baseRecord, module, importedName, localName });
+      }
+    }
+    return records;
+  }
+
+  // Plain `scoped_identifier` (or a bare `identifier` for a single-segment
+  // `use foo;`): the whole thing is one import.
+  const segments = pathSegments(argument);
+  const importedName = segments.at(-1) ?? "";
+  const module =
+    segments.length > 1 ? segments.slice(0, -1).join("::") : importedName;
+  return [{ ...baseRecord, module, importedName, localName: importedName }];
+}
+
 export function parseRust(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
   const seenIds = new Set<string>();
@@ -175,6 +259,14 @@ export function parseRust(filePath: string, source: string): ParsedFile {
 
   walk(tree.rootNode, undefined, []);
   const imports: ImportRecord[] = [];
+  const collectUses = (node: Node) => {
+    if (node.type === "use_declaration") {
+      imports.push(...parseUseDeclaration(node, filePath));
+      return; // a use_declaration has no nested items worth descending into
+    }
+    for (const child of node.namedChildren) collectUses(child);
+  };
+  collectUses(tree.rootNode);
   const exports: ExportRecord[] = [];
   return { symbols, calls: [], imports, exports, parseError };
 }

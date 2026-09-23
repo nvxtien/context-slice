@@ -100,6 +100,8 @@ export interface ImportRecord {
   externalPackage?: string;
   /** Stylesheet, image or other non-source import: never a call target. */
   asset?: boolean;
+  /** `use foo::*` — every name from the target module, not one binding. */
+  wildcard?: boolean;
   range: SourceRange;
 }
 export interface ExportRecord {
