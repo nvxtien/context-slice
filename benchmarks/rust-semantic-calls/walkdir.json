@@ -1,0 +1,499 @@
+[
+  {
+    "repo": "walkdir",
+    "file": "src/tests/util.rs",
+    "line": 141,
+    "col": 17,
+    "callerQualifiedName": "Dir::touch_all",
+    "callText": "self.touch(p)",
+    "calleeName": "touch",
+    "category": "self-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "Dir::touch",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "self is Dir (impl Dir util.rs:82); touch defined util.rs:128"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/lib.rs",
+    "line": 1074,
+    "col": 37,
+    "callerQualifiedName": "FilterEntry::next",
+    "callText": "self.it.next()",
+    "calleeName": "next",
+    "category": "field-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/lib.rs",
+        "qualifiedName": "IntoIter::next",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "impl Iterator for FilterEntry<IntoIter,P> (lib.rs:1060) so self.it: IntoIter; next at lib.rs:679"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/dent.rs",
+    "line": 214,
+    "col": 21,
+    "callerQualifiedName": "DirEntry::from_entry",
+    "callText": "ent.ino()",
+    "calleeName": "ino",
+    "category": "param-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "ent: &fs::DirEntry (dent.rs:187); std DirEntryExt::ino"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 447,
+    "col": 17,
+    "callerQualifiedName": "sym_root_dir_nofollow_root_nofollow",
+    "callText": "r.sorted_ents()",
+    "calleeName": "sorted_ents",
+    "category": "local-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "RecursiveResults::sorted_ents",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "r = dir.run_recursive(..) -> RecursiveResults (util.rs:101); sorted_ents util.rs:58"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 113,
+    "col": 30,
+    "callerQualifiedName": "one_file",
+    "callText": "dir.path()",
+    "calleeName": "path",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "Dir::path",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "dir = Dir::tmp() -> Dir (util.rs:84); path util.rs:90"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 915,
+    "col": 15,
+    "callerQualifiedName": "skip_current_dir",
+    "callText": "it.skip_current_dir()",
+    "calleeName": "skip_current_dir",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/lib.rs",
+        "qualifiedName": "IntoIter::skip_current_dir",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "it = WalkDir::new(..).into_iter() -> IntoIter (lib.rs:540); skip_current_dir lib.rs:781"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 687,
+    "col": 6,
+    "callerQualifiedName": "sym_noloop",
+    "callText": "r.assert_no_errors()",
+    "calleeName": "assert_no_errors",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "RecursiveResults::assert_no_errors",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "r = dir.run_recursive(..) -> RecursiveResults; assert_no_errors util.rs:35"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 1083,
+    "col": 34,
+    "callerQualifiedName": "regression_skip_current_dir",
+    "callText": "dir.path()",
+    "calleeName": "path",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "Dir::path",
+        "kind": "method"
+      },
+      "confidence": "exact",
+      "why": "dir = Dir::tmp() -> Dir; path util.rs:90"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/error.rs",
+    "line": 174,
+    "col": 39,
+    "callerQualifiedName": "Error::from_entry",
+    "callText": "dent.path().to_path_buf()",
+    "calleeName": "to_path_buf",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "outermost callee is to_path_buf on &Path; std"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/lib.rs",
+    "line": 277,
+    "col": 13,
+    "callerQualifiedName": "WalkDirOptions::fmt",
+    "callText": "f.debug_struct(\"WalkDirOptions\") .field(\"follow_links\", &self.follow_links) .field(\"follow_root_link\", &self.follow_root_links) .field(\"max_open\", &self.max_open) .field(\"min_depth\", &self.min_depth) ",
+    "calleeName": "finish",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "f is &mut fmt::Formatter; debug_struct is std"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/dent.rs",
+    "line": 192,
+    "col": 13,
+    "callerQualifiedName": "DirEntry::from_entry",
+    "callText": "ent .file_type() .map_err(|err| Error::from_path(depth, path.clone(), err))",
+    "calleeName": "map_err",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "outermost callee map_err on io::Result<FileType>; ent is fs::DirEntry (std)"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "walkdir-list/main.rs",
+    "line": 210,
+    "col": 13,
+    "callerQualifiedName": "Args::parse",
+    "callText": "App::new(\"List files using walkdir\") .author(crate_authors!()) .version(crate_version!()) .max_term_width(100) .arg(Arg::with_name(\"dirs\").multiple(true)) .arg( Arg::with_name(\"follow-links\") .long(\"f",
+    "calleeName": "arg",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "App::arg from clap dependency"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "walkdir-list/main.rs",
+    "line": 244,
+    "col": 21,
+    "callerQualifiedName": "Args::parse",
+    "callText": "Arg::with_name(\"count\") .long(\"count\") .short(\"c\") .help(\"Print only a total count of all file paths.\")",
+    "calleeName": "help",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Arg::help from clap dependency"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 41,
+    "col": 22,
+    "callerQualifiedName": "empty_follow",
+    "callText": "WalkDir::new(dir.path())",
+    "calleeName": "new",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/lib.rs",
+        "qualifiedName": "WalkDir::new",
+        "kind": "assoc-fn"
+      },
+      "confidence": "exact",
+      "why": "WalkDir::new defined lib.rs:289"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 390,
+    "col": 22,
+    "callerQualifiedName": "broken_sym_root_dir_nofollow_and_root_nofollow",
+    "callText": "WalkDir::new(dir.join(\"a-link\"))",
+    "calleeName": "new",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/lib.rs",
+        "qualifiedName": "WalkDir::new",
+        "kind": "assoc-fn"
+      },
+      "confidence": "exact",
+      "why": "WalkDir::new defined lib.rs:289"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 326,
+    "col": 19,
+    "callerQualifiedName": "sym_root_file_nofollow",
+    "callText": "Dir::tmp()",
+    "calleeName": "tmp",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "Dir::tmp",
+        "kind": "assoc-fn"
+      },
+      "confidence": "exact",
+      "why": "Dir::tmp defined util.rs:84"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 838,
+    "col": 19,
+    "callerQualifiedName": "max_depth_2",
+    "callText": "Dir::tmp()",
+    "calleeName": "tmp",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/util.rs",
+        "qualifiedName": "Dir::tmp",
+        "kind": "assoc-fn"
+      },
+      "confidence": "exact",
+      "why": "Dir::tmp defined util.rs:84"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "walkdir-list/main.rs",
+    "line": 34,
+    "col": 17,
+    "callerQualifiedName": "main",
+    "callText": "process::exit(1)",
+    "calleeName": "exit",
+    "category": "path-module",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std::process::exit"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 18,
+    "col": 4,
+    "callerQualifiedName": "send_sync_traits",
+    "callText": "assert_send::<FilterEntry<IntoIter, u8>>()",
+    "calleeName": "assert_send",
+    "category": "path-generic",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/tests/recursive.rs",
+        "qualifiedName": "assert_send",
+        "kind": "fn"
+      },
+      "confidence": "exact",
+      "why": "nested fn assert_send declared at recursive.rs:10 inside send_sync_traits"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "walkdir-list/main.rs",
+    "line": 255,
+    "col": 23,
+    "callerQualifiedName": "Args::parse",
+    "callText": "parse_usize(&parsed, \"min-depth\")",
+    "calleeName": "parse_usize",
+    "category": "bare-fn",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "walkdir-list/main.rs",
+        "qualifiedName": "parse_usize",
+        "kind": "fn"
+      },
+      "confidence": "exact",
+      "why": "fn parse_usize at walkdir-list/main.rs:289"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/lib.rs",
+    "line": 910,
+    "col": 12,
+    "callerQualifiedName": "IntoIter::push",
+    "callText": "Some(Error::from_path(self.depth, dent.path().to_path_buf(), err))",
+    "calleeName": "Some",
+    "category": "bare-closure-or-ctor",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Some is Option variant from prelude"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "walkdir-list/main.rs",
+    "line": 99,
+    "col": 4,
+    "callerQualifiedName": "print_paths",
+    "callText": "Ok(())",
+    "calleeName": "Ok",
+    "category": "bare-closure-or-ctor",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Ok is Result variant from prelude"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 513,
+    "col": 4,
+    "callerQualifiedName": "sym_root_dir_follow",
+    "callText": "assert!(!link.file_type().is_symlink())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "assert! is std macro"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/lib.rs",
+    "line": 694,
+    "col": 23,
+    "callerQualifiedName": "IntoIter::next",
+    "callText": "itry!(DirEntry::from_path(0, start, false))",
+    "calleeName": "itry",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "unresolvable",
+      "confidence": "exact",
+      "why": "itry! is an in-repo macro_rules (lib.rs:137); target is macro expansion, no target kind for macros"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 632,
+    "col": 4,
+    "callerQualifiedName": "sym_dir_nofollow",
+    "callText": "assert!(!link.metadata().unwrap().is_dir())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "assert! is std macro"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/util.rs",
+    "line": 105,
+    "col": 65,
+    "callerQualifiedName": "Dir::run_recursive",
+    "callText": "vec![]",
+    "calleeName": "vec",
+    "category": "macro-invocation",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "vec! is std macro"
+    }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/tests/recursive.rs",
+    "line": 398,
+    "col": 4,
+    "callerQualifiedName": "broken_sym_root_dir_nofollow_and_root_nofollow",
+    "callText": "assert!(link.path_is_symlink())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "assert! is std macro"
+    }
+  }
+]
