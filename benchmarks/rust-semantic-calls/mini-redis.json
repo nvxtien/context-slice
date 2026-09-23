@@ -1,0 +1,518 @@
+[
+  {
+    "repo": "mini-redis",
+    "file": "src/clients/client.rs",
+    "line": 118,
+    "col": 19,
+    "callerQualifiedName": "Client::ping",
+    "callText": "self.read_response()",
+    "calleeName": "read_response",
+    "category": "self-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/clients/client.rs",
+        "qualifiedName": "Client::read_response",
+        "kind": "method",
+        "line": 374
+      },
+      "confidence": "exact",
+      "why": "self is Client (impl Client client.rs:54); read_response client.rs:374"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/connection.rs",
+    "line": 192,
+    "col": 28,
+    "callerQualifiedName": "Connection::write_value",
+    "callText": "self.stream.write_u8(b'-')",
+    "calleeName": "write_u8",
+    "category": "field-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "self.stream is BufWriter<TcpStream> (connection.rs:25); tokio AsyncWriteExt::write_u8"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/db.rs",
+    "line": 150,
+    "col": 38,
+    "callerQualifiedName": "Db::get",
+    "callText": "self.shared.state.lock()",
+    "calleeName": "lock",
+    "category": "field-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "state is std::sync::Mutex<State> (db.rs:52); Mutex::lock is std"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/cmd/get.rs",
+    "line": 54,
+    "col": 24,
+    "callerQualifiedName": "Get::parse_frames",
+    "callText": "parse.next_string()",
+    "calleeName": "next_string",
+    "category": "param-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/parse.rs",
+        "qualifiedName": "Parse::next_string",
+        "kind": "method",
+        "line": 56
+      },
+      "confidence": "exact",
+      "why": "parse: &mut Parse; next_string parse.rs:56"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/cmd/subscribe.rs",
+    "line": 191,
+    "col": 38,
+    "callerQualifiedName": "subscribe_to_channel",
+    "callText": "channel_name.clone()",
+    "calleeName": "clone",
+    "category": "param-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "channel_name: String (subscribe.rs:171); String::clone is std"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/clients/client.rs",
+    "line": 482,
+    "col": 55,
+    "callerQualifiedName": "Subscriber::unsubscribe",
+    "callText": "frame.as_slice()",
+    "calleeName": "as_slice",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "frame is &Vec<Frame> from Frame::Array; as_slice is Vec std method"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/cmd/mod.rs",
+    "line": 55,
+    "col": 33,
+    "callerQualifiedName": "Command::from_frame",
+    "callText": "parse.next_string()",
+    "calleeName": "next_string",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/parse.rs",
+        "qualifiedName": "Parse::next_string",
+        "kind": "method",
+        "line": 56
+      },
+      "confidence": "exact",
+      "why": "parse = Parse::new(frame)? (cmd/mod.rs:49); next_string parse.rs:56"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "tests/client.rs",
+    "line": 36,
+    "col": 11,
+    "callerQualifiedName": "key_value_get_set",
+    "callText": "client.set(\"hello\", \"world\".into())",
+    "calleeName": "set",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/clients/client.rs",
+        "qualifiedName": "Client::set",
+        "kind": "method",
+        "line": 194
+      },
+      "confidence": "exact",
+      "why": "client is mini_redis::clients::Client from Client::connect; set client.rs:194 (library under src/)"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/db.rs",
+    "line": 135,
+    "col": 48,
+    "callerQualifiedName": "Db::new",
+    "callText": "shared.clone()",
+    "calleeName": "clone",
+    "category": "local-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "shared is Arc<Shared> (db.rs:124); Arc::clone is std"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "tests/server.rs",
+    "line": 238,
+    "col": 41,
+    "callerQualifiedName": "pub_sub",
+    "callText": "sub2.read_exact(&mut response).await.unwrap()",
+    "calleeName": "unwrap",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Result::unwrap on tokio read_exact result; std"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/parse.rs",
+    "line": 111,
+    "col": 70,
+    "callerQualifiedName": "Parse::next_int",
+    "callText": "MSG.into()",
+    "calleeName": "into",
+    "category": "chained-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "&str Into<Box<dyn Error>> via std From impls"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/parse.rs",
+    "line": 121,
+    "col": 76,
+    "callerQualifiedName": "Parse::finish",
+    "callText": "\"protocol error; expected end of frame, but there was more\".into()",
+    "calleeName": "into",
+    "category": "chained-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "&str Into<Box<dyn Error>> via std From impls"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/frame.rs",
+    "line": 90,
+    "col": 74,
+    "callerQualifiedName": "Frame::check",
+    "callText": "\"protocol error; invalid frame format\".into()",
+    "calleeName": "into",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "&str Into<Box<dyn Error>> via std From impls"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "tests/server.rs",
+    "line": 166,
+    "col": 41,
+    "callerQualifiedName": "pub_sub",
+    "callText": "sub1.read_exact(&mut response).await.unwrap()",
+    "calleeName": "unwrap",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Result::unwrap on tokio read_exact result; std"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/db.rs",
+    "line": 127,
+    "col": 34,
+    "callerQualifiedName": "Db::new",
+    "callText": "HashMap::new()",
+    "calleeName": "new",
+    "category": "assoc-Type",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std::collections::HashMap::new"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/cmd/mod.rs",
+    "line": 73,
+    "col": 52,
+    "callerQualifiedName": "Command::from_frame",
+    "callText": "Unknown::new(command_name)",
+    "calleeName": "new",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/cmd/unknown.rs",
+        "qualifiedName": "Unknown::new",
+        "kind": "assoc-fn",
+        "line": 14
+      },
+      "confidence": "exact",
+      "why": "Unknown::new(command_name) resolves to impl Unknown unknown.rs:11, new at unknown.rs:14"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/db.rs",
+    "line": 307,
+    "col": 27,
+    "callerQualifiedName": "Shared::purge_expired_keys",
+    "callText": "Instant::now()",
+    "calleeName": "now",
+    "category": "assoc-Type",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Instant is tokio::time::Instant (db.rs:2)"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "tests/frame_validation.rs",
+    "line": 11,
+    "col": 26,
+    "callerQualifiedName": "check_rejects_invalid_negative_bulk_length",
+    "callText": "Cursor::new(&b\"$-2\\r\\n\"[..])",
+    "calleeName": "new",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std::io::Cursor::new"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/clients/buffered_client.rs",
+    "line": 73,
+    "col": 15,
+    "callerQualifiedName": "BufferedClient::buffer",
+    "callText": "tokio::spawn(async move { run(client, rx).await })",
+    "calleeName": "spawn",
+    "category": "path-module",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "tokio::spawn"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/parse.rs",
+    "line": 110,
+    "col": 35,
+    "callerQualifiedName": "Parse::next_int",
+    "callText": "atoi::<u64>(data.as_bytes())",
+    "calleeName": "atoi",
+    "category": "path-generic",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "atoi crate function (use atoi::atoi parse.rs:101)"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/frame.rs",
+    "line": 255,
+    "col": 4,
+    "callerQualifiedName": "get_decimal",
+    "callText": "atoi::<u64>(line)",
+    "calleeName": "atoi",
+    "category": "path-generic",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "atoi crate function (use atoi::atoi frame.rs:251)"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/parse.rs",
+    "line": 111,
+    "col": 33,
+    "callerQualifiedName": "Parse::next_int",
+    "callText": "atoi::<u64>(&data)",
+    "calleeName": "atoi",
+    "category": "path-generic",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "atoi crate function (use atoi::atoi parse.rs:101)"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/frame.rs",
+    "line": 136,
+    "col": 26,
+    "callerQualifiedName": "Frame::parse",
+    "callText": "get_decimal(src)",
+    "calleeName": "get_decimal",
+    "category": "bare-fn",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "src/frame.rs",
+        "qualifiedName": "get_decimal",
+        "kind": "fn",
+        "line": 250
+      },
+      "confidence": "exact",
+      "why": "free fn get_decimal defined frame.rs:250"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/frame.rs",
+    "line": 70,
+    "col": 16,
+    "callerQualifiedName": "Frame::check",
+    "callText": "Ok(())",
+    "calleeName": "Ok",
+    "category": "bare-closure-or-ctor",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "prelude Result::Ok variant"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/parse.rs",
+    "line": 86,
+    "col": 21,
+    "callerQualifiedName": "Parse::next_bytes",
+    "callText": "Err(format!( \"protocol error; expected simple frame or bulk frame, got {frame:?}\" ) .into())",
+    "calleeName": "Err",
+    "category": "bare-closure-or-ctor",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "prelude Result::Err variant"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/frame.rs",
+    "line": 108,
+    "col": 16,
+    "callerQualifiedName": "Frame::check",
+    "callText": "Ok(())",
+    "calleeName": "Ok",
+    "category": "bare-closure-or-ctor",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "prelude Result::Ok variant"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/connection.rs",
+    "line": 218,
+    "col": 8,
+    "callerQualifiedName": "Connection::write_value",
+    "callText": "Ok(())",
+    "calleeName": "Ok",
+    "category": "bare-closure-or-ctor",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "prelude Result::Ok variant"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "tests/server.rs",
+    "line": 310,
+    "col": 4,
+    "callerQualifiedName": "manage_subscription",
+    "callText": "assert_eq!( &b\"*3\\r\\n$7\\r\\nmessage\\r\\n$3\\r\\nfoo\\r\\n$3\\r\\nbar\\r\\n\"[..], &response[..] )",
+    "calleeName": "assert_eq",
+    "category": "macro-invocation",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std assert_eq! macro"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "src/bin/cli.rs",
+    "line": 115,
+    "col": 12,
+    "callerQualifiedName": "main",
+    "callText": "println!(\"OK\")",
+    "calleeName": "println",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std println! macro"
+    }
+  },
+  {
+    "repo": "mini-redis",
+    "file": "tests/client.rs",
+    "line": 68,
+    "col": 19,
+    "callerQualifiedName": "receive_message_multiple_subscribed_channels",
+    "callText": "vec![\"hello\".into(), \"world\".into()]",
+    "calleeName": "vec",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std vec! macro"
+    }
+  }
+]
