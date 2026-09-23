@@ -10,7 +10,8 @@ import type {
 } from "../types/model.js";
 import { WorkflowError } from "../workflow/errors.js";
 
-export const INDEX_VERSION = "1.1.0";
+// Bump whenever any language adapter's parse/resolve output changes: unchanged files are otherwise reused from cache.
+export const INDEX_VERSION = "1.2.0";
 
 export interface IndexedFileRecord {
   hash: string;

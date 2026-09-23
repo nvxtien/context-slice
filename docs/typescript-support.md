@@ -84,7 +84,7 @@ Java and TypeScript coexist in one index. Each language resolves only its own ca
 
 ## Cache compatibility
 
-The cache schema is `1.1.0` and records a language per file, symbol and call. Upgrading from an earlier version drops the old cache and rebuilds it on the next command, with nothing to delete by hand.
+The cache schema is `1.2.0` and records a language per file, symbol and call. Upgrading from an earlier version drops the old cache and rebuilds it on the next command, with nothing to delete by hand.
 
 Downgrading to 1.0.0 or earlier requires deleting the cache first:
 
