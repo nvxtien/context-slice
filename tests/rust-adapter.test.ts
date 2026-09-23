@@ -27,6 +27,27 @@ test("target/ directory is ignored", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+test("duplicate impl blocks for the same type do not crash indexing", () => {
+  const dir = mkdtempSync(join(tmpdir(), "cs-rust-"));
+  writeFileSync(
+    join(dir, "lib.rs"),
+    "struct Foo;\nimpl Foo { fn a(&self) {} }\nimpl Foo { fn b(&self) {} }\n",
+  );
+  const index = new ProjectIndex(dir);
+  assert.doesNotThrow(() => index.rebuild());
+  const a = index.symbols.find((s) => s.name === "a" && s.language === "rust");
+  const b = index.symbols.find((s) => s.name === "b" && s.language === "rust");
+  assert.ok(a, "method 'a' was not indexed");
+  assert.ok(b, "method 'b' was not indexed");
+  assert.notEqual(a!.id, b!.id, "methods from distinct impl blocks got the same id");
+  assert.notEqual(
+    a!.parentId,
+    b!.parentId,
+    "the two impl blocks should be distinct parent symbols",
+  );
+  rmSync(dir, { recursive: true, force: true });
+});
+
 test("a mixed Java + Rust repository indexes both languages without crashing", () => {
   const dir = mkdtempSync(join(tmpdir(), "cs-mixed-"));
   writeFileSync(join(dir, "Main.java"), "class Main { void run() {} }\n");

@@ -92,6 +92,7 @@ function itemName(node: Node): string {
 
 export function parseRust(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
+  const seenIds = new Set<string>();
   let parseError = false;
   let tree: Parser.Tree;
   try {
@@ -113,7 +114,16 @@ export function parseRust(filePath: string, source: string): ParsedFile {
       const name = itemName(child);
       if (!name) continue;
       const kind = KIND_BY_NODE_TYPE[child.type];
-      const id = canonicalId(filePath, chain, kind, name);
+      const canonicalIdentity = canonicalId(filePath, chain, kind, name);
+      // Two items at the same nesting level can share a name (e.g. multiple
+      // `impl Foo` blocks, or #[cfg(...)]-gated fn overloads), which would
+      // otherwise collide on `id` — a SQLite primary key — and crash the
+      // whole project's indexing. Disambiguate with the node's own start
+      // line: deterministic and human-readable, unlike an incrementing
+      // counter that could shift under fixture reordering.
+      let id = canonicalIdentity;
+      if (seenIds.has(id)) id = `${canonicalIdentity}#${child.startPosition.row + 1}`;
+      seenIds.add(id);
       const modifiers = isPub(child) ? ["pub"] : [];
       const symbol: SymbolRecord = {
         id,
@@ -121,7 +131,7 @@ export function parseRust(filePath: string, source: string): ParsedFile {
         kind,
         name,
         qualifiedName: [...chain, name].join("::"),
-        canonicalIdentity: id,
+        canonicalIdentity,
         signature: child.text.split("\n")[0].trim(),
         filePath,
         range: range(child),
