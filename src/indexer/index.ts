@@ -25,6 +25,7 @@ import { extractEnterpriseRelations } from "../languages/java/enterprise/registr
 import "../languages/java.js";
 import "../languages/typescript/index.js";
 import "../languages/python/index.js";
+import "../languages/rust/index.js";
 
 const coreIgnored = new Set([
   ".git",
