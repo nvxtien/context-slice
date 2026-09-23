@@ -386,10 +386,9 @@ function evaluate(repo: Repository) {
           if (insideInline(file, record.range.startLine)) return "RUST_STATIC_LIMIT";
           if (new RegExp(`macro_rules!|\\b${record.importedName!.replace(/[^\w]/g, "")}!`).test(target) && wordIn(record.importedName!, target)) return "MACRO_EXPANSION_LIMIT";
           if (new RegExp(`use\\s[^;]*[{,\\s:]${record.importedName!.replace(/[^\w]/g, "")}\\b`).test(target)) return "USE_RESOLUTION";
-          if (!wordIn(record.importedName!, target)) return "RUST_STATIC_LIMIT";
-          return "UNKNOWN";
+          return "UNKNOWN"; // includes: imported name absent from the resolved file's text (see detail)
         })();
-        const f: Failure = { kind: "resolved-name-missing", category, file: record.filePath, line: record.range.startLine, detail: `use ${record.module}::${record.importedName} -> ${record.resolvedFile}` };
+        const f: Failure = { kind: "resolved-name-missing", category, file: record.filePath, line: record.range.startLine, detail: `use ${record.module}::${record.importedName} -> ${record.resolvedFile}${category === "UNKNOWN" && !wordIn(record.importedName, (sources.get(record.resolvedFile!) ?? "")) ? " [fallback: imported name does not appear in the resolved file's text]" : ""}` };
         failures.push(f);
         if (nameMissingSamples.length < EXAMPLES_LIMIT) nameMissingSamples.push(f);
       }
@@ -496,13 +495,13 @@ const results = repositories.map((repo) => {
 });
 
 const ATTRIBUTION_RULES = [
-  ["PARSER", "The importing file, or the file the oracle says is the target, has a tree-sitter syntax error OR was emptied by the adapter (it has no symbols/imports/exports although its text contains items; the indexer reports these as parseErrors)."],
+  ["PARSER", "The importing file, or the file the oracle says is the target, has a tree-sitter syntax error (genuine grammar error) OR the adapter failed to parse / emptied the file (an adapter defect, e.g. tree-sitter input-size limit: no symbols/imports/exports although the text contains items; the indexer reports these as parseErrors). Both sub-kinds are in this bucket; file counts per sub-kind are in the coverage table."],
   ["CARGO_WORKSPACE_RESOLUTION", "The file belongs to a crate root that is not src/lib.rs or src/main.rs (src/bin/*, tests/*, examples/*, build.rs, or an orphan such as a second crate outside src/), or a non-anchored import names the package's own lib crate but was classified external."],
-  ["RUST_STATIC_LIMIT", "The use sits inside an inline `mod x { }` body; or its path continues into an inline mod / item that has no file of its own; or the mod declaration is cfg-gated with no file; or the imported name does not appear anywhere in the resolved file's text."],
+  ["RUST_STATIC_LIMIT", "The use sits inside an inline `mod x { }` body; or its path continues into an inline mod / item that has no file of its own; or the mod declaration is cfg-gated with no file."],
   ["MACRO_EXPANSION_LIMIT", "The resolved file contains macro_rules!/an invocation mentioning the imported name and no symbol of that name exists."],
   ["MODULE_RESOLUTION", "The independent oracle finds a file-backed module for the path, but the adapter's modulePathFor disagrees with the oracle module path of that file."],
   ["USE_RESOLUTION", "The oracle finds the target module file and modulePathFor agrees with it, yet the adapter left the import unresolved / resolved it to a different file; or the name appears only inside a `use` group the parser skips (nested use groups); or a non-anchored path names a mod/item/imported name in scope in the same file but was marked external; or a top-level braced `use {a::b, c::d};` was parsed as one import whose module text is the whole group; or the path continues two or more segments past the last file-backed module."],
-  ["UNKNOWN", "None of the rules above matched. Reported unminimized; see UNKNOWN examples."],
+  ["UNKNOWN", "FALLBACK: none of the rules above matched, including a resolved-name-missing case where the imported name does not appear anywhere in the resolved file's text (marked in the example detail). Reported unminimized; see UNKNOWN examples."],
 ] as const;
 
 const generatedAt = new Date().toISOString();

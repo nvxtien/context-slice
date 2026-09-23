@@ -16,7 +16,7 @@ function tree(files: Record<string, string>) {
     mkdirSync(join(root, name, ".."), { recursive: true });
     writeFileSync(join(root, name), body);
   }
-  return (rel: string) => existsSync(join(root, rel)) && true;
+  return (rel: string) => existsSync(join(root, rel));
 }
 // Paths are compared repo-relative; the fake root is joined only inside `tree`.
 function rel(files: Record<string, string>) {
