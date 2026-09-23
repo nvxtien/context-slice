@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T18:05:29.296Z",
+  "generatedAt": "2026-09-23T18:17:32.286Z",
   "spec": "docs/prompt/CONTEXTSLICE_V1.5_RUST_SUPPORT.md §67-74, §80",
   "attributionRules": {
     "PARSER": "The importing file, or the file the oracle says is the target, has a tree-sitter syntax error (genuine grammar error) OR the adapter failed to parse / emptied the file (an adapter defect, e.g. tree-sitter input-size limit: no symbols/imports/exports although the text contains items; the indexer reports these as parseErrors). Both sub-kinds are in this bucket; file counts per sub-kind are in the coverage table.",
@@ -29,10 +29,10 @@
         "indexerReportedParseErrorsCold": 0
       },
       "performance": {
-        "coldMs": 71,
-        "warmMs": 10,
-        "coldWallMs": 71,
-        "warmWallMs": 10,
+        "coldMs": 84,
+        "warmMs": 9,
+        "coldWallMs": 84,
+        "warmWallMs": 9,
         "coldFilesParsed": 9,
         "warmFilesParsed": 0,
         "warmCacheHits": 9
@@ -156,9 +156,9 @@
         "indexerReportedParseErrorsCold": 0
       },
       "performance": {
-        "coldMs": 66,
+        "coldMs": 73,
         "warmMs": 15,
-        "coldWallMs": 66,
+        "coldWallMs": 73,
         "warmWallMs": 15,
         "coldFilesParsed": 28,
         "warmFilesParsed": 0,
@@ -805,10 +805,10 @@
         "indexerReportedParseErrorsCold": 0
       },
       "performance": {
-        "coldMs": 168,
-        "warmMs": 23,
-        "coldWallMs": 169,
-        "warmWallMs": 22,
+        "coldMs": 167,
+        "warmMs": 20,
+        "coldWallMs": 167,
+        "warmWallMs": 20,
         "coldFilesParsed": 13,
         "warmFilesParsed": 0,
         "warmCacheHits": 13

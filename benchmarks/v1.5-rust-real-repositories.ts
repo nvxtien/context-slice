@@ -647,7 +647,7 @@ const RATES: Array<[string, (r: any) => [number, number]]> = [
   ["reexport with symbolId (non-wildcard)", (r) => [r.reexportResolution.nonWildcardWithSymbolId, r.reexportResolution.nonWildcard]],
 ];
 const verdict = (b: number, a: number, good: "up" | "down" | "neutral") =>
-  a === b ? "unchanged" : good === "neutral" ? "changed (volume)" : (a > b) === (good === "up") ? "improved" : "WORSE";
+  a === b ? "unchanged" : good === "neutral" || (good === "up" && a > b) ? "changed (volume)" : (a > b) === (good === "up") ? "improved" : "WORSE";
 const worse: string[] = [];
 md.push("## Before / After the fixes", "");
 md.push("BEFORE is the committed run frozen in `v1.5-phase1-rust-real-repositories.before-fixes.json` (taken before any `src/` change); AFTER is this run. \"changed (volume)\" marks counts that grow because more `use` records are now parsed (nested groups, `self`, top-level lists, large files), not because of a quality change.", "");
