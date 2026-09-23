@@ -21,3 +21,9 @@ test("a file nested in a directory module maps to the full path", () => {
     "postgres",
   ]);
 });
+
+test("src/ only matches at a path-segment boundary", () => {
+  assert.deepEqual(modulePathFor("crates/mysrc/src/lib.rs"), []);
+  // No real `src/` segment: whole path is used (existing fallback behaviour).
+  assert.deepEqual(modulePathFor("crates/mysrc/foo.rs"), ["crates", "mysrc", "foo"]);
+});

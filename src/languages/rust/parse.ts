@@ -88,8 +88,8 @@ function canonicalId(filePath: string, chain: string[], kind: SymbolKind, name: 
  */
 export function modulePathFor(filePath: string): string[] {
   const normalized = filePath.replace(/\\/g, "/");
-  const srcIndex = normalized.indexOf("src/");
-  const relative = srcIndex >= 0 ? normalized.slice(srcIndex + 4) : normalized;
+  const srcMatch = /(^|\/)src\//.exec(normalized); // segment-safe: not `mysrc/`
+  const relative = srcMatch ? normalized.slice(srcMatch.index + srcMatch[0].length) : normalized;
   const parts = relative.split("/").filter(Boolean);
   const last = parts.pop() ?? "";
   const base = last.replace(/\.rs$/, "");

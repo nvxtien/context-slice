@@ -61,15 +61,53 @@ test("self:: resolves relative to the current file's own module", () => {
   assert.equal(resolved.file, "src/repository/postgres.rs");
 });
 
-test("an unresolvable crate/self/super target stays unresolved, never external", () => {
+test("an anchored target is never external; a module-only miss falls back to the crate root file", () => {
   const index = rustModuleIndex(FILES);
   const resolved = resolveRustModule(
     ["crate", "does_not_exist", "Thing"],
     "src/service.rs",
     index,
   );
+  // Full path with a missing module: neither key matches -> unresolved.
   assert.equal(resolved.file, undefined);
   assert.equal(resolved.externalPackage, undefined);
+  // Module-only path: documented file-granularity fallback to the crate root.
+  const moduleOnly = resolveRustModule(["crate", "nope"], "src/service.rs", index);
+  assert.equal(moduleOnly.file, "src/lib.rs");
+  assert.equal(moduleOnly.externalPackage, undefined);
+});
+
+test("module-only external path is external, not the crate root", () => {
+  const index = rustModuleIndex(FILES);
+  assert.deepEqual(resolveRustModule(["serde"], "src/service.rs", index), {
+    externalPackage: "serde",
+  });
+  assert.deepEqual(resolveRustModule(["serde"], "src/lib.rs", index), {
+    externalPackage: "serde",
+  });
+});
+
+test("non-anchored path resolves to a child module of the current module first", () => {
+  const index = rustModuleIndex(FILES);
+  assert.equal(
+    resolveRustModule(["postgres"], "src/repository/mod.rs", index).file,
+    "src/repository/postgres.rs",
+  );
+  assert.equal(resolveRustModule(["service"], "src/lib.rs", index).file, "src/service.rs");
+});
+
+test("a module named like a dependency never resolves to itself", () => {
+  const index = rustModuleIndex([...FILES, "src/serde.rs"]);
+  assert.deepEqual(resolveRustModule(["serde"], "src/serde.rs", index), {
+    externalPackage: "serde",
+  });
+});
+
+test("colliding module paths are ambiguous and resolve to nothing", () => {
+  const index = rustModuleIndex(["crates/a/src/lib.rs", "crates/b/src/lib.rs"]);
+  assert.equal(index.byModule.has(""), false);
+  assert.ok(index.ambiguous.has(""));
+  assert.deepEqual(resolveRustModule(["crate", "X"], "crates/b/src/lib.rs", index), {});
 });
 
 test("a bare (non-anchored) target falling outside the crate is external", () => {
