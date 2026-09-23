@@ -78,6 +78,25 @@ function canonicalId(filePath: string, chain: string[], kind: SymbolKind, name: 
   return [filePath, ...chain, kind, name].join("::");
 }
 
+/**
+ * The crate-relative module path a `use` statement would need to name this
+ * file, per the standard `src/lib.rs`/`src/main.rs`/`src/foo.rs`/`src/foo/mod.rs`
+ * layout (spec §10). Computed purely from this file's own path — no
+ * repository-wide listing is needed, since the convention is per-file.
+ * Multi-crate workspaces and `src/bin/*.rs` binaries are not modeled (§41-46,
+ * §60, deferred).
+ */
+export function modulePathFor(filePath: string): string[] {
+  const normalized = filePath.replace(/\\/g, "/");
+  const srcIndex = normalized.indexOf("src/");
+  const relative = srcIndex >= 0 ? normalized.slice(srcIndex + 4) : normalized;
+  const parts = relative.split("/").filter(Boolean);
+  const last = parts.pop() ?? "";
+  const base = last.replace(/\.rs$/, "");
+  if (base === "lib" || base === "main" || base === "mod") return parts;
+  return [...parts, base];
+}
+
 /** impl blocks have no `name` field — label them by their Self type (+ trait, if any). */
 function implLabel(node: Node): string {
   const selfType = text(field(node, "type"));
@@ -101,6 +120,8 @@ export function parseRust(filePath: string, source: string): ParsedFile {
   } catch {
     return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
   }
+
+  const modulePath = modulePathFor(filePath);
 
   function walk(node: Node, parent: SymbolRecord | undefined, chain: string[]) {
     for (const child of node.namedChildren) {
@@ -130,7 +151,7 @@ export function parseRust(filePath: string, source: string): ParsedFile {
         language: LANGUAGE_ID,
         kind,
         name,
-        qualifiedName: [...chain, name].join("::"),
+        qualifiedName: [...modulePath, ...chain, name].join("::"),
         canonicalIdentity,
         signature: child.text.split("\n")[0].trim(),
         filePath,
