@@ -23,3 +23,127 @@ export const range = (node: Node): SourceRange => ({
 });
 export const field = (node: Node, name: string) => node.childForFieldName(name);
 export const text = (node: Node | null | undefined) => node?.text ?? "";
+
+import type {
+  ExportRecord,
+  ImportRecord,
+  SymbolKind,
+  SymbolRecord,
+} from "../../types/model.js";
+import type { ParsedFile } from "../adapter.js";
+
+const ITEM_TYPES = new Set([
+  "function_item",
+  "function_signature_item",
+  "struct_item",
+  "enum_item",
+  "trait_item",
+  "impl_item",
+  "mod_item",
+  "const_item",
+  "static_item",
+  "type_item",
+]);
+
+// SymbolKind (src/types/model.ts) has no "struct" or "trait" member —
+// verified directly against the live type before writing this plan, do not
+// add "struct"/"trait" as kind values, tsc will reject them.
+const KIND_BY_NODE_TYPE: Record<string, SymbolKind> = {
+  function_item: "function",
+  function_signature_item: "function",
+  struct_item: "class", // closest existing kind for a data-bearing named type
+  enum_item: "enum",
+  trait_item: "interface", // closest existing kind: a trait is a behavioral contract
+  impl_item: "type", // impl blocks are containers, not themselves a named declaration; shares "type" with type aliases deliberately, revisit if this causes ambiguity in a later phase
+  mod_item: "namespace",
+  const_item: "variable",
+  static_item: "variable",
+  type_item: "type",
+};
+
+const isPub = (node: Node) =>
+  node.children.some((child) => child.type === "visibility_modifier");
+// `async` is not a direct child of function_item — tree-sitter-rust 0.21 nests
+// it inside a `function_modifiers` child (verified empirically; the brief's
+// "direct child" assumption didn't hold here, unlike visibility_modifier).
+const isAsync = (node: Node) =>
+  node.children.some(
+    (child) =>
+      child.type === "async" ||
+      (child.type === "function_modifiers" &&
+        child.children.some((c) => c.type === "async")),
+  );
+
+function canonicalId(filePath: string, chain: string[], kind: SymbolKind, name: string) {
+  return [filePath, ...chain, kind, name].join("::");
+}
+
+/** impl blocks have no `name` field — label them by their Self type (+ trait, if any). */
+function implLabel(node: Node): string {
+  const selfType = text(field(node, "type"));
+  const traitNode = field(node, "trait");
+  return traitNode ? `impl ${text(traitNode)} for ${selfType}` : `impl ${selfType}`;
+}
+
+function itemName(node: Node): string {
+  if (node.type === "impl_item") return implLabel(node);
+  return text(field(node, "name"));
+}
+
+export function parseRust(filePath: string, source: string): ParsedFile {
+  const symbols: SymbolRecord[] = [];
+  let parseError = false;
+  let tree: Parser.Tree;
+  try {
+    tree = rustParser().parse(source);
+    parseError = tree.rootNode.hasError;
+  } catch {
+    return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
+  }
+
+  function walk(node: Node, parent: SymbolRecord | undefined, chain: string[]) {
+    for (const child of node.namedChildren) {
+      if (!ITEM_TYPES.has(child.type)) {
+        // Not a top-level item itself, but it may contain one (e.g. a source_file
+        // wraps everything; an impl/trait/mod body wraps its members directly, so
+        // this branch mainly matters for source_file's implicit top level).
+        walk(child, parent, chain);
+        continue;
+      }
+      const name = itemName(child);
+      if (!name) continue;
+      const kind = KIND_BY_NODE_TYPE[child.type];
+      const id = canonicalId(filePath, chain, kind, name);
+      const modifiers = isPub(child) ? ["pub"] : [];
+      const symbol: SymbolRecord = {
+        id,
+        language: LANGUAGE_ID,
+        kind,
+        name,
+        qualifiedName: [...chain, name].join("::"),
+        canonicalIdentity: id,
+        signature: child.text.split("\n")[0].trim(),
+        filePath,
+        range: range(child),
+        bodyRange: field(child, "body") ? range(field(child, "body")!) : undefined,
+        parentId: parent?.id,
+        annotations: [],
+        modifiers,
+        metadata:
+          child.type === "function_item" && isAsync(child)
+            ? { async: true }
+            : undefined,
+        source: child.text,
+        body: field(child, "body")?.text,
+      };
+      symbols.push(symbol);
+      const body = field(child, "body");
+      if (body) walk(body, symbol, [...chain, name]);
+    }
+  }
+
+  walk(tree.rootNode, undefined, []);
+  const imports: ImportRecord[] = [];
+  const exports: ExportRecord[] = [];
+  return { symbols, calls: [], imports, exports, parseError };
+}
