@@ -197,7 +197,8 @@ export function parseRust(filePath: string, source: string): ParsedFile {
   let parseError = false;
   let tree: Parser.Tree;
   try {
-    tree = rustParser().parse(source);
+    // The node binding rejects string inputs of ~32KB or more, so feed it in small chunks.
+    tree = rustParser().parse((index: number) => source.slice(index, index + 4_096));
     parseError = tree.rootNode.hasError;
   } catch {
     return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
