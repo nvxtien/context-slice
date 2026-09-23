@@ -1,0 +1,550 @@
+[
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 289,
+    "col": 25,
+    "callerQualifiedName": "Ignore::add_child_with_entries",
+    "callText": "self.collect_ignore_files(entries)",
+    "calleeName": "collect_ignore_files",
+    "category": "self-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "Ignore::collect_ignore_files",
+        "kind": "method",
+        "line": 308
+      },
+      "confidence": "exact",
+      "why": "self is Ignore (impl Ignore dir.rs:168); collect_ignore_files dir.rs:308"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 834,
+    "col": 24,
+    "callerQualifiedName": "WalkBuilder::overrides",
+    "callText": "self.ig_builder.overrides(overrides)",
+    "calleeName": "overrides",
+    "category": "field-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "IgnoreBuilder::overrides",
+        "kind": "method",
+        "line": 878
+      },
+      "confidence": "exact",
+      "why": "ig_builder: IgnoreBuilder (walk.rs:490); IgnoreBuilder::overrides dir.rs:878"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 90,
+    "col": 18,
+    "callerQualifiedName": "DirEntry::ino",
+    "callText": "self.dent.ino()",
+    "calleeName": "ino",
+    "category": "field-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/walk.rs",
+        "qualifiedName": "DirEntryInner::ino",
+        "kind": "method",
+        "line": 219
+      },
+      "confidence": "exact",
+      "why": "dent: DirEntryInner (walk.rs:32); impl DirEntryInner ino walk.rs:219"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 509,
+    "col": 36,
+    "callerQualifiedName": "GitignoreBuilder::add_line",
+    "callText": "line.len()",
+    "calleeName": "len",
+    "category": "param-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "line is &str; str::len is std"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 2476,
+    "col": 21,
+    "callerQualifiedName": "tests::min_depth",
+    "callText": "builder.min_depth(Some(0))",
+    "calleeName": "min_depth",
+    "category": "local-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/walk.rs",
+        "qualifiedName": "WalkBuilder::min_depth",
+        "kind": "method",
+        "line": 744
+      },
+      "confidence": "exact",
+      "why": "builder = WalkBuilder::new(..) in test; WalkBuilder::min_depth walk.rs:744"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1203,
+    "col": 66,
+    "callerQualifiedName": "tests::gitignore_no_git",
+    "callText": "td.path()",
+    "calleeName": "path",
+    "category": "local-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/lib.rs",
+        "qualifiedName": "tests::TempDir::path",
+        "kind": "method",
+        "line": 545
+      },
+      "confidence": "exact",
+      "why": "td is crate::tests::TempDir (lib.rs:512, from tmpdir()); path at lib.rs:545"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 537,
+    "col": 19,
+    "callerQualifiedName": "Ignore::matched",
+    "callText": "mat.is_ignore()",
+    "calleeName": "is_ignore",
+    "category": "local-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/lib.rs",
+        "qualifiedName": "Match::is_ignore",
+        "kind": "method",
+        "line": 437
+      },
+      "confidence": "exact",
+      "why": "mat = self.matched_ignore(..) -> Match<IgnoreMatch> (dir.rs:548); impl<T> Match<T>::is_ignore lib.rs:437"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1050,
+    "col": 14,
+    "callerQualifiedName": "create_gitignore",
+    "callText": "errs.into_error_option()",
+    "calleeName": "into_error_option",
+    "category": "local-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/lib.rs",
+        "qualifiedName": "PartialErrorBuilder::into_error_option",
+        "kind": "method",
+        "line": 398
+      },
+      "confidence": "exact",
+      "why": "errs = PartialErrorBuilder::default() (dir.rs:1023); into_error_option lib.rs:398"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1537,
+    "col": 17,
+    "callerQualifiedName": "tests::multi_root_custom_ignore_order_independent",
+    "callText": "td.path()",
+    "calleeName": "path",
+    "category": "local-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/lib.rs",
+        "qualifiedName": "tests::TempDir::path",
+        "kind": "method",
+        "line": 545
+      },
+      "confidence": "exact",
+      "why": "td is crate::tests::TempDir (lib.rs:512, from tmpdir()); path at lib.rs:545"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/incremental.rs",
+    "line": 1225,
+    "col": 24,
+    "callerQualifiedName": "tests::gitignore_whitelist_overrides_hidden_filter",
+    "callText": "td.path().join(\".hidden-file\")",
+    "calleeName": "join",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "td.path() is &Path; Path::join is std"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 626,
+    "col": 36,
+    "callerQualifiedName": "gitconfig_system_contents",
+    "callText": "file.read_to_end(&mut contents).ok()",
+    "calleeName": "ok",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Result::ok on read_to_end result; std"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1436,
+    "col": 24,
+    "callerQualifiedName": "tests::absolute_parent_matchers_are_cached_across_roots",
+    "callText": "td.path().join(\".gitignore\")",
+    "calleeName": "join",
+    "category": "chained-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "td.path() is &Path; Path::join is std"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1417,
+    "col": 39,
+    "callerQualifiedName": "tests::absolute_parent_anchored",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "IgnoreBuilder::build",
+        "kind": "method",
+        "line": 809
+      },
+      "confidence": "exact",
+      "why": "IgnoreBuilder::new() is IgnoreBuilder; build dir.rs:809"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 2352,
+    "col": 24,
+    "callerQualifiedName": "tests::gitignore",
+    "callText": "td.path().join(\"a/foo\")",
+    "calleeName": "join",
+    "category": "chained-method",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "td.path() is &Path; Path::join is std"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/incremental.rs",
+    "line": 400,
+    "col": 40,
+    "callerQualifiedName": "IncrementalIgnore::match_path",
+    "callText": "IncrementalMatch::from_match( ignore.matched(&path, is_dir).map(|_| ()), is_dir, )",
+    "calleeName": "from_match",
+    "category": "assoc-Type",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/incremental.rs",
+        "qualifiedName": "IncrementalMatch::from_match",
+        "kind": "assoc-fn",
+        "line": 472
+      },
+      "confidence": "exact",
+      "why": "impl IncrementalMatch incremental.rs:455; from_match at 472"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 882,
+    "col": 30,
+    "callerQualifiedName": "IgnoreBuilder::overrides",
+    "callText": "Arc::new(overrides)",
+    "calleeName": "new",
+    "category": "assoc-Type",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std::sync::Arc::new"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 301,
+    "col": 16,
+    "callerQualifiedName": "DirEntryRaw::metadata_internal",
+    "callText": "fs::metadata(&self.path)",
+    "calleeName": "metadata",
+    "category": "path-module",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std::fs::metadata (use std::fs, walk.rs:4)"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1669,
+    "col": 50,
+    "callerQualifiedName": "Stack::new_for_each_thread",
+    "callText": "Arc::<[Stealer<Message>]>::from( deques.iter().map(Deque::stealer).collect::<Vec<_>>(), )",
+    "calleeName": "from",
+    "category": "path-generic",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std Arc::<[T]>::from"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/examples/walk.rs",
+    "line": 9,
+    "col": 38,
+    "callerQualifiedName": "main",
+    "callText": "crossbeam_channel::bounded::<DirEntry>(100)",
+    "calleeName": "bounded",
+    "category": "path-generic",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "crossbeam_channel dependency"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/incremental.rs",
+    "line": 835,
+    "col": 8,
+    "callerQualifiedName": "tests::cached_allowed_parent_matches_children",
+    "callText": "mkdirp(td.path().join(\"a/b\"))",
+    "calleeName": "mkdirp",
+    "category": "bare-fn",
+    "split": "dev",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/incremental.rs",
+        "qualifiedName": "tests::mkdirp",
+        "kind": "fn",
+        "line": 577
+      },
+      "confidence": "exact",
+      "why": "free fn mkdirp in incremental.rs tests mod at 577"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 2728,
+    "col": 17,
+    "callerQualifiedName": "tests::panic_in_parallel_builder",
+    "callText": "tmpdir()",
+    "calleeName": "tmpdir",
+    "category": "bare-fn",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/walk.rs",
+        "qualifiedName": "tests::tmpdir",
+        "kind": "fn",
+        "line": 2283
+      },
+      "confidence": "exact",
+      "why": "free fn tmpdir in walk.rs tests mod at 2283"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+    "line": 26,
+    "col": 20,
+    "callerQualifiedName": "test_files_in_root",
+    "callText": "get_gitignore()",
+    "calleeName": "get_gitignore",
+    "category": "bare-fn",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+        "qualifiedName": "get_gitignore",
+        "kind": "fn",
+        "line": 8
+      },
+      "confidence": "exact",
+      "why": "free fn get_gitignore in same file at line 8"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1473,
+    "col": 8,
+    "callerQualifiedName": "tests::multi_root_gitignore_order_independent",
+    "callText": "mkdirp(td.path().join(\"src\"))",
+    "calleeName": "mkdirp",
+    "category": "bare-fn",
+    "split": "held-out",
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "tests::mkdirp",
+        "kind": "fn",
+        "line": 1129
+      },
+      "confidence": "exact",
+      "why": "free fn mkdirp in dir.rs tests mod at 1129"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1218,
+    "col": 32,
+    "callerQualifiedName": "Walk::next",
+    "callText": "Err(Error::from_walkdir(err))",
+    "calleeName": "Err",
+    "category": "bare-closure-or-ctor",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Err is prelude Result::Err variant"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1643,
+    "col": 8,
+    "callerQualifiedName": "Work::read_dir",
+    "callText": "Ok(result)",
+    "calleeName": "Ok",
+    "category": "bare-closure-or-ctor",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "Ok is prelude Result::Ok variant"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1425,
+    "col": 8,
+    "callerQualifiedName": "tests::absolute_parent_anchored",
+    "callText": "assert!(ig2.matched(\"src/llvm\", true).is_none())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "dev",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std assert! macro"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+    "line": 247,
+    "col": 4,
+    "callerQualifiedName": "test_dirs_in_deep",
+    "callText": "assert!(m(\"ROOT/parent_dir/dir_deep_13/file\", false).is_none())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std assert! macro"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/overrides.rs",
+    "line": 257,
+    "col": 8,
+    "callerQualifiedName": "tests::allow_directories",
+    "callText": "assert!(ov.matched(\"src/foo.rs\", false).is_whitelist())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std assert! macro"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/incremental.rs",
+    "line": 1097,
+    "col": 8,
+    "callerQualifiedName": "tests::depth_limits",
+    "callText": "assert!(!matchedf(&mut m, \"a/file\").is_ignore())",
+    "calleeName": "assert",
+    "category": "macro-invocation",
+    "split": "held-out",
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "std assert! macro"
+    }
+  }
+]
