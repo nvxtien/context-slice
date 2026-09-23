@@ -1,0 +1,197 @@
+[
+  {
+    "repo": "walkdir",
+    "file": "src/dent.rs",
+    "line": 271,
+    "col": 20,
+    "callerQualifiedName": "DirEntry::from_path",
+    "callText": "md.ino()",
+    "calleeName": "ino",
+    "category": "local-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "DirEntryExt::ino"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 873,
+    "col": 13,
+    "callerQualifiedName": "tests::case_insensitive",
+    "callText": "GitignoreBuilder::new(ROOT) .case_insensitive(true) .unwrap() .add_str(None, \"*.html\") .unwrap() .build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/overrides.rs",
+    "line": 276,
+    "col": 13,
+    "callerQualifiedName": "tests::case_insensitive",
+    "callText": "OverrideBuilder::new(ROOT) .case_insensitive(true) .unwrap() .add(\"*.html\") .unwrap() .build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 111,
+    "col": 22,
+    "callerQualifiedName": "Gitignore::new",
+    "callText": "builder.build()",
+    "calleeName": "build",
+    "category": "local-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/types.rs",
+    "line": 233,
+    "col": 39,
+    "callerQualifiedName": "Types::empty",
+    "callText": "GlobSetBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1837,
+    "col": 36,
+    "callerQualifiedName": "Worker::run_one",
+    "callText": "self.visitor.visit(Err(err))",
+    "calleeName": "visit",
+    "category": "field-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitor::visit"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1402,
+    "col": 39,
+    "callerQualifiedName": "tests::absolute_parent",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 677,
+    "col": 13,
+    "callerQualifiedName": "parse_excludes_file",
+    "callText": "Regex::builder() .configure(Regex::config().utf8_empty(false)) .syntax(syntax::Config::new().utf8(false)) .build(r#\"(?im-u)^\\s*excludesfile\\s*=\\s*\"?\\s*(\\S+?)\\s*\"?\\s*$\"#)",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/overrides.rs",
+    "line": 197,
+    "col": 16,
+    "callerQualifiedName": "tests::ov",
+    "callText": "builder.build()",
+    "calleeName": "build",
+    "category": "local-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1587,
+    "col": 38,
+    "callerQualifiedName": "tests::git_info_exclude_in_linked_worktree",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1821,
+    "col": 37,
+    "callerQualifiedName": "Worker::run_one",
+    "callText": "self.visitor.visit(Ok(work.dent))",
+    "calleeName": "visit",
+    "category": "field-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitor::visit"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1320,
+    "col": 44,
+    "callerQualifiedName": "tests::errored",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 715,
+    "col": 16,
+    "callerQualifiedName": "tests::gi_from_str",
+    "callText": "builder.build()",
+    "calleeName": "build",
+    "category": "local-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ]
+  }
+]
