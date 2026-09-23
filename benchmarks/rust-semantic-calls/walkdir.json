@@ -14,7 +14,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "Dir::touch",
-        "kind": "method"
+        "kind": "method",
+        "line": 128
       },
       "confidence": "exact",
       "why": "self is Dir (impl Dir util.rs:82); touch defined util.rs:128"
@@ -35,7 +36,8 @@
       "target": {
         "file": "src/lib.rs",
         "qualifiedName": "IntoIter::next",
-        "kind": "method"
+        "kind": "method",
+        "line": 687
       },
       "confidence": "exact",
       "why": "impl Iterator for FilterEntry<IntoIter,P> (lib.rs:1060) so self.it: IntoIter; next at lib.rs:679"
@@ -72,7 +74,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "RecursiveResults::sorted_ents",
-        "kind": "method"
+        "kind": "method",
+        "line": 58
       },
       "confidence": "exact",
       "why": "r = dir.run_recursive(..) -> RecursiveResults (util.rs:101); sorted_ents util.rs:58"
@@ -93,7 +96,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "Dir::path",
-        "kind": "method"
+        "kind": "method",
+        "line": 90
       },
       "confidence": "exact",
       "why": "dir = Dir::tmp() -> Dir (util.rs:84); path util.rs:90"
@@ -114,7 +118,8 @@
       "target": {
         "file": "src/lib.rs",
         "qualifiedName": "IntoIter::skip_current_dir",
-        "kind": "method"
+        "kind": "method",
+        "line": 781
       },
       "confidence": "exact",
       "why": "it = WalkDir::new(..).into_iter() -> IntoIter (lib.rs:540); skip_current_dir lib.rs:781"
@@ -135,7 +140,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "RecursiveResults::assert_no_errors",
-        "kind": "method"
+        "kind": "method",
+        "line": 35
       },
       "confidence": "exact",
       "why": "r = dir.run_recursive(..) -> RecursiveResults; assert_no_errors util.rs:35"
@@ -156,7 +162,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "Dir::path",
-        "kind": "method"
+        "kind": "method",
+        "line": 90
       },
       "confidence": "exact",
       "why": "dir = Dir::tmp() -> Dir; path util.rs:90"
@@ -257,7 +264,8 @@
       "target": {
         "file": "src/lib.rs",
         "qualifiedName": "WalkDir::new",
-        "kind": "assoc-fn"
+        "kind": "assoc-fn",
+        "line": 289
       },
       "confidence": "exact",
       "why": "WalkDir::new defined lib.rs:289"
@@ -278,7 +286,8 @@
       "target": {
         "file": "src/lib.rs",
         "qualifiedName": "WalkDir::new",
-        "kind": "assoc-fn"
+        "kind": "assoc-fn",
+        "line": 289
       },
       "confidence": "exact",
       "why": "WalkDir::new defined lib.rs:289"
@@ -299,7 +308,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "Dir::tmp",
-        "kind": "assoc-fn"
+        "kind": "assoc-fn",
+        "line": 84
       },
       "confidence": "exact",
       "why": "Dir::tmp defined util.rs:84"
@@ -320,7 +330,8 @@
       "target": {
         "file": "src/tests/util.rs",
         "qualifiedName": "Dir::tmp",
-        "kind": "assoc-fn"
+        "kind": "assoc-fn",
+        "line": 84
       },
       "confidence": "exact",
       "why": "Dir::tmp defined util.rs:84"
@@ -356,11 +367,12 @@
       "kind": "resolved",
       "target": {
         "file": "src/tests/recursive.rs",
-        "qualifiedName": "assert_send",
-        "kind": "fn"
+        "qualifiedName": "send_sync_traits::assert_send",
+        "kind": "fn",
+        "line": 11
       },
       "confidence": "exact",
-      "why": "nested fn assert_send declared at recursive.rs:10 inside send_sync_traits"
+      "why": "nested fn assert_send declared at recursive.rs:11 inside send_sync_traits"
     }
   },
   {
@@ -378,7 +390,8 @@
       "target": {
         "file": "walkdir-list/main.rs",
         "qualifiedName": "parse_usize",
-        "kind": "fn"
+        "kind": "fn",
+        "line": 289
       },
       "confidence": "exact",
       "why": "fn parse_usize at walkdir-list/main.rs:289"
