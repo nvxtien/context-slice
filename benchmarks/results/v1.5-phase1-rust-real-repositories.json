@@ -1,0 +1,1452 @@
+{
+  "generatedAt": "2026-09-23T17:49:21.179Z",
+  "spec": "docs/prompt/CONTEXTSLICE_V1.5_RUST_SUPPORT.md §67-74, §80",
+  "attributionRules": {
+    "PARSER": "The importing file, or the file the oracle says is the target, has a tree-sitter syntax error OR was emptied by the adapter (it has no symbols/imports/exports although its text contains items; the indexer reports these as parseErrors).",
+    "CARGO_WORKSPACE_RESOLUTION": "The file belongs to a crate root that is not src/lib.rs or src/main.rs (src/bin/*, tests/*, examples/*, build.rs, or an orphan such as a second crate outside src/), or a non-anchored import names the package's own lib crate but was classified external.",
+    "RUST_STATIC_LIMIT": "The use sits inside an inline `mod x { }` body; or its path continues into an inline mod / item that has no file of its own; or the mod declaration is cfg-gated with no file; or the imported name does not appear anywhere in the resolved file's text.",
+    "MACRO_EXPANSION_LIMIT": "The resolved file contains macro_rules!/an invocation mentioning the imported name and no symbol of that name exists.",
+    "MODULE_RESOLUTION": "The independent oracle finds a file-backed module for the path, but the adapter's modulePathFor disagrees with the oracle module path of that file.",
+    "USE_RESOLUTION": "The oracle finds the target module file and modulePathFor agrees with it, yet the adapter left the import unresolved / resolved it to a different file; or the name appears only inside a `use` group the parser skips (nested use groups); or a non-anchored path names a mod/item/imported name in scope in the same file but was marked external; or a top-level braced `use {a::b, c::d};` was parsed as one import whose module text is the whole group; or the path continues two or more segments past the last file-backed module.",
+    "UNKNOWN": "None of the rules above matched. Reported unminimized; see UNKNOWN examples."
+  },
+  "repositories": [
+    {
+      "id": "walkdir",
+      "scale": "small",
+      "commit": "6fd031c82ba5a4204b4ce6eae73dacb00dc072ec",
+      "scope": "whole repository (library crate plus walkdir-list binary crate)",
+      "sparse": null,
+      "coverage": {
+        "rsFilesOnDisk": 8,
+        "rsFilesIndexed": 8,
+        "symbols": 149,
+        "imports": 57,
+        "exports": 0,
+        "filesWithParseError": 0,
+        "parseErrorFiles": [],
+        "filesSilentlyDropped": [
+          {
+            "file": "src/lib.rs",
+            "chars": 42415
+          }
+        ],
+        "indexerReportedParseErrorsCold": 1
+      },
+      "performance": {
+        "coldMs": 65,
+        "warmMs": 8,
+        "coldWallMs": 66,
+        "warmWallMs": 7,
+        "coldFilesParsed": 9,
+        "warmFilesParsed": 0,
+        "warmCacheHits": 9
+      },
+      "coldWarmIdentical": true,
+      "moduleResolution": {
+        "crateRoots": [
+          {
+            "file": "src/lib.rs",
+            "kind": "lib"
+          }
+        ],
+        "filesReached": 7,
+        "agree": 7,
+        "disagree": 0,
+        "agreeRate": 100,
+        "disagreeByCategory": {},
+        "disagreements": [],
+        "orphans": [
+          {
+            "file": "walkdir-list/main.rs",
+            "modulePathFor": [
+              "walkdir-list"
+            ]
+          }
+        ],
+        "multiClaimedFiles": [],
+        "declarations": {
+          "total": 6,
+          "fileFound": 6,
+          "fileMissing": 0,
+          "skippedPathAttribute": 0
+        },
+        "declarationsFileMissing": [],
+        "skippedPathAttribute": []
+      },
+      "useResolution": {
+        "anchored": {
+          "total": 9,
+          "resolved": 2,
+          "unresolved": 7,
+          "wildcard": 0,
+          "wildcardResolved": 0,
+          "resolvedRate": 22.22
+        },
+        "nonAnchored": {
+          "total": 48,
+          "external": 48,
+          "localResolved": 0,
+          "neither": 0,
+          "wildcard": 0,
+          "wildcardResolved": 0,
+          "externalOrLocalRate": 100
+        },
+        "externalBreakdown": {
+          "std-family": 40,
+          "declared-dependency": 8
+        },
+        "oracleCheck": {
+          "anchoredResolvedChecked": 2,
+          "agree": 2,
+          "disagree": 0,
+          "nonAnchoredLocalChecked": 0,
+          "nonAnchoredLocalAgree": 0
+        },
+        "precisionProxy": {
+          "checked": 2,
+          "contains": 2,
+          "unverifiable": 0,
+          "missing": 0,
+          "containsRate": 100,
+          "containsOrUnverifiableRate": 100
+        },
+        "nameMissingTotal": 0,
+        "nameMissingSamples": [],
+        "wrongFileExamples": []
+      },
+      "reexportResolution": {
+        "exportsTotal": 0,
+        "withFromModule": 0,
+        "withResolvedFile": 0,
+        "anchoredReexports": 0,
+        "anchoredWithResolvedFile": 0,
+        "nonWildcard": 0,
+        "nonWildcardWithSymbolId": 0,
+        "nonWildcardWithoutSymbolIdExamples": [],
+        "wildcard": 0,
+        "wildcardWithResolvedFile": 0
+      },
+      "attribution": {
+        "totalFailures": 7,
+        "byCategory": {
+          "MODULE_RESOLUTION": 0,
+          "USE_RESOLUTION": 0,
+          "CARGO_WORKSPACE_RESOLUTION": 0,
+          "MACRO_EXPANSION_LIMIT": 0,
+          "RUST_STATIC_LIMIT": 0,
+          "PARSER": 7,
+          "UNKNOWN": 0
+        },
+        "byKindCategory": {
+          "anchored-unresolved": {
+            "PARSER": 7
+          }
+        },
+        "unknownExamples": [],
+        "failureExamples": [
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/dent.rs",
+            "line": 7,
+            "detail": "use crate::Result",
+            "sourceLine": "use crate::Result;"
+          },
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/error.rs",
+            "line": 6,
+            "detail": "use crate::DirEntry",
+            "sourceLine": "use crate::DirEntry;"
+          },
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/tests/recursive.rs",
+            "line": 5,
+            "detail": "use crate::WalkDir",
+            "sourceLine": "use crate::WalkDir;"
+          },
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/tests/recursive.rs",
+            "line": 9,
+            "detail": "use crate::FilterEntry",
+            "sourceLine": "use crate::{FilterEntry, IntoIter};"
+          },
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/tests/recursive.rs",
+            "line": 9,
+            "detail": "use crate::IntoIter",
+            "sourceLine": "use crate::{FilterEntry, IntoIter};"
+          },
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/tests/util.rs",
+            "line": 8,
+            "detail": "use crate::DirEntry",
+            "sourceLine": "use crate::{DirEntry, Error};"
+          },
+          {
+            "kind": "anchored-unresolved",
+            "category": "PARSER",
+            "file": "src/tests/util.rs",
+            "line": 8,
+            "detail": "use crate::Error",
+            "sourceLine": "use crate::{DirEntry, Error};"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mini-redis",
+      "scale": "medium",
+      "commit": "3d93b42bc363220f85af4fc9e1bebd35b588a4a3",
+      "scope": "whole repository (async library, bins, integration tests)",
+      "sparse": null,
+      "coverage": {
+        "rsFilesOnDisk": 28,
+        "rsFilesIndexed": 28,
+        "symbols": 243,
+        "imports": 202,
+        "exports": 19,
+        "filesWithParseError": 0,
+        "parseErrorFiles": [],
+        "filesSilentlyDropped": [],
+        "indexerReportedParseErrorsCold": 0
+      },
+      "performance": {
+        "coldMs": 65,
+        "warmMs": 14,
+        "coldWallMs": 65,
+        "warmWallMs": 14,
+        "coldFilesParsed": 28,
+        "warmFilesParsed": 0,
+        "warmCacheHits": 28
+      },
+      "coldWarmIdentical": true,
+      "moduleResolution": {
+        "crateRoots": [
+          {
+            "file": "examples/chat.rs",
+            "kind": "example"
+          },
+          {
+            "file": "examples/hello_world.rs",
+            "kind": "example"
+          },
+          {
+            "file": "examples/pub.rs",
+            "kind": "example"
+          },
+          {
+            "file": "examples/sub.rs",
+            "kind": "example"
+          },
+          {
+            "file": "src/bin/cli.rs",
+            "kind": "bin"
+          },
+          {
+            "file": "src/bin/server.rs",
+            "kind": "bin"
+          },
+          {
+            "file": "src/lib.rs",
+            "kind": "lib"
+          },
+          {
+            "file": "tests/buffered_client.rs",
+            "kind": "test"
+          },
+          {
+            "file": "tests/client.rs",
+            "kind": "test"
+          },
+          {
+            "file": "tests/frame_validation.rs",
+            "kind": "test"
+          },
+          {
+            "file": "tests/server.rs",
+            "kind": "test"
+          }
+        ],
+        "filesReached": 28,
+        "agree": 18,
+        "disagree": 10,
+        "agreeRate": 64.29,
+        "disagreeByCategory": {
+          "CARGO_WORKSPACE_RESOLUTION": 10
+        },
+        "disagreements": [
+          {
+            "file": "examples/chat.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "examples",
+              "chat"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a example crate root (examples/chat.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "examples/hello_world.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "examples",
+              "hello_world"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a example crate root (examples/hello_world.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "examples/pub.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "examples",
+              "pub"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a example crate root (examples/pub.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "examples/sub.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "examples",
+              "sub"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a example crate root (examples/sub.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "src/bin/cli.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "bin",
+              "cli"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a bin crate root (src/bin/cli.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "src/bin/server.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "bin",
+              "server"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a bin crate root (src/bin/server.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "tests/buffered_client.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "tests",
+              "buffered_client"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a test crate root (tests/buffered_client.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "tests/client.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "tests",
+              "client"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a test crate root (tests/client.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "tests/frame_validation.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "tests",
+              "frame_validation"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a test crate root (tests/frame_validation.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "tests/server.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "tests",
+              "server"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a test crate root (tests/server.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          }
+        ],
+        "orphans": [],
+        "multiClaimedFiles": [],
+        "declarations": {
+          "total": 17,
+          "fileFound": 17,
+          "fileMissing": 0,
+          "skippedPathAttribute": 0
+        },
+        "declarationsFileMissing": [],
+        "skippedPathAttribute": []
+      },
+      "useResolution": {
+        "anchored": {
+          "total": 51,
+          "resolved": 51,
+          "unresolved": 0,
+          "wildcard": 0,
+          "wildcardResolved": 0,
+          "resolvedRate": 100
+        },
+        "nonAnchored": {
+          "total": 151,
+          "external": 128,
+          "localResolved": 23,
+          "neither": 0,
+          "wildcard": 1,
+          "wildcardResolved": 0,
+          "externalOrLocalRate": 100
+        },
+        "externalBreakdown": {
+          "own-package-crate": 11,
+          "declared-dependency": 81,
+          "std-family": 31,
+          "in-scope-local-item": 4,
+          "unverified": 1
+        },
+        "oracleCheck": {
+          "anchoredResolvedChecked": 51,
+          "agree": 51,
+          "disagree": 0,
+          "nonAnchoredLocalChecked": 23,
+          "nonAnchoredLocalAgree": 23
+        },
+        "precisionProxy": {
+          "checked": 74,
+          "contains": 54,
+          "unverifiable": 0,
+          "missing": 20,
+          "containsRate": 72.97,
+          "containsOrUnverifiableRate": 72.97
+        },
+        "nameMissingTotal": 20,
+        "nameMissingSamples": [
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/get.rs",
+            "line": 1,
+            "detail": "use crate::Db -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/get.rs",
+            "line": 1,
+            "detail": "use crate::Parse -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::Db -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::Parse -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::ParseError -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::Shutdown -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/ping.rs",
+            "line": 1,
+            "detail": "use crate::Parse -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/ping.rs",
+            "line": 1,
+            "detail": "use crate::ParseError -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/publish.rs",
+            "line": 1,
+            "detail": "use crate::Db -> src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/publish.rs",
+            "line": 1,
+            "detail": "use crate::Parse -> src/lib.rs"
+          }
+        ],
+        "wrongFileExamples": []
+      },
+      "reexportResolution": {
+        "exportsTotal": 19,
+        "withFromModule": 19,
+        "withResolvedFile": 19,
+        "anchoredReexports": 1,
+        "anchoredWithResolvedFile": 1,
+        "nonWildcard": 19,
+        "nonWildcardWithSymbolId": 19,
+        "nonWildcardWithoutSymbolIdExamples": [],
+        "wildcard": 0,
+        "wildcardWithResolvedFile": 0
+      },
+      "attribution": {
+        "totalFailures": 36,
+        "byCategory": {
+          "MODULE_RESOLUTION": 0,
+          "USE_RESOLUTION": 24,
+          "CARGO_WORKSPACE_RESOLUTION": 11,
+          "MACRO_EXPANSION_LIMIT": 0,
+          "RUST_STATIC_LIMIT": 0,
+          "PARSER": 0,
+          "UNKNOWN": 1
+        },
+        "byKindCategory": {
+          "external-but-repo-source": {
+            "CARGO_WORKSPACE_RESOLUTION": 11
+          },
+          "resolved-name-missing": {
+            "USE_RESOLUTION": 20
+          },
+          "external-but-in-scope-item": {
+            "USE_RESOLUTION": 4
+          },
+          "external-unverified": {
+            "UNKNOWN": 1
+          }
+        },
+        "unknownExamples": [
+          {
+            "kind": "external-unverified",
+            "category": "UNKNOWN",
+            "file": "src/connection.rs",
+            "line": 88,
+            "detail": "use frame::Error::Incomplete: 'frame' not std, not a declared dependency",
+            "sourceLine": "use frame::Error::Incomplete;"
+          }
+        ],
+        "failureExamples": [
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "examples/hello_world.rs",
+            "line": 16,
+            "detail": "use mini_redis::Result names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "examples/pub.rs",
+            "line": 20,
+            "detail": "use mini_redis::Result names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "examples/sub.rs",
+            "line": 20,
+            "detail": "use mini_redis::Result names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "src/bin/cli.rs",
+            "line": 1,
+            "detail": "use mini_redis::DEFAULT_PORT names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, DEFAULT_PORT};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "src/bin/server.rs",
+            "line": 9,
+            "detail": "use mini_redis::server names the package's own lib crate",
+            "sourceLine": "use mini_redis::{server, DEFAULT_PORT};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "src/bin/server.rs",
+            "line": 9,
+            "detail": "use mini_redis::DEFAULT_PORT names the package's own lib crate",
+            "sourceLine": "use mini_redis::{server, DEFAULT_PORT};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/get.rs",
+            "line": 1,
+            "detail": "use crate::Db -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/get.rs",
+            "line": 1,
+            "detail": "use crate::Parse -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::Db -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse, ParseError, Shutdown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::Parse -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse, ParseError, Shutdown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::ParseError -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse, ParseError, Shutdown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 19,
+            "detail": "use crate::Shutdown -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse, ParseError, Shutdown};"
+          },
+          {
+            "kind": "external-but-in-scope-item",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/mod.rs",
+            "line": 96,
+            "detail": "use Command::*: 'Command' is a mod/item in scope in this file",
+            "sourceLine": "use Command::*;"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/ping.rs",
+            "line": 1,
+            "detail": "use crate::Parse -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Frame, Parse, ParseError};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/ping.rs",
+            "line": 1,
+            "detail": "use crate::ParseError -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Frame, Parse, ParseError};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/publish.rs",
+            "line": 1,
+            "detail": "use crate::Db -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/publish.rs",
+            "line": 1,
+            "detail": "use crate::Parse -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame, Parse};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/set.rs",
+            "line": 1,
+            "detail": "use crate::cmd::Parse -> src/cmd/mod.rs",
+            "sourceLine": "use crate::cmd::{Parse, ParseError};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/set.rs",
+            "line": 1,
+            "detail": "use crate::cmd::ParseError -> src/cmd/mod.rs",
+            "sourceLine": "use crate::cmd::{Parse, ParseError};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/set.rs",
+            "line": 2,
+            "detail": "use crate::Db -> src/lib.rs",
+            "sourceLine": "use crate::{Connection, Db, Frame};"
+          },
+          {
+            "kind": "external-but-in-scope-item",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/set.rs",
+            "line": 81,
+            "detail": "use ParseError::EndOfStream: 'ParseError' is a mod/item in scope in this file",
+            "sourceLine": "use ParseError::EndOfStream;"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/subscribe.rs",
+            "line": 1,
+            "detail": "use crate::cmd::Parse -> src/cmd/mod.rs",
+            "sourceLine": "use crate::cmd::{Parse, ParseError, Unknown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/subscribe.rs",
+            "line": 1,
+            "detail": "use crate::cmd::ParseError -> src/cmd/mod.rs",
+            "sourceLine": "use crate::cmd::{Parse, ParseError, Unknown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/subscribe.rs",
+            "line": 2,
+            "detail": "use crate::Db -> src/lib.rs",
+            "sourceLine": "use crate::{Command, Connection, Db, Frame, Shutdown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/subscribe.rs",
+            "line": 2,
+            "detail": "use crate::Shutdown -> src/lib.rs",
+            "sourceLine": "use crate::{Command, Connection, Db, Frame, Shutdown};"
+          },
+          {
+            "kind": "external-but-in-scope-item",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/subscribe.rs",
+            "line": 62,
+            "detail": "use ParseError::EndOfStream: 'ParseError' is a mod/item in scope in this file",
+            "sourceLine": "use ParseError::EndOfStream;"
+          },
+          {
+            "kind": "external-but-in-scope-item",
+            "category": "USE_RESOLUTION",
+            "file": "src/cmd/subscribe.rs",
+            "line": 310,
+            "detail": "use ParseError::EndOfStream: 'ParseError' is a mod/item in scope in this file",
+            "sourceLine": "use ParseError::EndOfStream;"
+          },
+          {
+            "kind": "external-unverified",
+            "category": "UNKNOWN",
+            "file": "src/connection.rs",
+            "line": 88,
+            "detail": "use frame::Error::Incomplete: 'frame' not std, not a declared dependency",
+            "sourceLine": "use frame::Error::Incomplete;"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/server.rs",
+            "line": 6,
+            "detail": "use crate::Db -> src/lib.rs",
+            "sourceLine": "use crate::{Command, Connection, Db, DbDropGuard, Shutdown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/server.rs",
+            "line": 6,
+            "detail": "use crate::DbDropGuard -> src/lib.rs",
+            "sourceLine": "use crate::{Command, Connection, Db, DbDropGuard, Shutdown};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "USE_RESOLUTION",
+            "file": "src/server.rs",
+            "line": 6,
+            "detail": "use crate::Shutdown -> src/lib.rs",
+            "sourceLine": "use crate::{Command, Connection, Db, DbDropGuard, Shutdown};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/buffered_client.rs",
+            "line": 1,
+            "detail": "use mini_redis::server names the package's own lib crate",
+            "sourceLine": "use mini_redis::{"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/client.rs",
+            "line": 1,
+            "detail": "use mini_redis::server names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, server};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/frame_validation.rs",
+            "line": 1,
+            "detail": "use mini_redis::frame::Error names the package's own lib crate",
+            "sourceLine": "use mini_redis::frame::{Error, Frame};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/frame_validation.rs",
+            "line": 1,
+            "detail": "use mini_redis::frame::Frame names the package's own lib crate",
+            "sourceLine": "use mini_redis::frame::{Error, Frame};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/server.rs",
+            "line": 1,
+            "detail": "use mini_redis::server names the package's own lib crate",
+            "sourceLine": "use mini_redis::server;"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ripgrep-ignore",
+      "scale": "large",
+      "commit": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+      "scope": "crates/ignore (bounded subsystem of a workspace)",
+      "sparse": [
+        "crates/ignore"
+      ],
+      "coverage": {
+        "rsFilesOnDisk": 13,
+        "rsFilesIndexed": 13,
+        "symbols": 211,
+        "imports": 49,
+        "exports": 9,
+        "filesWithParseError": 0,
+        "parseErrorFiles": [],
+        "filesSilentlyDropped": [
+          {
+            "file": "crates/ignore/src/dir.rs",
+            "chars": 58367
+          },
+          {
+            "file": "crates/ignore/src/incremental.rs",
+            "chars": 48097
+          },
+          {
+            "file": "crates/ignore/src/walk.rs",
+            "chars": 93443
+          }
+        ],
+        "indexerReportedParseErrorsCold": 3
+      },
+      "performance": {
+        "coldMs": 66,
+        "warmMs": 9,
+        "coldWallMs": 66,
+        "warmWallMs": 9,
+        "coldFilesParsed": 13,
+        "warmFilesParsed": 0,
+        "warmCacheHits": 13
+      },
+      "coldWarmIdentical": true,
+      "moduleResolution": {
+        "crateRoots": [
+          {
+            "file": "build.rs",
+            "kind": "build"
+          },
+          {
+            "file": "crates/ignore/examples/walk.rs",
+            "kind": "example"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "kind": "lib"
+          },
+          {
+            "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "kind": "test"
+          },
+          {
+            "file": "crates/ignore/tests/gitignore_skip_bom.rs",
+            "kind": "test"
+          }
+        ],
+        "filesReached": 13,
+        "agree": 9,
+        "disagree": 4,
+        "agreeRate": 69.23,
+        "disagreeByCategory": {
+          "CARGO_WORKSPACE_RESOLUTION": 4
+        },
+        "disagreements": [
+          {
+            "file": "build.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "build"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a build crate root (build.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "crates/ignore/examples/walk.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "crates",
+              "ignore",
+              "examples",
+              "walk"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a example crate root (crates/ignore/examples/walk.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "crates",
+              "ignore",
+              "tests",
+              "gitignore_matched_path_or_any_parents_tests"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a test crate root (crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          },
+          {
+            "file": "crates/ignore/tests/gitignore_skip_bom.rs",
+            "oracle": [],
+            "modulePathFor": [
+              "crates",
+              "ignore",
+              "tests",
+              "gitignore_skip_bom"
+            ],
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "reason": "belongs to a test crate root (crates/ignore/tests/gitignore_skip_bom.rs), which is its own crate but modulePathFor uses the src/-relative path"
+          }
+        ],
+        "orphans": [],
+        "multiClaimedFiles": [],
+        "declarations": {
+          "total": 8,
+          "fileFound": 8,
+          "fileMissing": 0,
+          "skippedPathAttribute": 0
+        },
+        "declarationsFileMissing": [],
+        "skippedPathAttribute": []
+      },
+      "useResolution": {
+        "anchored": {
+          "total": 23,
+          "resolved": 23,
+          "unresolved": 0,
+          "wildcard": 0,
+          "wildcardResolved": 0,
+          "resolvedRate": 100
+        },
+        "nonAnchored": {
+          "total": 26,
+          "external": 26,
+          "localResolved": 0,
+          "neither": 0,
+          "wildcard": 1,
+          "wildcardResolved": 0,
+          "externalOrLocalRate": 100
+        },
+        "externalBreakdown": {
+          "std-family": 16,
+          "malformed-top-level-use-group": 3,
+          "own-package-crate": 4,
+          "declared-dependency": 3
+        },
+        "oracleCheck": {
+          "anchoredResolvedChecked": 23,
+          "agree": 13,
+          "disagree": 10,
+          "nonAnchoredLocalChecked": 0,
+          "nonAnchoredLocalAgree": 0
+        },
+        "precisionProxy": {
+          "checked": 23,
+          "contains": 17,
+          "unverifiable": 0,
+          "missing": 6,
+          "containsRate": 73.91,
+          "containsOrUnverifiableRate": 73.91
+        },
+        "nameMissingTotal": 6,
+        "nameMissingSamples": [
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/default_types.rs",
+            "line": 350,
+            "detail": "use super::DEFAULT_TYPES -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/gitignore.rs",
+            "line": 710,
+            "detail": "use super::Gitignore -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/gitignore.rs",
+            "line": 710,
+            "detail": "use super::GitignoreBuilder -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/overrides.rs",
+            "line": 188,
+            "detail": "use super::Override -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/overrides.rs",
+            "line": 188,
+            "detail": "use super::OverrideBuilder -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/types.rs",
+            "line": 501,
+            "detail": "use super::TypesBuilder -> crates/ignore/src/lib.rs"
+          }
+        ],
+        "wrongFileExamples": [
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 51,
+            "module": "crate::incremental",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/incremental.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 51,
+            "module": "crate::incremental",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/incremental.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          },
+          {
+            "file": "crates/ignore/src/pathutil.rs",
+            "line": 3,
+            "module": "crate::walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "oracleFile": "crates/ignore/src/walk.rs",
+            "category": "PARSER"
+          }
+        ]
+      },
+      "reexportResolution": {
+        "exportsTotal": 9,
+        "withFromModule": 9,
+        "withResolvedFile": 9,
+        "anchoredReexports": 9,
+        "anchoredWithResolvedFile": 9,
+        "nonWildcard": 9,
+        "nonWildcardWithSymbolId": 0,
+        "nonWildcardWithoutSymbolIdExamples": [
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 51,
+            "fromModule": "crate::incremental",
+            "sourceName": "IncrementalIgnore",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 51,
+            "fromModule": "crate::incremental",
+            "sourceName": "IncrementalMatch",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "DirEntry",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "ParallelVisitor",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "ParallelVisitorBuilder",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "Walk",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "WalkBuilder",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "WalkParallel",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          },
+          {
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "fromModule": "crate::walk",
+            "sourceName": "WalkState",
+            "resolvedFile": "crates/ignore/src/lib.rs",
+            "external": false
+          }
+        ],
+        "wildcard": 0,
+        "wildcardWithResolvedFile": 0
+      },
+      "attribution": {
+        "totalFailures": 23,
+        "byCategory": {
+          "MODULE_RESOLUTION": 0,
+          "USE_RESOLUTION": 3,
+          "CARGO_WORKSPACE_RESOLUTION": 4,
+          "MACRO_EXPANSION_LIMIT": 0,
+          "RUST_STATIC_LIMIT": 6,
+          "PARSER": 10,
+          "UNKNOWN": 0
+        },
+        "byKindCategory": {
+          "external-malformed-use-group": {
+            "USE_RESOLUTION": 3
+          },
+          "external-but-repo-source": {
+            "CARGO_WORKSPACE_RESOLUTION": 4
+          },
+          "resolved-name-missing": {
+            "RUST_STATIC_LIMIT": 6
+          },
+          "resolved-to-wrong-file": {
+            "PARSER": 10
+          }
+        },
+        "unknownExamples": [],
+        "failureExamples": [
+          {
+            "kind": "external-malformed-use-group",
+            "category": "USE_RESOLUTION",
+            "file": "crates/ignore/examples/walk.rs",
+            "line": 3,
+            "detail": "top-level braced use group parsed as one import with module text \"{bstr::ByteVec, ignore::WalkBuilder, wal\"...; its real imports are lost",
+            "sourceLine": "use {bstr::ByteVec, ignore::WalkBuilder, walkdir::WalkDir};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "crates/ignore/examples/walk.rs",
+            "line": 31,
+            "detail": "use ignore::WalkState::* names the package's own lib crate",
+            "sourceLine": "use ignore::WalkState::*;"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/default_types.rs",
+            "line": 350,
+            "detail": "use super::DEFAULT_TYPES -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::DEFAULT_TYPES;"
+          },
+          {
+            "kind": "external-malformed-use-group",
+            "category": "USE_RESOLUTION",
+            "file": "crates/ignore/src/gitignore.rs",
+            "line": 17,
+            "detail": "top-level braced use group parsed as one import with module text \"{\\n    globset::{Candidate, GlobBuilder, \"...; its real imports are lost",
+            "sourceLine": "use {"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/gitignore.rs",
+            "line": 710,
+            "detail": "use super::Gitignore -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::{Gitignore, GitignoreBuilder};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/gitignore.rs",
+            "line": 710,
+            "detail": "use super::GitignoreBuilder -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::{Gitignore, GitignoreBuilder};"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 51,
+            "detail": "use crate::incremental::IncrementalIgnore resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/incremental.rs",
+            "sourceLine": "pub use crate::incremental::{IncrementalIgnore, IncrementalMatch};"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 51,
+            "detail": "use crate::incremental::IncrementalMatch resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/incremental.rs",
+            "sourceLine": "pub use crate::incremental::{IncrementalIgnore, IncrementalMatch};"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::DirEntry resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::ParallelVisitor resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::ParallelVisitorBuilder resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::Walk resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::WalkBuilder resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::WalkParallel resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/lib.rs",
+            "line": 52,
+            "detail": "use crate::walk::WalkState resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "pub use crate::walk::{"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/overrides.rs",
+            "line": 188,
+            "detail": "use super::Override -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::{Override, OverrideBuilder};"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/overrides.rs",
+            "line": 188,
+            "detail": "use super::OverrideBuilder -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::{Override, OverrideBuilder};"
+          },
+          {
+            "kind": "resolved-to-wrong-file",
+            "category": "PARSER",
+            "file": "crates/ignore/src/pathutil.rs",
+            "line": 3,
+            "detail": "use crate::walk::DirEntry resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
+            "sourceLine": "use crate::walk::DirEntry;"
+          },
+          {
+            "kind": "external-malformed-use-group",
+            "category": "USE_RESOLUTION",
+            "file": "crates/ignore/src/types.rs",
+            "line": 89,
+            "detail": "top-level braced use group parsed as one import with module text \"{\\n    globset::{GlobBuilder, GlobSet, Gl\"...; its real imports are lost",
+            "sourceLine": "use {"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/types.rs",
+            "line": 501,
+            "detail": "use super::TypesBuilder -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::TypesBuilder;"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "line": 3,
+            "detail": "use ignore::gitignore::Gitignore names the package's own lib crate",
+            "sourceLine": "use ignore::gitignore::{Gitignore, GitignoreBuilder};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "crates/ignore/tests/gitignore_matched_path_or_any_parents_tests.rs",
+            "line": 3,
+            "detail": "use ignore::gitignore::GitignoreBuilder names the package's own lib crate",
+            "sourceLine": "use ignore::gitignore::{Gitignore, GitignoreBuilder};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "crates/ignore/tests/gitignore_skip_bom.rs",
+            "line": 1,
+            "detail": "use ignore::gitignore::GitignoreBuilder names the package's own lib crate",
+            "sourceLine": "use ignore::gitignore::GitignoreBuilder;"
+          }
+        ]
+      }
+    }
+  ]
+}
