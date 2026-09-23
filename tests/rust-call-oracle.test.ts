@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
   CATEGORIES,
+  collectTraitMethods,
+  selectTraitSupplement,
   enumerateCallSites,
   quotaFor,
   selectSample,
@@ -147,4 +149,39 @@ test("categories partition: counts sum to total", () => {
   const r = sites("fn f(p: u8) { a(); p.b(); x!(1); Foo::c(); S(1); }");
   const sum = CATEGORIES.reduce((n, c) => n + r.sites.filter((s) => s.category === c).length, 0);
   assert.equal(sum, r.sites.length);
+});
+
+// ---- trait-candidate supplement ----
+test("collectTraitMethods: signature and default methods as Trait::method", () => {
+  const src = "pub trait Tr { fn sig(&self); fn dflt(&self) { } const C: u8 = 1; }\nstruct S; impl S { fn inh(&self) {} }";
+  assert.deepEqual(collectTraitMethods(src).sort(), ["Tr::dflt", "Tr::sig"]);
+  assert.deepEqual(collectTraitMethods("fn f() {}"), []);
+});
+
+const tsite = (line: number, name = "sig"): CallSite =>
+  ({ repo: "r", file: "a.rs", line, col: 0, callerQualifiedName: "f", callText: `x.${name}()`, calleeName: name, category: "local-method" }) as CallSite;
+const hk = (line: number) => createHash("sha1").update(`r:a.rs:${line}:0`).digest("hex");
+
+test("supplement: matches by callee name, drops already-sampled, skips macros, lists traitMethods", () => {
+  const all = [tsite(1), tsite(2), tsite(3, "other"), { ...tsite(4), category: "macro-invocation" } as CallSite];
+  const r = selectTraitSupplement("r", all, ["Tr::sig", "Other::sig"], new Set(["a.rs:1:0"]));
+  assert.equal(r.candidates, 2); // sites 1 and 2 (macro excluded), before dropping
+  assert.equal(r.dropped, 1);
+  assert.equal(r.entries.length, 1);
+  const e = r.entries[0];
+  assert.equal(e.line, 2);
+  assert.equal(e.supplement, "trait-candidate");
+  assert.deepEqual(e.traitMethods, ["Other::sig", "Tr::sig"]);
+  assert.equal(e.split, splitFor("r", "a.rs", 2, 0));
+});
+
+test("supplement: cap at 12 by sha1 ascending; <=12 takes all; no traits -> empty", () => {
+  const all = Array.from({ length: 15 }, (_, i) => tsite(i + 1));
+  const r = selectTraitSupplement("r", all, ["Tr::sig"], new Set());
+  assert.equal(r.candidates, 15);
+  assert.equal(r.entries.length, 12);
+  const want = all.map((s) => s.line).sort((a, b) => (hk(a) < hk(b) ? -1 : 1)).slice(0, 12);
+  assert.deepEqual(r.entries.map((e) => e.line), want);
+  assert.equal(selectTraitSupplement("r", all.slice(0, 12), ["Tr::sig"], new Set()).entries.length, 12);
+  assert.deepEqual(selectTraitSupplement("r", all, [], new Set()), { candidates: 0, dropped: 0, entries: [] });
 });

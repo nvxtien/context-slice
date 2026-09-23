@@ -259,6 +259,52 @@ export function selectSample(all: CallSite[]): SampleEntry[] {
   return out;
 }
 
+/** Method names declared in `trait_item`s (signatures and default bodies), as `Trait::method`. */
+export function collectTraitMethods(source: string): string[] {
+  const out: string[] = [];
+  const walk = (n: Node) => {
+    if (n.type === "trait_item") {
+      const t = n.childForFieldName("name")?.text ?? "";
+      for (const m of n.childForFieldName("body")?.namedChildren ?? [])
+        if (m.type === "function_signature_item" || m.type === "function_item")
+          out.push(`${t}::${m.childForFieldName("name")?.text ?? ""}`);
+    }
+    for (const c of n.namedChildren) walk(c);
+  };
+  walk(parse(source).rootNode);
+  return out;
+}
+
+export type TraitEntry = SampleEntry & { supplement: "trait-candidate"; traitMethods: string[] };
+const SUPPLEMENT_CAP = 12;
+
+/** One repo: sites whose callee name is a trait method name, minus macros and already-sampled `file:line:col` keys. */
+export function selectTraitSupplement(
+  repo: string,
+  sites: CallSite[],
+  traitMethods: string[],
+  mainKeys: Set<string>,
+): { candidates: number; dropped: number; entries: TraitEntry[] } {
+  const byName = new Map<string, string[]>();
+  for (const tm of [...new Set(traitMethods)].sort()) {
+    const name = tm.slice(tm.lastIndexOf("::") + 2);
+    byName.set(name, [...(byName.get(name) ?? []), tm]);
+  }
+  const cand = sites.filter((s) => s.repo === repo && s.category !== "macro-invocation" && byName.has(s.calleeName));
+  const fresh = cand.filter((s) => !mainKeys.has(`${s.file}:${s.line}:${s.col}`));
+  const entries = fresh
+    .map((s) => ({ s, h: sha1(`${s.repo}:${s.file}:${s.line}:${s.col}`) }))
+    .sort((a, b) => (a.h < b.h ? -1 : a.h > b.h ? 1 : 0))
+    .slice(0, SUPPLEMENT_CAP)
+    .map(({ s }) => ({
+      ...s,
+      split: splitFor(s.repo, s.file, s.line, s.col),
+      supplement: "trait-candidate" as const,
+      traitMethods: byName.get(s.calleeName)!,
+    }));
+  return { candidates: cand.length, dropped: cand.length - fresh.length, entries };
+}
+
 function rustFiles(dir: string, rel = ""): string[] {
   const out: string[] = [];
   const entries = readdirSync(join(dir, rel), { withFileTypes: true }).sort((a, b) =>
@@ -278,7 +324,11 @@ function main() {
   const repos: Array<{ id: string; source: string }> = JSON.parse(
     readFileSync(join(root, "benchmarks/rust-repositories.json"), "utf8"),
   );
+  const supplement = process.argv.includes("--supplement");
+  if (supplement && process.argv[process.argv.indexOf("--supplement") + 1] !== "trait-candidates")
+    throw new Error("usage: --supplement trait-candidates");
   const all: CallSite[] = [];
+  const traitByRepo: Record<string, string[]> = {};
   const counts: Record<string, Record<string, number> & { total: number; hiddenInMacro: number }> = {};
   for (const r of repos) {
     const dir = join(root, r.source);
@@ -287,6 +337,7 @@ function main() {
     for (const file of rustFiles(dir)) {
       const res = enumerateCallSites(readFileSync(join(dir, file), "utf8"), file, r.id);
       mine.push(...res.sites);
+      if (supplement) (traitByRepo[r.id] ??= []).push(...collectTraitMethods(readFileSync(join(dir, file), "utf8")));
       hidden += res.hiddenInMacro;
     }
     const keys = new Set(mine.map((s) => `${s.file}:${s.line}:${s.col}`));
@@ -300,6 +351,32 @@ function main() {
   }
   const outDir = join(root, "benchmarks/rust-semantic-calls");
   mkdirSync(outDir, { recursive: true });
+  if (supplement) {
+    const main = JSON.parse(readFileSync(join(outDir, "sample.json"), "utf8")) as CallSite[];
+    const mainKeys = new Set(main.map((s) => `${s.repo}:${s.file}:${s.line}:${s.col}`));
+    const out: TraitEntry[] = [];
+    for (const r of repos) {
+      const tm = traitByRepo[r.id] ?? [];
+      const res = selectTraitSupplement(
+        r.id,
+        all,
+        tm,
+        new Set([...mainKeys].filter((k) => k.startsWith(`${r.id}:`)).map((k) => k.slice(r.id.length + 1))),
+      );
+      const dev = res.entries.filter((e) => e.split === "dev").length;
+      console.log(
+        `${r.id}: traitMethods=${JSON.stringify([...new Set(tm)].sort())} candidates=${res.candidates} dropped=${res.dropped} taken=${res.entries.length} dev=${dev} held-out=${res.entries.length - dev}`,
+      );
+      out.push(...res.entries);
+    }
+    const rows = out.map((s) => ({
+      repo: s.repo, file: s.file, line: s.line, col: s.col, callerQualifiedName: s.callerQualifiedName,
+      callText: s.callText, calleeName: s.calleeName, category: s.category, split: s.split,
+      supplement: s.supplement, traitMethods: s.traitMethods,
+    }));
+    writeFileSync(join(outDir, "sample-trait.json"), JSON.stringify(rows, null, 2) + "\n");
+    return;
+  }
   const sample = selectSample(all).map((s) => ({
     repo: s.repo,
     file: s.file,
