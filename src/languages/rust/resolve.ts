@@ -54,6 +54,8 @@ export function resolveRustModule(
   segments: string[],
   fromFile: string,
   index: ReturnType<typeof rustModuleIndex>,
+  /** Names bound in `fromFile` (declared items, imports). A non-anchored path starting with one is not an external crate. */
+  boundNames?: ReadonlySet<string>,
 ): { file?: string; externalPackage?: string } {
   const [anchor, ...rest] = segments;
   const anchored = anchor === "crate" || anchor === "self" || anchor === "super";
@@ -78,6 +80,7 @@ export function resolveRustModule(
     if (file) return { file };
   }
   if (anchored) return {};
+  if (anchor && boundNames?.has(anchor)) return {}; // bound locally: unresolved, not external
   return { externalPackage: anchor };
 }
 
@@ -93,11 +96,31 @@ export function resolveRustCalls(context: ResolveContext) {
     files.push(record.filePath);
   const index = rustModuleIndex([...new Set(files)]);
 
+  // Per-file bound names: declared items at any nesting + names bound by imports.
+  // A bare unaliased `use foo;` binds the crate name itself, so it does not count.
+  const boundByFile = new Map<string, Set<string>>();
+  const bind = (file: string, name: string | undefined) => {
+    if (!name) return;
+    let set = boundByFile.get(file);
+    if (!set) boundByFile.set(file, (set = new Set()));
+    set.add(name);
+  };
+  // Only type-namespace items (struct/enum/trait/type/mod) can start a `use` path;
+  // a fn/const/static with the same name as a crate does not shadow it.
+  for (const symbol of context.symbols)
+    if (symbol.kind !== "function" && symbol.kind !== "variable") bind(symbol.filePath, symbol.name);
+  for (const record of context.imports as ImportRecord[]) {
+    if (record.wildcard) continue;
+    const bareCrate = record.module === record.importedName && record.localName === record.importedName;
+    if (!bareCrate) bind(record.filePath, record.localName);
+  }
+
   for (const record of context.imports as ImportRecord[]) {
     const resolved = resolveRustModule(
       record.module.split("::"),
       record.filePath,
       index,
+      boundByFile.get(record.filePath),
     );
     record.resolvedFile = resolved.file;
     record.externalPackage = resolved.externalPackage;
