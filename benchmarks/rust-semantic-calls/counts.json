@@ -1,0 +1,53 @@
+{
+  "walkdir": {
+    "total": 1135,
+    "hiddenInMacro": 631,
+    "self-method": 24,
+    "field-method": 34,
+    "param-method": 48,
+    "local-method": 289,
+    "chained-method": 214,
+    "assoc-Self": 0,
+    "assoc-Type": 149,
+    "path-module": 23,
+    "path-generic": 6,
+    "bare-fn": 20,
+    "bare-closure-or-ctor": 58,
+    "qualified-trait": 0,
+    "macro-invocation": 270
+  },
+  "mini-redis": {
+    "total": 1049,
+    "hiddenInMacro": 42,
+    "self-method": 18,
+    "field-method": 79,
+    "param-method": 69,
+    "local-method": 143,
+    "chained-method": 275,
+    "assoc-Self": 0,
+    "assoc-Type": 129,
+    "path-module": 40,
+    "path-generic": 3,
+    "bare-fn": 45,
+    "bare-closure-or-ctor": 145,
+    "qualified-trait": 0,
+    "macro-invocation": 103
+  },
+  "ripgrep-ignore": {
+    "total": 3706,
+    "hiddenInMacro": 903,
+    "self-method": 73,
+    "field-method": 198,
+    "param-method": 160,
+    "local-method": 693,
+    "chained-method": 911,
+    "assoc-Self": 0,
+    "assoc-Type": 281,
+    "path-module": 45,
+    "path-generic": 2,
+    "bare-fn": 527,
+    "bare-closure-or-ctor": 268,
+    "qualified-trait": 0,
+    "macro-invocation": 548
+  }
+}
