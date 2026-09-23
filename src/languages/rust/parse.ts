@@ -130,8 +130,6 @@ function parseUseDeclaration(
 ): ImportRecord[] {
   const argument = field(node, "argument");
   if (!argument) return [];
-  const isPubUse = isPub(node);
-  void isPubUse; // re-exports are Task 4's concern; this task only emits ImportRecords
   const baseRecord = {
     filePath,
     language: LANGUAGE_ID,
@@ -259,14 +257,28 @@ export function parseRust(filePath: string, source: string): ParsedFile {
 
   walk(tree.rootNode, undefined, []);
   const imports: ImportRecord[] = [];
+  const exports: ExportRecord[] = [];
   const collectUses = (node: Node) => {
     if (node.type === "use_declaration") {
-      imports.push(...parseUseDeclaration(node, filePath));
+      const records = parseUseDeclaration(node, filePath);
+      imports.push(...records);
+      if (isPub(node)) {
+        for (const record of records)
+          exports.push({
+            filePath,
+            language: LANGUAGE_ID,
+            exportedName: record.localName ?? record.importedName ?? "",
+            fromModule: record.module,
+            sourceName: record.importedName,
+            wildcard: record.wildcard,
+            typeOnly: false,
+            range: record.range,
+          });
+      }
       return; // a use_declaration has no nested items worth descending into
     }
     for (const child of node.namedChildren) collectUses(child);
   };
   collectUses(tree.rootNode);
-  const exports: ExportRecord[] = [];
   return { symbols, calls: [], imports, exports, parseError };
 }

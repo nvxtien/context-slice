@@ -72,8 +72,10 @@ export function resolveRustModule(
  */
 export function resolveRustCalls(context: ResolveContext) {
   const files = [...new Set(context.symbols.map((symbol) => symbol.filePath))];
-  for (const record of context.imports) files.push(record.filePath);
+  for (const record of [...context.imports, ...context.exports])
+    files.push(record.filePath);
   const index = rustModuleIndex([...new Set(files)]);
+
   for (const record of context.imports as ImportRecord[]) {
     const resolved = resolveRustModule(
       record.module.split("::"),
@@ -83,4 +85,51 @@ export function resolveRustCalls(context: ResolveContext) {
     record.resolvedFile = resolved.file;
     record.externalPackage = resolved.externalPackage;
   }
+
+  const exportsByFile = new Map<string, typeof context.exports>();
+  for (const record of context.exports) {
+    if (record.fromModule) {
+      record.resolvedFile = resolveRustModule(
+        record.fromModule.split("::"),
+        record.filePath,
+        index,
+      ).file;
+    }
+    const list = exportsByFile.get(record.filePath) ?? [];
+    list.push(record);
+    exportsByFile.set(record.filePath, list);
+  }
+
+  const symbolsByFileAndName = new Map<string, string>(); // `${file}#${name}` -> symbolId
+  for (const symbol of context.symbols)
+    symbolsByFileAndName.set(`${symbol.filePath}#${symbol.name}`, symbol.id);
+
+  /** Follows `pub use` re-export chains; `seen` breaks cycles (mirrors python resolve.ts's `lookup`). */
+  const lookup = (
+    file: string,
+    name: string,
+    seen: Set<string>,
+  ): string | undefined => {
+    const key = `${file}#${name}`;
+    if (seen.has(key)) return undefined;
+    seen.add(key);
+    const direct = symbolsByFileAndName.get(key);
+    if (direct) return direct;
+    const records = exportsByFile.get(file) ?? [];
+    const reexport = records.find(
+      (record) => record.exportedName === name && record.resolvedFile,
+    );
+    if (reexport?.resolvedFile)
+      return lookup(reexport.resolvedFile, reexport.sourceName ?? name, seen);
+    for (const wildcard of records.filter((record) => record.wildcard))
+      if (wildcard.resolvedFile) {
+        const found = lookup(wildcard.resolvedFile, name, seen);
+        if (found) return found;
+      }
+    return undefined;
+  };
+
+  for (const record of context.exports)
+    if (record.resolvedFile && record.sourceName)
+      record.symbolId = lookup(record.resolvedFile, record.sourceName, new Set());
 }
