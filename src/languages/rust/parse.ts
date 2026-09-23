@@ -137,59 +137,68 @@ function parseUseDeclaration(
     typeOnly: false,
     range: range(node),
   };
+  const records: ImportRecord[] = [];
+  const leaf = (full: string[], localName?: string) => {
+    const importedName = full.at(-1);
+    if (!importedName) return;
+    const module = full.length > 1 ? full.slice(0, -1).join("::") : importedName;
+    records.push({ ...baseRecord, module, importedName, localName: localName ?? importedName });
+  };
+  const wildcard = (full: string[]) => {
+    if (full.length) records.push({ ...baseRecord, module: full.join("::"), wildcard: true });
+  };
+  // `self` inside `m::{self}` imports module `m` itself (module = m's parent path).
+  const selfLeaf = (prefix: string[], alias?: string) => {
+    const name = prefix.at(-1);
+    if (!name) return;
+    records.push({
+      ...baseRecord,
+      module: prefix.length > 1 ? prefix.slice(0, -1).join("::") : name,
+      importedName: name,
+      localName: alias ?? name,
+    });
+  };
 
-  if (argument.type === "use_wildcard") {
-    const prefix = argument.namedChild(0);
-    if (!prefix) return [];
-    const segments = pathSegments(prefix);
-    return [{ ...baseRecord, module: segments.join("::"), wildcard: true }];
-  }
-
-  if (argument.type === "use_as_clause") {
-    const pathNode = field(argument, "path");
-    const alias = text(field(argument, "alias"));
-    if (!pathNode) return [];
-    const segments = pathSegments(pathNode);
-    const importedName = segments.at(-1) ?? "";
-    const module =
-      segments.length > 1 ? segments.slice(0, -1).join("::") : importedName;
-    return [{ ...baseRecord, module, importedName, localName: alias }];
-  }
-
-  if (argument.type === "scoped_use_list") {
-    const pathNode = field(argument, "path");
-    const listNode = field(argument, "list");
-    if (!listNode) return [];
-    const prefix = pathNode ? pathSegments(pathNode) : [];
-    const module = prefix.join("::");
-    const records: ImportRecord[] = [];
-    for (const item of listNode.namedChildren) {
-      // Flat groups only: a bare identifier, or an aliased leaf. A nested
-      // path/group/wildcard inside `{ }` (e.g. `use std::{fmt, io::Write}`)
-      // is conservatively skipped — nested use groups are deferred (see
-      // plan header). This must never guess a wrong target.
-      if (item.type === "identifier") {
-        const importedName = text(item);
-        records.push({ ...baseRecord, module, importedName, localName: importedName });
-      } else if (item.type === "use_as_clause") {
-        const itemPath = field(item, "path");
-        if (!itemPath || itemPath.type !== "identifier") continue;
-        const importedName = text(itemPath);
-        const localName = text(field(item, "alias"));
-        records.push({ ...baseRecord, module, importedName, localName });
+  // Recursive over the tree-sitter-rust 0.21 use shapes: scoped_use_list
+  // (path + use_list), use_list, use_wildcard, use_as_clause, scoped_identifier,
+  // identifier/self/crate/super. Any other node type emits nothing.
+  const useTree = (item: Node, prefix: string[]): void => {
+    switch (item.type) {
+      case "use_list":
+        for (const child of item.namedChildren) useTree(child, prefix);
+        return;
+      case "scoped_use_list": {
+        const path = field(item, "path");
+        const list = field(item, "list");
+        if (list) useTree(list, [...prefix, ...(path ? pathSegments(path) : [])]);
+        return;
       }
+      case "use_wildcard": {
+        const path = item.namedChild(0);
+        wildcard([...prefix, ...(path ? pathSegments(path) : [])]);
+        return;
+      }
+      case "use_as_clause": {
+        const path = field(item, "path");
+        const alias = text(field(item, "alias"));
+        if (!path || !alias) return;
+        if (path.type === "self") selfLeaf(prefix, alias);
+        else if (isPathNode(path)) leaf([...prefix, ...pathSegments(path)], alias);
+        return;
+      }
+      case "self":
+        selfLeaf(prefix);
+        return;
+      default:
+        if (isPathNode(item)) leaf([...prefix, ...pathSegments(item)]);
     }
-    return records;
-  }
-
-  // Plain `scoped_identifier` (or a bare `identifier` for a single-segment
-  // `use foo;`): the whole thing is one import.
-  const segments = pathSegments(argument);
-  const importedName = segments.at(-1) ?? "";
-  const module =
-    segments.length > 1 ? segments.slice(0, -1).join("::") : importedName;
-  return [{ ...baseRecord, module, importedName, localName: importedName }];
+  };
+  useTree(argument, []);
+  return records;
 }
+
+const isPathNode = (node: Node) =>
+  ["scoped_identifier", "identifier", "self", "crate", "super"].includes(node.type);
 
 export function parseRust(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];

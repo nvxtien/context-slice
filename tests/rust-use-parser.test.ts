@@ -69,3 +69,52 @@ test("a bare single-segment use imports the module/crate name itself", () => {
   assert.equal(imports[0].module, "serde");
   assert.equal(imports[0].importedName, "serde");
 });
+
+// --- general use-tree parsing (D2) ---
+const shape = (src: string) =>
+  parseRust("a.rs", src).imports.map(
+    (i) => `${i.module}|${i.importedName ?? ""}|${i.localName ?? ""}|${i.wildcard ? "*" : ""}`,
+  );
+
+test("top-level use list becomes one import per leaf", () => {
+  assert.deepEqual(shape("use { a::b, c::d };\n"), ["a|b|b|", "c|d|d|"]);
+});
+
+test("self in a group imports the module itself", () => {
+  assert.deepEqual(shape("use crate::frame::{self, Frame};\n"), [
+    "crate|frame|frame|",
+    "crate::frame|Frame|Frame|",
+  ]);
+  assert.deepEqual(shape("use a::{self, b};\n"), ["a|a|a|", "a|b|b|"]);
+  assert.deepEqual(shape("use a::{self as x};\n"), ["a|a|x|"]);
+});
+
+test("nested groups recurse with the extended prefix", () => {
+  assert.deepEqual(shape("use a::{b::{c, d}, e};\n"), ["a::b|c|c|", "a::b|d|d|", "a|e|e|"]);
+  assert.deepEqual(shape("use std::{fmt, io::Write};\n"), ["std|fmt|fmt|", "std::io|Write|Write|"]);
+});
+
+test("wildcards inside groups", () => {
+  assert.deepEqual(shape("use a::{b::*, c};\n"), ["a::b|||*", "a|c|c|"]);
+  assert.deepEqual(shape("use a::{*};\n"), ["a|||*"]);
+});
+
+test("aliased paths, self:: anchor, leading ::", () => {
+  assert.deepEqual(shape("use a::b as c;\n"), ["a|b|c|"]);
+  assert.deepEqual(shape("use self::x;\n"), ["self|x|x|"]);
+  assert.deepEqual(shape("use ::std::x;\n"), ["std|x|x|"]);
+  assert.deepEqual(shape("use crate::{a, super::b};\n"), ["crate|a|a|", "crate::super|b|b|"]);
+});
+
+test("degenerate shapes emit nothing", () => {
+  assert.deepEqual(shape("use *;\n"), []);
+  assert.deepEqual(shape("use {self};\n"), []);
+});
+
+test("pub use of nested / self / wildcard groups yields matching exports", () => {
+  const { exports } = parseRust("a.rs", "pub use a::{self, b::{c as d, *}, e::f};\n");
+  assert.deepEqual(
+    exports.map((e) => `${e.fromModule}|${e.sourceName ?? ""}|${e.exportedName}|${e.wildcard ? "*" : ""}`),
+    ["a|a|a|", "a::b|c|d|", "a::b|||*", "a::e|f|f|"],
+  );
+});
