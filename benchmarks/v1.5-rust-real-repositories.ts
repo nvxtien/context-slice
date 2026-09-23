@@ -607,7 +607,70 @@ md.push("");
 for (const r of results)
   if (r.attribution.unknownExamples.length)
     md.push(`UNKNOWN examples in ${r.id}:`, "", table(["at", "kind", "detail", "source line"], r.attribution.unknownExamples.map((e) => [`\`${e.file}:${e.line}\``, e.kind, e.detail, `\`${e.sourceLine.replace(/\|/g, "\\|")}\``])), "");
-md.push(findingsProse(results));
+// ---- Before / After (BEFORE = frozen JSON committed before the fixes) ----------------
+const beforePath = join(outputDir, "v1.5-phase1-rust-real-repositories.before-fixes.json");
+const beforeById: Record<string, any> = existsSync(beforePath)
+  ? Object.fromEntries(JSON.parse(readFileSync(beforePath, "utf8")).repositories.map((r: any) => [r.id, r]))
+  : {};
+// good: which direction is an improvement; "neutral" = a size/volume figure with no good direction.
+type Metric = [name: string, get: (r: any) => number, good: "up" | "down" | "neutral"];
+const METRICS: Metric[] = [
+  ["files indexed", (r) => r.coverage.rsFilesIndexed, "neutral"],
+  ["files emptied by adapter", (r) => r.coverage.filesSilentlyDropped.length, "down"],
+  ["indexer cold parseErrors", (r) => r.coverage.indexerReportedParseErrorsCold, "down"],
+  ["symbols", (r) => r.coverage.symbols, "up"],
+  ["imports", (r) => r.coverage.imports, "neutral"],
+  ["exports", (r) => r.coverage.exports, "neutral"],
+  ["module_resolution: files agreeing with oracle", (r) => r.moduleResolution.agree, "up"],
+  ["use: anchored resolved", (r) => r.useResolution.anchored.resolved, "up"],
+  ["use: anchored unresolved", (r) => r.useResolution.anchored.unresolved, "down"],
+  ["use: anchored resolved file agrees with oracle", (r) => r.useResolution.oracleCheck.agree, "up"],
+  ["use: anchored resolved to WRONG file", (r) => r.useResolution.oracleCheck.anchoredResolvedChecked - r.useResolution.oracleCheck.agree, "down"],
+  ["use: non-anchored external", (r) => r.useResolution.nonAnchored.external, "neutral"],
+  ["use: non-anchored local-resolved", (r) => r.useResolution.nonAnchored.localResolved, "neutral"],
+  ["use: non-anchored neither (bound locally / unresolved)", (r) => r.useResolution.nonAnchored.neither, "neutral"],
+  ["external class malformed-top-level-use-group", (r) => r.useResolution.externalBreakdown["malformed-top-level-use-group"] ?? 0, "down"],
+  ["external class in-scope-local-item", (r) => r.useResolution.externalBreakdown["in-scope-local-item"] ?? 0, "down"],
+  ["precision proxy: target has the name", (r) => r.useResolution.precisionProxy.contains, "up"],
+  ["precision proxy: name missing", (r) => r.useResolution.precisionProxy.missing, "down"],
+  ["reexport: with resolvedFile", (r) => r.reexportResolution.withResolvedFile, "up"],
+  ["reexport: non-wildcard with symbolId", (r) => r.reexportResolution.nonWildcardWithSymbolId, "up"],
+  ["reexport: non-wildcard without symbolId", (r) => r.reexportResolution.nonWildcard - r.reexportResolution.nonWildcardWithSymbolId, "down"],
+  ...CATEGORIES.map((c): Metric => [`failures ${c}`, (r) => r.attribution.byCategory[c] ?? 0, "down"]),
+  ["failures total", (r) => r.attribution.totalFailures, "down"],
+];
+const RATES: Array<[string, (r: any) => [number, number]]> = [
+  ["module_resolution_rate", (r) => [r.moduleResolution.agree, r.moduleResolution.filesReached]],
+  ["use_resolution_rate (anchored resolved)", (r) => [r.useResolution.anchored.resolved, r.useResolution.anchored.total]],
+  ["precision proxy", (r) => [r.useResolution.precisionProxy.contains, r.useResolution.precisionProxy.checked]],
+  ["reexport_resolution_rate (resolvedFile)", (r) => [r.reexportResolution.withResolvedFile, r.reexportResolution.withFromModule]],
+  ["reexport with symbolId (non-wildcard)", (r) => [r.reexportResolution.nonWildcardWithSymbolId, r.reexportResolution.nonWildcard]],
+];
+const verdict = (b: number, a: number, good: "up" | "down" | "neutral") =>
+  a === b ? "unchanged" : good === "neutral" ? "changed (volume)" : (a > b) === (good === "up") ? "improved" : "WORSE";
+const worse: string[] = [];
+md.push("## Before / After the fixes", "");
+md.push("BEFORE is the committed run frozen in `v1.5-phase1-rust-real-repositories.before-fixes.json` (taken before any `src/` change); AFTER is this run. \"changed (volume)\" marks counts that grow because more `use` records are now parsed (nested groups, `self`, top-level lists, large files), not because of a quality change.", "");
+for (const r of results) {
+  const b = beforeById[r.id];
+  if (!b) continue;
+  md.push(`### ${r.id}`, "");
+  md.push(table(["metric", "before", "after", "verdict"], METRICS.map(([name, get, good]) => {
+    const v = verdict(get(b), get(r), good);
+    if (v === "WORSE") worse.push(`${r.id}: ${name} ${get(b)} -> ${get(r)}`);
+    return [name, get(b), get(r), v];
+  })), "");
+  md.push(table(["rate", "before", "after", "verdict"], RATES.map(([name, get]) => {
+    const [bn, bd] = get(b);
+    const [an, ad] = get(r);
+    const bp = pct(bn, bd), ap = pct(an, ad);
+    const v = bp === ap ? "unchanged" : bp === null || ap === null ? "changed (denominator)" : ap > bp ? "improved" : "WORSE";
+    if (v === "WORSE") worse.push(`${r.id}: ${name} ${bp}% -> ${ap}%`);
+    return [name, rate(bn, bd), rate(an, ad), v];
+  })), "");
+}
+md.push(worse.length ? `Metrics that got WORSE: ${worse.join("; ")}. See Findings.` : "No metric got worse.", "");
+md.push(findingsProse(results, beforeById));
 writeFileSync(join(outputDir, "v1.5-phase1-rust-real-repositories.md"), `${md.join("\n")}\n`);
 console.log(`Wrote ${join(outputDir, "v1.5-phase1-rust-real-repositories.md")}`);
 if (results.some((r) => !r.coldWarmIdentical)) {

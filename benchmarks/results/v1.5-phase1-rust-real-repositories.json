@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T17:54:35.580Z",
+  "generatedAt": "2026-09-23T18:05:29.296Z",
   "spec": "docs/prompt/CONTEXTSLICE_V1.5_RUST_SUPPORT.md §67-74, §80",
   "attributionRules": {
     "PARSER": "The importing file, or the file the oracle says is the target, has a tree-sitter syntax error (genuine grammar error) OR the adapter failed to parse / emptied the file (an adapter defect, e.g. tree-sitter input-size limit: no symbols/imports/exports although the text contains items; the indexer reports these as parseErrors). Both sub-kinds are in this bucket; file counts per sub-kind are in the coverage table.",
@@ -20,23 +20,18 @@
       "coverage": {
         "rsFilesOnDisk": 8,
         "rsFilesIndexed": 8,
-        "symbols": 149,
-        "imports": 57,
-        "exports": 0,
+        "symbols": 210,
+        "imports": 75,
+        "exports": 3,
         "filesWithParseError": 0,
         "parseErrorFiles": [],
-        "filesSilentlyDropped": [
-          {
-            "file": "src/lib.rs",
-            "chars": 42415
-          }
-        ],
-        "indexerReportedParseErrorsCold": 1
+        "filesSilentlyDropped": [],
+        "indexerReportedParseErrorsCold": 0
       },
       "performance": {
-        "coldMs": 85,
+        "coldMs": 71,
         "warmMs": 10,
-        "coldWallMs": 85,
+        "coldWallMs": 71,
         "warmWallMs": 10,
         "coldFilesParsed": 9,
         "warmFilesParsed": 0,
@@ -76,16 +71,16 @@
       },
       "useResolution": {
         "anchored": {
-          "total": 9,
-          "resolved": 2,
-          "unresolved": 7,
+          "total": 12,
+          "resolved": 12,
+          "unresolved": 0,
           "wildcard": 0,
           "wildcardResolved": 0,
-          "resolvedRate": 22.22
+          "resolvedRate": 100
         },
         "nonAnchored": {
-          "total": 48,
-          "external": 48,
+          "total": 63,
+          "external": 63,
           "localResolved": 0,
           "neither": 0,
           "wildcard": 0,
@@ -93,19 +88,19 @@
           "externalOrLocalRate": 100
         },
         "externalBreakdown": {
-          "std-family": 40,
-          "declared-dependency": 8
+          "std-family": 54,
+          "declared-dependency": 9
         },
         "oracleCheck": {
-          "anchoredResolvedChecked": 2,
-          "agree": 2,
+          "anchoredResolvedChecked": 12,
+          "agree": 12,
           "disagree": 0,
           "nonAnchoredLocalChecked": 0,
           "nonAnchoredLocalAgree": 0
         },
         "precisionProxy": {
-          "checked": 2,
-          "contains": 2,
+          "checked": 12,
+          "contains": 12,
           "unverifiable": 0,
           "missing": 0,
           "containsRate": 100,
@@ -116,92 +111,31 @@
         "wrongFileExamples": []
       },
       "reexportResolution": {
-        "exportsTotal": 0,
-        "withFromModule": 0,
-        "withResolvedFile": 0,
-        "anchoredReexports": 0,
-        "anchoredWithResolvedFile": 0,
-        "nonWildcard": 0,
-        "nonWildcardWithSymbolId": 0,
+        "exportsTotal": 3,
+        "withFromModule": 3,
+        "withResolvedFile": 3,
+        "anchoredReexports": 3,
+        "anchoredWithResolvedFile": 3,
+        "nonWildcard": 3,
+        "nonWildcardWithSymbolId": 3,
         "nonWildcardWithoutSymbolIdExamples": [],
         "wildcard": 0,
         "wildcardWithResolvedFile": 0
       },
       "attribution": {
-        "totalFailures": 7,
+        "totalFailures": 0,
         "byCategory": {
           "MODULE_RESOLUTION": 0,
           "USE_RESOLUTION": 0,
           "CARGO_WORKSPACE_RESOLUTION": 0,
           "MACRO_EXPANSION_LIMIT": 0,
           "RUST_STATIC_LIMIT": 0,
-          "PARSER": 7,
+          "PARSER": 0,
           "UNKNOWN": 0
         },
-        "byKindCategory": {
-          "anchored-unresolved": {
-            "PARSER": 7
-          }
-        },
+        "byKindCategory": {},
         "unknownExamples": [],
-        "failureExamples": [
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/dent.rs",
-            "line": 7,
-            "detail": "use crate::Result",
-            "sourceLine": "use crate::Result;"
-          },
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/error.rs",
-            "line": 6,
-            "detail": "use crate::DirEntry",
-            "sourceLine": "use crate::DirEntry;"
-          },
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/tests/recursive.rs",
-            "line": 5,
-            "detail": "use crate::WalkDir",
-            "sourceLine": "use crate::WalkDir;"
-          },
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/tests/recursive.rs",
-            "line": 9,
-            "detail": "use crate::FilterEntry",
-            "sourceLine": "use crate::{FilterEntry, IntoIter};"
-          },
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/tests/recursive.rs",
-            "line": 9,
-            "detail": "use crate::IntoIter",
-            "sourceLine": "use crate::{FilterEntry, IntoIter};"
-          },
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/tests/util.rs",
-            "line": 8,
-            "detail": "use crate::DirEntry",
-            "sourceLine": "use crate::{DirEntry, Error};"
-          },
-          {
-            "kind": "anchored-unresolved",
-            "category": "PARSER",
-            "file": "src/tests/util.rs",
-            "line": 8,
-            "detail": "use crate::Error",
-            "sourceLine": "use crate::{DirEntry, Error};"
-          }
-        ]
+        "failureExamples": []
       }
     },
     {
@@ -214,7 +148,7 @@
         "rsFilesOnDisk": 28,
         "rsFilesIndexed": 28,
         "symbols": 243,
-        "imports": 202,
+        "imports": 217,
         "exports": 19,
         "filesWithParseError": 0,
         "parseErrorFiles": [],
@@ -222,10 +156,10 @@
         "indexerReportedParseErrorsCold": 0
       },
       "performance": {
-        "coldMs": 84,
-        "warmMs": 22,
-        "coldWallMs": 84,
-        "warmWallMs": 22,
+        "coldMs": 66,
+        "warmMs": 15,
+        "coldWallMs": 66,
+        "warmWallMs": 15,
         "coldFilesParsed": 28,
         "warmFilesParsed": 0,
         "warmCacheHits": 28
@@ -400,43 +334,41 @@
       },
       "useResolution": {
         "anchored": {
-          "total": 51,
-          "resolved": 51,
+          "total": 52,
+          "resolved": 52,
           "unresolved": 0,
           "wildcard": 0,
           "wildcardResolved": 0,
           "resolvedRate": 100
         },
         "nonAnchored": {
-          "total": 151,
-          "external": 128,
+          "total": 165,
+          "external": 137,
           "localResolved": 23,
-          "neither": 0,
+          "neither": 5,
           "wildcard": 1,
           "wildcardResolved": 0,
-          "externalOrLocalRate": 100
+          "externalOrLocalRate": 96.97
         },
         "externalBreakdown": {
-          "own-package-crate": 11,
-          "declared-dependency": 81,
-          "std-family": 31,
-          "in-scope-local-item": 4,
-          "unverified": 1
+          "own-package-crate": 18,
+          "declared-dependency": 87,
+          "std-family": 32
         },
         "oracleCheck": {
-          "anchoredResolvedChecked": 51,
-          "agree": 51,
+          "anchoredResolvedChecked": 52,
+          "agree": 52,
           "disagree": 0,
           "nonAnchoredLocalChecked": 23,
           "nonAnchoredLocalAgree": 23
         },
         "precisionProxy": {
-          "checked": 74,
-          "contains": 54,
+          "checked": 75,
+          "contains": 55,
           "unverifiable": 0,
           "missing": 20,
-          "containsRate": 72.97,
-          "containsOrUnverifiableRate": 72.97
+          "containsRate": 73.33,
+          "containsOrUnverifiableRate": 73.33
         },
         "nameMissingTotal": 20,
         "nameMissingSamples": [
@@ -526,47 +458,48 @@
         "wildcardWithResolvedFile": 0
       },
       "attribution": {
-        "totalFailures": 36,
+        "totalFailures": 38,
         "byCategory": {
           "MODULE_RESOLUTION": 0,
-          "USE_RESOLUTION": 24,
-          "CARGO_WORKSPACE_RESOLUTION": 11,
+          "USE_RESOLUTION": 20,
+          "CARGO_WORKSPACE_RESOLUTION": 18,
           "MACRO_EXPANSION_LIMIT": 0,
           "RUST_STATIC_LIMIT": 0,
           "PARSER": 0,
-          "UNKNOWN": 1
+          "UNKNOWN": 0
         },
         "byKindCategory": {
           "external-but-repo-source": {
-            "CARGO_WORKSPACE_RESOLUTION": 11
+            "CARGO_WORKSPACE_RESOLUTION": 18
           },
           "resolved-name-missing": {
             "USE_RESOLUTION": 20
-          },
-          "external-but-in-scope-item": {
-            "USE_RESOLUTION": 4
-          },
-          "external-unverified": {
-            "UNKNOWN": 1
           }
         },
-        "unknownExamples": [
-          {
-            "kind": "external-unverified",
-            "category": "UNKNOWN",
-            "file": "src/connection.rs",
-            "line": 88,
-            "detail": "use frame::Error::Incomplete: 'frame' not std, not a declared dependency",
-            "sourceLine": "use frame::Error::Incomplete;"
-          }
-        ],
+        "unknownExamples": [],
         "failureExamples": [
           {
             "kind": "external-but-repo-source",
             "category": "CARGO_WORKSPACE_RESOLUTION",
             "file": "examples/hello_world.rs",
             "line": 16,
+            "detail": "use mini_redis::clients::Client names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "examples/hello_world.rs",
+            "line": 16,
             "detail": "use mini_redis::Result names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "examples/pub.rs",
+            "line": 20,
+            "detail": "use mini_redis::clients::Client names the package's own lib crate",
             "sourceLine": "use mini_redis::{clients::Client, Result};"
           },
           {
@@ -582,8 +515,24 @@
             "category": "CARGO_WORKSPACE_RESOLUTION",
             "file": "examples/sub.rs",
             "line": 20,
+            "detail": "use mini_redis::clients::Client names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "examples/sub.rs",
+            "line": 20,
             "detail": "use mini_redis::Result names the package's own lib crate",
             "sourceLine": "use mini_redis::{clients::Client, Result};"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "src/bin/cli.rs",
+            "line": 1,
+            "detail": "use mini_redis::clients::Client names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, DEFAULT_PORT};"
           },
           {
             "kind": "external-but-repo-source",
@@ -658,14 +607,6 @@
             "sourceLine": "use crate::{Connection, Db, Frame, Parse, ParseError, Shutdown};"
           },
           {
-            "kind": "external-but-in-scope-item",
-            "category": "USE_RESOLUTION",
-            "file": "src/cmd/mod.rs",
-            "line": 96,
-            "detail": "use Command::*: 'Command' is a mod/item in scope in this file",
-            "sourceLine": "use Command::*;"
-          },
-          {
             "kind": "resolved-name-missing",
             "category": "USE_RESOLUTION",
             "file": "src/cmd/ping.rs",
@@ -722,14 +663,6 @@
             "sourceLine": "use crate::{Connection, Db, Frame};"
           },
           {
-            "kind": "external-but-in-scope-item",
-            "category": "USE_RESOLUTION",
-            "file": "src/cmd/set.rs",
-            "line": 81,
-            "detail": "use ParseError::EndOfStream: 'ParseError' is a mod/item in scope in this file",
-            "sourceLine": "use ParseError::EndOfStream;"
-          },
-          {
             "kind": "resolved-name-missing",
             "category": "USE_RESOLUTION",
             "file": "src/cmd/subscribe.rs",
@@ -762,30 +695,6 @@
             "sourceLine": "use crate::{Command, Connection, Db, Frame, Shutdown};"
           },
           {
-            "kind": "external-but-in-scope-item",
-            "category": "USE_RESOLUTION",
-            "file": "src/cmd/subscribe.rs",
-            "line": 62,
-            "detail": "use ParseError::EndOfStream: 'ParseError' is a mod/item in scope in this file",
-            "sourceLine": "use ParseError::EndOfStream;"
-          },
-          {
-            "kind": "external-but-in-scope-item",
-            "category": "USE_RESOLUTION",
-            "file": "src/cmd/subscribe.rs",
-            "line": 310,
-            "detail": "use ParseError::EndOfStream: 'ParseError' is a mod/item in scope in this file",
-            "sourceLine": "use ParseError::EndOfStream;"
-          },
-          {
-            "kind": "external-unverified",
-            "category": "UNKNOWN",
-            "file": "src/connection.rs",
-            "line": 88,
-            "detail": "use frame::Error::Incomplete: 'frame' not std, not a declared dependency",
-            "sourceLine": "use frame::Error::Incomplete;"
-          },
-          {
             "kind": "resolved-name-missing",
             "category": "USE_RESOLUTION",
             "file": "src/server.rs",
@@ -814,8 +723,32 @@
             "category": "CARGO_WORKSPACE_RESOLUTION",
             "file": "tests/buffered_client.rs",
             "line": 1,
+            "detail": "use mini_redis::clients::BufferedClient names the package's own lib crate",
+            "sourceLine": "use mini_redis::{"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/buffered_client.rs",
+            "line": 1,
+            "detail": "use mini_redis::clients::Client names the package's own lib crate",
+            "sourceLine": "use mini_redis::{"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/buffered_client.rs",
+            "line": 1,
             "detail": "use mini_redis::server names the package's own lib crate",
             "sourceLine": "use mini_redis::{"
+          },
+          {
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
+            "file": "tests/client.rs",
+            "line": 1,
+            "detail": "use mini_redis::clients::Client names the package's own lib crate",
+            "sourceLine": "use mini_redis::{clients::Client, server};"
           },
           {
             "kind": "external-but-repo-source",
@@ -863,32 +796,19 @@
       "coverage": {
         "rsFilesOnDisk": 13,
         "rsFilesIndexed": 13,
-        "symbols": 211,
-        "imports": 49,
+        "symbols": 569,
+        "imports": 192,
         "exports": 9,
         "filesWithParseError": 0,
         "parseErrorFiles": [],
-        "filesSilentlyDropped": [
-          {
-            "file": "crates/ignore/src/dir.rs",
-            "chars": 58367
-          },
-          {
-            "file": "crates/ignore/src/incremental.rs",
-            "chars": 48097
-          },
-          {
-            "file": "crates/ignore/src/walk.rs",
-            "chars": 93443
-          }
-        ],
-        "indexerReportedParseErrorsCold": 3
+        "filesSilentlyDropped": [],
+        "indexerReportedParseErrorsCold": 0
       },
       "performance": {
-        "coldMs": 105,
-        "warmMs": 17,
-        "coldWallMs": 106,
-        "warmWallMs": 17,
+        "coldMs": 168,
+        "warmMs": 23,
+        "coldWallMs": 169,
+        "warmWallMs": 22,
         "coldFilesParsed": 13,
         "warmFilesParsed": 0,
         "warmCacheHits": 13
@@ -984,16 +904,16 @@
       },
       "useResolution": {
         "anchored": {
-          "total": 23,
-          "resolved": 23,
+          "total": 81,
+          "resolved": 81,
           "unresolved": 0,
-          "wildcard": 0,
-          "wildcardResolved": 0,
+          "wildcard": 8,
+          "wildcardResolved": 8,
           "resolvedRate": 100
         },
         "nonAnchored": {
-          "total": 26,
-          "external": 26,
+          "total": 111,
+          "external": 111,
           "localResolved": 0,
           "neither": 0,
           "wildcard": 1,
@@ -1001,27 +921,26 @@
           "externalOrLocalRate": 100
         },
         "externalBreakdown": {
-          "std-family": 16,
-          "malformed-top-level-use-group": 3,
-          "own-package-crate": 4,
-          "declared-dependency": 3
+          "std-family": 83,
+          "declared-dependency": 23,
+          "own-package-crate": 5
         },
         "oracleCheck": {
-          "anchoredResolvedChecked": 23,
-          "agree": 13,
-          "disagree": 10,
+          "anchoredResolvedChecked": 81,
+          "agree": 81,
+          "disagree": 0,
           "nonAnchoredLocalChecked": 0,
           "nonAnchoredLocalAgree": 0
         },
         "precisionProxy": {
-          "checked": 23,
-          "contains": 17,
+          "checked": 73,
+          "contains": 65,
           "unverifiable": 0,
-          "missing": 6,
-          "containsRate": 73.91,
-          "containsOrUnverifiableRate": 73.91
+          "missing": 8,
+          "containsRate": 89.04,
+          "containsOrUnverifiableRate": 89.04
         },
-        "nameMissingTotal": 6,
+        "nameMissingTotal": 8,
         "nameMissingSamples": [
           {
             "kind": "resolved-name-missing",
@@ -1047,6 +966,13 @@
           {
             "kind": "resolved-name-missing",
             "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/incremental.rs",
+            "line": 570,
+            "detail": "use super::CachedDir -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
             "file": "crates/ignore/src/overrides.rs",
             "line": 188,
             "detail": "use super::Override -> crates/ignore/src/lib.rs"
@@ -1064,90 +990,16 @@
             "file": "crates/ignore/src/types.rs",
             "line": 501,
             "detail": "use super::TypesBuilder -> crates/ignore/src/lib.rs"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/walk.rs",
+            "line": 2594,
+            "detail": "use super::device_num -> crates/ignore/src/lib.rs"
           }
         ],
-        "wrongFileExamples": [
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 51,
-            "module": "crate::incremental",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/incremental.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 51,
-            "module": "crate::incremental",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/incremental.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          },
-          {
-            "file": "crates/ignore/src/pathutil.rs",
-            "line": 3,
-            "module": "crate::walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "oracleFile": "crates/ignore/src/walk.rs",
-            "category": "PARSER"
-          }
-        ]
+        "wrongFileExamples": []
       },
       "reexportResolution": {
         "exportsTotal": 9,
@@ -1156,117 +1008,38 @@
         "anchoredReexports": 9,
         "anchoredWithResolvedFile": 9,
         "nonWildcard": 9,
-        "nonWildcardWithSymbolId": 0,
-        "nonWildcardWithoutSymbolIdExamples": [
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 51,
-            "fromModule": "crate::incremental",
-            "sourceName": "IncrementalIgnore",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 51,
-            "fromModule": "crate::incremental",
-            "sourceName": "IncrementalMatch",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "DirEntry",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "ParallelVisitor",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "ParallelVisitorBuilder",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "Walk",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "WalkBuilder",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "WalkParallel",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          },
-          {
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "fromModule": "crate::walk",
-            "sourceName": "WalkState",
-            "resolvedFile": "crates/ignore/src/lib.rs",
-            "external": false
-          }
-        ],
+        "nonWildcardWithSymbolId": 9,
+        "nonWildcardWithoutSymbolIdExamples": [],
         "wildcard": 0,
         "wildcardWithResolvedFile": 0
       },
       "attribution": {
-        "totalFailures": 23,
+        "totalFailures": 13,
         "byCategory": {
           "MODULE_RESOLUTION": 0,
-          "USE_RESOLUTION": 3,
-          "CARGO_WORKSPACE_RESOLUTION": 4,
+          "USE_RESOLUTION": 0,
+          "CARGO_WORKSPACE_RESOLUTION": 5,
           "MACRO_EXPANSION_LIMIT": 0,
-          "RUST_STATIC_LIMIT": 6,
-          "PARSER": 10,
+          "RUST_STATIC_LIMIT": 8,
+          "PARSER": 0,
           "UNKNOWN": 0
         },
         "byKindCategory": {
-          "external-malformed-use-group": {
-            "USE_RESOLUTION": 3
-          },
           "external-but-repo-source": {
-            "CARGO_WORKSPACE_RESOLUTION": 4
+            "CARGO_WORKSPACE_RESOLUTION": 5
           },
           "resolved-name-missing": {
-            "RUST_STATIC_LIMIT": 6
-          },
-          "resolved-to-wrong-file": {
-            "PARSER": 10
+            "RUST_STATIC_LIMIT": 8
           }
         },
         "unknownExamples": [],
         "failureExamples": [
           {
-            "kind": "external-malformed-use-group",
-            "category": "USE_RESOLUTION",
+            "kind": "external-but-repo-source",
+            "category": "CARGO_WORKSPACE_RESOLUTION",
             "file": "crates/ignore/examples/walk.rs",
             "line": 3,
-            "detail": "top-level braced use group parsed as one import with module text \"{bstr::ByteVec, ignore::WalkBuilder, wal\"...; its real imports are lost",
+            "detail": "use ignore::WalkBuilder names the package's own lib crate",
             "sourceLine": "use {bstr::ByteVec, ignore::WalkBuilder, walkdir::WalkDir};"
           },
           {
@@ -1286,14 +1059,6 @@
             "sourceLine": "use super::DEFAULT_TYPES;"
           },
           {
-            "kind": "external-malformed-use-group",
-            "category": "USE_RESOLUTION",
-            "file": "crates/ignore/src/gitignore.rs",
-            "line": 17,
-            "detail": "top-level braced use group parsed as one import with module text \"{\\n    globset::{Candidate, GlobBuilder, \"...; its real imports are lost",
-            "sourceLine": "use {"
-          },
-          {
             "kind": "resolved-name-missing",
             "category": "RUST_STATIC_LIMIT",
             "file": "crates/ignore/src/gitignore.rs",
@@ -1310,76 +1075,12 @@
             "sourceLine": "use super::{Gitignore, GitignoreBuilder};"
           },
           {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 51,
-            "detail": "use crate::incremental::IncrementalIgnore resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/incremental.rs",
-            "sourceLine": "pub use crate::incremental::{IncrementalIgnore, IncrementalMatch};"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 51,
-            "detail": "use crate::incremental::IncrementalMatch resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/incremental.rs",
-            "sourceLine": "pub use crate::incremental::{IncrementalIgnore, IncrementalMatch};"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::DirEntry resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::ParallelVisitor resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::ParallelVisitorBuilder resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::Walk resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::WalkBuilder resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::WalkParallel resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
-          },
-          {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/lib.rs",
-            "line": 52,
-            "detail": "use crate::walk::WalkState resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "pub use crate::walk::{"
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/incremental.rs",
+            "line": 570,
+            "detail": "use super::CachedDir -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::CachedDir;"
           },
           {
             "kind": "resolved-name-missing",
@@ -1398,28 +1099,20 @@
             "sourceLine": "use super::{Override, OverrideBuilder};"
           },
           {
-            "kind": "resolved-to-wrong-file",
-            "category": "PARSER",
-            "file": "crates/ignore/src/pathutil.rs",
-            "line": 3,
-            "detail": "use crate::walk::DirEntry resolved to crates/ignore/src/lib.rs, oracle says crates/ignore/src/walk.rs",
-            "sourceLine": "use crate::walk::DirEntry;"
-          },
-          {
-            "kind": "external-malformed-use-group",
-            "category": "USE_RESOLUTION",
-            "file": "crates/ignore/src/types.rs",
-            "line": 89,
-            "detail": "top-level braced use group parsed as one import with module text \"{\\n    globset::{GlobBuilder, GlobSet, Gl\"...; its real imports are lost",
-            "sourceLine": "use {"
-          },
-          {
             "kind": "resolved-name-missing",
             "category": "RUST_STATIC_LIMIT",
             "file": "crates/ignore/src/types.rs",
             "line": 501,
             "detail": "use super::TypesBuilder -> crates/ignore/src/lib.rs",
             "sourceLine": "use super::TypesBuilder;"
+          },
+          {
+            "kind": "resolved-name-missing",
+            "category": "RUST_STATIC_LIMIT",
+            "file": "crates/ignore/src/walk.rs",
+            "line": 2594,
+            "detail": "use super::device_num -> crates/ignore/src/lib.rs",
+            "sourceLine": "use super::device_num;"
           },
           {
             "kind": "external-but-repo-source",
