@@ -15,6 +15,7 @@ const manifests = [
   "benchmarks/repositories.json",
   "benchmarks/typescript-repositories.json",
   "benchmarks/python-repositories.json",
+  "benchmarks/rust-repositories.json",
 ];
 const repositories = manifests.flatMap(
   (manifest) =>

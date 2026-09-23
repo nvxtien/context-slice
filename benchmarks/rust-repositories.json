@@ -1,0 +1,30 @@
+[
+  {
+    "id": "walkdir",
+    "scale": "small",
+    "url": "https://github.com/BurntSushi/walkdir.git",
+    "commit": "6fd031c82ba5a4204b4ce6eae73dacb00dc072ec",
+    "source": "benchmarks/checkouts/walkdir",
+    "scope": "whole repository (library crate plus walkdir-list binary crate)",
+    "kind": "library"
+  },
+  {
+    "id": "mini-redis",
+    "scale": "medium",
+    "url": "https://github.com/tokio-rs/mini-redis.git",
+    "commit": "3d93b42bc363220f85af4fc9e1bebd35b588a4a3",
+    "source": "benchmarks/checkouts/mini-redis",
+    "scope": "whole repository (async library, bins, integration tests)",
+    "kind": "application"
+  },
+  {
+    "id": "ripgrep-ignore",
+    "scale": "large",
+    "url": "https://github.com/BurntSushi/ripgrep.git",
+    "commit": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+    "sparse": ["crates/ignore"],
+    "source": "benchmarks/checkouts/ripgrep-ignore",
+    "scope": "crates/ignore (bounded subsystem of a workspace)",
+    "kind": "library-subsystem"
+  }
+]
