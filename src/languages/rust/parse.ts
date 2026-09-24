@@ -202,30 +202,53 @@ function parseUseDeclaration(
 const isPathNode = (node: Node) =>
   ["scoped_identifier", "identifier", "self", "crate", "super"].includes(node.type);
 
-/** Base type name: strips generics, `&`/`&mut`, `dyn`/`impl`, lifetimes and path prefixes. */
-function baseTypeName(node: Node | null): string | undefined {
+const isComment = (n: Node) => n.type.endsWith("comment");
+const namedNoComments = (n: Node | null) => (n?.namedChildren ?? []).filter((c) => !isComment(c));
+
+/** Names of an impl's own generic type parameters (not lifetimes/consts). */
+function typeParamNames(impl: Node): Set<string> {
+  const names = new Set<string>();
+  for (const p of field(impl, "type_parameters")?.namedChildren ?? []) {
+    const n = p.type === "type_identifier" ? p : (field(p, "left") ?? field(p, "name"));
+    if (n?.type === "type_identifier") names.add(n.text);
+  }
+  return names;
+}
+
+/**
+ * Base type name: strips generics, `&`/`&mut`, `dyn`, lifetimes and path prefixes.
+ * Undefined for shapes that are not one named type (slices, arrays, tuples, fn pointers,
+ * multi-bound `dyn`, `impl Trait`, `!`, `_`) and for names in `generics`.
+ */
+function baseTypeName(node: Node | null, generics?: Set<string>): string | undefined {
   if (!node) return undefined;
+  let name: string;
   switch (node.type) {
     case "generic_type":
     case "reference_type":
     case "pointer_type":
-      return baseTypeName(field(node, "type"));
-    case "scoped_type_identifier":
-      return text(field(node, "name"));
+      return baseTypeName(field(node, "type"), generics);
     case "dynamic_type":
-    case "abstract_type":
-      return baseTypeName(field(node, "trait"));
+      return baseTypeName(field(node, "trait"), generics);
+    case "scoped_type_identifier":
+      name = text(field(node, "name"));
+      break;
+    case "type_identifier":
+      name = node.text;
+      break;
     default:
-      return node.text;
+      return undefined;
   }
+  return generics?.has(name) ? undefined : name;
 }
 
 function symbolMetadata(node: Node): SymbolMetadata | undefined {
   const meta: SymbolMetadata = {};
   if (node.type === "function_item" && isAsync(node)) meta.async = true;
   if (node.type === "impl_item") {
-    meta.implSelfType = baseTypeName(field(node, "type"));
-    const trait = baseTypeName(field(node, "trait"));
+    const generics = typeParamNames(node);
+    meta.implSelfType = baseTypeName(field(node, "type"), generics);
+    const trait = baseTypeName(field(node, "trait"), generics);
     if (trait) meta.implTrait = trait;
   } else if (node.type === "struct_item") {
     const types: Record<string, string> = {};
@@ -239,13 +262,15 @@ function symbolMetadata(node: Node): SymbolMetadata | undefined {
     if (Object.keys(types).length) meta.declaredTypes = types;
   } else if (node.type === "function_item" || node.type === "function_signature_item") {
     const types: Record<string, string> = {};
-    for (const p of field(node, "parameters")?.namedChildren ?? []) {
+    // declaredTypes.self is "&self" | "&mut self" | "self" for plain receivers, or the raw type
+    // text (e.g. "Box<Self>") for a typed `self: T`. Pattern params (`(a, b): T`, `_: T`) are skipped.
+    for (const p of namedNoComments(field(node, "parameters"))) {
       if (p.type === "self_parameter") {
         const ref = p.children.some((c) => c.type === "&");
         types.self = ref ? (p.children.some((c) => c.type === "mutable_specifier") ? "&mut self" : "&self") : "self";
       } else if (p.type === "parameter") {
         const pattern = field(p, "pattern");
-        if (pattern?.type === "identifier") types[pattern.text] = text(field(p, "type"));
+        if (pattern?.type === "identifier" || pattern?.type === "self") types[pattern.text] = text(field(p, "type"));
       }
     }
     if (Object.keys(types).length) meta.declaredTypes = types;
@@ -253,15 +278,19 @@ function symbolMetadata(node: Node): SymbolMetadata | undefined {
   return Object.keys(meta).length ? meta : undefined;
 }
 
-const simpleChain = (node: Node, dots = 0): boolean =>
-  node.type === "self" || node.type === "identifier"
-    ? true
-    : node.type === "field_expression" && dots < 3
-      ? simpleChain(field(node, "value")!, dots + 1)
-      : false;
+/** Dot count of a pure ident/self field chain, or undefined if it contains anything else. */
+const chainDots = (node: Node): number | undefined => {
+  if (node.type === "self" || node.type === "identifier") return 0;
+  if (node.type !== "field_expression") return undefined;
+  const inner = chainDots(field(node, "value")!);
+  return inner === undefined ? undefined : inner + 1;
+};
 
+/** Chains of <= 3 dots: source text. `<field>` = chain too long; `<expr>` = chain contains a call/index/etc. */
 function receiverOf(node: Node): string {
-  return simpleChain(node) ? node.text : `<${node.type.replace(/_expression$/, "")}>`;
+  const dots = chainDots(node);
+  if (dots !== undefined) return dots <= 3 ? node.text : "<field>";
+  return node.type === "field_expression" ? "<expr>" : `<${node.type.replace(/_expression$/, "")}>`;
 }
 
 /** Path prefix text without generic arguments (`Vec::<u8>` -> `Vec`). */
@@ -288,7 +317,7 @@ function callEdge(node: Node, filePath: string, callerId: string): CallEdge {
     edge.evidence = [`macro:${edge.calleeName}`];
     return edge;
   }
-  edge.argumentCount = field(node, "arguments")?.namedChildCount ?? 0;
+  edge.argumentCount = namedNoComments(field(node, "arguments")).length;
   let fn = field(node, "function")!;
   if (fn.type === "generic_function") fn = field(fn, "function")!;
   if (fn.type === "field_expression") {

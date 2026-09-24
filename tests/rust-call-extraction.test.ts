@@ -27,7 +27,8 @@ test("method calls: receiver text and markers", () => {
   assert.deepEqual(one("self.m(1, 2);"), { name: "m", recv: "self", args: 2, ev: [] });
   assert.equal(one("self.a.b.m();").recv, "self.a.b");
   assert.equal(one("x.m();").recv, "x");
-  assert.equal(one("self.a.b.c.d.m();").recv, "<field>");
+  assert.equal(one("self.a.b.c.d.m();").recv, "<field>"); // chain too long
+  assert.equal(calls("self.a().b.c();").find((c) => c.name === "c")?.recv, "<expr>"); // chain contains a call
   assert.equal(one("self.0.m();").recv, "self.0");
   assert.deepEqual(
     calls("a().b();").map((c) => [c.name, c.recv]),
@@ -121,7 +122,7 @@ test("impl metadata", () => {
   const impls = p.symbols.filter((s) => s.name.startsWith("impl"));
   assert.deepEqual(
     impls.map((s) => [s.metadata?.implSelfType, s.metadata?.implTrait]),
-    [["Vec", "Tr"], ["A", undefined], ["B", "Tr2"], ["Box", "Tr3"], ["T", "Tr4"]],
+    [["Vec", "Tr"], ["A", undefined], ["B", "Tr2"], ["Box", "Tr3"], [undefined, "Tr4"]],
   );
 });
 
@@ -148,11 +149,89 @@ impl S {
   assert.equal(dt("s"), undefined);
 });
 
+test("argument count ignores comments", () => {
+  assert.equal(one("f(/* c */ 1);").args, 1);
+  assert.equal(one("f(// c\n 1, 2);").args, 2);
+  assert.equal(one("f(/// doc\n 1, 2);").args, 2);
+  assert.equal(one("f(/* nothing */);").args, 0);
+  assert.equal(one("x.m(/* a */ 1, /* b */ 2);").args, 2);
+});
+
+test("self: Box<Self>, pattern params and exotic impl types", () => {
+  const p = parseRust(
+    "src/lib.rs",
+    `impl S { fn m(self: Box<Self>, x: u8) {} fn n((a, b): (u8, u8), _: T, /* c */ z: Z) {} }
+impl Tr for [u8] {}
+impl Tr for (A, B) {}
+impl Tr for fn(u8) -> u8 {}
+impl Tr for dyn A + Send {}
+impl<T> Tr for T {}
+impl<T: Bound> Tr for T {}
+impl<T> Tr<T> for Vec<T> {}
+impl<'a> Tr<'a> for Foo<'a> {}
+impl dyn Tr {}
+impl Tr for *const Foo {}
+impl a::b::Tr for c::Foo {}
+`,
+  );
+  const dt = (n: string) => p.symbols.find((s) => s.name === n)?.metadata?.declaredTypes;
+  assert.deepEqual(dt("m"), { self: "Box<Self>", x: "u8" });
+  assert.deepEqual(dt("n"), { z: "Z" }); // pattern params skipped by design
+  const impls = p.symbols.filter((s) => s.name.startsWith("impl"));
+  assert.deepEqual(
+    impls.map((s) => [s.metadata?.implSelfType, s.metadata?.implTrait]),
+    [
+      ["S", undefined],
+      [undefined, "Tr"], [undefined, "Tr"], [undefined, "Tr"], [undefined, "Tr"],
+      [undefined, "Tr"], [undefined, "Tr"], ["Vec", "Tr"], ["Foo", "Tr"],
+      ["Tr", undefined], ["Foo", "Tr"], ["Foo", "Tr"],
+    ],
+  );
+});
+
+test("Phase-1 symbol fields unchanged apart from new metadata", () => {
+  const p = parseRust("src/lib.rs", "pub struct S { a: u8 }\nimpl S {\n  pub fn m(&self) {}\n}\n");
+  assert.deepEqual(
+    p.symbols.map(({ metadata: _m, ...rest }) => rest).map(({ source, body, ...r }) => r),
+    [
+      {
+        id: "src/lib.rs::class::S", language: "rust", kind: "class", name: "S", qualifiedName: "S",
+        canonicalIdentity: "src/lib.rs::class::S", signature: "pub struct S { a: u8 }", filePath: "src/lib.rs",
+        range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 22 },
+        bodyRange: { startLine: 1, startColumn: 13, endLine: 1, endColumn: 22 },
+        annotations: [], modifiers: ["pub"], parentId: undefined,
+      },
+      {
+        id: "src/lib.rs::type::impl S", language: "rust", kind: "type", name: "impl S", qualifiedName: "impl S",
+        canonicalIdentity: "src/lib.rs::type::impl S", signature: "impl S {", filePath: "src/lib.rs",
+        range: { startLine: 2, startColumn: 0, endLine: 4, endColumn: 1 },
+        bodyRange: { startLine: 2, startColumn: 7, endLine: 4, endColumn: 1 },
+        annotations: [], modifiers: [], parentId: undefined,
+      },
+      {
+        id: "src/lib.rs::impl S::function::m", language: "rust", kind: "function", name: "m",
+        qualifiedName: "impl S::m", canonicalIdentity: "src/lib.rs::impl S::function::m",
+        signature: "pub fn m(&self) {}", filePath: "src/lib.rs",
+        range: { startLine: 3, startColumn: 2, endLine: 3, endColumn: 20 },
+        bodyRange: { startLine: 3, startColumn: 18, endLine: 3, endColumn: 20 },
+        annotations: [], modifiers: ["pub"], parentId: "src/lib.rs::type::impl S",
+      },
+    ],
+  );
+});
+
 test("ProjectIndex: calls persist and are stable across warm rebuild and one-file edit", () => {
   const dir = mkdtempSync(join(tmpdir(), "cs-rust-calls-"));
   mkdirSync(join(dir, "src"));
-  writeFileSync(join(dir, "src", "lib.rs"), "pub fn a() { b(); x.m(); }\npub fn b() {}\n");
+  writeFileSync(join(dir, "src", "lib.rs"), "pub fn a(q: u8) { b(); x.m(); }\npub fn b() {}\nstruct S { f: u8 }\nimpl Tr for S { fn t(&self, y: Y) {} }\n");
   writeFileSync(join(dir, "src", "other.rs"), "pub fn c() { Vec::<u8>::new(); println!(\"x\"); }\n");
+  const meta = (i: ProjectIndex) =>
+    JSON.stringify(
+      i.symbols
+        .filter((s) => s.language === "rust")
+        .map((s) => [s.id, s.metadata?.implSelfType, s.metadata?.implTrait, s.metadata?.declaredTypes])
+        .sort(),
+    );
   const snap = (i: ProjectIndex) =>
     JSON.stringify(
       i.calls
@@ -164,12 +243,16 @@ test("ProjectIndex: calls persist and are stable across warm rebuild and one-fil
     const cold = new ProjectIndex(dir);
     cold.rebuild();
     const first = snap(cold);
+    const firstMeta = meta(cold);
+    assert.ok(firstMeta.includes('"Tr"') && firstMeta.includes('"&self"'));
     assert.equal(cold.calls.filter((c) => c.language === "rust").length, 4);
     cold.rebuild(); // warm: all cache hits
     assert.equal(snap(cold), first);
+    assert.equal(meta(cold), firstMeta);
     const reopened = new ProjectIndex(dir); // persisted through SQLite
     reopened.rebuild();
     assert.equal(snap(reopened), first);
+    assert.equal(meta(reopened), firstMeta);
     writeFileSync(join(dir, "src", "other.rs"), "pub fn c() { Vec::<u8>::new(); }\n");
     reopened.rebuild();
     assert.equal(reopened.calls.filter((c) => c.language === "rust").length, 3);
