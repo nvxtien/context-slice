@@ -140,3 +140,31 @@ test("a local fn in a nested block does not resolve a call outside that block", 
   });
   withRepo({ "src/lib.rs": "fn t() { { fn h() {} } h(); }\n" }, (dir) => notResolved(one(dir, "h", "t")));
 });
+
+// ---- IMPORTANT 3: generic params read from the syntax tree, whatever the head qualifiers
+test("T::new() with a generic T never resolves to a same-named struct (any fn/impl/trait head)", () => {
+  const src = [
+    "struct T;",
+    "impl T { fn new() {} }",
+    "struct Foo<T>(T);",
+    "struct X;",
+    "trait Tr { fn h(); }",
+    "pub(crate) fn a<T>() { T::new(); }",
+    "pub(super) fn b<T: Default>() { T::new(); }",
+    "pub async fn c<T>() { T::new(); }",
+    "pub const fn d<T>() { T::new(); }",
+    "pub unsafe extern \"C\" fn e<T>() { T::new(); }",
+    "unsafe impl<T> Tr for X { fn h() { T::new(); } }",
+    "impl<T> Foo<T> { fn m() { T::new(); } }",
+    "trait Tt<T> { fn d2() { T::new(); } }",
+    "fn k<'a, T: 'a, const N: usize>() { T::new(); }",
+  ].join("\n");
+  withRepo({ "src/lib.rs": src }, (dir) => {
+    const list = edges(dir, "new");
+    assert.equal(list.length, 9);
+    for (const e of list) {
+      notResolved(e);
+      assert.ok(e.ev.includes("no-type:generic-param"), JSON.stringify(e.ev));
+    }
+  });
+});

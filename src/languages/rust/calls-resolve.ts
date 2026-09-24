@@ -1,6 +1,6 @@
 import type { CallEdge, ExportRecord, ImportRecord, SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
-import { rustParser, type Node } from "./parse.js";
+import { field, rustParser, type Node } from "./parse.js";
 
 /**
  * Rust call resolution, part A (structural targets): `self.m()`, `Self::f()`/`Type::f()`,
@@ -397,40 +397,31 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     bindingCache.set(caller.id, set);
     return set;
   };
-  /** Identifiers inside the `<...>` generics of a fn / impl / trait head (over-approximate: bounds are included). */
-  const headGenerics = (s: SymbolRecord) => {
-    const cut = s.kind === "function" ? s.source.indexOf("(") : s.source.indexOf("{");
-    const head = cut < 0 ? s.source : s.source.slice(0, cut);
-    const open = head.indexOf("<");
-    const names = new Set<string>();
-    if (open < 0 || !/^(?:[^<]*\b(?:fn|trait)\s+\w+|impl)\s*$/.test(head.slice(0, open))) return names;
-    let depth = 0;
-    let i = open;
-    for (; i < head.length; i++) {
-      if (head[i] === "<") depth++;
-      else if (head[i] === ">" && head[i - 1] !== "-" && --depth === 0) break; // `->` is not a closer
+  const genericsCache = new Map<string, Set<string>>();
+  /** Type/const parameter names declared by a fn / impl / trait, read from its syntax tree (any qualifiers). */
+  const declaredGenerics = (s: SymbolRecord) => {
+    let names = genericsCache.get(s.id);
+    if (names) return names;
+    names = new Set();
+    try {
+      // Only the head matters: parsing the whole impl/trait body is wasted work.
+      const head = s.kind === "function" ? s.source : `${s.source.slice(0, Math.max(0, s.source.indexOf("{")))}{}`;
+      const item = rustParser().parse((i: number) => head.slice(i, i + 4_096)).rootNode.namedChild(0);
+      for (const p of (item ? field(item, "type_parameters") : null)?.namedChildren ?? []) {
+        const n = p.type === "type_identifier" ? p : (field(p, "left") ?? field(p, "name"));
+        if (n && (n.type === "type_identifier" || n.type === "identifier")) names.add(n.text);
+      }
+    } catch {
+      names.add("*"); // unparsable head: any name may be a type parameter
     }
-    // Declared names only: the first identifier of each depth-1 comma-separated item (bounds are skipped).
-    let d = 0;
-    let item = "";
-    const flush = () => {
-      const m = /^\s*(?:const\s+)?([A-Za-z_]\w*)/.exec(item);
-      if (m) names.add(m[1]);
-      item = "";
-    };
-    for (const ch of head.slice(open + 1, i)) {
-      if (ch === "<" || ch === "(" || ch === "[") d++;
-      else if (ch === ">" || ch === ")" || ch === "]") d--;
-      if (ch === "," && d === 0) flush();
-      else item += ch;
-    }
-    flush();
+    genericsCache.set(s.id, names);
     return names;
   };
   /** Type parameters in scope for a caller: its own, its impl's or trait's. */
   const isGenericParam = (caller: SymbolRecord, name: string) => {
     const owner = enclosing(caller);
-    return headGenerics(caller).has(name) || (!!owner && (isImpl(owner) || owner.kind === "interface") && headGenerics(owner).has(name));
+    const has = (x: SymbolRecord) => declaredGenerics(x).has(name) || declaredGenerics(x).has("*");
+    return has(caller) || (!!owner && (isImpl(owner) || owner.kind === "interface") && has(owner));
   };
 
   // ---- edge writers
