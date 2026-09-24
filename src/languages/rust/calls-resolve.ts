@@ -72,6 +72,21 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const exportsByFile = new Map<string, ExportRecord[]>();
   for (const r of context.exports) push(exportsByFile, r.filePath, r);
 
+  // Files that are the root of a crate other than the library: `src/bin/*`, `tests/*`, `examples/*`,
+  // `benches/*`, `build.rs`, and `src/main.rs` next to a `src/lib.rs`. The shared module index maps every file
+  // into one tree, so anchored paths (`crate::`/`self::`/`super::`) there would land in the library: never trusted.
+  const allFiles = new Set([...symbolsByFile.keys(), ...context.imports.map((r) => r.filePath), ...context.exports.map((r) => r.filePath)]);
+  const foreignRoot = (file: string) => {
+    const p = file.replace(/\\/g, "/");
+    return (
+      /(^|\/)src\/bin\//.test(p) ||
+      /(^|\/)(tests|examples|benches)\//.test(p) ||
+      /(^|\/)build\.rs$/.test(p) ||
+      (/(^|\/)src\/main\.rs$/.test(p) && allFiles.has(p.replace(/main\.rs$/, "lib.rs")))
+    );
+  };
+  const isAnchor = (seg: string | undefined) => seg === "crate" || seg === "self" || seg === "super";
+
   const ancestors = (s: SymbolRecord) => {
     const ids = new Set<string>();
     for (let c: SymbolRecord | undefined = s; c; c = c.parentId ? byId.get(c.parentId) : undefined) ids.add(c.id);
@@ -134,6 +149,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const mod = rec.module.split("::");
     if (!rec.wildcard && (!rec.importedName || (mod.length === 1 && mod[0] === rec.importedName))) return { t: "unknown" };
     let segs = rec.wildcard ? mod : [...mod, rec.importedName!];
+    if (isAnchor(segs[0]) && foreignRoot(rec.filePath)) return { t: "unknown" };
     let fromFile = rec.filePath;
     const container = scopeOf(rec).mod;
     if (container) {
@@ -637,6 +653,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       return typeOutcome(call, res, name, "static", trait);
     }
     const anchored = first === "crate" || first === "self" || first === "super";
+    if (anchored && foreignRoot(file)) return unresolved(call, "no-type:crate-root");
     // `T::f()` with a generic `T` in scope is a bound-based call (part B), never a same-named type.
     if (!anchored && isGenericParam(caller, first)) return unresolved(call, "no-type:generic-param");
     if (!anchored) {

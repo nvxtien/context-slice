@@ -200,3 +200,30 @@ test("trait impl method is exact only when the trait is in scope at the call", (
     assert.deepEqual([e.conf, e.targetFile], ["exact", "src/m.rs"]);
   });
 });
+
+// ---- IMPORTANT 5: anchored paths from other crate roots never resolve into the library tree
+test("crate:: / self:: / super:: from bin, test, example and build roots do not resolve into the library", () => {
+  const lib = { "src/lib.rs": "mod util;\npub fn f() {}\n", "src/util.rs": "pub fn g() {}\n" };
+  for (const [file, body] of [
+    ["src/bin/cli.rs", "mod util;\nfn main() { crate::util::g(); }\n"],
+    ["tests/x.rs", "fn t() { crate::util::g(); }\n"],
+    ["examples/e.rs", "fn t() { crate::util::g(); }\n"],
+    ["build.rs", "fn main() { crate::util::g(); }\n"],
+    ["src/bin/cli.rs", "fn main() { self::util::g(); }\n"],
+    ["src/bin/cli.rs", "fn main() { super::util::g(); }\n"],
+    ["src/bin/cli.rs", "use crate::util::g;\nfn main() { g(); }\n"],
+    ["tests/x.rs", "use crate::util;\nfn t() { util::g(); }\n"],
+    ["src/main.rs", "fn main() { crate::util::g(); }\n"], // lib.rs exists next to it: a different crate
+  ] as const)
+    withRepo({ ...lib, [file]: body }, (dir) => {
+      const e = one(dir, "g");
+      assert.equal(e.target, undefined, `${file}: ${body} -> ${JSON.stringify(e)}`);
+      assert.equal(e.conf, "unresolved");
+    });
+});
+
+test("a lone main.rs (no lib.rs) is the crate root: crate:: still resolves", () => {
+  withRepo({ "src/main.rs": "mod util;\nfn main() { crate::util::g(); }\n", "src/util.rs": "pub fn g() {}\n" }, (dir) =>
+    assert.equal(one(dir, "g").targetFile, "src/util.rs"),
+  );
+});
