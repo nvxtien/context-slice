@@ -1,5 +1,6 @@
 import type { ImportRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
+import { resolveCallsA } from "./calls-resolve.js";
 import { modulePathFor } from "./parse.js";
 
 /**
@@ -86,9 +87,8 @@ export function resolveRustModule(
 
 /**
  * Resolves every Rust ImportRecord's `resolvedFile`/`externalPackage` in
- * place. Call resolution itself (matching CallEdges to symbols) remains
- * unimplemented in this phase — CallEdge arrays stay empty until a later
- * phase builds on this module graph.
+ * place, then resolves CallEdges to symbols (structural targets, see
+ * calls-resolve.ts).
  */
 export function resolveRustCalls(context: ResolveContext) {
   const files = [...new Set(context.symbols.map((symbol) => symbol.filePath))];
@@ -174,4 +174,11 @@ export function resolveRustCalls(context: ResolveContext) {
     if (record.resolvedFile && record.sourceName)
       record.symbolId = lookup(record.resolvedFile, record.sourceName, new Set());
   }
+
+  // Exact module file for a containing-module path: the dummy trailing segment makes
+  // resolveRustModule's "drop last segment" fallback land on `segments` itself, never a parent.
+  resolveCallsA(context, {
+    moduleOf: (segments, fromFile) =>
+      resolveRustModule([...segments, "\u0000"], fromFile, index, boundByFile.get(fromFile)),
+  });
 }
