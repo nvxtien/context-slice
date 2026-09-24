@@ -362,8 +362,15 @@ export function parseRust(filePath: string, source: string): ParsedFile {
   const fnByNode = new Map<number, SymbolRecord>();
 
   function walk(node: Node, parent: SymbolRecord | undefined, chain: string[]) {
+    // `#[...]` attributes are siblings that precede their item: collect them as annotations.
+    let attributes: string[] = [];
     for (const child of node.namedChildren) {
+      if (child.type === "attribute_item") {
+        attributes.push(child.text);
+        continue;
+      }
       if (!ITEM_TYPES.has(child.type)) {
+        if (!child.type.endsWith("comment")) attributes = [];
         // Not a top-level item itself, but it may contain one (e.g. a source_file
         // wraps everything; an impl/trait/mod body wraps its members directly, so
         // this branch mainly matters for source_file's implicit top level).
@@ -396,12 +403,13 @@ export function parseRust(filePath: string, source: string): ParsedFile {
         range: range(child),
         bodyRange: field(child, "body") ? range(field(child, "body")!) : undefined,
         parentId: parent?.id,
-        annotations: [],
+        annotations: attributes,
         modifiers,
         metadata: symbolMetadata(child),
         source: child.text,
         body: field(child, "body")?.text,
       };
+      attributes = [];
       symbols.push(symbol);
       if (child.type === "function_item") fnByNode.set(child.id, symbol);
       const body = field(child, "body");

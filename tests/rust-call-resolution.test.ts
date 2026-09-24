@@ -65,8 +65,8 @@ test("self.m(): unique inherent method is exact / this-member", () => {
 test("self.m(): unique method across several impl blocks and files, trait impl evidence", () => {
   withRepo(
     {
-      "src/lib.rs": "mod other;\npub struct A;\nimpl A { fn c(&self) { self.m(); self.t(); } }\n",
-      "src/other.rs": "use crate::A;\ntrait Tr { fn t(&self); }\nimpl A { fn m(&self) {} }\nimpl Tr for A { fn t(&self) {} }\n",
+      "src/lib.rs": "mod other;\nuse crate::other::Tr;\npub struct A;\nimpl A { fn c(&self) { self.m(); self.t(); } }\n",
+      "src/other.rs": "use crate::A;\npub trait Tr { fn t(&self); }\nimpl A { fn m(&self) {} }\nimpl Tr for A { fn t(&self) {} }\n",
     },
     (dir) => {
       const m = one(dir, "m", "A::c");

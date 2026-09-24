@@ -168,3 +168,35 @@ test("T::new() with a generic T never resolves to a same-named struct (any fn/im
     }
   });
 });
+
+// ---- IMPORTANT 4: a unique trait-impl method needs the trait in scope and no derive of the same method
+const DERIVE_FILE =
+  "#[derive(Default)]\nstruct A;\ntrait Make { fn default() -> A; }\nimpl Make for A { fn default() -> A { A } }\nfn t() { A::default(); }\n";
+test("derived Default vs an in-repo trait method named default is ambiguous, not exact", () => {
+  withRepo({ "src/lib.rs": DERIVE_FILE }, (dir) => notResolved(one(dir, "default", "t"), "ambiguous:"));
+  withRepo(
+    { "src/lib.rs": "#[derive(Clone)]\nstruct Dup;\ntrait D { fn clone(&self); }\nimpl D for Dup { fn clone(&self) {} }\nimpl Dup { fn c(&self) { self.clone(); } }\n" },
+    (dir) => notResolved(one(dir, "clone", "Dup::c"), "ambiguous:"),
+  );
+});
+
+test("a derive of an unrelated trait does not block a unique trait-impl method", () => {
+  withRepo({ "src/lib.rs": DERIVE_FILE.replace("Default", "Debug") }, (dir) => {
+    const e = one(dir, "default", "t");
+    assert.deepEqual([e.target, e.conf], ["A::default", "exact"]);
+    assert.ok(e.ev[0].startsWith("trait:"));
+  });
+});
+
+test("trait impl method is exact only when the trait is in scope at the call", () => {
+  const files = (imports: string) => ({
+    "src/lib.rs": "mod m;\nmod n;\n",
+    "src/m.rs": "pub struct A;\npub trait Make { fn build() -> A; }\nimpl Make for A { fn build() -> A { A } }\n",
+    "src/n.rs": `${imports}\nfn t() { A::build(); }\n`,
+  });
+  withRepo(files("use crate::m::A;"), (dir) => notResolved(one(dir, "build", "t"), "no-type:trait-not-in-scope"));
+  withRepo(files("use crate::m::{A, Make};"), (dir) => {
+    const e = one(dir, "build", "t");
+    assert.deepEqual([e.conf, e.targetFile], ["exact", "src/m.rs"]);
+  });
+});

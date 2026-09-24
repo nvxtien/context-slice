@@ -27,6 +27,11 @@ const STD_TYPES = new Set([
   "ExactSizeIterator", "Some", "None", "Ok", "Err",
   "bool", "char", "str", "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64", "i128", "isize", "f32", "f64",
 ]);
+// Methods a `#[derive(..)]` also provides, keyed to the derived trait.
+const DERIVE_TRAIT: Record<string, string> = {
+  clone: "Clone", default: "Default", fmt: "Debug", eq: "PartialEq", ne: "PartialEq",
+  cmp: "Ord", partial_cmp: "PartialOrd", hash: "Hash",
+};
 const STD_ROOTS = new Set(["std", "core", "alloc"]);
 // A glob import can shadow these prelude names (e.g. `use io::*` brings its own `Result`).
 const SHADOWABLE = new Set(["Result"]);
@@ -459,6 +464,19 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const cands = (methodsByType.get(decl.id) ?? []).filter((m) => m.sym.name === name);
     if (cands.length === 1) {
       const { sym, impl } = cands[0];
+      const traitName = impl.metadata?.implTrait;
+      if (traitName) {
+        // Derived / std impls are not indexed, so a unique in-repo trait impl is not unique in Rust when the
+        // type derives the same method; and a trait method is only a candidate when its trait is in scope.
+        const derived = DERIVE_TRAIT[name];
+        if (derived && (decl.annotations ?? []).some((a) => new RegExp(`derive\\s*\\([^)]*\\b${derived}\\b`).test(a)))
+          return ambiguous(call, 2, `derive(${derived}) and ${traitName} for ${decl.name}::${name}`);
+        const caller = byId.get(call.callerId);
+        const trait = [...(traitsByType.get(decl.id) ?? [])].find((t) => t.name === traitName && traitMethods(t, name).length > 0);
+        const seen = caller ? typeName(traitName, caller.filePath, caller) : undefined;
+        const visibleHere = trait ? seen?.t === "decl" && seen.sym.id === trait.id : seen?.t === "external";
+        if (!visibleHere) return unresolved(call, `no-type:trait-not-in-scope ${traitName}`);
+      }
       return settle(
         call,
         sym,
