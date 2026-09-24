@@ -508,5 +508,25 @@
       "confidence": "exact",
       "why": "assert! is std macro"
     }
+  },
+  {
+    "repo": "walkdir",
+    "file": "src/dent.rs",
+    "line": 271,
+    "col": 20,
+    "callerQualifiedName": "DirEntry::from_path",
+    "callText": "md.ino()",
+    "calleeName": "ino",
+    "category": "local-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "DirEntryExt::ino"
+    ],
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "distractor: md is std::fs::Metadata; ino from std::os::unix::fs::MetadataExt (dent.rs:257), not in-repo DirEntryExt"
+    }
   }
 ]

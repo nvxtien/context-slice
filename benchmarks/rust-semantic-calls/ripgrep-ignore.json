@@ -546,5 +546,305 @@
       "confidence": "exact",
       "why": "std assert! macro"
     }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 873,
+    "col": 13,
+    "callerQualifiedName": "tests::case_insensitive",
+    "callText": "GitignoreBuilder::new(ROOT) .case_insensitive(true) .unwrap() .add_str(None, \"*.html\") .unwrap() .build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/gitignore.rs",
+        "qualifiedName": "GitignoreBuilder::build",
+        "kind": "method",
+        "line": 349
+      },
+      "confidence": "exact",
+      "why": "distractor: receiver &mut GitignoreBuilder (chain from GitignoreBuilder::new); inherent build gitignore.rs:349, NOT ParallelVisitorBuilder::build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/overrides.rs",
+    "line": 276,
+    "col": 13,
+    "callerQualifiedName": "tests::case_insensitive",
+    "callText": "OverrideBuilder::new(ROOT) .case_insensitive(true) .unwrap() .add(\"*.html\") .unwrap() .build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/overrides.rs",
+        "qualifiedName": "OverrideBuilder::build",
+        "kind": "method",
+        "line": 132
+      },
+      "confidence": "exact",
+      "why": "distractor: receiver OverrideBuilder (overrides.rs:115); inherent build overrides.rs:132, NOT the trait's build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 111,
+    "col": 22,
+    "callerQualifiedName": "Gitignore::new",
+    "callText": "builder.build()",
+    "calleeName": "build",
+    "category": "local-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/gitignore.rs",
+        "qualifiedName": "GitignoreBuilder::build",
+        "kind": "method",
+        "line": 349
+      },
+      "confidence": "exact",
+      "why": "distractor: builder = GitignoreBuilder::new(parent) (gitignore.rs:108); inherent build :349, NOT the trait's build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/types.rs",
+    "line": 233,
+    "col": 39,
+    "callerQualifiedName": "Types::empty",
+    "callText": "GlobSetBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "distractor: GlobSetBuilder from globset crate (types.rs:90 use), not in-repo trait"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1837,
+    "col": 36,
+    "callerQualifiedName": "Worker::run_one",
+    "callText": "self.visitor.visit(Err(err))",
+    "calleeName": "visit",
+    "category": "field-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitor::visit"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/walk.rs",
+        "qualifiedName": "ParallelVisitor::visit",
+        "kind": "trait-method-decl",
+        "line": 1374
+      },
+      "confidence": "probable",
+      "why": "trait-dispatch: self.visitor is Box<dyn ParallelVisitor + 's> (walk.rs:1723); trait decl walk.rs:1374"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1402,
+    "col": 39,
+    "callerQualifiedName": "tests::absolute_parent",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "IgnoreBuilder::build",
+        "kind": "method",
+        "line": 809
+      },
+      "confidence": "exact",
+      "why": "distractor: IgnoreBuilder::new() then inherent pub(crate) build dir.rs:809, NOT ParallelVisitorBuilder::build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 677,
+    "col": 13,
+    "callerQualifiedName": "parse_excludes_file",
+    "callText": "Regex::builder() .configure(Regex::config().utf8_empty(false)) .syntax(syntax::Config::new().utf8(false)) .build(r#\"(?im-u)^\\s*excludesfile\\s*=\\s*\"?\\s*(\\S+?)\\s*\"?\\s*$\"#)",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "external",
+      "confidence": "exact",
+      "why": "distractor: regex_automata::meta::Regex::builder() -> regex_automata Builder (gitignore.rs:667 use), external crate"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/overrides.rs",
+    "line": 197,
+    "col": 16,
+    "callerQualifiedName": "tests::ov",
+    "callText": "builder.build()",
+    "calleeName": "build",
+    "category": "local-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/overrides.rs",
+        "qualifiedName": "OverrideBuilder::build",
+        "kind": "method",
+        "line": 132
+      },
+      "confidence": "exact",
+      "why": "distractor: builder = OverrideBuilder::new(ROOT) (overrides.rs:193); inherent build :132, NOT the trait's build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1587,
+    "col": 38,
+    "callerQualifiedName": "tests::git_info_exclude_in_linked_worktree",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "dev",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "IgnoreBuilder::build",
+        "kind": "method",
+        "line": 809
+      },
+      "confidence": "exact",
+      "why": "distractor: IgnoreBuilder::new() then inherent build dir.rs:809, NOT the trait's build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/walk.rs",
+    "line": 1821,
+    "col": 37,
+    "callerQualifiedName": "Worker::run_one",
+    "callText": "self.visitor.visit(Ok(work.dent))",
+    "calleeName": "visit",
+    "category": "field-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitor::visit"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/walk.rs",
+        "qualifiedName": "ParallelVisitor::visit",
+        "kind": "trait-method-decl",
+        "line": 1374
+      },
+      "confidence": "probable",
+      "why": "trait-dispatch: self.visitor is Box<dyn ParallelVisitor + 's> (walk.rs:1723); trait decl walk.rs:1374"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/dir.rs",
+    "line": 1320,
+    "col": 44,
+    "callerQualifiedName": "tests::errored",
+    "callText": "IgnoreBuilder::new().build()",
+    "calleeName": "build",
+    "category": "chained-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/dir.rs",
+        "qualifiedName": "IgnoreBuilder::build",
+        "kind": "method",
+        "line": 809
+      },
+      "confidence": "exact",
+      "why": "distractor: IgnoreBuilder::new() then inherent build dir.rs:809, NOT the trait's build"
+    }
+  },
+  {
+    "repo": "ripgrep-ignore",
+    "file": "crates/ignore/src/gitignore.rs",
+    "line": 715,
+    "col": 16,
+    "callerQualifiedName": "tests::gi_from_str",
+    "callText": "builder.build()",
+    "calleeName": "build",
+    "category": "local-method",
+    "split": "held-out",
+    "supplement": "trait-candidate",
+    "traitMethods": [
+      "ParallelVisitorBuilder::build"
+    ],
+    "expected": {
+      "kind": "resolved",
+      "target": {
+        "file": "crates/ignore/src/gitignore.rs",
+        "qualifiedName": "GitignoreBuilder::build",
+        "kind": "method",
+        "line": 349
+      },
+      "confidence": "exact",
+      "why": "distractor: builder = GitignoreBuilder::new(root) (gitignore.rs:713); inherent build :349, NOT the trait's build"
+    }
   }
 ]
