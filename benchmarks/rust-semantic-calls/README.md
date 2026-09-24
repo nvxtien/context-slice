@@ -67,3 +67,6 @@ Entries carry the `sample.json` fields plus `"supplement": "trait-candidate"` an
 | walkdir | `DirEntryExt::ino` | 2 | 1 | 1 | 1 / 0 |
 | mini-redis | none (no in-repo traits) | 0 | 0 | 0 | 0 / 0 |
 | ripgrep-ignore | `ParallelVisitor::visit`, `ParallelVisitorBuilder::build` | 71 | 1 | 12 (cap) | 3 / 9 |
+
+## Evaluation script
+`npx tsx benchmarks/v1.5-rust-semantic-calls.ts [--split dev|held-out|all] [--final] [--repo <id>] [--out <path>] [--json]`. Default `--split dev`. `held-out`/`all` are refused without `--final`; a `--final` run appends one line to `HELDOUT_RUNS.log` (exactly one entry allowed by the end). Dev runs write nothing into the repo (`--out` must be outside it). Checkouts are copied into the OS temp dir and indexed there (disk-space constraint); the frozen labels are hash-checked before scoring.
