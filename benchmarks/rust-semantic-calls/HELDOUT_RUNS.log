@@ -1,2 +1,3 @@
-# Held-out split runs. Exactly one entry allowed by the end of the evaluation.
-# Each line: ISO date, git HEAD short sha, split, invoked by.
+# Held-out split runs. Exactly one COMPLETED entry allowed by the end of the evaluation.
+# Each line: ISO date, git HEAD short sha, split, `started` (+ invoked by) or `completed`.
+# A `started` line without `completed` is a crashed run (visible, does not block a rerun); a `completed` line blocks further --final runs.

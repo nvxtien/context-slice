@@ -3,7 +3,7 @@
 //   npx tsx benchmarks/v1.5-rust-semantic-calls.ts [--split dev|held-out|all] [--final] [--repo <id>] [--out <path>] [--json]
 //
 // * Default split is `dev`. `held-out` / `all` are REFUSED unless `--final` is given; `--final` prints a
-//   warning and appends one line to benchmarks/rust-semantic-calls/HELDOUT_RUNS.log. Dev runs write nothing
+//   warning, requires no --repo and no earlier `completed` entry, and logs `started` then `completed` in HELDOUT_RUNS.log. Dev runs write nothing
 //   into the repo (`--out` must resolve outside the repo tree unless `--final`).
 // * DISK: the project volume is nearly full. Each checkout is COPIED into os.tmpdir() (a different volume),
 //   indexed there (the `.context-slice` SQLite cache lives in the copy) and the copy is deleted in `finally`.
@@ -161,7 +161,8 @@ export const FAILURE_CATEGORIES = [
   "SYMBOL_INDEX", "PARSER", "RUST_STATIC_LIMIT", "GROUND_TRUTH", "UNKNOWN",
 ] as const;
 export type FailureCategory = (typeof FAILURE_CATEGORIES)[number];
-export type AttributionContext = { symbolExists(file: string, line: number): boolean; parseErrorFiles: Set<string> };
+/** Keyed by repo: symbolExists(repo,file,line); parseErrorFiles holds `repo:file`. */
+export type AttributionContext = { symbolExists(repo: string, file: string, line: number): boolean; parseErrorFiles: Set<string> };
 const METHOD_CATEGORIES = new Set(["self-method", "field-method", "param-method", "local-method", "chained-method", "assoc-Self", "assoc-Type"]);
 const PATH_CATEGORIES = new Set(["path-module", "path-generic", "bare-fn", "bare-closure-or-ctor"]);
 
@@ -172,10 +173,11 @@ const PATH_CATEGORIES = new Set(["path-module", "path-generic", "bare-fn", "bare
  * Otherwise the FIRST matching rule wins (see the report for the table):
  *  1 no-edge -> PARSER if the file had a parse error, else UNKNOWN
  *  2 label target has no symbol at (file,line) in the index -> SYMBOL_INDEX
- *  3 macro-invocation label, or label `unresolvable` -> MACRO_EXPANSION_LIMIT
+ *  3 adapter RESOLVED a macro-invocation or `unresolvable` label (false positive) -> CALL_RESOLUTION;
+ *    macro-invocation label otherwise -> MACRO_EXPANSION_LIMIT
  *  4 label target kind trait-method-decl, category qualified-trait, or `trait:` evidence -> TRAIT_RESOLUTION
  *  5 `inherent:` evidence -> IMPL_RESOLUTION
- *  6 category: method-like -> IMPL_RESOLUTION (chained-method with `no-type:` evidence or a `<...>` receiver -> RUST_STATIC_LIMIT);
+ *  6 category: method-like -> IMPL_RESOLUTION (incl. chained-method on call receivers: a declared return type is learnable);
  *    path-like -> USE_RESOLUTION when label target is in another file than the call, else CALL_RESOLUTION
  *  7 anything else -> UNKNOWN
  * GROUND_TRUTH is never assigned automatically (needs reviewed evidence in CORRECTIONS.md).
@@ -187,13 +189,14 @@ export function attributeFailure(l: Label, o: Outcome, ctx: AttributionContext):
     (k === "resolved" && !(o.kind === "resolved" && o.correct)) ||
     (k !== "resolved" && o.kind === "resolved");
   if (!failure) return null;
-  if (o.kind === "no-edge") return ctx.parseErrorFiles.has(l.file) ? "PARSER" : "UNKNOWN";
+  if (o.kind === "no-edge") return ctx.parseErrorFiles.has(`${l.repo}:${l.file}`) ? "PARSER" : "UNKNOWN";
   const t = l.expected.target;
-  if (k === "resolved" && t && !ctx.symbolExists(t.file, t.line)) return "SYMBOL_INDEX";
-  if (l.category === "macro-invocation" || k === "unresolvable") return "MACRO_EXPANSION_LIMIT";
+  if (k === "resolved" && t && !ctx.symbolExists(l.repo, t.file, t.line)) return "SYMBOL_INDEX";
+  const macroish = l.category === "macro-invocation" || k === "unresolvable";
+  if (macroish && o.kind === "resolved") return "CALL_RESOLUTION";
+  if (l.category === "macro-invocation") return "MACRO_EXPANSION_LIMIT";
   if (t?.kind === "trait-method-decl" || l.category === "qualified-trait" || o.evidence.includes("trait:")) return "TRAIT_RESOLUTION";
   if (o.evidence.includes("inherent:")) return "IMPL_RESOLUTION";
-  if (l.category === "chained-method" && (o.evidence.includes("no-type:") || o.receiverText?.startsWith("<"))) return "RUST_STATIC_LIMIT";
   if (METHOD_CATEGORIES.has(l.category)) return "IMPL_RESOLUTION";
   if (PATH_CATEGORIES.has(l.category)) return k === "resolved" && t && t.file !== l.file ? "USE_RESOLUTION" : "CALL_RESOLUTION";
   return "UNKNOWN";
@@ -298,7 +301,7 @@ export function buildReport(allRows: Row[], opts: BuildOpts): Report {
     extraction: { labelled: ratio(rows.filter((r) => r.o.kind !== "no-edge").length, rows.length), perRepo },
     trait,
     failures: { byCategory: byCat, rows: failRows },
-    targetSymbolsPresent: ratio(resolvedLabels.filter((r) => ctx.symbolExists(r.l.expected.target!.file, r.l.expected.target!.line)).length, resolvedLabels.length),
+    targetSymbolsPresent: ratio(resolvedLabels.filter((r) => ctx.symbolExists(r.l.repo, r.l.expected.target!.file, r.l.expected.target!.line)).length, resolvedLabels.length),
     ...(opts.coldWarm ? { coldWarm: opts.coldWarm } : {}),
   };
 }
@@ -350,21 +353,40 @@ export function formatReport(r: Report): string {
 
 // ---------------------------------------------------------------- split gate
 export type Gate = { ok: true } | { ok: false; message: string };
-/** Held-out / all need --final. Pure: never logs (see logFinalRun). */
-export function gateSplit(split: string, final: boolean, _logPath = LOG_PATH): Gate {
+/** Held-out / all need --final; --final needs all repos and no completed held-out run. Pure: never writes. */
+export function gateSplit(split: string, final: boolean, logPath = LOG_PATH, repo?: string): Gate {
   if (split !== "dev" && split !== "held-out" && split !== "all") return { ok: false, message: `unknown --split '${split}' (dev|held-out|all)` };
   if (split !== "dev" && !final)
     return { ok: false, message: `Refusing --split ${split}: the held-out split is measured exactly once at the end. Pass --final only for that run.` };
+  if (final && repo) return { ok: false, message: "Refusing --final with --repo: a final run must cover all repos." };
+  if (final && split !== "dev" && existsSync(logPath) && readFileSync(logPath, "utf8").split("\n").some((l) => !l.startsWith("#") && l.split(" ")[3] === "completed"))
+    return { ok: false, message: `Refusing --final: the single held-out run was already performed (see ${logPath}). Changing this requires a human editing the log and a note in CORRECTIONS.md.` };
   return { ok: true };
 }
 
-const LOG_HEADER =
-  "# Held-out split runs. Exactly one entry allowed by the end of the evaluation.\n" +
-  "# Each line: ISO date, git HEAD short sha, split, invoked by.\n";
-/** Appends ONE line (creating the header if needed). Only called for --final runs on held-out/all. */
-export function logFinalRun(logPath: string, split: string, invokedBy: string, sha: string, now = new Date()): void {
+export const LOG_HEADER =
+  "# Held-out split runs. Exactly one COMPLETED entry allowed by the end of the evaluation.\n" +
+  "# Each line: ISO date, git HEAD short sha, split, `started` (+ invoked by) or `completed`.\n" +
+  "# A `started` line without `completed` is a crashed run (visible, does not block a rerun); a `completed` line blocks further --final runs.\n";
+const appendLog = (logPath: string, sha: string, split: string, what: string) => {
   if (!existsSync(logPath)) writeFileSync(logPath, LOG_HEADER);
-  appendFileSync(logPath, `${now.toISOString()} ${sha} ${split} ${invokedBy}\n`);
+  appendFileSync(logPath, `${new Date().toISOString()} ${sha} ${split} ${what}\n`);
+};
+/**
+ * Runs `work`. For a --final held-out/all run: gate, append `started`, run, append `completed` only on success
+ * (a throw leaves just `started`). Otherwise (dev) nothing is logged.
+ */
+export function runGuarded<T>(
+  o: { split: string; final: boolean; repo?: string; logPath: string; sha: string; invokedBy: string },
+  work: () => T,
+): { ok: true; value: T } | { ok: false; message: string } {
+  const g = gateSplit(o.split, o.final, o.logPath, o.repo);
+  if (!g.ok) return g;
+  if (o.split === "dev") return { ok: true, value: work() };
+  appendLog(o.logPath, o.sha, o.split, `started ${o.invokedBy}`);
+  const value = work();
+  appendLog(o.logPath, o.sha, o.split, "completed");
+  return { ok: true, value };
 }
 
 // ---------------------------------------------------------------- indexing (copies in os.tmpdir())
@@ -430,25 +452,29 @@ const die = (msg: string): never => {
 function main() {
   let args: ReturnType<typeof parseArgs>;
   try { args = parseArgs(process.argv.slice(2)); } catch (e) { return die(String((e as Error).message)); }
-  const gate = gateSplit(args.split, args.final);
+  const gate = gateSplit(args.split, args.final, LOG_PATH, args.final ? args.repo : undefined);
   if (!gate.ok) return die(gate.message);
   if (args.out && insideRepo(args.out) && !args.final) return die(`Refusing --out ${args.out}: must resolve outside the repo tree (dev runs write nothing into the repo).`);
   if (args.repo && !(REPOS as readonly string[]).includes(args.repo)) return die(`unknown --repo ${args.repo}`);
   try { assertFrozen(); } catch (e) { return die(String((e as Error).message)); }
   const split = args.split as Split;
   const repos = args.repo ? [args.repo] : [...REPOS];
-  if (args.split !== "dev") {
-    process.stderr.write("\x1b[1m*** HELD-OUT SPLIT: this is the ONE final measurement. It is logged in HELDOUT_RUNS.log. Do not iterate on it. ***\x1b[0m\n");
-    const sha = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
-    logFinalRun(LOG_PATH, args.split, `${userInfo().username} via ${process.argv.slice(1).join(" ").replace(REPO_ROOT, ".")}`, sha);
-  }
+  if (args.split !== "dev") process.stderr.write("\x1b[1m*** HELD-OUT SPLIT: this is the ONE final measurement. It is logged in HELDOUT_RUNS.log. Do not iterate on it. ***\x1b[0m\n");
+  const sha = args.split === "dev" ? "" : execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
+  const by = `${userInfo().username} via ${process.argv.slice(1).join(" ").replace(REPO_ROOT, ".")}`;
+  const res = runGuarded({ split: args.split, final: args.final, repo: args.final ? args.repo : undefined, logPath: LOG_PATH, sha, invokedBy: by }, () => evaluate(repos, split, args));
+  if (!res.ok) return die(res.message);
+  if (res.value) process.exit(1);
+}
+
+/** Indexes copies, scores, prints. Returns true if cold != warm for any repo. */
+function evaluate(repos: string[], split: Split, args: ReturnType<typeof parseArgs>): boolean {
   const labels = loadLabels(repos);
   const counts = JSON.parse(readFileSync(join(FROZEN_DIR, "counts.json"), "utf8"));
   const rows: Row[] = [];
   const cw: Record<string, boolean> = {};
   const repoStats: NonNullable<BuildOpts["counts"]> = {};
-  const attrib = { symbolExists: (f: string, l: number) => false, parseErrorFiles: new Set<string>() } as AttributionContext;
-  const exists = new Set<string>();
+  const symKeys = new Set<string>();
   const parseErrs = new Set<string>();
   const timings: string[] = [];
   const tmpRoot = mkdtempSync(join(tmpdir(), "rust-semantic-calls-"));
@@ -469,22 +495,19 @@ function main() {
         total: c.total, edges: idx.calls.length, oracleTotal: c.total,
         macroEdges: idx.calls.filter((e) => e.evidence.some((x) => x.startsWith("macro:"))).length, oracleMacro: c["macro-invocation"],
       };
-      const prev = attrib.symbolExists;
-      const se = idx.symbolExists;
-      attrib.symbolExists = (f, l) => se(f, l) || prev(f, l);
-      idx.parseErrorFiles.forEach((f) => parseErrs.add(f));
-      exists.add(repo);
+      idx.symbols.forEach((sy) => symKeys.add(`${repo}:${sy.filePath.split("\\").join("/")}:${sy.range.startLine}`));
+      idx.parseErrorFiles.forEach((f) => parseErrs.add(`${repo}:${f}`));
     }
   } finally {
     rmSync(tmpRoot, { recursive: true, force: true });
   }
-  attrib.parseErrorFiles = parseErrs;
+  const attrib: AttributionContext = { symbolExists: (r, f, l) => symKeys.has(`${r}:${f}:${l}`), parseErrorFiles: parseErrs };
   const report = buildReport(rows, { split, counts: repoStats, ctx: attrib, coldWarm: cw });
   const text = args.json ? JSON.stringify(report, null, 2) : formatReport(report);
   process.stdout.write(`${text}\n`);
   process.stderr.write(`timings (non-deterministic):\n${timings.map((t) => `  ${t}`).join("\n")}\n`);
   if (args.out) writeFileSync(args.out, JSON.stringify(report, null, 2) + "\n");
-  if (Object.values(cw).some((v) => !v)) process.exit(1);
+  return Object.values(cw).some((v) => !v);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

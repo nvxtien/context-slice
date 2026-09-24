@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -10,7 +10,9 @@ import {
   buildReport,
   classifyOutcome,
   formatReport,
+  assertFrozen,
   gateSplit,
+  runGuarded,
   indexRepo,
   matchLabelToEdge,
   scoreEntries,
@@ -153,7 +155,7 @@ test("report: macro block and supplement are kept out of the headline; split fil
 });
 
 test("failure attribution: deterministic rules, UNKNOWN never hidden", () => {
-  const ctx = { symbolExists: (f: string, l: number) => !(f === "src/gone.rs"), parseErrorFiles: new Set(["src/bad.rs"]) };
+  const ctx = { symbolExists: (_r: string, f: string, _l: number) => !(f === "src/gone.rs"), parseErrorFiles: new Set(["r:src/bad.rs"]) };
   const at = (l: Label, e?: CallEdge) => attributeFailure(l, classifyOutcome(l, e, symbols), ctx);
   const un = edge({ calleeName: "y" });
   assert.equal(at(label({ expected: R(10) }), claim("t10")), null); // correct: not a failure
@@ -161,12 +163,21 @@ test("failure attribution: deterministic rules, UNKNOWN never hidden", () => {
   assert.equal(at(label({ expected: R(10) }), undefined), "UNKNOWN");
   assert.equal(at(label({ file: "src/bad.rs", expected: R(10) }), undefined), "PARSER");
   assert.equal(at(label({ expected: R(10, "src/gone.rs") }), un), "SYMBOL_INDEX");
-  assert.equal(at(label({ category: "macro-invocation", expected: { kind: "unresolvable", confidence: "exact", why: "" } }), claim("t10")), "MACRO_EXPANSION_LIMIT");
+  const UNRES: Label["expected"] = { kind: "unresolvable", confidence: "exact", why: "" };
+  assert.equal(at(label({ category: "macro-invocation", expected: UNRES }), un), null); // not a failure
+  // a macro-labelled row the adapter RESOLVES, or a non-macro unresolvable row it resolves, is an adapter false positive
+  assert.equal(at(label({ category: "macro-invocation", expected: UNRES }), claim("t10")), "CALL_RESOLUTION");
+  assert.equal(at(label({ category: "macro-invocation", expected: EXT }), claim("t10")), "CALL_RESOLUTION");
+  assert.equal(at(label({ category: "self-method", expected: UNRES }), claim("t10")), "CALL_RESOLUTION");
+  assert.equal(at(label({ category: "bare-fn", expected: UNRES }), claim("t10")), "CALL_RESOLUTION");
+  // a macro-labelled row with a resolved label the adapter left unresolved is still the macro limit
+  assert.equal(at(label({ category: "macro-invocation", expected: R(10) }), un), "MACRO_EXPANSION_LIMIT");
   assert.equal(at(label({ expected: { ...R(10), target: { file: "src/b.rs", qualifiedName: "T::y", kind: "trait-method-decl", line: 10 } } }), un), "TRAIT_RESOLUTION");
   assert.equal(at(label({ expected: R(10) }), edge({ calleeName: "y", evidence: ["trait:T"] })), "TRAIT_RESOLUTION");
   assert.equal(at(label({ expected: R(10) }), edge({ calleeName: "y", evidence: ["inherent:T"] })), "IMPL_RESOLUTION");
   assert.equal(at(label({ category: "self-method", expected: R(10) }), un), "IMPL_RESOLUTION");
-  assert.equal(at(label({ category: "chained-method", expected: R(10) }), edge({ calleeName: "y", receiverText: "<call>" })), "RUST_STATIC_LIMIT");
+  // call-result receivers stay in the resolver's bucket (a declared return type can be learned)
+  assert.equal(at(label({ category: "chained-method", expected: R(10) }), edge({ calleeName: "y", receiverText: "<call>", evidence: ["no-type:x"] })), "IMPL_RESOLUTION");
   assert.equal(at(label({ category: "bare-fn", expected: R(10, "src/b.rs") }), un), "USE_RESOLUTION"); // cross-file
   assert.equal(at(label({ category: "bare-fn", expected: R(10, "src/a.rs") }), un), "CALL_RESOLUTION"); // same file
   assert.equal(at(label({ category: "bare-fn", expected: EXT }), claim("t10")), "CALL_RESOLUTION"); // claimed on external
@@ -239,6 +250,66 @@ test("synthetic Rust project: real index edges match labels, cold == warm", () =
     assert.ok(idx.symbolExists("src/lib.rs", 3));
     assert.equal(idx.symbolExists("src/lib.rs", 99), false);
     assert.equal(existsSync(join(dir, ".context-slice")), true); // cache lived in the (temp) dir we passed
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("attribution keys symbols and parse errors by repo: a shared path cannot mask", () => {
+  const ctx = {
+    symbolExists: (r: string, f: string, l: number) => r === "a" && f === "src/lib.rs" && l === 10,
+    parseErrorFiles: new Set(["a:src/lib.rs"]),
+  };
+  const lb = (repo: string) => label({ repo, file: "src/lib.rs", expected: R(10, "src/lib.rs") });
+  assert.equal(attributeFailure(lb("a"), classifyOutcome(lb("a"), undefined, symbols), ctx), "PARSER");
+  assert.equal(attributeFailure(lb("b"), classifyOutcome(lb("b"), undefined, symbols), ctx), "UNKNOWN");
+  assert.equal(attributeFailure(lb("b"), classifyOutcome(lb("b"), edge({ calleeName: "y" }), symbols), ctx), "SYMBOL_INDEX");
+  assert.equal(attributeFailure(lb("a"), classifyOutcome(lb("a"), edge({ calleeName: "y" }), symbols), ctx), "IMPL_RESOLUTION");
+});
+
+test("held-out protocol: --repo refused, completed entry blocks, crash leaves only `started`", () => {
+  const dir = mkdtempSync(join(tmpdir(), "rsc-log-"));
+  try {
+    const log = join(dir, "HELDOUT_RUNS.log");
+    const o = (over: object = {}) => ({ split: "held-out", final: true, repo: undefined as string | undefined, logPath: log, sha: "abc1234", invokedBy: "t", ...over });
+    let r = runGuarded(o({ repo: "walkdir" }), () => 1);
+    assert.equal(r.ok, false);
+    assert.match(r.ok ? "" : r.message, /--repo/);
+    assert.equal(existsSync(log), false);
+    assert.equal(gateSplit("held-out", true, log, "walkdir").ok, false);
+    assert.throws(() => runGuarded(o(), () => { throw new Error("boom"); }), /boom/);
+    const lines = () => readFileSync(log, "utf8").split("\n").filter((l) => l && !l.startsWith("#"));
+    assert.equal(lines().length, 1);
+    assert.match(lines()[0], / held-out started/);
+    r = runGuarded(o(), () => 42); // rerun after a crash is allowed; the earlier started line stays visible
+    assert.equal(r.ok && r.value, 42);
+    assert.deepEqual(lines().map((l) => l.split(" ")[3]), ["started", "started", "completed"]);
+    const n = lines().length;
+    r = runGuarded(o({ split: "all" }), () => 1);
+    assert.equal(r.ok, false);
+    assert.match(r.ok ? "" : r.message, /already performed/);
+    assert.equal(gateSplit("all", true, log).ok, false);
+    assert.equal(lines().length, n);
+    assert.equal(runGuarded(o({ split: "dev", final: false }), () => 1).ok, true); // dev never logs
+    assert.equal(lines().length, n);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("assertFrozen refuses a mutated label and accepts a why-only change (temp copy)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "rsc-frozen-"));
+  try {
+    cpSync(join(process.cwd(), "benchmarks/rust-semantic-calls"), dir, { recursive: true });
+    assert.doesNotThrow(() => assertFrozen(dir));
+    const f = join(dir, "walkdir.json");
+    const j = JSON.parse(readFileSync(f, "utf8"));
+    j[0].expected.why = "reworded only";
+    writeFileSync(f, JSON.stringify(j));
+    assert.doesNotThrow(() => assertFrozen(dir));
+    j[0].line += 1;
+    writeFileSync(f, JSON.stringify(j));
+    assert.throws(() => assertFrozen(dir), /FROZEN\.sha256/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
