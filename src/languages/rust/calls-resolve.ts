@@ -80,7 +80,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const p = file.replace(/\\/g, "/");
     return (
       /(^|\/)src\/bin\//.test(p) ||
-      /(^|\/)(tests|examples|benches)\//.test(p) ||
+      (/(^|\/)(tests|examples|benches)\//.test(p) && !/(^|\/)src\//.test(p)) ||
       /(^|\/)build\.rs$/.test(p) ||
       (/(^|\/)src\/main\.rs$/.test(p) && allFiles.has(p.replace(/main\.rs$/, "lib.rs")))
     );

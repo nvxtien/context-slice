@@ -242,3 +242,14 @@ test("the CamelCase-glob rule is dropped when the file allows non_camel_case_typ
   withRepo({ "src/lib.rs": body }, (dir) => assert.equal(one(dir, "to_string", "t").pkg, "serde_json"));
   withRepo({ "src/lib.rs": `#![allow(non_camel_case_types)]\n${body}` }, (dir) => notResolved(one(dir, "to_string", "t"), "no-type:"));
 });
+
+test("a `tests/` directory inside src/ is an ordinary library module", () => {
+  withRepo(
+    { "src/lib.rs": "mod util;\nmod tests;\n", "src/util.rs": "pub fn g() {}\n", "src/tests/mod.rs": "use crate::util::g;\nfn t() { g(); crate::util::g(); }\n" },
+    (dir) => {
+      const list = edges(dir, "g", "t");
+      assert.equal(list.length, 2);
+      assert.ok(list.every((e) => e.conf === "exact" && e.targetFile === "src/util.rs"), JSON.stringify(list));
+    },
+  );
+});
