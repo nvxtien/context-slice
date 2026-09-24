@@ -11,7 +11,7 @@ import type {
 import { WorkflowError } from "../workflow/errors.js";
 
 // Bump whenever any language adapter's parse/resolve output changes: unchanged files are otherwise reused from cache.
-export const INDEX_VERSION = "1.5.0";
+export const INDEX_VERSION = "1.6.0";
 
 export interface IndexedFileRecord {
   hash: string;

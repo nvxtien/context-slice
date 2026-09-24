@@ -13,7 +13,7 @@ import { field, rustParser, type Node } from "./parse.js";
  */
 export interface CallDeps {
   /** Exact file of a module path (`[...segments]`, no trailing item) as seen from `fromFile`. */
-  moduleOf(segments: string[], fromFile: string): { file?: string; externalPackage?: string };
+  moduleOf(segments: string[], fromFile: string): { file?: string };
 }
 
 const TYPE_KINDS = new Set(["class", "enum", "interface", "type"]);
@@ -24,7 +24,7 @@ const STD_TYPES = new Set([
   "Option", "Result", "Vec", "String", "Box", "Default", "Clone", "Iterator", "IntoIterator", "From", "Into",
   "TryFrom", "TryInto", "AsRef", "AsMut", "ToString", "ToOwned", "PartialEq", "Eq", "PartialOrd", "Ord", "Drop",
   "Fn", "FnMut", "FnOnce", "Send", "Sync", "Copy", "Sized", "Extend", "FromIterator", "DoubleEndedIterator",
-  "ExactSizeIterator", "Some", "None", "Ok", "Err",
+  "ExactSizeIterator",
   "bool", "char", "str", "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64", "i128", "isize", "f32", "f64",
 ]);
 // Methods a `#[derive(..)]` also provides, keyed to the derived trait.
@@ -124,6 +124,39 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if ((mod?.id ?? "") !== (modContainer(from)?.id ?? "")) return false;
     return !vis || ancestors(from).has(vis.id);
   };
+  type Tree = ReturnType<ReturnType<typeof rustParser>["parse"]>;
+  const sourceCache = new Map<string, { text: string; lines: number[]; tree?: Tree }>();
+  const fileText = (sample: SymbolRecord) => {
+    let c = sourceCache.get(sample.filePath);
+    if (!c) {
+      const text = context.sourceOf(sample);
+      const lines = [0];
+      for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) lines.push(i + 1);
+      sourceCache.set(sample.filePath, (c = { text, lines }));
+    }
+    return c;
+  };
+  const offsetIn = (sample: SymbolRecord, line: number, col: number) => fileText(sample).lines[line - 1] + col;
+  /** [start, end) of the innermost `{ }` block enclosing `offset`, or undefined at module level. */
+  const blockAt = (sample: SymbolRecord, offset: number): [number, number] | undefined => {
+    const c = fileText(sample);
+    try {
+      c.tree ??= rustParser().parse((i: number) => c.text.slice(i, i + 4_096));
+      for (let n: Node | null = c.tree.rootNode.descendantForIndex(offset); n; n = n.parent)
+        if (n.type === "block") return [n.startIndex, n.endIndex];
+    } catch {
+      /* unparsable: no block info */
+    }
+    return undefined;
+  };
+  /** True when the block declaring the item at `at` also encloses the call being resolved. */
+  const declEnclosesCall = (sample: SymbolRecord, at: SymbolRecord["range"]) => {
+    if (!currentCall) return true;
+    const blk = blockAt(sample, offsetIn(sample, at.startLine, at.startColumn));
+    if (!blk) return true;
+    const c = offsetIn(sample, currentCall.range.startLine, currentCall.range.startColumn);
+    return c >= blk[0] && c < blk[1];
+  };
   // The call being resolved (set by the main loop; undefined while resolving impl headers). A fn-local
   // `use` counts only if the block it sits in encloses this call.
   let currentCall: CallEdge | undefined;
@@ -193,14 +226,17 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   // ---- glob imports visible from a scope
   // `unknown`: a glob we cannot see into may provide `name`. A glob of a CamelCase path (`use Enum::*`)
   // only brings that enum's variants, which are CamelCase too, so it cannot provide a lowercase name.
+  // This rests on the naming CONVENTION only (`#[allow(non_camel_case_types)]` variants can break it), so a
+  // file mentioning that attribute gets the conservative answer: every unseeable glob may provide the name.
   const globs = (file: string, from: SymbolRecord, name: string) => {
-    const files: { file: string; via: ImportRecord }[] = [];
+    const conventional = !fileText(from).text.includes("non_camel_case_types");
+    const files: { file: string }[] = [];
     let unknown = false;
     for (const rec of importsFor(file, from).filter((r) => r.wildcard)) {
       const t = importTarget(rec);
       const f = t.t === "path" ? moduleFile(t.segs, t.fromFile) : undefined;
-      if (f) files.push({ file: f, via: rec });
-      else if (!(/^[a-z_]/.test(name) && /^[A-Z]/.test(rec.module.split("::").at(-1) ?? ""))) unknown = true;
+      if (f) files.push({ file: f });
+      else if (!(conventional && /^[a-z_]/.test(name) && /^[A-Z]/.test(rec.module.split("::").at(-1) ?? ""))) unknown = true;
     }
     return { files, unknown };
   };
@@ -277,7 +313,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (t.t === "unknown") return undefined;
       return { t: "path", fromFile: t.fromFile, segs: [...t.segs, ...rest], via: recs[0] };
     }
-    if (STD_ROOTS.has(first) && !boundNames(file, first)) return { t: "ext", pkg: "std", exact: true };
+    if (STD_ROOTS.has(first) && !boundNames(file, first)) return { t: "ext", pkg: first, exact: true }; // `std`, `core` or `alloc`
     return { t: "path", fromFile: file, segs };
   };
   const boundNames = (file: string, name: string) =>
@@ -334,39 +370,6 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     (childrenOf.get(trait.id) ?? []).filter((s) => s.kind === "function" && s.name === name);
 
   // ---- caller facts
-  type Tree = ReturnType<ReturnType<typeof rustParser>["parse"]>;
-  const sourceCache = new Map<string, { text: string; lines: number[]; tree?: Tree }>();
-  const fileText = (sample: SymbolRecord) => {
-    let c = sourceCache.get(sample.filePath);
-    if (!c) {
-      const text = context.sourceOf(sample);
-      const lines = [0];
-      for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) lines.push(i + 1);
-      sourceCache.set(sample.filePath, (c = { text, lines }));
-    }
-    return c;
-  };
-  const offsetIn = (sample: SymbolRecord, line: number, col: number) => fileText(sample).lines[line - 1] + col;
-  /** [start, end) of the innermost `{ }` block enclosing `offset`, or undefined at module level. */
-  const blockAt = (sample: SymbolRecord, offset: number): [number, number] | undefined => {
-    const c = fileText(sample);
-    try {
-      c.tree ??= rustParser().parse((i: number) => c.text.slice(i, i + 4_096));
-      for (let n: Node | null = c.tree.rootNode.descendantForIndex(offset); n; n = n.parent)
-        if (n.type === "block") return [n.startIndex, n.endIndex];
-    } catch {
-      /* unparsable: no block info */
-    }
-    return undefined;
-  };
-  /** True when the block declaring the item at `at` also encloses the call being resolved. */
-  const declEnclosesCall = (sample: SymbolRecord, at: SymbolRecord["range"]) => {
-    if (!currentCall) return true;
-    const blk = blockAt(sample, offsetIn(sample, at.startLine, at.startColumn));
-    if (!blk) return true;
-    const c = offsetIn(sample, currentCall.range.startLine, currentCall.range.startColumn);
-    return c >= blk[0] && c < blk[1];
-  };
   /** `path` (`recv::f()`), `method` (`recv.f()`) or undefined, from the text right after the receiver. */
   const shapeOf = (call: CallEdge, caller: SymbolRecord): "path" | "method" | undefined => {
     const rt = call.receiverText!;
@@ -382,14 +385,14 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     let set = bindingCache.get(caller.id);
     if (set) return set;
     set = new Set();
-    const collect = (n: Node | null, ownerType?: string) => {
+    const collect = (n: Node | null) => {
       if (!n) return;
       if (n.type === "identifier" || n.type === "shorthand_field_identifier") set!.add(n.text);
       for (let i = 0; i < n.namedChildCount; i++) {
         const c = n.namedChild(i)!;
         const parentField = ["tuple_struct_pattern", "struct_pattern"].includes(n.type) && n.childForFieldName("type")?.id === c.id;
         if (c.type === "scoped_identifier" || parentField) continue;
-        collect(c, ownerType);
+        collect(c);
       }
     };
     const visit = (n: Node) => {
@@ -621,9 +624,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const inlineFn = (call: CallEdge, caller: SymbolRecord, segs: string[]): Outcome | undefined => {
     let container: SymbolRecord | undefined = modContainer(caller);
     const rest = [...segs];
-    let anchored = false;
     while (rest[0] === "self" || rest[0] === "super") {
-      anchored = true;
       if (rest[0] === "super") {
         if (!container) return undefined; // file-level: module files handle it
         container = modContainer(container);

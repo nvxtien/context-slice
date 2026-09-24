@@ -103,7 +103,7 @@ test("self.m() found only as a default method of a trait the type implements is 
   );
 });
 
-test("self.m() with an unknown method is unresolved with no-type", () => {
+test("self.m() with a method no impl or trait defines is unresolved with no-symbol", () => {
   withRepo({ "src/lib.rs": "struct A;\nimpl A { fn c(&self) { self.len(); } }\n" }, (dir) =>
     unresolved(one(dir, "len", "A::c"), "no-symbol:"),
   );

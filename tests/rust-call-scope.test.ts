@@ -227,3 +227,18 @@ test("a lone main.rs (no lib.rs) is the crate root: crate:: still resolves", () 
     assert.equal(one(dir, "g").targetFile, "src/util.rs"),
   );
 });
+
+// ---- MINOR 9 / 11
+test("core:: and alloc:: roots report their own package name", () => {
+  withRepo({ "src/lib.rs": "fn t() { core::mem::swap(a, b); alloc::vec::Vec::new(); std::mem::take(c); }\n" }, (dir) => {
+    assert.equal(one(dir, "swap", "t").pkg, "core");
+    assert.equal(one(dir, "new", "t").pkg, "alloc");
+    assert.equal(one(dir, "take", "t").pkg, "std");
+  });
+});
+
+test("the CamelCase-glob rule is dropped when the file allows non_camel_case_types", () => {
+  const body = "enum Color { r }\nfn t() { use Color::*; serde_json::to_string(1); }\n";
+  withRepo({ "src/lib.rs": body }, (dir) => assert.equal(one(dir, "to_string", "t").pkg, "serde_json"));
+  withRepo({ "src/lib.rs": `#![allow(non_camel_case_types)]\n${body}` }, (dir) => notResolved(one(dir, "to_string", "t"), "no-type:"));
+});

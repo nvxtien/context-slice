@@ -46,7 +46,7 @@ export type Outcome = {
   /** resolved only: target file+startLine equals the label's target (false when the label has no target). */
   correct?: boolean;
   confidence?: CallEdge["confidence"];
-  /** Stable evidence prefixes present on the matched edge (`trait:`, `inherent:`, `ambiguous:`, `no-type:`, `macro:`). */
+  /** Stable evidence prefixes present on the matched edge (`trait:`, `inherent:`, `ambiguous:`, `no-type:`, `no-symbol:`, `macro:`). */
   evidence: string[];
   resolutionKind?: string;
   receiverText?: string;
@@ -54,7 +54,7 @@ export type Outcome = {
 export type Row = { l: Label; o: Outcome };
 export type Split = "dev" | "held-out" | "all";
 
-const PREFIXES = ["inherent:", "trait:", "ambiguous:", "no-type:", "macro:"];
+const PREFIXES = ["inherent:", "trait:", "ambiguous:", "no-type:", "no-symbol:", "macro:"];
 const ratio = (k: number, n: number): Ratio => ({ k, n });
 const fmt = (r: Ratio) => (r.n === 0 ? `${r.k}/0` : `${r.k}/${r.n} (${(Math.round((r.k / r.n) * 1000) / 10).toFixed(1)}%)`);
 
