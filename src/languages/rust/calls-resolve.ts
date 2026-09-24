@@ -150,14 +150,16 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
 
   // ---- glob imports visible from a scope
-  const globs = (file: string, from: SymbolRecord) => {
+  // `unknown`: a glob we cannot see into may provide `name`. A glob of a CamelCase path (`use Enum::*`)
+  // only brings that enum's variants, which are CamelCase too, so it cannot provide a lowercase name.
+  const globs = (file: string, from: SymbolRecord, name: string) => {
     const files: { file: string; via: ImportRecord }[] = [];
     let unknown = false;
     for (const rec of importsFor(file, from).filter((r) => r.wildcard)) {
       const t = importTarget(rec);
       const f = t.t === "path" ? moduleFile(t.segs, t.fromFile) : undefined;
       if (f) files.push({ file: f, via: rec });
-      else unknown = true;
+      else if (!(/^[a-z_]/.test(name) && /^[A-Z]/.test(rec.module.split("::").at(-1) ?? ""))) unknown = true;
     }
     return { files, unknown };
   };
@@ -194,7 +196,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (ext.size) return { t: "external", pkg: [...ext][0], exact: true };
       return fromDecls(decls);
     }
-    const g = globs(file, from);
+    const g = globs(file, from, name);
     const cands = g.files.flatMap((x) => lookupItems(x.file, name).filter((s) => TYPE_KINDS.has(s.kind)));
     const found = fromDecls(cands);
     if (found) return g.unknown ? undefined : found;
@@ -346,6 +348,41 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return set;
   };
   const enclosing = (caller: SymbolRecord) => (caller.parentId ? byId.get(caller.parentId) : undefined);
+  /** Identifiers inside the `<...>` generics of a fn / impl / trait head (over-approximate: bounds are included). */
+  const headGenerics = (s: SymbolRecord) => {
+    const cut = s.kind === "function" ? s.source.indexOf("(") : s.source.indexOf("{");
+    const head = cut < 0 ? s.source : s.source.slice(0, cut);
+    const open = head.indexOf("<");
+    const names = new Set<string>();
+    if (open < 0 || !/^(?:[^<]*\b(?:fn|trait)\s+\w+|impl)\s*$/.test(head.slice(0, open))) return names;
+    let depth = 0;
+    let i = open;
+    for (; i < head.length; i++) {
+      if (head[i] === "<") depth++;
+      else if (head[i] === ">" && head[i - 1] !== "-" && --depth === 0) break; // `->` is not a closer
+    }
+    // Declared names only: the first identifier of each depth-1 comma-separated item (bounds are skipped).
+    let d = 0;
+    let item = "";
+    const flush = () => {
+      const m = /^\s*(?:const\s+)?([A-Za-z_]\w*)/.exec(item);
+      if (m) names.add(m[1]);
+      item = "";
+    };
+    for (const ch of head.slice(open + 1, i)) {
+      if (ch === "<" || ch === "(" || ch === "[") d++;
+      else if (ch === ">" || ch === ")" || ch === "]") d--;
+      if (ch === "," && d === 0) flush();
+      else item += ch;
+    }
+    flush();
+    return names;
+  };
+  /** Type parameters in scope for a caller: its own, its impl's or trait's. */
+  const isGenericParam = (caller: SymbolRecord, name: string) => {
+    const owner = enclosing(caller);
+    return headGenerics(caller).has(name) || (!!owner && (isImpl(owner) || owner.kind === "interface") && headGenerics(owner).has(name));
+  };
   const modContainer = (s: SymbolRecord) => {
     for (let c = s.parentId ? byId.get(s.parentId) : undefined; c; c = c.parentId ? byId.get(c.parentId) : undefined)
       if (c.kind === "namespace") return c;
@@ -479,7 +516,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (cands.size + ext.size > 1) return ambiguous(call, cands.size + ext.size, `imports named ${name}`);
       return unresolved(call, `no-symbol:imported ${name}`);
     }
-    const g = globs(file, caller);
+    const g = globs(file, caller, name);
     const gc = new Map<string, SymbolRecord>();
     for (const x of g.files) for (const s of lookupItems(x.file, name)) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
     if (gc.size > 1) return ambiguous(call, gc.size, `glob imports providing ${name}`);
@@ -541,6 +578,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       return typeOutcome(call, res, name, "static", trait);
     }
     const anchored = first === "crate" || first === "self" || first === "super";
+    // `T::f()` with a generic `T` in scope is a bound-based call (part B), never a same-named type.
+    if (!anchored && isGenericParam(caller, first)) return unresolved(call, "no-type:generic-param");
     if (!anchored) {
       const inline = inlineFn(call, caller, segs);
       if (inline) return inline;
@@ -573,7 +612,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       const t = typePath(segs, file, caller);
       if (t) return typeOutcome(call, t, name, "static");
     }
-    if (boundNames(file, first) || globs(file, caller).files.length || globs(file, caller).unknown)
+    const g = globs(file, caller, first);
+    if (boundNames(file, first) || g.files.length || g.unknown)
       return unresolved(call, "no-type:unknown-type");
     if (STD_TYPES.has(first)) return external(call, "std", false, `std type ${first}`);
     if (/^[a-z_]/.test(first)) return external(call, first, false, `extern crate ${first}`);

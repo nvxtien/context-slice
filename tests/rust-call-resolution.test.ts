@@ -418,3 +418,27 @@ test("warm rebuild reproduces cold edges; unresolved edges are re-resolved after
     },
   );
 });
+
+test("T::f() with a generic T (fn or impl level) never resolves to a same-named type; bounds do not count as params", () => {
+  withRepo(
+    {
+      "src/lib.rs":
+        "struct T;\nimpl T { fn make() {} }\nfn a<T: Default>() { T::make(); }\nstruct W<T>(T);\nimpl<T> W<T> { fn b() { T::make(); } }\nfn c<I: IntoIterator<Item = String>>() { String::new(); T::make(); }\n",
+    },
+    (dir) => {
+      const list = edges(dir, "make");
+      assert.deepEqual(list.map((e) => e.conf), ["unresolved", "unresolved", "exact"]);
+      assert.ok(list[0].ev.includes("no-type:generic-param"));
+      assert.equal(one(dir, "new", "c").pkg, "std"); // `String` appears in a bound only
+    },
+  );
+});
+
+test("an enum-variant glob cannot hide an extern crate path; an unknown module glob still can", () => {
+  withRepo({ "src/lib.rs": "enum Color { R }\nfn t() { use Color::*; serde_json::to_string(1); }\n" }, (dir) =>
+    assert.equal(one(dir, "to_string", "t").pkg, "serde_json"),
+  );
+  withRepo({ "src/lib.rs": "use other_crate::*;\nfn t() { serde_json::to_string(1); }\n" }, (dir) =>
+    unresolved(one(dir, "to_string", "t"), "no-type:unknown-type"),
+  );
+});
