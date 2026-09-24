@@ -25,9 +25,11 @@ export const field = (node: Node, name: string) => node.childForFieldName(name);
 export const text = (node: Node | null | undefined) => node?.text ?? "";
 
 import type {
+  CallEdge,
   ExportRecord,
   ImportRecord,
   SymbolKind,
+  SymbolMetadata,
   SymbolRecord,
 } from "../../types/model.js";
 import type { ParsedFile } from "../adapter.js";
@@ -200,6 +202,120 @@ function parseUseDeclaration(
 const isPathNode = (node: Node) =>
   ["scoped_identifier", "identifier", "self", "crate", "super"].includes(node.type);
 
+/** Base type name: strips generics, `&`/`&mut`, `dyn`/`impl`, lifetimes and path prefixes. */
+function baseTypeName(node: Node | null): string | undefined {
+  if (!node) return undefined;
+  switch (node.type) {
+    case "generic_type":
+    case "reference_type":
+    case "pointer_type":
+      return baseTypeName(field(node, "type"));
+    case "scoped_type_identifier":
+      return text(field(node, "name"));
+    case "dynamic_type":
+    case "abstract_type":
+      return baseTypeName(field(node, "trait"));
+    default:
+      return node.text;
+  }
+}
+
+function symbolMetadata(node: Node): SymbolMetadata | undefined {
+  const meta: SymbolMetadata = {};
+  if (node.type === "function_item" && isAsync(node)) meta.async = true;
+  if (node.type === "impl_item") {
+    meta.implSelfType = baseTypeName(field(node, "type"));
+    const trait = baseTypeName(field(node, "trait"));
+    if (trait) meta.implTrait = trait;
+  } else if (node.type === "struct_item") {
+    const types: Record<string, string> = {};
+    const body = field(node, "body");
+    if (body?.type === "field_declaration_list") {
+      for (const f of body.namedChildren)
+        if (f.type === "field_declaration") types[text(field(f, "name"))] = text(field(f, "type"));
+    } else if (body) {
+      body.childrenForFieldName("type").forEach((t, i) => (types[String(i)] = t.text));
+    }
+    if (Object.keys(types).length) meta.declaredTypes = types;
+  } else if (node.type === "function_item" || node.type === "function_signature_item") {
+    const types: Record<string, string> = {};
+    for (const p of field(node, "parameters")?.namedChildren ?? []) {
+      if (p.type === "self_parameter") {
+        const ref = p.children.some((c) => c.type === "&");
+        types.self = ref ? (p.children.some((c) => c.type === "mutable_specifier") ? "&mut self" : "&self") : "self";
+      } else if (p.type === "parameter") {
+        const pattern = field(p, "pattern");
+        if (pattern?.type === "identifier") types[pattern.text] = text(field(p, "type"));
+      }
+    }
+    if (Object.keys(types).length) meta.declaredTypes = types;
+  }
+  return Object.keys(meta).length ? meta : undefined;
+}
+
+const simpleChain = (node: Node, dots = 0): boolean =>
+  node.type === "self" || node.type === "identifier"
+    ? true
+    : node.type === "field_expression" && dots < 3
+      ? simpleChain(field(node, "value")!, dots + 1)
+      : false;
+
+function receiverOf(node: Node): string {
+  return simpleChain(node) ? node.text : `<${node.type.replace(/_expression$/, "")}>`;
+}
+
+/** Path prefix text without generic arguments (`Vec::<u8>` -> `Vec`). */
+const prefixText = (node: Node): string =>
+  node.type === "generic_type" ? text(field(node, "type")) : node.text;
+
+/** Turns a call_expression / macro_invocation into an unresolved edge. */
+function callEdge(node: Node, filePath: string, callerId: string): CallEdge {
+  const edge: CallEdge = {
+    callerId,
+    calleeName: "",
+    filePath,
+    language: LANGUAGE_ID,
+    range: range(node),
+    confidence: "unresolved",
+    resolutionKind: "unresolved",
+    evidence: [],
+  };
+  if (node.type === "macro_invocation") {
+    const macro = field(node, "macro")!;
+    edge.calleeName = macro.type === "scoped_identifier" ? text(field(macro, "name")) : macro.text;
+    if (macro.type === "scoped_identifier") edge.receiverText = prefixText(field(macro, "path")!);
+    edge.argumentCount = 0;
+    edge.evidence = [`macro:${edge.calleeName}`];
+    return edge;
+  }
+  edge.argumentCount = field(node, "arguments")?.namedChildCount ?? 0;
+  let fn = field(node, "function")!;
+  if (fn.type === "generic_function") fn = field(fn, "function")!;
+  if (fn.type === "field_expression") {
+    edge.calleeName = text(field(fn, "field"));
+    edge.receiverText = receiverOf(field(fn, "value")!);
+  } else if (fn.type === "scoped_identifier") {
+    edge.calleeName = text(field(fn, "name"));
+    const path = field(fn, "path");
+    if (path) edge.receiverText = prefixText(path);
+    const qualified = path?.type === "bracketed_type" ? path.namedChild(0) : null;
+    if (qualified?.type === "qualified_type")
+      edge.evidence = [`qualified:${baseTypeName(field(qualified, "alias"))}`];
+  } else if (fn.type === "identifier") {
+    edge.calleeName = fn.text;
+  } else {
+    const inner = fn.type === "parenthesized_expression" ? fn.namedChild(0) : null;
+    edge.calleeName =
+      inner?.type === "field_expression"
+        ? text(field(inner, "field"))
+        : inner?.type === "identifier"
+          ? inner.text
+          : "<expr>";
+    edge.evidence = ["no-type:callee-expression"];
+  }
+  return edge;
+}
+
 export function parseRust(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
   const seenIds = new Set<string>();
@@ -214,6 +330,7 @@ export function parseRust(filePath: string, source: string): ParsedFile {
   }
 
   const modulePath = modulePathFor(filePath);
+  const fnByNode = new Map<number, SymbolRecord>();
 
   function walk(node: Node, parent: SymbolRecord | undefined, chain: string[]) {
     for (const child of node.namedChildren) {
@@ -252,20 +369,30 @@ export function parseRust(filePath: string, source: string): ParsedFile {
         parentId: parent?.id,
         annotations: [],
         modifiers,
-        metadata:
-          child.type === "function_item" && isAsync(child)
-            ? { async: true }
-            : undefined,
+        metadata: symbolMetadata(child),
         source: child.text,
         body: field(child, "body")?.text,
       };
       symbols.push(symbol);
+      if (child.type === "function_item") fnByNode.set(child.id, symbol);
       const body = field(child, "body");
       if (body) walk(body, symbol, [...chain, name]);
     }
   }
 
   walk(tree.rootNode, undefined, []);
+  const calls: CallEdge[] = [];
+  // Caller = innermost enclosing fn (closures/async blocks belong to it); token trees are opaque.
+  const collectCalls = (node: Node, caller: SymbolRecord | undefined) => {
+    for (const child of node.namedChildren) {
+      if (child.type === "token_tree") continue;
+      const owner = fnByNode.get(child.id) ?? caller;
+      if (owner && (child.type === "call_expression" || child.type === "macro_invocation"))
+        calls.push(callEdge(child, filePath, owner.id));
+      collectCalls(child, owner);
+    }
+  };
+  collectCalls(tree.rootNode, undefined);
   const imports: ImportRecord[] = [];
   const exports: ExportRecord[] = [];
   const collectUses = (node: Node) => {
@@ -290,5 +417,5 @@ export function parseRust(filePath: string, source: string): ParsedFile {
     for (const child of node.namedChildren) collectUses(child);
   };
   collectUses(tree.rootNode);
-  return { symbols, calls: [], imports, exports, parseError };
+  return { symbols, calls, imports, exports, parseError };
 }

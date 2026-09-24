@@ -60,6 +60,12 @@ export interface SymbolMetadata {
   /** Python `@classmethod` / `@staticmethod`. */
   classMethod?: boolean;
   staticMethod?: boolean;
+  /** Rust impl block: base name of the Self type (generics, `&`, `dyn`, path prefix stripped). */
+  implSelfType?: string;
+  /** Rust impl block: base name of the implemented trait. */
+  implTrait?: string;
+  /** Rust struct: field name (tuple index as string) -> type text; fn: parameter name -> type text, plus `self` -> "&self" | "&mut self" | "self". */
+  declaredTypes?: Record<string, string>;
 }
 export interface SymbolRecord {
   id: string;
