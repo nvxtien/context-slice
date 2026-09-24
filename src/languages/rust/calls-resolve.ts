@@ -104,8 +104,16 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if ((mod?.id ?? "") !== (modContainer(from)?.id ?? "")) return false;
     return !vis || ancestors(from).has(vis.id);
   };
+  // The call being resolved (set by the main loop; undefined while resolving impl headers). A fn-local
+  // `use` counts only if the block it sits in encloses this call.
+  let currentCall: CallEdge | undefined;
   const importsFor = (file: string, from: SymbolRecord) =>
-    (importsByFile.get(file) ?? []).filter((r) => visible(r, from));
+    (importsByFile.get(file) ?? []).filter(
+      (r) => visible(r, from) && (scopeOf(r).vis?.kind !== "function" || declEnclosesCall(from, r.range)),
+    );
+  /** Imports declared in a fn body (enclosing the call) that bind `name`: they shadow module-level items. */
+  const localImportsNamed = (file: string, from: SymbolRecord, name: string) =>
+    importsFor(file, from).filter((r) => !r.wildcard && r.localName === name && scopeOf(r).vis?.kind === "function");
 
   // ---- where a `use` points
   const targetCache = new WeakMap<ImportRecord, Target>();
@@ -197,10 +205,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return uniq.length === 1 ? { t: "decl", sym: uniq[0] } : uniq.length > 1 ? { t: "ambiguous", n: uniq.length } : undefined;
   };
   const typeName = (name: string, file: string, from: SymbolRecord): TypeRes => {
-    const same = declsHere(from, name);
-    if (same.length) return fromDecls(same);
-    const recs = importsFor(file, from).filter((r) => !r.wildcard && r.localName === name);
-    if (recs.length) {
+    const viaImports = (recs: ImportRecord[]): TypeRes => {
       const decls: SymbolRecord[] = [];
       const ext = new Set<string>();
       let unknown = false;
@@ -213,7 +218,13 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (unknown || (ext.size && decls.length) || ext.size > 1) return undefined;
       if (ext.size) return { t: "external", pkg: [...ext][0], exact: true };
       return fromDecls(decls);
-    }
+    };
+    const local = localImportsNamed(file, from, name);
+    if (local.length) return viaImports(local); // a fn-local `use` shadows module-level items
+    const same = declsHere(from, name);
+    if (same.length) return fromDecls(same);
+    const recs = importsFor(file, from).filter((r) => !r.wildcard && r.localName === name);
+    if (recs.length) return viaImports(recs);
     const g = globs(file, from, name);
     const cands = g.files.flatMap((x) => lookupItems(x.file, name).filter((s) => TYPE_KINDS.has(s.kind)));
     const found = fromDecls(cands);
@@ -302,23 +313,44 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     (childrenOf.get(trait.id) ?? []).filter((s) => s.kind === "function" && s.name === name);
 
   // ---- caller facts
-  const sourceCache = new Map<string, { buf: Buffer; lines: number[] }>();
-  const fileText = (caller: SymbolRecord) => {
-    let c = sourceCache.get(caller.filePath);
+  type Tree = ReturnType<ReturnType<typeof rustParser>["parse"]>;
+  const sourceCache = new Map<string, { text: string; lines: number[]; tree?: Tree }>();
+  const fileText = (sample: SymbolRecord) => {
+    let c = sourceCache.get(sample.filePath);
     if (!c) {
-      const buf = Buffer.from(context.sourceOf(caller), "utf8");
+      const text = context.sourceOf(sample);
       const lines = [0];
-      for (let i = 0; i < buf.length; i++) if (buf[i] === 10) lines.push(i + 1);
-      sourceCache.set(caller.filePath, (c = { buf, lines }));
+      for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) lines.push(i + 1);
+      sourceCache.set(sample.filePath, (c = { text, lines }));
     }
     return c;
+  };
+  const offsetIn = (sample: SymbolRecord, line: number, col: number) => fileText(sample).lines[line - 1] + col;
+  /** [start, end) of the innermost `{ }` block enclosing `offset`, or undefined at module level. */
+  const blockAt = (sample: SymbolRecord, offset: number): [number, number] | undefined => {
+    const c = fileText(sample);
+    try {
+      c.tree ??= rustParser().parse((i: number) => c.text.slice(i, i + 4_096));
+      for (let n: Node | null = c.tree.rootNode.descendantForIndex(offset); n; n = n.parent)
+        if (n.type === "block") return [n.startIndex, n.endIndex];
+    } catch {
+      /* unparsable: no block info */
+    }
+    return undefined;
+  };
+  /** True when the block declaring the item at `at` also encloses the call being resolved. */
+  const declEnclosesCall = (sample: SymbolRecord, at: SymbolRecord["range"]) => {
+    if (!currentCall) return true;
+    const blk = blockAt(sample, offsetIn(sample, at.startLine, at.startColumn));
+    if (!blk) return true;
+    const c = offsetIn(sample, currentCall.range.startLine, currentCall.range.startColumn);
+    return c >= blk[0] && c < blk[1];
   };
   /** `path` (`recv::f()`), `method` (`recv.f()`) or undefined, from the text right after the receiver. */
   const shapeOf = (call: CallEdge, caller: SymbolRecord): "path" | "method" | undefined => {
     const rt = call.receiverText!;
-    const { buf, lines } = fileText(caller);
-    const off = lines[call.range.startLine - 1] + call.range.startColumn;
-    const tail = buf.toString("utf8", off, off + Buffer.byteLength(rt) + 200);
+    const off = offsetIn(caller, call.range.startLine, call.range.startColumn);
+    const tail = fileText(caller).text.slice(off, off + rt.length + 200);
     if (!tail.startsWith(rt)) return "method"; // `<call>`-style marker: the receiver text is not in the source
     const after = tail.slice(rt.length).trimStart();
     return after.startsWith("::") ? "path" : after.startsWith(".") ? "method" : undefined;
@@ -486,7 +518,9 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
 
   const scopeFns = (caller: SymbolRecord, name: string) => {
-    const fns = (list: SymbolRecord[]) => list.filter((s) => s.kind === "function" && s.name === name);
+    // Only local fns declared in a block that encloses the call are in scope.
+    const fns = (list: SymbolRecord[]) =>
+      list.filter((s) => s.kind === "function" && s.name === name && (s.parentId === undefined || byId.get(s.parentId)?.kind !== "function" || declEnclosesCall(caller, s.range)));
     const own = fns(childrenOf.get(caller.id) ?? []);
     if (own.length) return own;
     for (let p = caller.parentId ? byId.get(caller.parentId) : undefined; p; p = p.parentId ? byId.get(p.parentId) : undefined) {
@@ -497,10 +531,33 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return fns(topByFile.get(caller.filePath) ?? []);
   };
 
+  const bareViaImports = (call: CallEdge, name: string, recs: ImportRecord[]): Outcome => {
+    const cands = new Map<string, SymbolRecord>();
+    const ext = new Set<string>();
+    let unknown = false;
+    for (const r of recs) {
+      const t = importTarget(r);
+      if (t.t === "ext") ext.add(t.pkg);
+      else if (t.t === "unknown") unknown = true;
+      else for (const s of itemsVia(t)) if (s.kind === "function" || isTupleStruct(s)) cands.set(s.id, s);
+    }
+    if (unknown) return unresolved(call, "no-symbol:import-target");
+    if (ext.size === 1 && !cands.size) return external(call, [...ext][0], true, `imported from ${[...ext][0]}`);
+    if (cands.size === 1 && !ext.size) {
+      const s = [...cands.values()][0];
+      const aliased = recs[0].localName !== recs[0].importedName;
+      return settle(call, s, isTupleStruct(s) ? "constructor" : aliased ? "aliased-import" : "imported", `import ${recs[0].module}::${recs[0].importedName}`);
+    }
+    if (cands.size + ext.size > 1) return ambiguous(call, cands.size + ext.size, `imports named ${name}`);
+    return unresolved(call, `no-symbol:imported ${name}`);
+  };
+
   const bareCall = (call: CallEdge, caller: SymbolRecord): Outcome => {
     const name = call.calleeName;
     const file = caller.filePath;
     if (bindingsOf(caller).has(name) || bindingsOf(caller).has("*")) return unresolved(call, "no-type:local-binding");
+    const local = localImportsNamed(file, caller, name);
+    if (local.length) return bareViaImports(call, name, local); // fn-local `use` shadows module items
     const fns = scopeFns(caller, name);
     if (fns.length === 1) return settle(call, fns[0], "same-file", `same-file fn ${fns[0].qualifiedName}`);
     if (fns.length > 1) return ambiguous(call, fns.length, `same-scope fns named ${name}`);
@@ -508,26 +565,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (ctors.length === 1) return settle(call, ctors[0], "constructor", `constructor ${ctors[0].qualifiedName}`);
     if (ctors.length > 1) return ambiguous(call, ctors.length, `constructors named ${name}`);
     const recs = importsFor(file, caller).filter((r) => !r.wildcard && r.localName === name);
-    if (recs.length) {
-      const cands = new Map<string, SymbolRecord>();
-      const ext = new Set<string>();
-      let unknown = false;
-      for (const r of recs) {
-        const t = importTarget(r);
-        if (t.t === "ext") ext.add(t.pkg);
-        else if (t.t === "unknown") unknown = true;
-        else for (const s of itemsVia(t)) if (s.kind === "function" || isTupleStruct(s)) cands.set(s.id, s);
-      }
-      if (unknown) return unresolved(call, "no-symbol:import-target");
-      if (ext.size === 1 && !cands.size) return external(call, [...ext][0], true, `imported from ${[...ext][0]}`);
-      if (cands.size === 1 && !ext.size) {
-        const s = [...cands.values()][0];
-        const aliased = recs[0].localName !== recs[0].importedName;
-        return settle(call, s, isTupleStruct(s) ? "constructor" : aliased ? "aliased-import" : "imported", `import ${recs[0].module}::${recs[0].importedName}`);
-      }
-      if (cands.size + ext.size > 1) return ambiguous(call, cands.size + ext.size, `imports named ${name}`);
-      return unresolved(call, `no-symbol:imported ${name}`);
-    }
+    if (recs.length) return bareViaImports(call, name, recs);
     const g = globs(file, caller, name);
     const gc = new Map<string, SymbolRecord>();
     for (const x of g.files) for (const s of lookupItems(x.file, name)) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
@@ -641,6 +679,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     call.confidence = "unresolved";
     if (call.evidence.some((e) => e.startsWith("macro:"))) continue;
     let outcome: Outcome;
+    currentCall = call;
     const rt = call.receiverText;
     if (call.evidence.includes("no-type:callee-expression")) outcome = unresolved(call, "no-type:callee-expression");
     else if (rt === undefined) outcome = bareCall(call, caller);

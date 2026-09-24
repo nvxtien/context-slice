@@ -107,3 +107,36 @@ test("inline-mod tuple struct is not a bare constructor at file scope", () => {
   );
   withRepo({ "src/lib.rs": "mod inner { pub struct W(pub u8); }\nfn t() { W(1); }\n" }, (dir) => notResolved(one(dir, "W", "t")));
 });
+
+// ---- IMPORTANT 2 / MINOR 7: function-local `use` and local fns
+test("a fn-local `use` shadows a module-level fn and type", () => {
+  withRepo({ "src/lib.rs": "fn f() {}\nfn t() { use ext::f; f(); }\n" }, (dir) => {
+    const e = one(dir, "f", "t");
+    assert.equal(e.target, undefined);
+    assert.equal(e.pkg, "ext");
+  });
+  withRepo(
+    {
+      "src/lib.rs": "mod a;\nstruct T;\nimpl T { fn new() {} }\nfn t() { use crate::a::T; T::new(); }\n",
+      "src/a.rs": "pub struct T;\nimpl T { pub fn new() {} }\n",
+    },
+    (dir) => assert.equal(one(dir, "new", "t").targetFile, "src/a.rs"),
+  );
+});
+
+test("a `use` in a nested block that does not enclose the call does not count", () => {
+  withRepo({ "src/lib.rs": "fn f() {}\nfn t() { { use ext::f; f(); } f(); }\n" }, (dir) => {
+    const list = edges(dir, "f", "t").sort((a, b) => (a.pkg ? -1 : 1) - (b.pkg ? -1 : 1));
+    assert.equal(list[0].pkg, "ext"); // inside the block
+    assert.equal(list[1].target, "f"); // after the block: the module-level fn
+  });
+});
+
+test("a local fn in a nested block does not resolve a call outside that block", () => {
+  withRepo({ "src/lib.rs": "fn h() {}\nfn t() { { fn h() {} h(); } h(); }\n" }, (dir) => {
+    const list = edges(dir, "h", "t");
+    assert.equal(list.length, 2);
+    assert.deepEqual(list.map((e) => e.target).sort(), ["h", "t::h"]);
+  });
+  withRepo({ "src/lib.rs": "fn t() { { fn h() {} } h(); }\n" }, (dir) => notResolved(one(dir, "h", "t")));
+});
