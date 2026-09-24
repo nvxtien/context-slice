@@ -192,7 +192,19 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     }
     return { t: "path", fromFile, segs };
   };
-  const moduleFile = (segs: string[], fromFile: string) => (segs.length ? deps.moduleOf(segs, fromFile).file : undefined);
+  // Exact module file of `segs`, unless a prefix's file declares an INLINE mod on the way: that mod has no
+  // file, and a same-named orphan/cfg-alternative file must never stand in for it.
+  const moduleFile = (segs: string[], fromFile: string) => {
+    if (!segs.length) return undefined;
+    for (let i = 1; i < segs.length; i++) {
+      const pf = deps.moduleOf(segs.slice(0, i), fromFile).file;
+      const inline = (topByFile.get(pf ?? "") ?? []).some(
+        (s) => s.kind === "namespace" && s.name === segs[i] && (childrenOf.get(s.id)?.length ?? 0) > 0,
+      );
+      if (inline) return undefined;
+    }
+    return deps.moduleOf(segs, fromFile).file;
+  };
 
   // ---- item lookup in a module file, following `pub use` chains
   const lookupItems = (file: string, name: string, seen = new Set<string>()): SymbolRecord[] => {
@@ -228,17 +240,23 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   // only brings that enum's variants, which are CamelCase too, so it cannot provide a lowercase name.
   // This rests on the naming CONVENTION only (`#[allow(non_camel_case_types)]` variants can break it), so a
   // file mentioning that attribute gets the conservative answer: every unseeable glob may provide the name.
-  const globs = (file: string, from: SymbolRecord, name: string) => {
+  const globs = (file: string, from: SymbolRecord, name: string, onlyLocal = false) => {
     const conventional = !fileText(from).text.includes("non_camel_case_types");
     const files: { file: string }[] = [];
+    // Non-glob imports of an ancestor scope that `use super::*` / `use crate::*` also brings in.
+    const providers: ImportRecord[] = [];
     let unknown = false;
-    for (const rec of importsFor(file, from).filter((r) => r.wildcard)) {
+    for (const rec of importsFor(file, from).filter((r) => r.wildcard && (!onlyLocal || scopeOf(r).vis?.kind === "function"))) {
       const t = importTarget(rec);
       const f = t.t === "path" ? moduleFile(t.segs, t.fromFile) : undefined;
-      if (f) files.push({ file: f });
-      else if (!(conventional && /^[a-z_]/.test(name) && /^[A-Z]/.test(rec.module.split("::").at(-1) ?? ""))) unknown = true;
+      if (f) {
+        files.push({ file: f });
+        if (t.t === "path" && t.segs.every(isAnchor))
+          for (const r of importsByFile.get(f) ?? [])
+            if (r !== rec && !r.wildcard && r.localName === name && !scopeOf(r).vis) providers.push(r);
+      } else if (!(conventional && /^[a-z_]/.test(name) && /^[A-Z]/.test(rec.module.split("::").at(-1) ?? ""))) unknown = true;
     }
-    return { files, unknown };
+    return { files, providers, unknown };
   };
 
   // ---- types
@@ -256,6 +274,15 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (!names) typeNamesInFile.set(s.filePath, (names = new Set()));
     names.add(s.name);
   }
+  /** Items declared in a fn body (in a block enclosing the call) that shadow module-level names. */
+  const localItems = (from: SymbolRecord, name: string) => {
+    const out: SymbolRecord[] = [];
+    for (let a: SymbolRecord | undefined = from; a; a = a.parentId ? byId.get(a.parentId) : undefined)
+      if (a.kind === "function")
+        for (const c of childrenOf.get(a.id) ?? [])
+          if (c.name === name && c.kind !== "function" && !isImpl(c) && declEnclosesCall(from, c.range)) out.push(c);
+    return out;
+  };
   const declsHere = (from: SymbolRecord, name: string) => typeDeclsByScope.get(ownScope(from))?.get(name) ?? [];
   const fromDecls = (list: SymbolRecord[]): TypeRes => {
     const uniq = [...new Map(list.map((s) => [s.id, s])).values()];
@@ -276,8 +303,18 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (ext.size) return { t: "external", pkg: [...ext][0], exact: true };
       return fromDecls(decls);
     };
+    const localTypes = localItems(from, name).filter((s) => TYPE_KINDS.has(s.kind));
+    if (localTypes.length) return fromDecls(localTypes);
     const local = localImportsNamed(file, from, name);
     if (local.length) return viaImports(local); // a fn-local `use` shadows module-level items
+    const lg = globs(file, from, name, true);
+    if (lg.files.length || lg.providers.length || lg.unknown) {
+      const lc = fromDecls(lg.files.flatMap((x) => lookupItems(x.file, name).filter((s) => TYPE_KINDS.has(s.kind))));
+      const lp = lg.providers.length ? viaImports(lg.providers) : undefined;
+      if (lc && lp) return { t: "ambiguous", n: 2 };
+      if (lc || lp) return lg.unknown ? undefined : (lc ?? lp);
+      if (lg.unknown) return undefined;
+    }
     const same = declsHere(from, name);
     if (same.length) return fromDecls(same);
     const recs = importsFor(file, from).filter((r) => !r.wildcard && r.localName === name);
@@ -285,7 +322,9 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const g = globs(file, from, name);
     const cands = g.files.flatMap((x) => lookupItems(x.file, name).filter((s) => TYPE_KINDS.has(s.kind)));
     const found = fromDecls(cands);
-    if (found) return g.unknown ? undefined : found;
+    const prov = g.providers.length ? viaImports(g.providers) : undefined;
+    if (found && prov) return { t: "ambiguous", n: 2 };
+    if (found || prov) return g.unknown ? undefined : (found ?? prov);
     if (STD_TYPES.has(name) && !(g.unknown && SHADOWABLE.has(name))) return { t: "external", pkg: "std", exact: false };
     return undefined;
   };
@@ -407,6 +446,10 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
         case "closure_parameters":
           collect(n);
           break;
+        case "const_item":
+        case "static_item":
+          if (n.childForFieldName("name")) set!.add(n.childForFieldName("name")!.text);
+          break;
         case "self_parameter":
           set!.add("self");
           break;
@@ -493,7 +536,10 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
         const caller = byId.get(call.callerId);
         const trait = [...(traitsByType.get(decl.id) ?? [])].find((t) => t.name === traitName && traitMethods(t, name).length > 0);
         const seen = caller ? typeName(traitName, caller.filePath, caller) : undefined;
-        const visibleHere = trait ? seen?.t === "decl" && seen.sym.id === trait.id : seen?.t === "external";
+        const owner = caller ? enclosing(caller) : undefined;
+        const ot = owner && isImpl(owner) ? implTrait(owner) : undefined;
+        const viaOwnImpl = !!ot && owner!.metadata?.implTrait === traitName && (trait ? ot.t === "decl" && ot.sym.id === trait.id : ot.t === "external");
+        const visibleHere = viaOwnImpl || (trait ? seen?.t === "decl" && seen.sym.id === trait.id : seen?.t === "external");
         if (!visibleHere) return unresolved(call, `no-type:trait-not-in-scope ${traitName}`);
       }
       return settle(
@@ -584,8 +630,25 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const name = call.calleeName;
     const file = caller.filePath;
     if (bindingsOf(caller).has(name) || bindingsOf(caller).has("*")) return unresolved(call, "no-type:local-binding");
+    const li = localItems(caller, name);
+    const localCtors = li.filter(isTupleStruct);
+    if (localCtors.length === 1 && li.length === 1) return settle(call, localCtors[0], "constructor", `constructor ${localCtors[0].qualifiedName}`);
+    if (li.some((x) => x.kind === "variable" || TYPE_KINDS.has(x.kind))) return unresolved(call, "no-type:local-item");
     const local = localImportsNamed(file, caller, name);
     if (local.length) return bareViaImports(call, name, local); // fn-local `use` shadows module items
+    const lg = globs(file, caller, name, true);
+    if (lg.files.length || lg.providers.length || lg.unknown) {
+      const lc = new Map<string, SymbolRecord>();
+      for (const x of lg.files) for (const s of lookupItems(x.file, name)) if (s.kind === "function" || isTupleStruct(s)) lc.set(s.id, s);
+      if (lc.size + lg.providers.length > 1) return ambiguous(call, lc.size + lg.providers.length, `local glob imports providing ${name}`);
+      if (lc.size + lg.providers.length === 1) {
+        if (lg.unknown) return unresolved(call, "no-type:glob-unknown");
+        if (lg.providers.length) return bareViaImports(call, name, lg.providers);
+        const s = [...lc.values()][0];
+        return settle(call, s, isTupleStruct(s) ? "constructor" : "imported", `glob import provides ${s.qualifiedName}`);
+      }
+      if (lg.unknown) return unresolved(call, "no-type:glob-unknown");
+    }
     const fns = scopeFns(caller, name);
     if (fns.length === 1) return settle(call, fns[0], "same-file", `same-file fn ${fns[0].qualifiedName}`);
     if (fns.length > 1) return ambiguous(call, fns.length, `same-scope fns named ${name}`);
@@ -597,7 +660,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const g = globs(file, caller, name);
     const gc = new Map<string, SymbolRecord>();
     for (const x of g.files) for (const s of lookupItems(x.file, name)) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
-    if (gc.size > 1) return ambiguous(call, gc.size, `glob imports providing ${name}`);
+    if (gc.size + g.providers.length > 1) return ambiguous(call, gc.size + g.providers.length, `glob imports providing ${name}`);
+    if (g.providers.length === 1 && !gc.size) return g.unknown ? unresolved(call, "no-type:glob-unknown") : bareViaImports(call, name, g.providers);
     if (gc.size === 1) {
       if (g.unknown) return unresolved(call, "no-type:glob-unknown");
       const s = [...gc.values()][0];
@@ -657,6 +721,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (anchored && foreignRoot(file)) return unresolved(call, "no-type:crate-root");
     // `T::f()` with a generic `T` in scope is a bound-based call (part B), never a same-named type.
     if (!anchored && isGenericParam(caller, first)) return unresolved(call, "no-type:generic-param");
+    const li = anchored ? [] : localItems(caller, first);
+    if (li.some((x) => x.kind === "namespace")) return unresolved(call, "no-type:local-item");
     if (!anchored) {
       const inline = inlineFn(call, caller, segs);
       if (inline) return inline;
@@ -664,7 +730,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       return inlineFn(call, caller, segs) ?? unresolved(call, "no-symbol:module");
     }
     // A first segment that names a local type.
-    if (!anchored && segs.length === 1 && declsHere(caller, first).length > 0) return typeOutcome(call, typeName(first, file, caller), name, "static");
+    if (!anchored && segs.length === 1 && (declsHere(caller, first).length > 0 || li.length > 0)) return typeOutcome(call, typeName(first, file, caller), name, "static");
     const full = expand(segs, file, caller);
     if (!full) return unresolved(call, "no-type:unknown-type");
     if (full.t === "ext") return external(call, full.pkg, full.exact, `external path ${segs.join("::")}`);
