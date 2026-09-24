@@ -196,7 +196,7 @@
     "expected": {
       "kind": "external",
       "confidence": "exact",
-      "why": "&str Into<Box<dyn Error>> via std From impls"
+      "why": ".into() on &str is core Into::into (external); it reaches the checkout's own From<&str> for ParseError (parse.rs:132), not Box<dyn Error>"
     }
   },
   {
@@ -212,7 +212,7 @@
     "expected": {
       "kind": "external",
       "confidence": "exact",
-      "why": "&str Into<Box<dyn Error>> via std From impls"
+      "why": ".into() on &str is core Into::into (external); it reaches the checkout's own From<&str> for ParseError (parse.rs:132), not Box<dyn Error>"
     }
   },
   {
@@ -228,7 +228,7 @@
     "expected": {
       "kind": "external",
       "confidence": "exact",
-      "why": "&str Into<Box<dyn Error>> via std From impls"
+      "why": ".into() on &str is core Into::into (external); it reaches the checkout's own From<&str> for frame::Error (frame.rs:284), not Box<dyn Error>"
     }
   },
   {

@@ -44,8 +44,13 @@ Per repo, per category: `quota = count` if `count <= 3`, else `min(5, max(1, rou
 After the ground truth and sample are committed they change only via `CORRECTIONS.md` (date, entry id, old -> new, evidence, who/how found), never silently.
 
 ## Labelling rules
-- `target.line` (1-based line of the definition's signature) is required for kind `resolved`; the evaluator matches by (file, simple name, line), not qualifiedName text.
-- qualifiedName of nested fns is `outer::inner`.
+- `target.line` is required for kind `resolved`; the evaluator matches by (file, simple name, line), not qualifiedName text. It is the 1-based line of the first token of the item itself (`pub`/`fn`/`struct`/`enum`/`trait`/variant), NOT its attributes and NOT its doc comments; for a multi-line signature, the first line.
+- `qualifiedName` format: `Type::method`, `Trait::method`, a free fn as its bare name, nested fn `outer::inner`, inline-`mod` prefix `m::f`; impl generics stripped; no crate-relative module prefix.
+- `confidence` for `external` and `unresolvable` labels is `exact` by convention and is not scored.
+- A target that exists in several `cfg` variants: label the definition matching a Unix host (or the cfg-neutral one) and say which variant in `why`.
+- A call whose CALLED symbol is a std/core trait method (e.g. `Into::into`, `Iterator::map`, `Clone::clone`) is `external`, even if the trait machinery ends up invoking an in-checkout impl (e.g. a `From` impl).
+- Callers in `tests/`, `examples/`, `src/bin/` and `#[cfg(test)]` modules are in scope; a call from them that reaches an item defined in the checkout is `resolved`.
+- `why` text is documentation, not scored; factual errors in it are still corrected through `CORRECTIONS.md`.
 - Macro invocation of a std/dependency macro: `external`. Invocation of a `macro_rules!` defined inside the checkout: `unresolvable`, with `why` naming the macro_rules location. Macro sites are scored separately (macro_unresolved_rate).
 
 ## Trait-candidate supplement (`sample-trait.json`)

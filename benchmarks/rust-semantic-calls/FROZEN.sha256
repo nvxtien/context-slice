@@ -1,0 +1,8 @@
+# Frozen Rust semantic-call ground truth: SHA-256 of each file canonicalised (JSON parsed, every `why` removed, keys sorted, no whitespace).
+# Checked by tests/rust-ground-truth-integrity.test.ts. Lines starting with # are ignored.
+# Regenerate (only after adding an entry to CORRECTIONS.md): npx tsx benchmarks/rust-freeze-hash.ts
+734347bb8c86e46852c8fa41f3a93a4697c7b6df7df683590702bb29b8c54818  walkdir.json
+9c7a23c2ce3b8cc5b860fbc2c8513df47728dc13f92b6df36e9896f0dac9d8a6  mini-redis.json
+8aed3d55d764036fc8e1eee4e7c7ce445741c616909534792426ff1850b82171  ripgrep-ignore.json
+045d075884b81aad0e388b7d110bf9ccbe82913bbc013cdff98aaed4cdec252e  sample.json
+afdfd4b1a9e2a78ff6281a807f65cfed323f89195d0279742a5ac27f48af0d6d  sample-trait.json

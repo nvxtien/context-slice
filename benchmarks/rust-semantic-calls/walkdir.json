@@ -40,7 +40,7 @@
         "line": 687
       },
       "confidence": "exact",
-      "why": "impl Iterator for FilterEntry<IntoIter,P> (lib.rs:1060) so self.it: IntoIter; next at lib.rs:679"
+      "why": "impl Iterator for FilterEntry<IntoIter,P> (lib.rs:1060) so self.it: IntoIter; IntoIter::next is at lib.rs:687 (impl Iterator for IntoIter at lib.rs:679)"
     }
   },
   {
@@ -56,7 +56,7 @@
     "expected": {
       "kind": "external",
       "confidence": "exact",
-      "why": "ent: &fs::DirEntry (dent.rs:187); std DirEntryExt::ino"
+      "why": "cfg(unix) from_entry (dent.rs:200): ent: &fs::DirEntry (dent.rs:202), std DirEntryExt imported at dent.rs:204; std DirEntryExt::ino"
     }
   },
   {
@@ -214,7 +214,7 @@
     "expected": {
       "kind": "external",
       "confidence": "exact",
-      "why": "outermost callee map_err on io::Result<FileType>; ent is fs::DirEntry (std)"
+      "why": "exists only in the cfg(windows) from_entry (dent.rs:185); outermost callee map_err on io::Result<FileType>; ent is fs::DirEntry (std)"
     }
   },
   {
