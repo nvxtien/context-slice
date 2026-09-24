@@ -73,6 +73,15 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return ids;
   };
 
+  const enclosing = (caller: SymbolRecord) => (caller.parentId ? byId.get(caller.parentId) : undefined);
+  const modContainer = (s: SymbolRecord) => {
+    for (let c = s.parentId ? byId.get(s.parentId) : undefined; c; c = c.parentId ? byId.get(c.parentId) : undefined)
+      if (c.kind === "namespace") return c;
+    return undefined;
+  };
+  /** Module scope a symbol lives in: its nearest inline `mod`, else the file's top level. */
+  const ownScope = (s: SymbolRecord) => modContainer(s)?.id ?? `file:${s.filePath}`;
+
   // ---- scopes of `use` / `pub use` records (by range containment in the file's fn/mod symbols)
   const scopeCache = new WeakMap<object, { vis?: SymbolRecord; mod?: SymbolRecord }>();
   const scopeOf = (rec: { filePath: string; range: SymbolRecord["range"] }) => {
@@ -88,8 +97,11 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     scopeCache.set(rec, (c = { vis, mod }));
     return c;
   };
+  // A `use` is visible only inside the module scope that declares it (an inline mod does not
+  // inherit its parent's imports) and, when declared in a fn body, only inside that fn.
   const visible = (rec: ImportRecord, from: SymbolRecord) => {
-    const vis = scopeOf(rec).vis;
+    const { vis, mod } = scopeOf(rec);
+    if ((mod?.id ?? "") !== (modContainer(from)?.id ?? "")) return false;
     return !vis || ancestors(from).has(vis.id);
   };
   const importsFor = (file: string, from: SymbolRecord) =>
@@ -165,21 +177,27 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
 
   // ---- types
-  const typeDeclsByFile = new Map<string, Map<string, SymbolRecord[]>>();
-  for (const [file, list] of symbolsByFile) {
-    const m = new Map<string, SymbolRecord[]>();
-    for (const s of list) {
-      const p = s.parentId ? byId.get(s.parentId) : undefined;
-      if (TYPE_KINDS.has(s.kind) && !isImpl(s) && (!p || p.kind === "namespace")) push(m, s.name, s);
-    }
-    typeDeclsByFile.set(file, m);
+  // Type declarations by module scope (never merged across inline mods) and, loosely, by file.
+  const typeDeclsByScope = new Map<string, Map<string, SymbolRecord[]>>();
+  const typeNamesInFile = new Map<string, Set<string>>();
+  for (const s of context.symbols) {
+    const p = s.parentId ? byId.get(s.parentId) : undefined;
+    if (!TYPE_KINDS.has(s.kind) || isImpl(s) || (p && p.kind !== "namespace")) continue;
+    const key = ownScope(s);
+    let m = typeDeclsByScope.get(key);
+    if (!m) typeDeclsByScope.set(key, (m = new Map()));
+    push(m, s.name, s);
+    let names = typeNamesInFile.get(s.filePath);
+    if (!names) typeNamesInFile.set(s.filePath, (names = new Set()));
+    names.add(s.name);
   }
+  const declsHere = (from: SymbolRecord, name: string) => typeDeclsByScope.get(ownScope(from))?.get(name) ?? [];
   const fromDecls = (list: SymbolRecord[]): TypeRes => {
     const uniq = [...new Map(list.map((s) => [s.id, s])).values()];
     return uniq.length === 1 ? { t: "decl", sym: uniq[0] } : uniq.length > 1 ? { t: "ambiguous", n: uniq.length } : undefined;
   };
   const typeName = (name: string, file: string, from: SymbolRecord): TypeRes => {
-    const same = typeDeclsByFile.get(file)?.get(name) ?? [];
+    const same = declsHere(from, name);
     if (same.length) return fromDecls(same);
     const recs = importsFor(file, from).filter((r) => !r.wildcard && r.localName === name);
     if (recs.length) {
@@ -231,7 +249,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return { t: "path", fromFile: file, segs };
   };
   const boundNames = (file: string, name: string) =>
-    (typeDeclsByFile.get(file)?.has(name) ?? false) ||
+    (typeNamesInFile.get(file)?.has(name) ?? false) ||
     (symbolsByFile.get(file) ?? []).some((s) => s.kind === "namespace" && s.name === name) ||
     (importsByFile.get(file) ?? []).some((r) => r.localName === name);
 
@@ -347,7 +365,6 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     bindingCache.set(caller.id, set);
     return set;
   };
-  const enclosing = (caller: SymbolRecord) => (caller.parentId ? byId.get(caller.parentId) : undefined);
   /** Identifiers inside the `<...>` generics of a fn / impl / trait head (over-approximate: bounds are included). */
   const headGenerics = (s: SymbolRecord) => {
     const cut = s.kind === "function" ? s.source.indexOf("(") : s.source.indexOf("{");
@@ -382,11 +399,6 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const isGenericParam = (caller: SymbolRecord, name: string) => {
     const owner = enclosing(caller);
     return headGenerics(caller).has(name) || (!!owner && (isImpl(owner) || owner.kind === "interface") && headGenerics(owner).has(name));
-  };
-  const modContainer = (s: SymbolRecord) => {
-    for (let c = s.parentId ? byId.get(s.parentId) : undefined; c; c = c.parentId ? byId.get(c.parentId) : undefined)
-      if (c.kind === "namespace") return c;
-    return undefined;
   };
 
   // ---- edge writers
@@ -492,7 +504,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const fns = scopeFns(caller, name);
     if (fns.length === 1) return settle(call, fns[0], "same-file", `same-file fn ${fns[0].qualifiedName}`);
     if (fns.length > 1) return ambiguous(call, fns.length, `same-scope fns named ${name}`);
-    const ctors = (typeDeclsByFile.get(file)?.get(name) ?? []).filter(isTupleStruct);
+    const ctors = declsHere(caller, name).filter(isTupleStruct);
     if (ctors.length === 1) return settle(call, ctors[0], "constructor", `constructor ${ctors[0].qualifiedName}`);
     if (ctors.length > 1) return ambiguous(call, ctors.length, `constructors named ${name}`);
     const recs = importsFor(file, caller).filter((r) => !r.wildcard && r.localName === name);
@@ -587,7 +599,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       return inlineFn(call, caller, segs) ?? unresolved(call, "no-symbol:module");
     }
     // A first segment that names a local type.
-    if (!anchored && segs.length === 1 && (typeDeclsByFile.get(file)?.has(first) ?? false)) return typeOutcome(call, typeName(first, file, caller), name, "static");
+    if (!anchored && segs.length === 1 && declsHere(caller, first).length > 0) return typeOutcome(call, typeName(first, file, caller), name, "static");
     const full = expand(segs, file, caller);
     if (!full) return unresolved(call, "no-type:unknown-type");
     if (full.t === "ext") return external(call, full.pkg, full.exact, `external path ${segs.join("::")}`);
