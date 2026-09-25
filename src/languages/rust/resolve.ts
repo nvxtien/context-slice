@@ -1,6 +1,6 @@
 import type { ImportRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
-import { resolveCallsA } from "./calls-resolve.js";
+import { leaveUnresolvedOnError, resolveCallsA } from "./calls-resolve.js";
 import { modulePathFor } from "./parse.js";
 
 /**
@@ -177,8 +177,13 @@ export function resolveRustCalls(context: ResolveContext) {
 
   // Exact module file for a containing-module path: the dummy trailing segment makes
   // resolveRustModule's "drop last segment" fallback land on `segments` itself, never a parent.
-  resolveCallsA(context, {
-    moduleOf: (segments, fromFile) =>
-      resolveRustModule([...segments, "\u0000"], fromFile, index, boundByFile.get(fromFile)),
-  });
+  try {
+    resolveCallsA(context, {
+      moduleOf: (segments, fromFile) =>
+        resolveRustModule([...segments, "\u0000"], fromFile, index, boundByFile.get(fromFile)),
+    });
+  } catch {
+    // A throw outside the per-edge guard (impl pre-pass): no Rust edge is trusted, the rebuild continues.
+    context.calls.forEach(leaveUnresolvedOnError);
+  }
 }

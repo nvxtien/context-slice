@@ -51,10 +51,37 @@ type TypeRes =
   | undefined;
 type Target = { t: "ext"; pkg: string } | { t: "path"; fromFile: string; segs: string[] } | { t: "unknown" };
 
+const BASE = (e: string) => e.startsWith("macro:") || e.startsWith("qualified:") || e === "no-type:callee-expression";
+// Keeps parse-time evidence (idempotent across warm re-resolution), drops earlier resolver evidence.
+const withBase = (call: CallEdge, ev: string) => [...new Set([...call.evidence.filter(BASE), ev])];
+/** The conservative outcome when resolution throws: no target, `no-type:resolver-error` (macro edges keep theirs). */
+export function leaveUnresolvedOnError(call: CallEdge) {
+  call.declaredTargetId = call.resolvedTargetId = call.externalPackage = undefined;
+  call.resolutionKind = "unresolved";
+  call.confidence = "unresolved";
+  if (!call.evidence.some((e) => e.startsWith("macro:"))) call.evidence = withBase(call, "no-type:resolver-error");
+}
+
+type Tree = ReturnType<ReturnType<typeof rustParser>["parse"]>;
+type FileFacts = { text: string; lines: number[]; tree?: Tree; conventional?: boolean };
+type Bindings = { source: string; sites: Map<string, Node[]>; calls: Map<string, Node>; root?: Node };
+/**
+ * Parse results that depend ONLY on the exact text they were parsed from, kept across resolve runs so warm
+ * rebuilds do not re-parse unchanged files / fns. Every hit is checked against the current text (a changed
+ * file or fn is re-parsed); entries for files / symbols no longer indexed are dropped at the start of each run.
+ */
+const PERSIST = {
+  files: new Map<string, FileFacts>(),
+  bindings: new Map<string, Bindings>(),
+  generics: new Map<string, { source: string; names: Set<string> }>(),
+};
+
 export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const byId = new Map<string, SymbolRecord>();
   const childrenOf = new Map<string, SymbolRecord[]>();
   const topByFile = new Map<string, SymbolRecord[]>();
+  /** Top-level symbols by `file\0name`, in symbol order (same order a filter over topByFile gives). */
+  const topNamed = new Map<string, SymbolRecord[]>();
   const push = <K, V>(m: Map<K, V[]>, k: K, v: V) => (m.get(k)?.push(v) ?? m.set(k, [v]));
   const symbolsByFile = new Map<string, SymbolRecord[]>();
   const methodCount = new Map<string, number>();
@@ -62,13 +89,18 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     byId.set(s.id, s);
     push(symbolsByFile, s.filePath, s);
     if (s.parentId) push(childrenOf, s.parentId, s);
-    else push(topByFile, s.filePath, s);
+    else {
+      push(topByFile, s.filePath, s);
+      push(topNamed, `${s.filePath}\0${s.name}`, s);
+    }
   }
   for (const s of context.symbols) {
     const p = s.parentId ? byId.get(s.parentId) : undefined;
     if (s.kind === "function" && p && (isImpl(p) || p.kind === "interface"))
       methodCount.set(s.name, (methodCount.get(s.name) ?? 0) + 1);
   }
+  for (const k of PERSIST.files.keys()) if (!symbolsByFile.has(k)) PERSIST.files.delete(k);
+  for (const m of [PERSIST.bindings, PERSIST.generics]) for (const k of m.keys()) if (!byId.has(k)) m.delete(k);
   const importsByFile = new Map<string, ImportRecord[]>();
   for (const r of context.imports) push(importsByFile, r.filePath, r);
 
@@ -124,20 +156,22 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if ((mod?.id ?? "") !== (modContainer(from)?.id ?? "")) return false;
     return !vis || ancestors(from).has(vis.id);
   };
-  type Tree = ReturnType<ReturnType<typeof rustParser>["parse"]>;
-  const sourceCache = new Map<string, { text: string; lines: number[]; tree?: Tree }>();
+  const sourceCache = new Map<string, FileFacts>();
   const fileText = (sample: SymbolRecord) => {
     let c = sourceCache.get(sample.filePath);
     if (!c) {
       const text = context.sourceOf(sample);
-      const lines = [0];
-      for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) lines.push(i + 1);
-      sourceCache.set(sample.filePath, (c = { text, lines }));
+      c = PERSIST.files.get(sample.filePath);
+      if (c?.text !== text) {
+        const lines = [0];
+        for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) lines.push(i + 1);
+        PERSIST.files.set(sample.filePath, (c = { text, lines }));
+      }
+      sourceCache.set(sample.filePath, c);
     }
     return c;
   };
   const offsetIn = (sample: SymbolRecord, line: number, col: number) => fileText(sample).lines[line - 1] + col;
-  /** [start, end) of the innermost `{ }` block enclosing `offset`, or undefined at module level. */
   /** Innermost node at `offset` of the sample's whole-file syntax tree, or undefined when unparsable. */
   const nodeAt = (sample: SymbolRecord, offset: number): Node | undefined => {
     const c = fileText(sample);
@@ -148,6 +182,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       return undefined;
     }
   };
+  /** [start, end) of the innermost `{ }` block enclosing `offset`, or undefined at module level. */
   const blockAt = (sample: SymbolRecord, offset: number): [number, number] | undefined => {
     for (let n: Node | null | undefined = nodeAt(sample, offset); n; n = n.parent)
       if (n.type === "block") return [n.startIndex, n.endIndex];
@@ -187,7 +222,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (!rec.wildcard && (!rec.importedName || (mod.length === 1 && mod[0] === rec.importedName))) return { t: "unknown" };
     let segs = rec.wildcard ? mod : [...mod, rec.importedName!];
     if (isAnchor(segs[0]) && foreignRoot(rec.filePath)) return { t: "unknown" };
-    let fromFile = rec.filePath;
+    const fromFile = rec.filePath;
     const container = scopeOf(rec).mod;
     if (container) {
       // `use` inside an inline mod: anchors are relative to that mod, not the file's module.
@@ -202,9 +237,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (!segs.length) return undefined;
     for (let i = isAnchor(segs[0]) ? 1 : 0; i < segs.length; i++) {
       const pf = i === 0 ? fromFile : deps.moduleOf(segs.slice(0, i), fromFile).file;
-      const inline = (topByFile.get(pf ?? "") ?? []).some(
-        (s) => s.kind === "namespace" && s.name === segs[i] && s.bodyRange !== undefined,
-      );
+      const inline = (topNamed.get(`${pf ?? ""}\0${segs[i]}`) ?? []).some((s) => s.kind === "namespace" && s.bodyRange !== undefined);
       if (inline) return undefined;
     }
     return deps.moduleOf(segs, fromFile).file;
@@ -223,7 +256,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const key = `${file}#${name}`;
     if (seen.has(key)) return [];
     seen.add(key);
-    const direct = (topByFile.get(file) ?? []).filter((s) => s.name === name && !isImpl(s));
+    const direct = (topNamed.get(`${file}\0${name}`) ?? []).filter((s) => !isImpl(s));
     if (direct.length) return direct;
     const out = new Map<string, SymbolRecord>();
     const add = (list: SymbolRecord[]) => list.forEach((s) => out.set(s.id, s));
@@ -261,7 +294,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const blockStartOf = (from: SymbolRecord, rec: ImportRecord) =>
     scopeOf(rec).vis?.kind === "function" ? (blockAt(from, offsetIn(from, rec.range.startLine, rec.range.startColumn))?.[0] ?? -1) : -1;
   const globs = (file: string, from: SymbolRecord, name: string, onlyLocal = false, minBlock = -1) => {
-    const conventional = !fileText(from).text.includes("non_camel_case_types");
+    const ft = fileText(from);
+    const conventional = (ft.conventional ??= !ft.text.includes("non_camel_case_types"));
     const files: { file: string }[] = [];
     // Items an ancestor scope imports by name, which `use super::*` / `use crate::*` also brings in.
     const extra: SymbolRecord[] = [];
@@ -459,15 +493,14 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const after = tail.slice(rt.length).trimStart();
     return after.startsWith("::") ? "path" : after.startsWith(".") ? "method" : undefined;
   };
-  const bindingCache = new Map<string, { sites: Map<string, Node[]>; calls: Map<string, Node>; root?: Node }>();
   /**
    * Binding sites (the let / parameter / for / closure / arm / const node) of every name bound by parameters,
    * `let`, closures, `for`, `if let`/`match` patterns anywhere in the caller, parsed from the caller's own source
    * (offsets relative to its start). `*` = unparsable: every name may be shadowed.
    */
-  const bindingSites = (caller: SymbolRecord) => {
-    let c = bindingCache.get(caller.id);
-    if (c) return c;
+  const bindingSites = (caller: SymbolRecord): Bindings => {
+    let c = PERSIST.bindings.get(caller.id);
+    if (c?.source === caller.source) return c;
     const sites = new Map<string, Node[]>();
     const calls = new Map<string, Node>();
     const add = (name: string, owner: Node) => push(sites, name, owner);
@@ -513,16 +546,15 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     } catch {
       sites.set("*", []);
     }
-    bindingCache.set(caller.id, (c = { sites, calls, root }));
+    PERSIST.bindings.set(caller.id, (c = { source: caller.source, sites, calls, root }));
     return c;
   };
   const bindingsOf = (caller: SymbolRecord) => bindingSites(caller).sites;
-  const genericsCache = new Map<string, Set<string>>();
   /** Type/const parameter names declared by a fn / impl / trait, read from its syntax tree (any qualifiers). */
   const declaredGenerics = (s: SymbolRecord) => {
-    let names = genericsCache.get(s.id);
-    if (names) return names;
-    names = new Set();
+    const hit = PERSIST.generics.get(s.id);
+    if (hit?.source === s.source) return hit.names;
+    const names = new Set<string>();
     try {
       // Only the head matters: parsing the whole impl/trait body is wasted work.
       const head = s.kind === "function" ? s.source : `${s.source.slice(0, Math.max(0, s.source.indexOf("{")))}{}`;
@@ -534,7 +566,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     } catch {
       names.add("*"); // unparsable head: any name may be a type parameter
     }
-    genericsCache.set(s.id, names);
+    PERSIST.generics.set(s.id, { source: s.source, names });
     return names;
   };
   /** Type parameters in scope for a caller: its own, its impl's or trait's. */
@@ -545,10 +577,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
 
   // ---- edge writers
-  const BASE = (e: string) => e.startsWith("macro:") || e.startsWith("qualified:") || e === "no-type:callee-expression";
   type Outcome = () => void;
-  // Keeps parse-time evidence (idempotent across warm re-resolution), drops earlier resolver evidence.
-  const withBase = (call: CallEdge, ev: string) => [...new Set([...call.evidence.filter(BASE), ev])];
   const unresolved = (call: CallEdge, ev: string): Outcome => () => {
     call.evidence = withBase(call, ev);
   };
@@ -978,7 +1007,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       const f = fns(childrenOf.get(p.id) ?? []);
       if (f.length || p.kind === "namespace") return f;
     }
-    return fns(topByFile.get(caller.filePath) ?? []);
+    return fns(topNamed.get(`${caller.filePath}\0${name}`) ?? []);
   };
 
   const bareViaImports = (call: CallEdge, name: string, recs: ImportRecord[]): Outcome => {
@@ -1174,6 +1203,11 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     call.confidence = "unresolved";
     if (call.evidence.some((e) => e.startsWith("macro:"))) continue;
     currentCall = call;
-    resolveEdge(call, caller)();
+    try {
+      resolveEdge(call, caller)();
+    } catch {
+      // One bad edge (e.g. a file that vanished mid-rebuild) must not abort the rebuild for every language.
+      leaveUnresolvedOnError(call);
+    }
   }
 }
