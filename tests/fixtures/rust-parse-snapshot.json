@@ -1,0 +1,970 @@
+{
+ "indexVersion": "1.7.0",
+ "files": {
+  "functions.rs": {
+   "parseError": false,
+   "symbols": [
+    {
+     "kind": "function",
+     "name": "create_order",
+     "qualifiedName": "functions::create_order",
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 3,
+      "endColumn": 1
+     },
+     "metadata": {
+      "declaredTypes": {
+       "id": "u32"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "fetch_order",
+     "qualifiedName": "functions::fetch_order",
+     "range": {
+      "startLine": 5,
+      "startColumn": 0,
+      "endLine": 7,
+      "endColumn": 1
+     },
+     "metadata": {
+      "async": true,
+      "declaredTypes": {
+       "id": "u32"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "helper",
+     "qualifiedName": "functions::helper",
+     "range": {
+      "startLine": 9,
+      "startColumn": 0,
+      "endLine": 9,
+      "endColumn": 14
+     }
+    }
+   ],
+   "imports": [],
+   "exports": [],
+   "calls": []
+  },
+  "modules.rs": {
+   "parseError": false,
+   "symbols": [
+    {
+     "kind": "namespace",
+     "name": "service",
+     "qualifiedName": "modules::service",
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 1,
+      "endColumn": 12
+     }
+    },
+    {
+     "kind": "namespace",
+     "name": "repository",
+     "qualifiedName": "modules::repository",
+     "range": {
+      "startLine": 3,
+      "startColumn": 0,
+      "endLine": 11,
+      "endColumn": 1
+     }
+    },
+    {
+     "kind": "class",
+     "name": "InMemoryRepository",
+     "qualifiedName": "modules::repository::InMemoryRepository",
+     "range": {
+      "startLine": 4,
+      "startColumn": 4,
+      "endLine": 4,
+      "endColumn": 34
+     }
+    },
+    {
+     "kind": "type",
+     "name": "impl InMemoryRepository",
+     "qualifiedName": "modules::repository::impl InMemoryRepository",
+     "range": {
+      "startLine": 6,
+      "startColumn": 4,
+      "endLine": 10,
+      "endColumn": 5
+     },
+     "metadata": {
+      "implSelfType": "InMemoryRepository"
+     }
+    },
+    {
+     "kind": "function",
+     "name": "new",
+     "qualifiedName": "modules::repository::impl InMemoryRepository::new",
+     "range": {
+      "startLine": 7,
+      "startColumn": 8,
+      "endLine": 9,
+      "endColumn": 9
+     }
+    },
+    {
+     "kind": "variable",
+     "name": "MAX_RETRIES",
+     "qualifiedName": "modules::MAX_RETRIES",
+     "range": {
+      "startLine": 13,
+      "startColumn": 0,
+      "endLine": 13,
+      "endColumn": 31
+     }
+    },
+    {
+     "kind": "variable",
+     "name": "COUNTER",
+     "qualifiedName": "modules::COUNTER",
+     "range": {
+      "startLine": 14,
+      "startColumn": 0,
+      "endLine": 14,
+      "endColumn": 24
+     }
+    },
+    {
+     "kind": "type",
+     "name": "OrderId",
+     "qualifiedName": "modules::OrderId",
+     "range": {
+      "startLine": 15,
+      "startColumn": 0,
+      "endLine": 15,
+      "endColumn": 19
+     }
+    }
+   ],
+   "imports": [],
+   "exports": [],
+   "calls": []
+  },
+  "structs_enums.rs": {
+   "parseError": false,
+   "symbols": [
+    {
+     "kind": "class",
+     "name": "Order",
+     "qualifiedName": "structs_enums::Order",
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 4,
+      "endColumn": 1
+     },
+     "metadata": {
+      "declaredTypes": {
+       "id": "u32",
+       "status": "Status"
+      }
+     }
+    },
+    {
+     "kind": "class",
+     "name": "UserId",
+     "qualifiedName": "structs_enums::UserId",
+     "range": {
+      "startLine": 6,
+      "startColumn": 0,
+      "endLine": 6,
+      "endColumn": 22
+     },
+     "metadata": {
+      "declaredTypes": {
+       "0": "String"
+      }
+     }
+    },
+    {
+     "kind": "enum",
+     "name": "Status",
+     "qualifiedName": "structs_enums::Status",
+     "range": {
+      "startLine": 8,
+      "startColumn": 0,
+      "endLine": 12,
+      "endColumn": 1
+     }
+    }
+   ],
+   "imports": [],
+   "exports": [],
+   "calls": []
+  },
+  "traits_impls.rs": {
+   "parseError": false,
+   "symbols": [
+    {
+     "kind": "interface",
+     "name": "Repository",
+     "qualifiedName": "traits_impls::Repository",
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 6,
+      "endColumn": 1
+     }
+    },
+    {
+     "kind": "function",
+     "name": "save",
+     "qualifiedName": "traits_impls::Repository::save",
+     "range": {
+      "startLine": 2,
+      "startColumn": 4,
+      "endLine": 2,
+      "endColumn": 55
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&self",
+       "order": "&Order"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "find",
+     "qualifiedName": "traits_impls::Repository::find",
+     "range": {
+      "startLine": 3,
+      "startColumn": 4,
+      "endLine": 5,
+      "endColumn": 5
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&self",
+       "id": "u32"
+      }
+     }
+    },
+    {
+     "kind": "class",
+     "name": "PostgresRepository",
+     "qualifiedName": "traits_impls::PostgresRepository",
+     "range": {
+      "startLine": 8,
+      "startColumn": 0,
+      "endLine": 8,
+      "endColumn": 30
+     }
+    },
+    {
+     "kind": "type",
+     "name": "impl PostgresRepository",
+     "qualifiedName": "traits_impls::impl PostgresRepository",
+     "range": {
+      "startLine": 10,
+      "startColumn": 0,
+      "endLine": 16,
+      "endColumn": 1
+     },
+     "metadata": {
+      "implSelfType": "PostgresRepository"
+     }
+    },
+    {
+     "kind": "function",
+     "name": "new",
+     "qualifiedName": "traits_impls::impl PostgresRepository::new",
+     "range": {
+      "startLine": 11,
+      "startColumn": 4,
+      "endLine": 13,
+      "endColumn": 5
+     }
+    },
+    {
+     "kind": "function",
+     "name": "connect",
+     "qualifiedName": "traits_impls::impl PostgresRepository::connect",
+     "range": {
+      "startLine": 15,
+      "startColumn": 4,
+      "endLine": 15,
+      "endColumn": 24
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&self"
+      }
+     }
+    },
+    {
+     "kind": "type",
+     "name": "impl Repository for PostgresRepository",
+     "qualifiedName": "traits_impls::impl Repository for PostgresRepository",
+     "range": {
+      "startLine": 18,
+      "startColumn": 0,
+      "endLine": 22,
+      "endColumn": 1
+     },
+     "metadata": {
+      "implSelfType": "PostgresRepository",
+      "implTrait": "Repository"
+     }
+    },
+    {
+     "kind": "function",
+     "name": "save",
+     "qualifiedName": "traits_impls::impl Repository for PostgresRepository::save",
+     "range": {
+      "startLine": 19,
+      "startColumn": 4,
+      "endLine": 21,
+      "endColumn": 5
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&self",
+       "order": "&Order"
+      }
+     }
+    }
+   ],
+   "imports": [],
+   "exports": [],
+   "calls": [
+    {
+     "calleeName": "Ok",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 20,
+      "startColumn": 8,
+      "endLine": 20,
+      "endColumn": 14
+     },
+     "evidence": []
+    }
+   ]
+  },
+  "snapshot_calls.rs": {
+   "parseError": false,
+   "symbols": [
+    {
+     "kind": "namespace",
+     "name": "inner",
+     "qualifiedName": "snapshot_calls::inner",
+     "range": {
+      "startLine": 5,
+      "startColumn": 0,
+      "endLine": 7,
+      "endColumn": 1
+     }
+    },
+    {
+     "kind": "class",
+     "name": "Thing",
+     "qualifiedName": "snapshot_calls::inner::Thing",
+     "range": {
+      "startLine": 6,
+      "startColumn": 4,
+      "endLine": 6,
+      "endColumn": 29
+     },
+     "metadata": {
+      "declaredTypes": {
+       "0": "u8"
+      }
+     }
+    },
+    {
+     "kind": "interface",
+     "name": "Visit",
+     "qualifiedName": "snapshot_calls::Visit",
+     "range": {
+      "startLine": 9,
+      "startColumn": 0,
+      "endLine": 15,
+      "endColumn": 1
+     }
+    },
+    {
+     "kind": "function",
+     "name": "visit",
+     "qualifiedName": "snapshot_calls::Visit::visit",
+     "range": {
+      "startLine": 10,
+      "startColumn": 4,
+      "endLine": 10,
+      "endColumn": 39
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&mut self",
+       "t": "&T"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "done",
+     "qualifiedName": "snapshot_calls::Visit::done",
+     "range": {
+      "startLine": 11,
+      "startColumn": 4,
+      "endLine": 13,
+      "endColumn": 5
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&self"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "log",
+     "qualifiedName": "snapshot_calls::Visit::log",
+     "range": {
+      "startLine": 14,
+      "startColumn": 4,
+      "endLine": 14,
+      "endColumn": 20
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&self"
+      }
+     }
+    },
+    {
+     "kind": "class",
+     "name": "Walker",
+     "qualifiedName": "snapshot_calls::Walker",
+     "range": {
+      "startLine": 17,
+      "startColumn": 0,
+      "endLine": 21,
+      "endColumn": 1
+     },
+     "metadata": {
+      "declaredTypes": {
+       "root": "&'a str",
+       "items": "Vec<R>",
+       "map": "HashMap<String, Box<dyn Visit<u8>>>"
+      }
+     }
+    },
+    {
+     "kind": "type",
+     "name": "impl Walker<'a, R>",
+     "qualifiedName": "snapshot_calls::impl Walker<'a, R>",
+     "range": {
+      "startLine": 23,
+      "startColumn": 0,
+      "endLine": 41,
+      "endColumn": 1
+     },
+     "metadata": {
+      "implSelfType": "Walker"
+     }
+    },
+    {
+     "kind": "function",
+     "name": "new",
+     "qualifiedName": "snapshot_calls::impl Walker<'a, R>::new",
+     "range": {
+      "startLine": 24,
+      "startColumn": 4,
+      "endLine": 26,
+      "endColumn": 5
+     },
+     "metadata": {
+      "declaredTypes": {
+       "root": "&'a str"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "run",
+     "qualifiedName": "snapshot_calls::impl Walker<'a, R>::run",
+     "range": {
+      "startLine": 28,
+      "startColumn": 4,
+      "endLine": 40,
+      "endColumn": 5
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&mut self",
+       "v": "&mut impl Visit<u8>",
+       "extra": "Option<R>"
+      }
+     }
+    },
+    {
+     "kind": "type",
+     "name": "impl Visit<u8> for Walker<'a, R>",
+     "qualifiedName": "snapshot_calls::impl Visit<u8> for Walker<'a, R>",
+     "range": {
+      "startLine": 43,
+      "startColumn": 0,
+      "endLine": 48,
+      "endColumn": 1
+     },
+     "metadata": {
+      "implSelfType": "Walker",
+      "implTrait": "Visit"
+     }
+    },
+    {
+     "kind": "function",
+     "name": "visit",
+     "qualifiedName": "snapshot_calls::impl Visit<u8> for Walker<'a, R>::visit",
+     "range": {
+      "startLine": 44,
+      "startColumn": 4,
+      "endLine": 47,
+      "endColumn": 5
+     },
+     "metadata": {
+      "declaredTypes": {
+       "self": "&mut self",
+       "t": "&u8"
+      }
+     }
+    },
+    {
+     "kind": "function",
+     "name": "helper",
+     "qualifiedName": "snapshot_calls::helper",
+     "range": {
+      "startLine": 50,
+      "startColumn": 0,
+      "endLine": 53,
+      "endColumn": 1
+     },
+     "metadata": {
+      "declaredTypes": {
+       "a": "usize",
+       "b": "usize"
+      }
+     }
+    }
+   ],
+   "imports": [
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 1,
+      "endColumn": 62
+     },
+     "module": "std::collections",
+     "importedName": "HashMap",
+     "localName": "HashMap"
+    },
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 1,
+      "endColumn": 62
+     },
+     "module": "std::collections",
+     "importedName": "hash_map",
+     "localName": "hash_map"
+    },
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 1,
+      "endColumn": 62
+     },
+     "module": "std::collections::hash_map",
+     "importedName": "Entry",
+     "localName": "E"
+    },
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 2,
+      "startColumn": 0,
+      "endLine": 2,
+      "endColumn": 38
+     },
+     "module": "crate::a::b",
+     "importedName": "c",
+     "localName": "c"
+    },
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 2,
+      "startColumn": 0,
+      "endLine": 2,
+      "endColumn": 38
+     },
+     "module": "crate::a::b",
+     "importedName": "d",
+     "localName": "dd"
+    },
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 2,
+      "startColumn": 0,
+      "endLine": 2,
+      "endColumn": 38
+     },
+     "module": "crate::e",
+     "wildcard": true
+    },
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "kind": "named",
+     "typeOnly": false,
+     "range": {
+      "startLine": 3,
+      "startColumn": 0,
+      "endLine": 3,
+      "endColumn": 27
+     },
+     "module": "self::inner",
+     "importedName": "Thing",
+     "localName": "Thing"
+    }
+   ],
+   "exports": [
+    {
+     "filePath": "src/snapshot_calls.rs",
+     "language": "rust",
+     "exportedName": "Thing",
+     "fromModule": "self::inner",
+     "sourceName": "Thing",
+     "typeOnly": false,
+     "range": {
+      "startLine": 3,
+      "startColumn": 0,
+      "endLine": 3,
+      "endColumn": 27
+     }
+    }
+   ],
+   "calls": [
+    {
+     "calleeName": "log",
+     "receiverText": "self",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 12,
+      "startColumn": 8,
+      "endLine": 12,
+      "endColumn": 18
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "new",
+     "receiverText": "Vec",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 25,
+      "startColumn": 28,
+      "endLine": 25,
+      "endColumn": 38
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "new",
+     "receiverText": "HashMap",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 25,
+      "startColumn": 45,
+      "endLine": 25,
+      "endColumn": 59
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "len",
+     "receiverText": "self.items",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 29,
+      "startColumn": 23,
+      "endLine": 29,
+      "endColumn": 39
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "new",
+     "receiverText": "Walker",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 30,
+      "startColumn": 16,
+      "endLine": 30,
+      "endColumn": 43
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "count",
+     "receiverText": "<call>",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 31,
+      "startColumn": 8,
+      "endLine": 31,
+      "endColumn": 49
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "map",
+     "receiverText": "<call>",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 31,
+      "startColumn": 8,
+      "endLine": 31,
+      "endColumn": 41
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "iter",
+     "receiverText": "w.items",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 31,
+      "startColumn": 8,
+      "endLine": 31,
+      "endColumn": 22
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "clone",
+     "receiverText": "x",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 31,
+      "startColumn": 31,
+      "endLine": 31,
+      "endColumn": 40
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "visit",
+     "receiverText": "v",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 32,
+      "startColumn": 8,
+      "endLine": 32,
+      "endColumn": 19
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "done",
+     "receiverText": "<call>",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 33,
+      "startColumn": 8,
+      "endLine": 33,
+      "endColumn": 41
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "unwrap",
+     "receiverText": "<call>",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 33,
+      "startColumn": 8,
+      "endLine": 33,
+      "endColumn": 34
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "get",
+     "receiverText": "self.map",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 33,
+      "startColumn": 8,
+      "endLine": 33,
+      "endColumn": 25
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "helper",
+     "argumentCount": 2,
+     "range": {
+      "startLine": 34,
+      "startColumn": 8,
+      "endLine": 34,
+      "endColumn": 34
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "log",
+     "receiverText": "<Self as Visit<u8>>",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 35,
+      "startColumn": 8,
+      "endLine": 35,
+      "endColumn": 38
+     },
+     "evidence": [
+      "qualified:Visit"
+     ]
+    },
+    {
+     "calleeName": "println",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 36,
+      "startColumn": 8,
+      "endLine": 36,
+      "endColumn": 38
+     },
+     "evidence": [
+      "macro:println"
+     ]
+    },
+    {
+     "calleeName": "Thing",
+     "receiverText": "inner",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 37,
+      "startColumn": 8,
+      "endLine": 37,
+      "endColumn": 23
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "unwrap",
+     "receiverText": "<call>",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 38,
+      "startColumn": 8,
+      "endLine": 38,
+      "endColumn": 28
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "Some",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 38,
+      "startColumn": 8,
+      "endLine": 38,
+      "endColumn": 19
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "Ok",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 39,
+      "startColumn": 8,
+      "endLine": 39,
+      "endColumn": 14
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "done",
+     "receiverText": "self",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 45,
+      "startColumn": 8,
+      "endLine": 45,
+      "endColumn": 19
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "Ok",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 52,
+      "startColumn": 4,
+      "endLine": 52,
+      "endColumn": 16
+     },
+     "evidence": []
+    },
+    {
+     "calleeName": "f",
+     "argumentCount": 1,
+     "range": {
+      "startLine": 52,
+      "startColumn": 7,
+      "endLine": 52,
+      "endColumn": 11
+     },
+     "evidence": []
+    }
+   ]
+  },
+  "large.rs (generated)": {
+   "counts": {
+    "symbols": 1385,
+    "imports": 2,
+    "calls": 1385
+   },
+   "sha256": "76ece2e75f5156e1539e76044bfe55af3ce90afb890693e1b0df5baf24e37613"
+  }
+ }
+}
