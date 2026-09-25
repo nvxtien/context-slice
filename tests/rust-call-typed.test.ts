@@ -216,6 +216,67 @@ test("a path through a private `use` of an ancestor module resolves (crate-root 
   );
 });
 
+test("negative: nested wrappers are never external std when the inner type is in-repo", () => {
+  withRepo(
+    {
+      "src/lib.rs": `use std::sync::Arc;\nuse std::rc::Rc;\nuse std::pin::Pin;\n${AB}pub trait Tr { fn run(&self); }\n` +
+        "fn a(x: Arc<Box<A>>) { x.run(); }\nfn b(x: Rc<Rc<B>>) { x.run(); }\nfn c(x: Pin<Box<A>>) { x.run(); }\nfn d(x: Arc<Box<dyn Tr>>) { x.run(); }\nfn e(x: Arc<Box<A>>) { x.clone(); }\n",
+    },
+    (dir) => {
+      exact(one(dir, "run", "a"), "A::run");
+      exact(one(dir, "run", "b"), "B::run");
+      unresolved(one(dir, "run", "c"), "no-type:"); // Pin derefs to its pointer's target: not modelled
+      probableDecl(one(dir, "run", "d"), "Tr::run");
+      assert.notEqual(one(dir, "clone", "e").kind, "declared-type");
+    },
+  );
+});
+
+test("negative: a sibling's glob sees only pub `use` records, not private ones", () => {
+  withRepo(
+    {
+      "src/lib.rs": "mod a;\nmod b;\nmod c;\n",
+      "src/c.rs": "pub struct String;\nimpl String { pub fn len(&self) -> usize { 0 } }\n",
+      "src/b.rs": "use crate::c::String;\n",
+      "src/a.rs": "use crate::b::*;\nfn t(s: String) { s.len(); }\n",
+    },
+    (dir) => {
+      const e = one(dir, "len", "a::t");
+      assert.equal(e.target, undefined, JSON.stringify(e));
+    },
+  );
+});
+
+test("negative: `Trait::default()` never types the receiver as the trait", () => {
+  withRepo(
+    { "src/lib.rs": `${AB}pub trait Tr { fn run(&self); }\nfn t() { Tr::default().run(); }\n` },
+    (dir) => assert.notEqual(one(dir, "run", "t").kind, "interface"),
+  );
+});
+
+test("negative: a blanket impl of an in-scope trait makes a unique method ambiguous; out of scope it does not", () => {
+  withRepo(
+    {
+      "src/lib.rs": "mod ext;\npub struct A;\npub trait Tr { fn go(&self); }\nimpl Tr for A { fn go(&self) {} }\nfn a(x: A) { use crate::ext::Ext; x.go(); }\nfn b(x: A) { x.go(); }\n",
+      "src/ext.rs": "pub trait Ext { fn go(&self); }\nimpl<T: ?Sized> Ext for &T { fn go(&self) {} }\n",
+    },
+    (dir) => {
+      unresolved(one(dir, "go", "a"), "ambiguous:");
+      assert.equal(one(dir, "go", "b").conf, "exact");
+    },
+  );
+});
+
+test("perf guard: long method chains resolve in linear time", () => {
+  const chain = ".n()".repeat(80);
+  const fns = Array.from({ length: 50 }, (_, i) => `fn f${i}(b: B) { b${chain}.run(); }`).join("\n");
+  withRepo({ "src/lib.rs": `pub struct B;\nimpl B { pub fn n(&self) -> B { B } pub fn run(&self) {} }\n${fns}\n` }, (dir) => {
+    const t0 = Date.now();
+    exact(one(dir, "run", "f7"), "B::run");
+    assert.ok(Date.now() - t0 < 10_000, `took ${Date.now() - t0} ms`);
+  });
+});
+
 test("negative: a receiver of a generic external wrapper with a project method name is not external", () => {
   withRepo(
     { "src/lib.rs": `${AB}fn a(x: std::cell::RefCell<A>) { x.borrow().run(); }\n` },

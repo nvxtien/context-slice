@@ -1,6 +1,6 @@
 import type { CallEdge, ImportRecord, SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
-import { callEdge, field, rustParser, typeParamNames, type Node } from "./parse.js";
+import { callEdge, field, modulePathFor, rustParser, typeParamNames, type Node } from "./parse.js";
 
 /**
  * Rust call resolution. Part A (structural targets): `self.m()`, `Self::f()`/`Type::f()`, module paths and
@@ -211,7 +211,15 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
 
   // ---- item lookup in a module file, following `pub use` chains
-  const lookupItems = (file: string, name: string, seen = new Set<string>()): SymbolRecord[] => {
+  // `use` declarations with a visibility modifier (they also produce export records).
+  const pubUses = new Set(context.exports.map((e) => `${e.filePath}:${e.range.startLine}:${e.range.startColumn}`));
+  /** True when module file `asker` is `file`'s module or one of its descendants. */
+  const within = (asker: string, file: string) => {
+    const a = modulePathFor(asker);
+    return modulePathFor(file).every((seg, i) => a[i] === seg);
+  };
+  /** Items named `name` in module `file` as seen from module file `asker` (private `use` only from within). */
+  const lookupItems = (file: string, name: string, asker: string, seen = new Set<string>()): SymbolRecord[] => {
     const key = `${file}#${name}`;
     if (seen.has(key)) return [];
     seen.add(key);
@@ -219,19 +227,20 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (direct.length) return direct;
     const out = new Map<string, SymbolRecord>();
     const add = (list: SymbolRecord[]) => list.forEach((s) => out.set(s.id, s));
-    // Module-level `use` records, `pub` or not: a private `use` is importable from the module and its
-    // descendants, and compiling code only names it from there.
+    // Module-level `use` records: `pub` ones always, private ones only for the module itself and its descendants.
+    const inside = within(asker, file);
     for (const rec of importsByFile.get(file) ?? []) {
       const sc = scopeOf(rec);
       if (sc.vis || sc.mod || rec.externalPackage) continue;
+      if (!inside && !pubUses.has(`${rec.filePath}:${rec.range.startLine}:${rec.range.startColumn}`)) continue;
       const mod = rec.module.split("::");
       if (isAnchor(mod[0]) && foreignRoot(file)) continue;
       if (rec.wildcard) {
         const f = moduleFile(mod, file);
-        if (f) add(lookupItems(f, name, seen));
+        if (f) add(lookupItems(f, name, file, seen));
       } else if (rec.localName === name && rec.importedName && !(mod.length === 1 && mod[0] === rec.importedName)) {
         const f = moduleFile(mod, file);
-        if (f) add(lookupItems(f, rec.importedName, seen));
+        if (f) add(lookupItems(f, rec.importedName, file, seen));
       }
     }
     return [...out.values()];
@@ -240,7 +249,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const segs = name === undefined ? t.segs.slice(0, -1) : t.segs;
     const last = name ?? t.segs.at(-1)!;
     const f = moduleFile(segs, t.fromFile);
-    return f ? lookupItems(f, last) : [];
+    return f ? lookupItems(f, last, t.fromFile) : [];
   };
 
   // ---- glob imports visible from a scope
@@ -327,7 +336,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const named = local.length ? Math.max(...local.map((r) => blockStartOf(from, r))) : -1;
     const lg = globs(file, from, name, true, named);
     if (lg.hit) {
-      const lc = fromDecls([...lg.files.flatMap((x) => lookupItems(x.file, name)), ...lg.extra].filter((s) => TYPE_KINDS.has(s.kind)));
+      const lc = fromDecls([...lg.files.flatMap((x) => lookupItems(x.file, name, file)), ...lg.extra].filter((s) => TYPE_KINDS.has(s.kind)));
       if (lc) return lg.unknown ? undefined : lc;
       if (lg.unknown) return undefined;
     }
@@ -337,7 +346,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const recs = importsFor(file, from).filter((r) => !r.wildcard && r.localName === name);
     if (recs.length) return viaImports(recs);
     const g = globs(file, from, name);
-    const cands = [...g.files.flatMap((x) => lookupItems(x.file, name)), ...g.extra].filter((s) => TYPE_KINDS.has(s.kind));
+    const cands = [...g.files.flatMap((x) => lookupItems(x.file, name, file)), ...g.extra].filter((s) => TYPE_KINDS.has(s.kind));
     const found = fromDecls(cands);
     if (found) return g.unknown ? undefined : found;
     if (STD_TYPES.has(name) && !(g.unknown && SHADOWABLE.has(name))) return { t: "external", pkg: "std", exact: false };
@@ -425,9 +434,17 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   // Method names an in-repo impl gives to something that is not an in-repo type (blanket `impl<T> Tr for T`,
   // `impl Tr for String`): a receiver of an external type may reach them.
   const foreignNames = new Set<string>();
+  // In-repo traits with a blanket impl (`impl<T: ..> Tr for T` / `for &T`): any type may have their methods.
+  // Filtered lazily: the generics reader is declared further down.
+  const blanketCands: { impl: SymbolRecord; trait: SymbolRecord; self: string }[] = [];
+  let blanketCache: SymbolRecord[] | undefined;
+  const blanketTraits = () =>
+    (blanketCache ??= [...new Set(blanketCands.filter((b) => declaredGenerics(b.impl).has(b.self)).map((b) => b.trait))]);
   for (const impl of context.symbols.filter(isImpl)) {
     if (impl.metadata?.implSelfType && implSelf(impl)?.t === "decl") continue;
     const tr = impl.metadata?.implTrait ? implTrait(impl) : undefined;
+    if (tr?.t === "decl" && tr.sym.kind === "interface" && impl.name.includes(" for "))
+      blanketCands.push({ impl, trait: tr.sym, self: impl.name.slice(impl.name.lastIndexOf(" for ") + 5).replace(/^&\s*('\w+\s+)?(mut\s+)?/, "").trim() });
     for (const owner of [impl, ...(tr?.t === "decl" ? [tr.sym] : [])])
       for (const m of childrenOf.get(owner.id) ?? []) if (m.kind === "function") foreignNames.add(m.name);
   }
@@ -442,7 +459,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const after = tail.slice(rt.length).trimStart();
     return after.startsWith("::") ? "path" : after.startsWith(".") ? "method" : undefined;
   };
-  const bindingCache = new Map<string, { sites: Map<string, Node[]>; root?: Node }>();
+  const bindingCache = new Map<string, { sites: Map<string, Node[]>; calls: Map<string, Node>; root?: Node }>();
   /**
    * Binding sites (the let / parameter / for / closure / arm / const node) of every name bound by parameters,
    * `let`, closures, `for`, `if let`/`match` patterns anywhere in the caller, parsed from the caller's own source
@@ -452,6 +469,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     let c = bindingCache.get(caller.id);
     if (c) return c;
     const sites = new Map<string, Node[]>();
+    const calls = new Map<string, Node>();
     const add = (name: string, owner: Node) => push(sites, name, owner);
     const collect = (n: Node | null, owner: Node) => {
       if (!n) return;
@@ -465,6 +483,9 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     };
     const visit = (n: Node) => {
       switch (n.type) {
+        case "call_expression":
+          calls.set(`${n.startIndex}:${n.endIndex}`, n);
+          break;
         case "let_declaration":
         case "for_expression":
         case "let_condition":
@@ -492,7 +513,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     } catch {
       sites.set("*", []);
     }
-    bindingCache.set(caller.id, (c = { sites, root }));
+    bindingCache.set(caller.id, (c = { sites, calls, root }));
     return c;
   };
   const bindingsOf = (caller: SymbolRecord) => bindingSites(caller).sites;
@@ -556,6 +577,18 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const memberOf = (call: CallEdge, decl: SymbolRecord, name: string, kind: CallEdge["resolutionKind"], extraTrait?: SymbolRecord): Outcome => {
     if (decl.kind === "interface") return traitDecl(call, [decl], name);
     const cands = (methodsByType.get(decl.id) ?? []).filter((m) => m.sym.name === name);
+    // A blanket impl of an in-scope trait declaring `name` competes with the type's own methods.
+    const asker = byId.get(call.callerId);
+    const blanket = asker
+      ? blanketTraits().filter((t) => {
+          if (!traitMethods(t, name).length) return false;
+          const seen = typeName(t.name, asker.filePath, asker);
+          return seen?.t === "decl" && seen.sym.id === t.id;
+        })
+      : [];
+    const own = [...(traitsByType.get(decl.id) ?? []), ...(extraTrait ? [extraTrait] : [])].filter((t) => !blanket.includes(t));
+    if (blanket.length && (cands.length || own.some((t) => traitMethods(t, name).length)))
+      return ambiguous(call, cands.length + blanket.length, `${decl.name}::${name} or blanket impl of ${blanket.map((t) => t.name).join(", ")}`);
     if (cands.length === 1) {
       const { sym, impl } = cands[0];
       const traitName = impl.metadata?.implTrait;
@@ -774,7 +807,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
 
   /** Type of the local `name` used at `use` (caller-source offset): one binding site only, a plain `let`/parameter. */
-  const localTy = (caller: SymbolRecord, name: string, use: number, depth: number): Ty => {
+  const localTy = (caller: SymbolRecord, name: string, use: number): Ty => {
     const { sites } = bindingSites(caller);
     const list = sites.get(name) ?? [];
     if (sites.has("*") || list.length !== 1) return undefined; // shadowed / re-bound: never guessed
@@ -785,33 +818,56 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (site.type === "parameter") return tyOf(field(site, "type"), sigScope(caller, true));
     if (site.type !== "let_declaration" || use < site.endIndex || !site.parent || use >= site.parent.endIndex) return undefined;
     const tn = field(site, "type");
-    return tn ? tyOf(tn, bodyScope(caller)) : exprTy(caller, field(site, "value"), depth + 1);
+    return tn ? tyOf(tn, bodyScope(caller)) : exprTy(caller, field(site, "value"));
   };
 
+  // Recursion only moves to strictly earlier / smaller nodes (receivers, a `let` value before its use), so it
+  // terminates; the guard only bounds the stack. A result computed under a cut is never memoized.
+  let exprDepth = 0;
+  let cuts = 0;
   /** Type of expression `n` (a node of the caller's own source tree). */
-  const exprTy = (caller: SymbolRecord, n: Node | null | undefined, depth = 0): Ty => {
-    if (!n || depth > 8) return undefined;
+  const exprTy = (caller: SymbolRecord, n: Node | null | undefined): Ty => {
+    if (!n) return undefined;
+    if (exprDepth > 200) {
+      cuts++;
+      return undefined;
+    }
+    exprDepth++;
+    try {
+      return exprTyOf(caller, n);
+    } finally {
+      exprDepth--;
+    }
+  };
+  const exprTyOf = (caller: SymbolRecord, n: Node): Ty => {
     switch (n.type) {
       case "self":
         return selfTy(ownerOf(caller), true);
       case "identifier":
-        return localTy(caller, n.text, n.startIndex, depth);
+        return localTy(caller, n.text, n.startIndex);
       case "parenthesized_expression":
       case "reference_expression":
-        return exprTy(caller, n.namedChildren.at(-1), depth + 1);
+        return exprTy(caller, n.namedChildren.at(-1));
       case "field_expression":
-        return fieldTy(derefTy(exprTy(caller, field(n, "value"), depth + 1)), field(n, "field")?.text ?? "");
+        return fieldTy(derefTy(exprTy(caller, field(n, "value"))), field(n, "field")?.text ?? "");
       case "struct_expression":
         return tyOf(field(n, "name"), bodyScope(caller));
       case "try_expression":
-        return unwrapTy(exprTy(caller, n.namedChild(0), depth + 1));
-      case "call_expression":
-        return callTy(caller, n, depth);
+        return unwrapTy(exprTy(caller, n.namedChild(0)));
+      case "call_expression": {
+        // Memoized per caller and node: each call of a chain is typed once, not once per outer call.
+        const key = `${caller.id}:${n.startIndex}:${n.endIndex}`;
+        if (callTyMemo.has(key)) return callTyMemo.get(key);
+        const before = cuts;
+        const ty = callTy(caller, n);
+        if (cuts === before) callTyMemo.set(key, ty);
+        return ty;
+      }
     }
     return undefined;
   };
 
-  let probeDepth = 0;
+  const callTyMemo = new Map<string, Ty>();
   /** Resolves a call found inside another call's receiver as if it were an edge (not recorded). */
   const probe = (caller: SymbolRecord, n: Node): CallEdge => {
     const edge = callEdge(n, caller.filePath, caller.id);
@@ -823,25 +879,23 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const s = at(n.startPosition);
     const e = at(n.endPosition);
     edge.range = { startLine: s.line, startColumn: s.col, endLine: e.line, endColumn: e.col };
-    if (edge.evidence.some((x) => x.startsWith("macro:")) || probeDepth > 8) return edge;
+    if (edge.evidence.some((x) => x.startsWith("macro:"))) return edge;
     const saved = currentCall;
     currentCall = edge;
-    probeDepth++;
     try {
-      resolveEdge(edge, caller)();
+      resolveEdge(edge, caller, n)();
     } finally {
-      probeDepth--;
       currentCall = saved;
     }
     return edge;
   };
 
   /** Return type of a call: the exact in-repo target's declared return type, or std `unwrap`-style / `Default` rules. */
-  const callTy = (caller: SymbolRecord, n: Node, depth: number): Ty => {
+  const callTy = (caller: SymbolRecord, n: Node): Ty => {
     let fn = field(n, "function");
     if (fn?.type === "generic_function") fn = field(fn, "function");
     if (fn?.type === "field_expression" && UNWRAP.has(field(fn, "field")?.text ?? "")) {
-      const inner = unwrapTy(exprTy(caller, field(fn, "value"), depth + 1));
+      const inner = unwrapTy(exprTy(caller, field(fn, "value")));
       if (inner) return inner;
     }
     const edge = probe(caller, n);
@@ -857,7 +911,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const segs = (path?.type === "generic_type" ? field(path, "type") : path)?.text.split("::").map((s) => s.trim()) ?? [];
     if (!segs.length || !segs.every((s) => IDENT.test(s)) || isGenericParam(caller, segs[0])) return undefined;
     const t = segs.length === 1 && segs[0] === "Self" ? selfTy(ownerOf(caller), false) : named(typePath(segs, caller.filePath, caller), segs.at(-1)!, [], 0);
-    if (t?.t !== "decl") return undefined;
+    if (t?.t !== "decl" || t.sym.kind === "interface") return undefined;
     const name = edge.calleeName;
     return (name === "default" && edge.argumentCount === 0) || (t.sym.kind === "enum" && /^[A-Z]/.test(name)) ? t : undefined;
   };
@@ -878,7 +932,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
         return external(call, new Set(ty.ext).size === 1 ? ty.ext[0] : "std-or-dependency", false, `trait bound method ${name}`);
       return cands ? unresolved(call, `no-type:generic-param candidates=${cands}`) : external(call, "std-or-dependency", false, nowhere);
     }
-    if (WRAPPERS.has(ty.name) && ty.args.length === 1 && ty.args[0]?.t !== "ext") {
+    if (WRAPPERS.has(ty.name) && ty.args.length === 1) {
+      // Nested wrappers (`Arc<Box<A>>`) recurse here, so the wrapper-method guard applies at every level.
       if (!cands) return external(call, ty.pkg, ty.exact, nowhere);
       if (WRAPPER_METHODS.has(name)) return ambiguous(call, 2, `${ty.name}::${name} or the inner type's`);
       return methodOn(call, ty.args[0]);
@@ -886,22 +941,24 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (!cands) return external(call, ty.pkg, ty.exact, `method on external type ${ty.name}`);
     // A project method name: an in-repo trait impl for this type, or a Deref to an in-repo generic argument, may win.
     if (foreignNames.has(name)) return ambiguous(call, 2, `external ${ty.name}::${name} or an in-repo trait impl`);
-    if (ty.args.some((a) => a?.t !== "ext")) return unresolved(call, `no-type:external-generic ${ty.name} candidates=${cands}`);
+    const local = (t: Ty): boolean => !t || t.t !== "ext" || t.args.some(local);
+    if (ty.args.some(local)) return unresolved(call, `no-type:external-generic ${ty.name} candidates=${cands}`);
     return external(call, ty.pkg, ty.exact, `method on external type ${ty.name}`);
   };
-  const methodCall = (call: CallEdge, caller: SymbolRecord): Outcome => {
-    const { root } = bindingSites(caller);
-    const rel = offsetIn(caller, call.range.startLine, call.range.startColumn) - offsetIn(caller, caller.range.startLine, caller.range.startColumn);
-    const relEnd = offsetIn(caller, call.range.endLine, call.range.endColumn) - offsetIn(caller, caller.range.startLine, caller.range.startColumn);
-    let n: Node | null | undefined = root?.descendantForIndex(rel);
-    while (n && !(n.type === "call_expression" && n.startIndex === rel && n.endIndex === relEnd)) n = n.parent;
+  const methodCall = (call: CallEdge, caller: SymbolRecord, node?: Node): Outcome => {
+    let n = node;
+    if (!n) {
+      const base = offsetIn(caller, caller.range.startLine, caller.range.startColumn);
+      const rel = offsetIn(caller, call.range.startLine, call.range.startColumn) - base;
+      n = bindingSites(caller).calls.get(`${rel}:${offsetIn(caller, call.range.endLine, call.range.endColumn) - base}`);
+    }
     let fn = n && field(n, "function");
     if (fn?.type === "generic_function") fn = field(fn, "function");
     return methodOn(call, fn?.type === "field_expression" ? exprTy(caller, field(fn, "value")) : undefined);
   };
 
   // ---- rules
-  const selfMethod =(call: CallEdge, caller: SymbolRecord): Outcome => {
+  const selfMethod = (call: CallEdge, caller: SymbolRecord): Outcome => {
     const { res, trait, owner } = enclosingTypeRes(caller);
     if (!owner) return unresolved(call, "no-type:self-outside-impl");
     if (!res) return unresolved(call, `no-type:self-type-unknown candidates=${methodCount.get(call.calleeName) ?? 0}`);
@@ -963,7 +1020,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const lg = globs(file, caller, name, true, Math.max(named, fnStart));
     if (lg.hit) {
       const lc = new Map<string, SymbolRecord>();
-      for (const s of [...lg.files.flatMap((x) => lookupItems(x.file, name)), ...lg.extra])
+      for (const s of [...lg.files.flatMap((x) => lookupItems(x.file, name, file)), ...lg.extra])
         if (s.kind === "function" || isTupleStruct(s)) lc.set(s.id, s);
       if (lc.size > 1) return ambiguous(call, lc.size, `local glob imports providing ${name}`);
       if (lc.size === 1) {
@@ -984,7 +1041,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (recs.length) return bareViaImports(call, name, recs);
     const g = globs(file, caller, name);
     const gc = new Map<string, SymbolRecord>();
-    for (const s of [...g.files.flatMap((x) => lookupItems(x.file, name)), ...g.extra]) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
+    for (const s of [...g.files.flatMap((x) => lookupItems(x.file, name, file)), ...g.extra]) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
     if (gc.size > 1) return ambiguous(call, gc.size, `glob imports providing ${name}`);
     if (gc.size === 1) {
       if (g.unknown) return unresolved(call, "no-type:glob-unknown");
@@ -999,7 +1056,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const moduleFn = (call: CallEdge, name: string, full: { fromFile: string; segs: string[]; via?: ImportRecord }, kind: CallEdge["resolutionKind"]): Outcome | undefined => {
     const f = moduleFile(full.segs, full.fromFile);
     if (!f) return undefined;
-    const cands = lookupItems(f, name).filter((s) => s.kind === "function" || isTupleStruct(s));
+    const cands = lookupItems(f, name, full.fromFile).filter((s) => s.kind === "function" || isTupleStruct(s));
     if (cands.length === 1) {
       const s = cands[0];
       return settle(call, s, isTupleStruct(s) ? "constructor" : kind, `module path ${full.segs.join("::")}::${name}`);
@@ -1094,7 +1151,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return unresolved(call, "no-type:unknown-type");
   };
 
-  function resolveEdge(call: CallEdge, caller: SymbolRecord): Outcome {
+  function resolveEdge(call: CallEdge, caller: SymbolRecord, node?: Node): Outcome {
     const rt = call.receiverText;
     if (call.evidence.includes("no-type:callee-expression")) return unresolved(call, "no-type:callee-expression");
     if (rt === undefined) return bareCall(call, caller);
@@ -1104,7 +1161,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       const segs = rt.split("::");
       return rt.startsWith("<") || !segs.every((s) => IDENT.test(s)) ? unresolved(call, "no-type:qualified-path") : pathCall(call, caller, segs);
     }
-    if (shape === "method") return methodCall(call, caller);
+    if (shape === "method") return methodCall(call, caller, node);
     return unresolved(call, "no-type:call-shape");
   }
 
