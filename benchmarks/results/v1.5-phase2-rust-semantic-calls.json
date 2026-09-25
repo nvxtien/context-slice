@@ -1,0 +1,2220 @@
+{
+  "meta": {
+    "date": "2026-09-25T07:36:25.784Z",
+    "head": "9df7fb4",
+    "indexVersion": "1.7.0",
+    "argv": "--final --split all --out benchmarks/results/v1.5-phase2-rust-semantic-calls.json"
+  },
+  "reports": {
+    "dev": {
+      "split": "dev",
+      "repos": [
+        "mini-redis",
+        "ripgrep-ignore",
+        "walkdir"
+      ],
+      "pooled": {
+        "n": 45,
+        "recallExact": {
+          "k": 20,
+          "n": 21
+        },
+        "recallInclProbable": {
+          "k": 20,
+          "n": 21
+        },
+        "precision": {
+          "k": 20,
+          "n": 20
+        },
+        "externalAgreement": {
+          "k": 24,
+          "n": 24
+        },
+        "falsePositiveEdgeRate": {
+          "k": 0,
+          "n": 45
+        },
+        "wrongExact": 0,
+        "wrongProbable": 0,
+        "externalBreakdown": {
+          "agree": 24,
+          "nameRule": 10,
+          "claimedResolved": 0,
+          "unresolved": 0,
+          "noEdge": 0
+        },
+        "coverage": {
+          "k": 45,
+          "n": 45
+        }
+      },
+      "byRepo": {
+        "mini-redis": {
+          "n": 16,
+          "recallExact": {
+            "k": 3,
+            "n": 4
+          },
+          "recallInclProbable": {
+            "k": 3,
+            "n": 4
+          },
+          "precision": {
+            "k": 3,
+            "n": 3
+          },
+          "externalAgreement": {
+            "k": 12,
+            "n": 12
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 16
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 12,
+            "nameRule": 4,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 16,
+            "n": 16
+          }
+        },
+        "ripgrep-ignore": {
+          "n": 11,
+          "recallExact": {
+            "k": 5,
+            "n": 5
+          },
+          "recallInclProbable": {
+            "k": 5,
+            "n": 5
+          },
+          "precision": {
+            "k": 5,
+            "n": 5
+          },
+          "externalAgreement": {
+            "k": 6,
+            "n": 6
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 11
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 6,
+            "nameRule": 2,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 11,
+            "n": 11
+          }
+        },
+        "walkdir": {
+          "n": 18,
+          "recallExact": {
+            "k": 12,
+            "n": 12
+          },
+          "recallInclProbable": {
+            "k": 12,
+            "n": 12
+          },
+          "precision": {
+            "k": 12,
+            "n": 12
+          },
+          "externalAgreement": {
+            "k": 6,
+            "n": 6
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 18
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 6,
+            "nameRule": 4,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 18,
+            "n": 18
+          }
+        }
+      },
+      "byCategory": {
+        "assoc-Type": {
+          "n": 7,
+          "recallExact": {
+            "k": 5,
+            "n": 5
+          },
+          "recallInclProbable": {
+            "k": 5,
+            "n": 5
+          },
+          "precision": {
+            "k": 5,
+            "n": 5
+          },
+          "externalAgreement": {
+            "k": 2,
+            "n": 2
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 7
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 2,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 7,
+            "n": 7
+          }
+        },
+        "bare-closure-or-ctor": {
+          "n": 4,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 4,
+            "n": 4
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 4,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        },
+        "bare-fn": {
+          "n": 3,
+          "recallExact": {
+            "k": 3,
+            "n": 3
+          },
+          "recallInclProbable": {
+            "k": 3,
+            "n": 3
+          },
+          "precision": {
+            "k": 3,
+            "n": 3
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 0
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        },
+        "chained-method": {
+          "n": 11,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 10,
+            "n": 10
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 11
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 10,
+            "nameRule": 9,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 11,
+            "n": 11
+          }
+        },
+        "field-method": {
+          "n": 4,
+          "recallExact": {
+            "k": 3,
+            "n": 3
+          },
+          "recallInclProbable": {
+            "k": 3,
+            "n": 3
+          },
+          "precision": {
+            "k": 3,
+            "n": 3
+          },
+          "externalAgreement": {
+            "k": 1,
+            "n": 1
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 1,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        },
+        "local-method": {
+          "n": 8,
+          "recallExact": {
+            "k": 6,
+            "n": 7
+          },
+          "recallInclProbable": {
+            "k": 6,
+            "n": 7
+          },
+          "precision": {
+            "k": 6,
+            "n": 6
+          },
+          "externalAgreement": {
+            "k": 1,
+            "n": 1
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 8
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 1,
+            "nameRule": 1,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 8,
+            "n": 8
+          }
+        },
+        "param-method": {
+          "n": 1,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 1,
+            "n": 1
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 1
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 1,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 1,
+            "n": 1
+          }
+        },
+        "path-generic": {
+          "n": 6,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 5,
+            "n": 5
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 6
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 5,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 6,
+            "n": 6
+          }
+        },
+        "self-method": {
+          "n": 1,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 0
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 1
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 1,
+            "n": 1
+          }
+        }
+      },
+      "bySplit": {
+        "dev": {
+          "n": 45,
+          "recallExact": {
+            "k": 20,
+            "n": 21
+          },
+          "recallInclProbable": {
+            "k": 20,
+            "n": 21
+          },
+          "precision": {
+            "k": 20,
+            "n": 20
+          },
+          "externalAgreement": {
+            "k": 24,
+            "n": 24
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 45
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 24,
+            "nameRule": 10,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 45,
+            "n": 45
+          }
+        }
+      },
+      "macro": {
+        "n": 7,
+        "unresolvedWithMacroEvidence": 7,
+        "macroUnresolvedRate": {
+          "k": 7,
+          "n": 7
+        },
+        "claimedResolved": 0
+      },
+      "supplement": {
+        "n": 4,
+        "metrics": {
+          "n": 4,
+          "recallExact": {
+            "k": 2,
+            "n": 2
+          },
+          "recallInclProbable": {
+            "k": 2,
+            "n": 2
+          },
+          "precision": {
+            "k": 2,
+            "n": 2
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 2
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 2,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        }
+      },
+      "extraction": {
+        "labelled": {
+          "k": 56,
+          "n": 56
+        },
+        "perRepo": {
+          "mini-redis": {
+            "labelled": {
+              "k": 18,
+              "n": 18
+            },
+            "edges": 1049,
+            "oracleTotal": 1049,
+            "macroEdges": 103,
+            "oracleMacro": 103
+          },
+          "ripgrep-ignore": {
+            "labelled": {
+              "k": 15,
+              "n": 15
+            },
+            "edges": 3706,
+            "oracleTotal": 3706,
+            "macroEdges": 548,
+            "oracleMacro": 548
+          },
+          "walkdir": {
+            "labelled": {
+              "k": 23,
+              "n": 23
+            },
+            "edges": 1135,
+            "oracleTotal": 1135,
+            "macroEdges": 270,
+            "oracleMacro": 270
+          }
+        }
+      },
+      "trait": {
+        "inherent-resolved": 17,
+        "trait-declaration-resolved": 0,
+        "trait-impl-resolved": 1,
+        "other-resolved": 4,
+        "ambiguous": 0,
+        "unresolved": 3,
+        "unresolved-no-type": 3,
+        "external": 24
+      },
+      "failures": {
+        "byCategory": {
+          "CALL_RESOLUTION": 0,
+          "TRAIT_RESOLUTION": 0,
+          "IMPL_RESOLUTION": 1,
+          "USE_RESOLUTION": 0,
+          "MACRO_EXPANSION_LIMIT": 0,
+          "SYMBOL_INDEX": 0,
+          "PARSER": 0,
+          "GROUND_TRUTH": 0,
+          "UNKNOWN": 0
+        },
+        "rows": [
+          {
+            "id": "mini-redis:tests/client.rs:36:11",
+            "category": "local-method",
+            "repo": "mini-redis",
+            "split": "dev",
+            "label": "resolved src/clients/client.rs:194",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "client.set(\"hello\", \"world\".into())",
+            "why": "client is mini_redis::clients::Client from Client::connect; set client.rs:194 (library under src/)",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=4"
+            ]
+          }
+        ]
+      },
+      "targetSymbolsPresent": {
+        "k": 23,
+        "n": 23
+      },
+      "coldWarm": {
+        "walkdir": true,
+        "mini-redis": true,
+        "ripgrep-ignore": true
+      }
+    },
+    "held-out": {
+      "split": "held-out",
+      "repos": [
+        "mini-redis",
+        "ripgrep-ignore",
+        "walkdir"
+      ],
+      "pooled": {
+        "n": 29,
+        "recallExact": {
+          "k": 8,
+          "n": 12
+        },
+        "recallInclProbable": {
+          "k": 8,
+          "n": 12
+        },
+        "precision": {
+          "k": 8,
+          "n": 8
+        },
+        "externalAgreement": {
+          "k": 17,
+          "n": 17
+        },
+        "falsePositiveEdgeRate": {
+          "k": 0,
+          "n": 29
+        },
+        "wrongExact": 0,
+        "wrongProbable": 0,
+        "externalBreakdown": {
+          "agree": 17,
+          "nameRule": 5,
+          "claimedResolved": 0,
+          "unresolved": 0,
+          "noEdge": 0
+        },
+        "coverage": {
+          "k": 29,
+          "n": 29
+        }
+      },
+      "byRepo": {
+        "mini-redis": {
+          "n": 11,
+          "recallExact": {
+            "k": 2,
+            "n": 2
+          },
+          "recallInclProbable": {
+            "k": 2,
+            "n": 2
+          },
+          "precision": {
+            "k": 2,
+            "n": 2
+          },
+          "externalAgreement": {
+            "k": 9,
+            "n": 9
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 11
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 9,
+            "nameRule": 3,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 11,
+            "n": 11
+          }
+        },
+        "ripgrep-ignore": {
+          "n": 14,
+          "recallExact": {
+            "k": 5,
+            "n": 9
+          },
+          "recallInclProbable": {
+            "k": 5,
+            "n": 9
+          },
+          "precision": {
+            "k": 5,
+            "n": 5
+          },
+          "externalAgreement": {
+            "k": 5,
+            "n": 5
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 14
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 5,
+            "nameRule": 2,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 14,
+            "n": 14
+          }
+        },
+        "walkdir": {
+          "n": 4,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 3,
+            "n": 3
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 3,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        }
+      },
+      "byCategory": {
+        "assoc-Type": {
+          "n": 3,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 2,
+            "n": 2
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 2,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        },
+        "bare-closure-or-ctor": {
+          "n": 4,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 4,
+            "n": 4
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 4,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        },
+        "bare-fn": {
+          "n": 3,
+          "recallExact": {
+            "k": 3,
+            "n": 3
+          },
+          "recallInclProbable": {
+            "k": 3,
+            "n": 3
+          },
+          "precision": {
+            "k": 3,
+            "n": 3
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 0
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        },
+        "chained-method": {
+          "n": 4,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 4,
+            "n": 4
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 4,
+            "nameRule": 4,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        },
+        "field-method": {
+          "n": 1,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 1,
+            "n": 1
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 1
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 1,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 1,
+            "n": 1
+          }
+        },
+        "local-method": {
+          "n": 6,
+          "recallExact": {
+            "k": 1,
+            "n": 5
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 5
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 1,
+            "n": 1
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 6
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 1,
+            "nameRule": 1,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 6,
+            "n": 6
+          }
+        },
+        "param-method": {
+          "n": 3,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 2,
+            "n": 2
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 2,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        },
+        "path-module": {
+          "n": 3,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 3,
+            "n": 3
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 3,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        },
+        "self-method": {
+          "n": 2,
+          "recallExact": {
+            "k": 2,
+            "n": 2
+          },
+          "recallInclProbable": {
+            "k": 2,
+            "n": 2
+          },
+          "precision": {
+            "k": 2,
+            "n": 2
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 0
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 2
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 2,
+            "n": 2
+          }
+        }
+      },
+      "bySplit": {
+        "held-out": {
+          "n": 29,
+          "recallExact": {
+            "k": 8,
+            "n": 12
+          },
+          "recallInclProbable": {
+            "k": 8,
+            "n": 12
+          },
+          "precision": {
+            "k": 8,
+            "n": 8
+          },
+          "externalAgreement": {
+            "k": 17,
+            "n": 17
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 29
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 17,
+            "nameRule": 5,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 29,
+            "n": 29
+          }
+        }
+      },
+      "macro": {
+        "n": 5,
+        "unresolvedWithMacroEvidence": 5,
+        "macroUnresolvedRate": {
+          "k": 5,
+          "n": 5
+        },
+        "claimedResolved": 0
+      },
+      "supplement": {
+        "n": 9,
+        "metrics": {
+          "n": 9,
+          "recallExact": {
+            "k": 6,
+            "n": 8
+          },
+          "recallInclProbable": {
+            "k": 8,
+            "n": 8
+          },
+          "precision": {
+            "k": 8,
+            "n": 8
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 1
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 9
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 1,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 9,
+            "n": 9
+          }
+        }
+      },
+      "extraction": {
+        "labelled": {
+          "k": 43,
+          "n": 43
+        },
+        "perRepo": {
+          "mini-redis": {
+            "labelled": {
+              "k": 12,
+              "n": 12
+            },
+            "edges": 1049,
+            "oracleTotal": 1049,
+            "macroEdges": 103,
+            "oracleMacro": 103
+          },
+          "ripgrep-ignore": {
+            "labelled": {
+              "k": 26,
+              "n": 26
+            },
+            "edges": 3706,
+            "oracleTotal": 3706,
+            "macroEdges": 548,
+            "oracleMacro": 548
+          },
+          "walkdir": {
+            "labelled": {
+              "k": 5,
+              "n": 5
+            },
+            "edges": 1135,
+            "oracleTotal": 1135,
+            "macroEdges": 270,
+            "oracleMacro": 270
+          }
+        }
+      },
+      "trait": {
+        "inherent-resolved": 11,
+        "trait-declaration-resolved": 2,
+        "trait-impl-resolved": 0,
+        "other-resolved": 3,
+        "ambiguous": 0,
+        "unresolved": 5,
+        "unresolved-no-type": 5,
+        "external": 17
+      },
+      "failures": {
+        "byCategory": {
+          "CALL_RESOLUTION": 0,
+          "TRAIT_RESOLUTION": 0,
+          "IMPL_RESOLUTION": 4,
+          "USE_RESOLUTION": 0,
+          "MACRO_EXPANSION_LIMIT": 0,
+          "SYMBOL_INDEX": 0,
+          "PARSER": 0,
+          "GROUND_TRUTH": 0,
+          "UNKNOWN": 0
+        },
+        "rows": [
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/walk.rs:2476:21",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/walk.rs:744",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "builder.min_depth(Some(0))",
+            "why": "builder = WalkBuilder::new(..) in test; WalkBuilder::min_depth walk.rs:744",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=1"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/dir.rs:1203:66",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/lib.rs:545",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "td.path()",
+            "why": "td is crate::tests::TempDir (lib.rs:512, from tmpdir()); path at lib.rs:545",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=9"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/dir.rs:537:19",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/lib.rs:437",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "mat.is_ignore()",
+            "why": "mat = self.matched_ignore(..) -> Match<IgnoreMatch> (dir.rs:548); impl<T> Match<T>::is_ignore lib.rs:437",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=2"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/dir.rs:1537:17",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/lib.rs:545",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "td.path()",
+            "why": "td is crate::tests::TempDir (lib.rs:512, from tmpdir()); path at lib.rs:545",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=9"
+            ]
+          }
+        ]
+      },
+      "targetSymbolsPresent": {
+        "k": 20,
+        "n": 20
+      },
+      "coldWarm": {
+        "walkdir": true,
+        "mini-redis": true,
+        "ripgrep-ignore": true
+      }
+    },
+    "all": {
+      "split": "all",
+      "repos": [
+        "mini-redis",
+        "ripgrep-ignore",
+        "walkdir"
+      ],
+      "pooled": {
+        "n": 74,
+        "recallExact": {
+          "k": 28,
+          "n": 33
+        },
+        "recallInclProbable": {
+          "k": 28,
+          "n": 33
+        },
+        "precision": {
+          "k": 28,
+          "n": 28
+        },
+        "externalAgreement": {
+          "k": 41,
+          "n": 41
+        },
+        "falsePositiveEdgeRate": {
+          "k": 0,
+          "n": 74
+        },
+        "wrongExact": 0,
+        "wrongProbable": 0,
+        "externalBreakdown": {
+          "agree": 41,
+          "nameRule": 15,
+          "claimedResolved": 0,
+          "unresolved": 0,
+          "noEdge": 0
+        },
+        "coverage": {
+          "k": 74,
+          "n": 74
+        }
+      },
+      "byRepo": {
+        "mini-redis": {
+          "n": 27,
+          "recallExact": {
+            "k": 5,
+            "n": 6
+          },
+          "recallInclProbable": {
+            "k": 5,
+            "n": 6
+          },
+          "precision": {
+            "k": 5,
+            "n": 5
+          },
+          "externalAgreement": {
+            "k": 21,
+            "n": 21
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 27
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 21,
+            "nameRule": 7,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 27,
+            "n": 27
+          }
+        },
+        "ripgrep-ignore": {
+          "n": 25,
+          "recallExact": {
+            "k": 10,
+            "n": 14
+          },
+          "recallInclProbable": {
+            "k": 10,
+            "n": 14
+          },
+          "precision": {
+            "k": 10,
+            "n": 10
+          },
+          "externalAgreement": {
+            "k": 11,
+            "n": 11
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 25
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 11,
+            "nameRule": 4,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 25,
+            "n": 25
+          }
+        },
+        "walkdir": {
+          "n": 22,
+          "recallExact": {
+            "k": 13,
+            "n": 13
+          },
+          "recallInclProbable": {
+            "k": 13,
+            "n": 13
+          },
+          "precision": {
+            "k": 13,
+            "n": 13
+          },
+          "externalAgreement": {
+            "k": 9,
+            "n": 9
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 22
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 9,
+            "nameRule": 4,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 22,
+            "n": 22
+          }
+        }
+      },
+      "byCategory": {
+        "assoc-Type": {
+          "n": 10,
+          "recallExact": {
+            "k": 6,
+            "n": 6
+          },
+          "recallInclProbable": {
+            "k": 6,
+            "n": 6
+          },
+          "precision": {
+            "k": 6,
+            "n": 6
+          },
+          "externalAgreement": {
+            "k": 4,
+            "n": 4
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 10
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 4,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 10,
+            "n": 10
+          }
+        },
+        "bare-closure-or-ctor": {
+          "n": 8,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 8,
+            "n": 8
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 8
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 8,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 8,
+            "n": 8
+          }
+        },
+        "bare-fn": {
+          "n": 6,
+          "recallExact": {
+            "k": 6,
+            "n": 6
+          },
+          "recallInclProbable": {
+            "k": 6,
+            "n": 6
+          },
+          "precision": {
+            "k": 6,
+            "n": 6
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 0
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 6
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 6,
+            "n": 6
+          }
+        },
+        "chained-method": {
+          "n": 15,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 14,
+            "n": 14
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 15
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 14,
+            "nameRule": 13,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 15,
+            "n": 15
+          }
+        },
+        "field-method": {
+          "n": 5,
+          "recallExact": {
+            "k": 3,
+            "n": 3
+          },
+          "recallInclProbable": {
+            "k": 3,
+            "n": 3
+          },
+          "precision": {
+            "k": 3,
+            "n": 3
+          },
+          "externalAgreement": {
+            "k": 2,
+            "n": 2
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 5
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 2,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 5,
+            "n": 5
+          }
+        },
+        "local-method": {
+          "n": 14,
+          "recallExact": {
+            "k": 7,
+            "n": 12
+          },
+          "recallInclProbable": {
+            "k": 7,
+            "n": 12
+          },
+          "precision": {
+            "k": 7,
+            "n": 7
+          },
+          "externalAgreement": {
+            "k": 2,
+            "n": 2
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 14
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 2,
+            "nameRule": 2,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 14,
+            "n": 14
+          }
+        },
+        "param-method": {
+          "n": 4,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 3,
+            "n": 3
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 4
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 3,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 4,
+            "n": 4
+          }
+        },
+        "path-generic": {
+          "n": 6,
+          "recallExact": {
+            "k": 1,
+            "n": 1
+          },
+          "recallInclProbable": {
+            "k": 1,
+            "n": 1
+          },
+          "precision": {
+            "k": 1,
+            "n": 1
+          },
+          "externalAgreement": {
+            "k": 5,
+            "n": 5
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 6
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 5,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 6,
+            "n": 6
+          }
+        },
+        "path-module": {
+          "n": 3,
+          "recallExact": {
+            "k": 0,
+            "n": 0
+          },
+          "recallInclProbable": {
+            "k": 0,
+            "n": 0
+          },
+          "precision": {
+            "k": 0,
+            "n": 0
+          },
+          "externalAgreement": {
+            "k": 3,
+            "n": 3
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 3,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        },
+        "self-method": {
+          "n": 3,
+          "recallExact": {
+            "k": 3,
+            "n": 3
+          },
+          "recallInclProbable": {
+            "k": 3,
+            "n": 3
+          },
+          "precision": {
+            "k": 3,
+            "n": 3
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 0
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 3
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 3,
+            "n": 3
+          }
+        }
+      },
+      "bySplit": {
+        "dev": {
+          "n": 45,
+          "recallExact": {
+            "k": 20,
+            "n": 21
+          },
+          "recallInclProbable": {
+            "k": 20,
+            "n": 21
+          },
+          "precision": {
+            "k": 20,
+            "n": 20
+          },
+          "externalAgreement": {
+            "k": 24,
+            "n": 24
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 45
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 24,
+            "nameRule": 10,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 45,
+            "n": 45
+          }
+        },
+        "held-out": {
+          "n": 29,
+          "recallExact": {
+            "k": 8,
+            "n": 12
+          },
+          "recallInclProbable": {
+            "k": 8,
+            "n": 12
+          },
+          "precision": {
+            "k": 8,
+            "n": 8
+          },
+          "externalAgreement": {
+            "k": 17,
+            "n": 17
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 29
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 17,
+            "nameRule": 5,
+            "claimedResolved": 0,
+            "unresolved": 0,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 29,
+            "n": 29
+          }
+        }
+      },
+      "macro": {
+        "n": 12,
+        "unresolvedWithMacroEvidence": 12,
+        "macroUnresolvedRate": {
+          "k": 12,
+          "n": 12
+        },
+        "claimedResolved": 0
+      },
+      "supplement": {
+        "n": 13,
+        "metrics": {
+          "n": 13,
+          "recallExact": {
+            "k": 8,
+            "n": 10
+          },
+          "recallInclProbable": {
+            "k": 10,
+            "n": 10
+          },
+          "precision": {
+            "k": 10,
+            "n": 10
+          },
+          "externalAgreement": {
+            "k": 0,
+            "n": 3
+          },
+          "falsePositiveEdgeRate": {
+            "k": 0,
+            "n": 13
+          },
+          "wrongExact": 0,
+          "wrongProbable": 0,
+          "externalBreakdown": {
+            "agree": 0,
+            "nameRule": 0,
+            "claimedResolved": 0,
+            "unresolved": 3,
+            "noEdge": 0
+          },
+          "coverage": {
+            "k": 13,
+            "n": 13
+          }
+        }
+      },
+      "extraction": {
+        "labelled": {
+          "k": 99,
+          "n": 99
+        },
+        "perRepo": {
+          "mini-redis": {
+            "labelled": {
+              "k": 30,
+              "n": 30
+            },
+            "edges": 1049,
+            "oracleTotal": 1049,
+            "macroEdges": 103,
+            "oracleMacro": 103
+          },
+          "ripgrep-ignore": {
+            "labelled": {
+              "k": 41,
+              "n": 41
+            },
+            "edges": 3706,
+            "oracleTotal": 3706,
+            "macroEdges": 548,
+            "oracleMacro": 548
+          },
+          "walkdir": {
+            "labelled": {
+              "k": 28,
+              "n": 28
+            },
+            "edges": 1135,
+            "oracleTotal": 1135,
+            "macroEdges": 270,
+            "oracleMacro": 270
+          }
+        }
+      },
+      "trait": {
+        "inherent-resolved": 28,
+        "trait-declaration-resolved": 2,
+        "trait-impl-resolved": 1,
+        "other-resolved": 7,
+        "ambiguous": 0,
+        "unresolved": 8,
+        "unresolved-no-type": 8,
+        "external": 41
+      },
+      "failures": {
+        "byCategory": {
+          "CALL_RESOLUTION": 0,
+          "TRAIT_RESOLUTION": 0,
+          "IMPL_RESOLUTION": 5,
+          "USE_RESOLUTION": 0,
+          "MACRO_EXPANSION_LIMIT": 0,
+          "SYMBOL_INDEX": 0,
+          "PARSER": 0,
+          "GROUND_TRUTH": 0,
+          "UNKNOWN": 0
+        },
+        "rows": [
+          {
+            "id": "mini-redis:tests/client.rs:36:11",
+            "category": "local-method",
+            "repo": "mini-redis",
+            "split": "dev",
+            "label": "resolved src/clients/client.rs:194",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "client.set(\"hello\", \"world\".into())",
+            "why": "client is mini_redis::clients::Client from Client::connect; set client.rs:194 (library under src/)",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=4"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/walk.rs:2476:21",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/walk.rs:744",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "builder.min_depth(Some(0))",
+            "why": "builder = WalkBuilder::new(..) in test; WalkBuilder::min_depth walk.rs:744",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=1"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/dir.rs:1203:66",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/lib.rs:545",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "td.path()",
+            "why": "td is crate::tests::TempDir (lib.rs:512, from tmpdir()); path at lib.rs:545",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=9"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/dir.rs:537:19",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/lib.rs:437",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "mat.is_ignore()",
+            "why": "mat = self.matched_ignore(..) -> Match<IgnoreMatch> (dir.rs:548); impl<T> Match<T>::is_ignore lib.rs:437",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=2"
+            ]
+          },
+          {
+            "id": "ripgrep-ignore:crates/ignore/src/dir.rs:1537:17",
+            "category": "local-method",
+            "repo": "ripgrep-ignore",
+            "split": "held-out",
+            "label": "resolved crates/ignore/src/lib.rs:545",
+            "outcome": "unresolved",
+            "attribution": "IMPL_RESOLUTION",
+            "callText": "td.path()",
+            "why": "td is crate::tests::TempDir (lib.rs:512, from tmpdir()); path at lib.rs:545",
+            "evidence": [
+              "no-type:receiver-type-unknown candidates=9"
+            ]
+          }
+        ]
+      },
+      "targetSymbolsPresent": {
+        "k": 43,
+        "n": 43
+      },
+      "coldWarm": {
+        "walkdir": true,
+        "mini-redis": true,
+        "ripgrep-ignore": true
+      }
+    }
+  },
+  "timingsMs": {
+    "walkdir": {
+      "cold": 207,
+      "warm": 64
+    },
+    "mini-redis": {
+      "cold": 218,
+      "warm": 78
+    },
+    "ripgrep-ignore": {
+      "cold": 558,
+      "warm": 255
+    }
+  },
+  "counts": {
+    "walkdir": {
+      "total": 1135,
+      "hiddenInMacro": 631,
+      "self-method": 24,
+      "field-method": 34,
+      "param-method": 48,
+      "local-method": 289,
+      "chained-method": 214,
+      "assoc-Self": 0,
+      "assoc-Type": 149,
+      "path-module": 23,
+      "path-generic": 6,
+      "bare-fn": 20,
+      "bare-closure-or-ctor": 58,
+      "qualified-trait": 0,
+      "macro-invocation": 270
+    },
+    "mini-redis": {
+      "total": 1049,
+      "hiddenInMacro": 42,
+      "self-method": 18,
+      "field-method": 79,
+      "param-method": 69,
+      "local-method": 143,
+      "chained-method": 275,
+      "assoc-Self": 0,
+      "assoc-Type": 129,
+      "path-module": 40,
+      "path-generic": 3,
+      "bare-fn": 45,
+      "bare-closure-or-ctor": 145,
+      "qualified-trait": 0,
+      "macro-invocation": 103
+    },
+    "ripgrep-ignore": {
+      "total": 3706,
+      "hiddenInMacro": 903,
+      "self-method": 73,
+      "field-method": 198,
+      "param-method": 160,
+      "local-method": 693,
+      "chained-method": 911,
+      "assoc-Self": 0,
+      "assoc-Type": 281,
+      "path-module": 45,
+      "path-generic": 2,
+      "bare-fn": 527,
+      "bare-closure-or-ctor": 268,
+      "qualified-trait": 0,
+      "macro-invocation": 548
+    }
+  },
+  "independence": [
+    {
+      "what": "src/ mentions no benchmark repo or semantic-calls name",
+      "command": "git grep -nIE semantic-calls|walkdir|mini-redis|mini_redis|ripgrep -- src",
+      "output": ""
+    },
+    {
+      "what": "oracle, freeze hash and label files import nothing from src/ or the indexer",
+      "command": "git grep -nE \\.\\./src/|ProjectIndex|parseRust|resolveRust|modulePathFor -- benchmarks/rust-call-oracle.ts benchmarks/rust-freeze-hash.ts benchmarks/rust-semantic-calls",
+      "output": ""
+    },
+    {
+      "what": "label/sample files changed after the freeze commit 6e5ea7e",
+      "command": "git log --oneline 6e5ea7e..HEAD -- benchmarks/rust-semantic-calls/*.json",
+      "output": ""
+    }
+  ]
+}

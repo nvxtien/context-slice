@@ -1,3 +1,5 @@
 # Held-out split runs. Exactly one COMPLETED entry allowed by the end of the evaluation.
 # Each line: ISO date, git HEAD short sha, split, `started` (+ invoked by) or `completed`.
 # A `started` line without `completed` is a crashed run (visible, does not block a rerun); a `completed` line blocks further --final runs.
+2026-09-25T07:36:23.815Z 9df7fb4 all started tiennv via ./benchmarks/v1.5-rust-semantic-calls.ts --final --split all --out benchmarks/results/v1.5-phase2-rust-semantic-calls.json
+2026-09-25T07:36:25.920Z 9df7fb4 all completed
