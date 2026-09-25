@@ -196,10 +196,10 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   // file, and a same-named orphan/cfg-alternative file must never stand in for it.
   const moduleFile = (segs: string[], fromFile: string) => {
     if (!segs.length) return undefined;
-    for (let i = 1; i < segs.length; i++) {
-      const pf = deps.moduleOf(segs.slice(0, i), fromFile).file;
+    for (let i = isAnchor(segs[0]) ? 1 : 0; i < segs.length; i++) {
+      const pf = i === 0 ? fromFile : deps.moduleOf(segs.slice(0, i), fromFile).file;
       const inline = (topByFile.get(pf ?? "") ?? []).some(
-        (s) => s.kind === "namespace" && s.name === segs[i] && (childrenOf.get(s.id)?.length ?? 0) > 0,
+        (s) => s.kind === "namespace" && s.name === segs[i] && s.bodyRange !== undefined,
       );
       if (inline) return undefined;
     }
@@ -240,23 +240,33 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   // only brings that enum's variants, which are CamelCase too, so it cannot provide a lowercase name.
   // This rests on the naming CONVENTION only (`#[allow(non_camel_case_types)]` variants can break it), so a
   // file mentioning that attribute gets the conservative answer: every unseeable glob may provide the name.
-  const globs = (file: string, from: SymbolRecord, name: string, onlyLocal = false) => {
+  /** Start offset of the innermost `{ }` block holding a fn-local import (-1 when not fn-local). */
+  const blockStartOf = (from: SymbolRecord, rec: ImportRecord) =>
+    scopeOf(rec).vis?.kind === "function" ? (blockAt(from, offsetIn(from, rec.range.startLine, rec.range.startColumn))?.[0] ?? -1) : -1;
+  const globs = (file: string, from: SymbolRecord, name: string, onlyLocal = false, minBlock = -1) => {
     const conventional = !fileText(from).text.includes("non_camel_case_types");
     const files: { file: string }[] = [];
-    // Non-glob imports of an ancestor scope that `use super::*` / `use crate::*` also brings in.
-    const providers: ImportRecord[] = [];
+    // Items an ancestor scope imports by name, which `use super::*` / `use crate::*` also brings in.
+    const extra: SymbolRecord[] = [];
     let unknown = false;
-    for (const rec of importsFor(file, from).filter((r) => r.wildcard && (!onlyLocal || scopeOf(r).vis?.kind === "function"))) {
+    const wild = importsFor(file, from).filter(
+      (r) => r.wildcard && (!onlyLocal || (scopeOf(r).vis?.kind === "function" && blockStartOf(from, r) > minBlock)),
+    );
+    for (const rec of wild) {
       const t = importTarget(rec);
       const f = t.t === "path" ? moduleFile(t.segs, t.fromFile) : undefined;
       if (f) {
         files.push({ file: f });
         if (t.t === "path" && t.segs.every(isAnchor))
-          for (const r of importsByFile.get(f) ?? [])
-            if (r !== rec && !r.wildcard && r.localName === name && !scopeOf(r).vis) providers.push(r);
+          for (const r of importsByFile.get(f) ?? []) {
+            if (r === rec || r.wildcard || r.localName !== name || scopeOf(r).vis) continue;
+            const rt = importTarget(r);
+            if (rt.t === "path") extra.push(...itemsVia(rt));
+            else unknown = true; // an external / unknown import of that name: cannot see into it
+          }
       } else if (!(conventional && /^[a-z_]/.test(name) && /^[A-Z]/.test(rec.module.split("::").at(-1) ?? ""))) unknown = true;
     }
-    return { files, providers, unknown };
+    return { files, extra, unknown, hit: files.length > 0 || unknown };
   };
 
   // ---- types
@@ -306,25 +316,22 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const localTypes = localItems(from, name).filter((s) => TYPE_KINDS.has(s.kind));
     if (localTypes.length) return fromDecls(localTypes);
     const local = localImportsNamed(file, from, name);
-    if (local.length) return viaImports(local); // a fn-local `use` shadows module-level items
-    const lg = globs(file, from, name, true);
-    if (lg.files.length || lg.providers.length || lg.unknown) {
-      const lc = fromDecls(lg.files.flatMap((x) => lookupItems(x.file, name).filter((s) => TYPE_KINDS.has(s.kind))));
-      const lp = lg.providers.length ? viaImports(lg.providers) : undefined;
-      if (lc && lp) return { t: "ambiguous", n: 2 };
-      if (lc || lp) return lg.unknown ? undefined : (lc ?? lp);
+    const named = local.length ? Math.max(...local.map((r) => blockStartOf(from, r))) : -1;
+    const lg = globs(file, from, name, true, named);
+    if (lg.hit) {
+      const lc = fromDecls([...lg.files.flatMap((x) => lookupItems(x.file, name)), ...lg.extra].filter((s) => TYPE_KINDS.has(s.kind)));
+      if (lc) return lg.unknown ? undefined : lc;
       if (lg.unknown) return undefined;
     }
+    if (local.length) return viaImports(local); // a fn-local `use` shadows module-level items
     const same = declsHere(from, name);
     if (same.length) return fromDecls(same);
     const recs = importsFor(file, from).filter((r) => !r.wildcard && r.localName === name);
     if (recs.length) return viaImports(recs);
     const g = globs(file, from, name);
-    const cands = g.files.flatMap((x) => lookupItems(x.file, name).filter((s) => TYPE_KINDS.has(s.kind)));
+    const cands = [...g.files.flatMap((x) => lookupItems(x.file, name)), ...g.extra].filter((s) => TYPE_KINDS.has(s.kind));
     const found = fromDecls(cands);
-    const prov = g.providers.length ? viaImports(g.providers) : undefined;
-    if (found && prov) return { t: "ambiguous", n: 2 };
-    if (found || prov) return g.unknown ? undefined : (found ?? prov);
+    if (found) return g.unknown ? undefined : found;
     if (STD_TYPES.has(name) && !(g.unknown && SHADOWABLE.has(name))) return { t: "external", pkg: "std", exact: false };
     return undefined;
   };
@@ -635,20 +642,26 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (localCtors.length === 1 && li.length === 1) return settle(call, localCtors[0], "constructor", `constructor ${localCtors[0].qualifiedName}`);
     if (li.some((x) => x.kind === "variable" || TYPE_KINDS.has(x.kind))) return unresolved(call, "no-type:local-item");
     const local = localImportsNamed(file, caller, name);
-    if (local.length) return bareViaImports(call, name, local); // fn-local `use` shadows module items
-    const lg = globs(file, caller, name, true);
-    if (lg.files.length || lg.providers.length || lg.unknown) {
+    // A local fn (declared in a fn body, enclosing the call) is as local as a `use`; the innermost block wins.
+    const localFns = scopeFns(caller, name).filter((f) => f.parentId !== undefined && byId.get(f.parentId)?.kind === "function");
+    const fnStart = localFns.length
+      ? Math.max(...localFns.map((f) => blockAt(caller, offsetIn(caller, f.range.startLine, f.range.startColumn))?.[0] ?? -1))
+      : -1;
+    const named = local.length ? Math.max(...local.map((r) => blockStartOf(caller, r))) : -1;
+    const lg = globs(file, caller, name, true, Math.max(named, fnStart));
+    if (lg.hit) {
       const lc = new Map<string, SymbolRecord>();
-      for (const x of lg.files) for (const s of lookupItems(x.file, name)) if (s.kind === "function" || isTupleStruct(s)) lc.set(s.id, s);
-      if (lc.size + lg.providers.length > 1) return ambiguous(call, lc.size + lg.providers.length, `local glob imports providing ${name}`);
-      if (lc.size + lg.providers.length === 1) {
+      for (const s of [...lg.files.flatMap((x) => lookupItems(x.file, name)), ...lg.extra])
+        if (s.kind === "function" || isTupleStruct(s)) lc.set(s.id, s);
+      if (lc.size > 1) return ambiguous(call, lc.size, `local glob imports providing ${name}`);
+      if (lc.size === 1) {
         if (lg.unknown) return unresolved(call, "no-type:glob-unknown");
-        if (lg.providers.length) return bareViaImports(call, name, lg.providers);
         const s = [...lc.values()][0];
         return settle(call, s, isTupleStruct(s) ? "constructor" : "imported", `glob import provides ${s.qualifiedName}`);
       }
       if (lg.unknown) return unresolved(call, "no-type:glob-unknown");
     }
+    if (local.length) return bareViaImports(call, name, local); // fn-local `use` shadows module items
     const fns = scopeFns(caller, name);
     if (fns.length === 1) return settle(call, fns[0], "same-file", `same-file fn ${fns[0].qualifiedName}`);
     if (fns.length > 1) return ambiguous(call, fns.length, `same-scope fns named ${name}`);
@@ -659,9 +672,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (recs.length) return bareViaImports(call, name, recs);
     const g = globs(file, caller, name);
     const gc = new Map<string, SymbolRecord>();
-    for (const x of g.files) for (const s of lookupItems(x.file, name)) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
-    if (gc.size + g.providers.length > 1) return ambiguous(call, gc.size + g.providers.length, `glob imports providing ${name}`);
-    if (g.providers.length === 1 && !gc.size) return g.unknown ? unresolved(call, "no-type:glob-unknown") : bareViaImports(call, name, g.providers);
+    for (const s of [...g.files.flatMap((x) => lookupItems(x.file, name)), ...g.extra]) if (s.kind === "function" || isTupleStruct(s)) gc.set(s.id, s);
+    if (gc.size > 1) return ambiguous(call, gc.size, `glob imports providing ${name}`);
     if (gc.size === 1) {
       if (g.unknown) return unresolved(call, "no-type:glob-unknown");
       const s = [...gc.values()][0];
@@ -728,6 +740,13 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (inline) return inline;
     } else if (modContainer(caller)) {
       return inlineFn(call, caller, segs) ?? unresolved(call, "no-symbol:module");
+    }
+    // A fn-local glob (innermost block) shadows file-level named imports: single segments go through the
+    // type lookup, longer paths are left alone.
+    if (!anchored) {
+      const localNamed = localImportsNamed(file, caller, first);
+      const lg = globs(file, caller, first, true, localNamed.length ? Math.max(...localNamed.map((r) => blockStartOf(caller, r))) : -1);
+      if (lg.hit) return segs.length === 1 ? typeOutcome(call, typeName(first, file, caller), name, "static") : unresolved(call, "no-type:local-glob");
     }
     // A first segment that names a local type.
     if (!anchored && segs.length === 1 && (declsHere(caller, first).length > 0 || li.length > 0)) return typeOutcome(call, typeName(first, file, caller), name, "static");
