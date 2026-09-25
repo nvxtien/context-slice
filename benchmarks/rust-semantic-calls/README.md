@@ -70,3 +70,5 @@ Entries carry the `sample.json` fields plus `"supplement": "trait-candidate"` an
 
 ## Evaluation script
 `npx tsx benchmarks/v1.5-rust-semantic-calls.ts [--split dev|held-out|all] [--final] [--repo <id>] [--out <path>] [--json]`. Default `--split dev`. `held-out`/`all` are refused without `--final`; `--final` is refused with `--repo` and once the log holds a `completed` line; otherwise it logs `started` before indexing and `completed` on success (a crash leaves only `started`, which does not block a rerun). Dev runs write nothing into the repo (`--out` must be outside it). Checkouts are copied into the OS temp dir and indexed there (disk-space constraint); the frozen labels are hash-checked before scoring.
+
+The single final run is `--final --split all --out benchmarks/results/v1.5-phase2-rust-semantic-calls.json`: its JSON holds the dev, held-out and pooled reports from one indexing pass, plus timings and the leakage checks. `--report <that json> [--notes <md>]` renders the sibling `.md` from the JSON only (no indexing, no log); `--notes` appends hand-written analysis under its own heading.

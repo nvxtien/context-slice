@@ -13,6 +13,8 @@ import {
   assertFrozen,
   gateSplit,
   FAILURE_CATEGORIES,
+  renderMarkdown,
+  independenceChecks,
   runGuarded,
   indexRepo,
   matchLabelToEdge,
@@ -122,7 +124,7 @@ test("metrics: exact vs probable, precision, external agreement, false positives
   assert.deepEqual(m.externalAgreement, { k: 1, n: 3 });
   assert.deepEqual(m.falsePositiveEdgeRate, { k: 4, n: 10 });
   assert.deepEqual([m.wrongExact, m.wrongProbable], [3, 1]);
-  assert.deepEqual(m.externalBreakdown, { agree: 1, claimedResolved: 1, unresolved: 1, noEdge: 0 });
+  assert.deepEqual(m.externalBreakdown, { agree: 1, nameRule: 0, claimedResolved: 1, unresolved: 1, noEdge: 0 });
   assert.deepEqual(m.coverage, { k: 9, n: 10 });
   // empty set: precision is 0/0, never NaN
   assert.deepEqual(scoreEntries([]).precision, { k: 0, n: 0 });
@@ -328,4 +330,25 @@ test("assertFrozen refuses a mutated label and accepts a why-only change (temp c
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("report mode: markdown shows dev and held-out side by side, name-rule count and disclosures", () => {
+  const nameRule = edge({ calleeName: "y", resolutionKind: "external-package", externalPackage: "std-or-dependency", evidence: ["method y is defined by no project symbol"] });
+  const rows = [
+    { l: label({ expected: R(10) }), o: classifyOutcome(label({ expected: R(10) }), claim("t10"), symbols) },
+    { l: label({ split: "held-out", expected: R(10) }), o: classifyOutcome(label({ expected: R(10) }), edge({ calleeName: "y" }), symbols) },
+    { l: label({ split: "held-out", expected: EXT }), o: classifyOutcome(label({ expected: EXT }), nameRule, symbols) },
+  ];
+  const b = (split: "dev" | "held-out" | "all") => buildReport(rows, { split });
+  const md = renderMarkdown({
+    meta: { date: "d", head: "abc1234", indexVersion: "9.9.9", argv: "--final --split all" },
+    reports: { dev: b("dev"), "held-out": b("held-out"), all: b("all") },
+    timingsMs: {}, counts: {}, independence: independenceChecks(),
+  }, "hand notes");
+  assert.match(md, /\| recall_exact \| 1\/1 \(100\.0%\) \| 0\/1 \(0\.0%\) \| 1\/2 \(50\.0%\) \|/);
+  assert.match(md, /of which by the name rule only \| 0 \| 1 \| 1 \|/);
+  for (const s of ["assoc-Self", "+65-69%", "held-out is the honest estimate", "blanket impls", "Cargo.toml", "hand notes", "IMPL_RESOLUTION"])
+    assert.ok(md.includes(s), s);
+  assert.ok(!md.includes("RUST_STATIC_LIMIT"));
+  assert.match(md, /src\/ mentions no benchmark repo[\s\S]*?\(no output\)/); // leakage grep over src/ is clean
 });

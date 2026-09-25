@@ -18,6 +18,7 @@ import { fileURLToPath } from "node:url";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { parseRust } from "../src/languages/rust/parse.js";
 import type { CallEdge, SymbolRecord } from "../src/types/model.js";
+import { INDEX_VERSION } from "../src/storage/sqlite.js";
 import { FROZEN_DIR, frozenLines } from "./rust-freeze-hash.js";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -50,10 +51,14 @@ export type Outcome = {
   evidence: string[];
   resolutionKind?: string;
   receiverText?: string;
+  /** Full evidence strings and external package of the matched edge (for inspection of failures). */
+  detail?: string[];
+  externalPackage?: string;
 };
 export type Row = { l: Label; o: Outcome };
 export type Split = "dev" | "held-out" | "all";
 
+const NAME_RULE = "is defined by no project symbol";
 const PREFIXES = ["inherent:", "trait:", "ambiguous:", "no-type:", "no-symbol:", "macro:"];
 const ratio = (k: number, n: number): Ratio => ({ k, n });
 const fmt = (r: Ratio) => (r.n === 0 ? `${r.k}/0` : `${r.k}/${r.n} (${(Math.round((r.k / r.n) * 1000) / 10).toFixed(1)}%)`);
@@ -103,7 +108,7 @@ export function matchLabelToEdge(label: Label, edges: CallEdge[]): CallEdge | un
 export function classifyOutcome(label: Label, edge: CallEdge | undefined, symbolsById: Map<string, SymbolRecord>): Outcome {
   if (!edge) return { kind: "no-edge", evidence: [] };
   const evidence = PREFIXES.filter((p) => edge.evidence.some((e) => e.startsWith(p)));
-  const base = { evidence, confidence: edge.confidence, resolutionKind: edge.resolutionKind, receiverText: edge.receiverText };
+  const base = { evidence, confidence: edge.confidence, resolutionKind: edge.resolutionKind, receiverText: edge.receiverText, detail: edge.evidence, externalPackage: edge.externalPackage };
   if (edge.resolvedTargetId) {
     const s = symbolsById.get(edge.resolvedTargetId);
     const t = label.expected.target;
@@ -124,7 +129,8 @@ export type Metrics = {
   falsePositiveEdgeRate: Ratio;
   wrongExact: number;
   wrongProbable: number;
-  externalBreakdown: { agree: number; claimedResolved: number; unresolved: number; noEdge: number };
+  /** nameRule: agreements that come only from the "method name defined by no project symbol" rule (receiver type unknown). */
+  externalBreakdown: { agree: number; nameRule: number; claimedResolved: number; unresolved: number; noEdge: number };
   coverage: Ratio;
 };
 
@@ -147,6 +153,7 @@ export function scoreEntries(rows: Row[]): Metrics {
     wrongProbable: wrong.filter((r) => r.o.confidence === "probable").length,
     externalBreakdown: {
       agree: external.filter((r) => r.o.kind === "external").length,
+      nameRule: external.filter((r) => r.o.kind === "external" && (r.o.detail ?? []).some((e) => e.includes(NAME_RULE))).length,
       claimedResolved: external.filter((r) => r.o.kind === "resolved").length,
       unresolved: external.filter((r) => r.o.kind === "unresolved").length,
       noEdge: external.filter((r) => r.o.kind === "no-edge").length,
@@ -214,7 +221,7 @@ export type Report = {
   supplement: { n: number; metrics: Metrics };
   extraction: { labelled: Ratio; perRepo: Record<string, { labelled: Ratio; edges?: number; oracleTotal?: number; macroEdges?: number; oracleMacro?: number }> };
   trait: Record<string, number>;
-  failures: { byCategory: Record<string, number>; rows: Array<{ id: string; category: string; repo: string; split: string; label: string; outcome: string; attribution: FailureCategory; callText: string }> };
+  failures: { byCategory: Record<string, number>; rows: Array<{ id: string; category: string; repo: string; split: string; label: string; outcome: string; attribution: FailureCategory; callText: string; why: string; evidence: string[] }> };
   targetSymbolsPresent: Ratio;
   coldWarm?: Record<string, boolean>;
 };
@@ -271,7 +278,7 @@ export function buildReport(allRows: Row[], opts: BuildOpts): Report {
       id: `${r.l.repo}:${r.l.file}:${r.l.line}:${r.l.col}`, category: r.l.category, repo: r.l.repo, split: r.l.split,
       label: r.l.expected.kind === "resolved" ? `resolved ${r.l.expected.target?.file}:${r.l.expected.target?.line}` : r.l.expected.kind,
       outcome: r.o.kind === "resolved" ? `resolved(${r.o.correct ? "correct" : "wrong"},${r.o.confidence})` : r.o.kind,
-      attribution: a, callText: r.l.callText,
+      attribution: a, callText: r.l.callText, why: r.l.expected.why, evidence: r.o.detail ?? [],
     });
   }
   const resolvedLabels = rows.filter((r) => r.l.expected.kind === "resolved" && r.l.expected.target);
@@ -314,7 +321,7 @@ function metricsLines(m: Metrics, indent = "  "): string[] {
     `${indent}recall_exact                ${fmt(m.recallExact)}`,
     `${indent}recall_incl_probable        ${fmt(m.recallInclProbable)}`,
     `${indent}precision                   ${fmt(m.precision)}`,
-    `${indent}external_agreement          ${fmt(m.externalAgreement)}   [claimed-resolved ${m.externalBreakdown.claimedResolved}, unresolved(neutral) ${m.externalBreakdown.unresolved}, no-edge ${m.externalBreakdown.noEdge}]`,
+    `${indent}external_agreement          ${fmt(m.externalAgreement)}   [by name rule only ${m.externalBreakdown.nameRule}, claimed-resolved ${m.externalBreakdown.claimedResolved}, unresolved(neutral) ${m.externalBreakdown.unresolved}, no-edge ${m.externalBreakdown.noEdge}]`,
     `${indent}false_positive_edge_rate    ${fmt(m.falsePositiveEdgeRate)}   [wrong exact ${m.wrongExact}, wrong probable ${m.wrongProbable}]`,
     `${indent}extraction (edge found)     ${fmt(m.coverage)}`,
   ];
@@ -426,9 +433,148 @@ export function indexRepo(dir: string) {
   };
 }
 
+// ---------------------------------------------------------------- final run metadata + markdown report
+export type FinalRun = {
+  meta: { date: string; head: string; indexVersion: string; argv: string };
+  reports: { dev: Report; "held-out": Report; all: Report };
+  timingsMs: Record<string, { cold: number; warm: number }>;
+  counts: Record<string, Record<string, number>>;
+  independence: Array<{ what: string; command: string; output: string }>;
+};
+// `git grep` exits 1 when nothing matches: that is the clean case, reported as empty output.
+const git = (...a: string[]) => {
+  try { return execFileSync("git", a, { cwd: REPO_ROOT, encoding: "utf8" }).trim(); } catch { return ""; }
+};
+/** Leakage / independence checks, recorded verbatim (empty output = clean). */
+export function independenceChecks(): FinalRun["independence"] {
+  const freeze = git("log", "--format=%h", "--grep", "freeze Rust semantic-call ground truth", "-1");
+  const checks: Array<[string, string[]]> = [
+    ["src/ mentions no benchmark repo or semantic-calls name", ["grep", "-nIE", "semantic-calls|walkdir|mini-redis|mini_redis|ripgrep", "--", "src"]],
+    ["oracle, freeze hash and label files import nothing from src/ or the indexer",
+      ["grep", "-nE", String.raw`\.\./src/|ProjectIndex|parseRust|resolveRust|modulePathFor`, "--", "benchmarks/rust-call-oracle.ts", "benchmarks/rust-freeze-hash.ts", "benchmarks/rust-semantic-calls"]],
+    [`label/sample files changed after the freeze commit ${freeze}`, ["log", "--oneline", `${freeze}..HEAD`, "--", "benchmarks/rust-semantic-calls/*.json"]],
+  ];
+  return checks.map(([what, a]) => ({ what, command: `git ${a.join(" ")}`, output: git(...a) }));
+}
+
+const pct = (r: Ratio) => (r.n === 0 ? `${r.k}/0` : `${r.k}/${r.n} (${((r.k / r.n) * 100).toFixed(1)}%)`);
+const esc = (s: string) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
+const table = (head: string[], rows: string[][]) =>
+  [`| ${head.join(" | ")} |`, `|${head.map(() => "---").join("|")}|`, ...rows.map((r) => `| ${r.join(" | ")} |`)].join("\n");
+
+/** Markdown results report from a final run's JSON. Numbers come only from `f`; the prose sections are fixed disclosures. */
+export function renderMarkdown(f: FinalRun, notes = ""): string {
+  const S = ["dev", "held-out", "all"] as const;
+  const R = f.reports;
+  const metricRows = (pick: (r: Report) => Metrics): string[][] => [
+    ["n (labelled, non-macro)", ...S.map((k) => String(pick(R[k]).n))],
+    ["recall_exact", ...S.map((k) => pct(pick(R[k]).recallExact))],
+    ["recall_incl_probable", ...S.map((k) => pct(pick(R[k]).recallInclProbable))],
+    ["precision", ...S.map((k) => pct(pick(R[k]).precision))],
+    ["external_agreement", ...S.map((k) => pct(pick(R[k]).externalAgreement))],
+    ["  of which by the name rule only", ...S.map((k) => String(pick(R[k]).externalBreakdown.nameRule))],
+    ["  external left unresolved (neutral)", ...S.map((k) => String(pick(R[k]).externalBreakdown.unresolved))],
+    ["false_positive_edge_rate", ...S.map((k) => pct(pick(R[k]).falsePositiveEdgeRate))],
+    ["  wrong exact / wrong probable", ...S.map((k) => `${pick(R[k]).wrongExact} / ${pick(R[k]).wrongProbable}`)],
+    ["extraction (edge found)", ...S.map((k) => pct(pick(R[k]).coverage))],
+  ];
+  const mRow = (name: string, m: Metrics) => [name, String(m.n), pct(m.recallExact), pct(m.precision), pct(m.externalAgreement), pct(m.falsePositiveEdgeRate)];
+  const mHead = ["", "n", "recall_exact", "precision", "external", "FP rate"];
+  const catRows = (k: (typeof S)[number]) => CATEGORIES.filter((c) => R[k].byCategory[c]).map((c) => mRow(c, R[k].byCategory[c]));
+  const repoRows = (k: (typeof S)[number]) => Object.entries(R[k].byRepo).map(([repo, m]) => mRow(repo, m));
+  const indep = f.independence.map((c) => `- ${c.what}\n\n  \`${c.command}\`\n\n  \`\`\`\n  ${c.output || "(no output)"}\n  \`\`\``).join("\n");
+  const failures = R.all.failures.rows.map((x) => [x.id, x.split, x.category, x.label, x.outcome, x.attribution, `\`${esc(x.callText)}\``, esc(x.evidence.join("; "))]);
+  const ext = (k: (typeof S)[number]) => `${R[k].pooled.externalBreakdown.nameRule} of ${R[k].pooled.externalAgreement.k}`;
+  const o: string[] = [
+    "# v1.5 Phase 2: Rust semantic-call resolution, measured on real repositories",
+    "",
+    `Generated by \`npx tsx benchmarks/v1.5-rust-semantic-calls.ts --report <json>\` from the single final run (\`${f.meta.argv}\`) at commit \`${f.meta.head}\`, ${f.meta.date}, INDEX_VERSION ${f.meta.indexVersion}. Numbers are copied from that run's JSON; nothing is hand-edited.`,
+    "",
+    "## Scope",
+    "- Three pinned repositories: walkdir, mini-redis, ripgrep `crates/ignore` (sparse checkout: only `crates/ignore` is indexed; other ripgrep crates are external).",
+    `- Ground truth: ${R.all.pooled.n} non-macro headline entries and ${R.all.macro.n} macro entries from a stratified sample, plus ${R.all.supplement.n} trait-candidate supplement entries. Hand-derived from source, blind re-verified (Task 5: 99/99 kind, 43/43 resolved targets, 0 disagreements; labeller and verifier were both LLMs, so this is consistency evidence, not proof), frozen before any resolver code.`,
+    `- Split by a fixed hash rule: dev n=${R.dev.pooled.n}, held-out n=${R["held-out"].pooled.n} headline entries. The resolver was iterated on dev only; held-out was measured once, in this run.`,
+    "- Not measured: whole-repo recall (only sampled sites), calls inside macro arguments (not extracted by design), resolution into ripgrep crates outside the sparse scope, `Self::f()` (0 real sites), qualified-trait calls (0 real sites).",
+    "",
+    "## Headline (non-macro, non-supplement)",
+    "Samples are tiny (tens of entries per split, single digits per category): read every rate with its k/n. No interval estimates are given.",
+    "",
+    table(["metric", "dev", "held-out", "pooled"], metricRows((r) => r.pooled)),
+    "",
+    `Dev/held-out gap: recall_exact dev ${pct(R.dev.pooled.recallExact)} vs held-out ${pct(R["held-out"].pooled.recallExact)}; precision dev ${pct(R.dev.pooled.precision)} vs held-out ${pct(R["held-out"].pooled.precision)}; external agreement dev ${pct(R.dev.pooled.externalAgreement)} vs held-out ${pct(R["held-out"].pooled.externalAgreement)}. Dev was tuned on; held-out is the honest estimate.`,
+    "",
+    "### Per repo",
+    ...S.flatMap((k) => [`**${k}**`, "", table(["repo", ...mHead.slice(1)], repoRows(k)), ""]),
+    "### Per category",
+    "Categories are syntactic (oracle). `local-method` detection is flow-insensitive; `bare-closure-or-ctor` mixes constructors and closure calls.",
+    "",
+    ...S.flatMap((k) => [`**${k}**`, "", table(["category", ...mHead.slice(1)], catRows(k)), ""]),
+    "## Macro block (excluded from the headline)",
+    table(["", ...S], [
+      ["macro-labelled entries", ...S.map((k) => String(R[k].macro.n))],
+      ["macro_unresolved_rate", ...S.map((k) => pct(R[k].macro.macroUnresolvedRate))],
+      ["adapter claimed a target", ...S.map((k) => String(R[k].macro.claimedResolved))],
+    ]),
+    "",
+    "## Trait-candidate supplement (never mixed into the headline)",
+    "Sites whose callee name equals a method of an in-repo trait. Most are same-named methods on unrelated types, so this block mainly measures false-positive resistance. Only 2 entries are real in-repo trait dispatch (ripgrep-ignore `walk.rs:1821` and `walk.rs:1837`, through `Box<dyn ParallelVisitor>`, labelled `probable` trait declaration).",
+    "",
+    table(["metric", "dev", "held-out", "pooled"], metricRows((r) => r.supplement.metrics)),
+    "",
+    "## Trait-resolution breakdown (spec §73)",
+    "Matched non-macro edges including the supplement, bucketed by evidence prefix.",
+    "",
+    table(["bucket", ...S], Object.keys(R.all.trait).map((b) => [b, ...S.map((k) => String(R[k].trait[b]))])),
+    "",
+    "## Extraction coverage",
+    table(["repo", "labelled entries with an edge", "edges", "oracle total", "macro edges", "oracle macro", "oracle hiddenInMacro (not extracted)"],
+      Object.entries(R.all.extraction.perRepo).map(([repo, c]) => [repo, pct(c.labelled), String(c.edges), String(c.oracleTotal), String(c.macroEdges), String(c.oracleMacro), String(f.counts[repo]?.hiddenInMacro ?? "")])),
+    "",
+    `Label targets that exist as an indexed symbol at (file, startLine): ${pct(R.all.targetSymbolsPresent)}.`,
+    "",
+    "## Failure attribution (spec §74)",
+    "Rules, first match wins: no edge -> PARSER if the file has a parse error, else UNKNOWN; label target not indexed -> SYMBOL_INDEX; adapter resolved a macro/unresolvable label -> CALL_RESOLUTION, other macro label -> MACRO_EXPANSION_LIMIT; trait-method-decl target, qualified-trait or `trait:` evidence -> TRAIT_RESOLUTION; `inherent:` evidence or a method-like category -> IMPL_RESOLUTION; path-like category -> USE_RESOLUTION if the target is in another file, else CALL_RESOLUTION; else UNKNOWN. GROUND_TRUTH is never auto-assigned. Label external + adapter unresolved is a neutral miss, not a failure.",
+    "",
+    table(["category", ...S], FAILURE_CATEGORIES.map((c) => [c, ...S.map((k) => String(R[k].failures.byCategory[c]))])),
+    "",
+    "Every failure row (all splits, including supplement and macro):",
+    "",
+    failures.length ? table(["entry", "split", "category", "label", "adapter", "attribution", "call", "adapter evidence"], failures) : "(none)",
+    "",
+    "## Cold vs warm",
+    table(["repo", "cold == warm", "cold ms", "warm ms"], Object.keys(f.timingsMs).sort().map((r) => [r, R.all.coldWarm?.[r] ? "identical" : "DIFFERENT", String(f.timingsMs[r].cold), String(f.timingsMs[r].warm)])),
+    "",
+    "Timings are one run on one machine (indexing a temp copy, SQLite cache included), not a benchmark.",
+    "",
+    "## Performance of call extraction",
+    "Measured in the Task 6 review, not by this script: `parseRust` with call extraction is +65-69% slower than the Phase 1 parser on real files (ripgrep-ignore `dir.rs` 26.5 -> 44.7 ms, `walk.rs` 43.5 -> 73.1 ms, `incremental.rs` 23.1 -> 38.2 ms; synthetic 1 MiB file 1117 -> 1792 ms), linear in file size. Cause: a second tree traversal; merging the traversals is deferred.",
+    "",
+    "## Independence and leakage checks (run by this script)",
+    indep,
+    "",
+    "Ground-truth corrections: `benchmarks/rust-semantic-calls/CORRECTIONS.md` holds six `why`-text-only edits made at the freeze; no kind, target or confidence changed. The last check above lists any later label-file commit.",
+    "",
+    "## Honesty notes and known limits",
+    `- Thin samples: pooled headline n=${R.all.pooled.n} (dev ${R.dev.pooled.n}, held-out ${R["held-out"].pooled.n}). Per-repo and per-category held-out rates rest on a few entries each and are not interpretable alone.`,
+    "- `assoc-Self` has 0 real sites in all three repos (`Self::f()` never appears in code) and qualified-trait has 0: spec §25/§27 are covered only by synthetic tests.",
+    "- Only 2 real in-repo trait-dispatch entries exist (supplement, above): trait dispatch on real code is barely measured.",
+    `- External agreement partly comes from a name rule: a method whose receiver type is unknown and whose name no project symbol defines is classed external (\`std-or-dependency\`, probable). Agreements from that rule alone: dev ${ext("dev")}, held-out ${ext("held-out")}.`,
+    "- Dev tuning: resolver rules were developed while looking at dev failures (each with a synthetic test), so dev numbers are optimistic. The held-out column is the honest number.",
+    "- Cached RESOLVED edges are not re-resolved on warm rebuilds (shared indexer behaviour): an edit in another file can leave a stale or dangling edge until a cold rebuild. INDEX_VERSION only protects against old cache formats.",
+    "- In-repo blanket impls only make competing candidates ambiguous; their bounds are not checked.",
+    "- Macros are structural only: no expansion, and calls inside macro arguments are not extracted.",
+    "- No inference for closures, iterator adapters, `for`/`match`/`if let` patterns, `.await`, or external return types.",
+    "- A library imported by its own crate name (`use <crate>::...` from `tests/` or `src/bin/`) is not mapped to the local library (the import is marked external; crate identity needs Cargo.toml), so calls through it stay unresolved.",
+    "- Dev history, quoted from the task reports (earlier commits, same script, dev split): no resolver 0/21 recall_exact, 0/24 external; structural resolution (Task 7) 10/21, precision 10/10, external 11/24; typed receivers (Task 8) 20/21, 20/20, 24/24, FP 0/45.",
+    "- Parse slowdown of +65-69% from call extraction (see Performance).",
+  ];
+  if (notes.trim()) o.push("", "## Analysis (written after the run, from the rows above)", "", notes.trim());
+  return o.join("\n") + "\n";
+}
+
 // ---------------------------------------------------------------- CLI
 function parseArgs(argv: string[]) {
-  const a = { split: "dev", final: false, repo: undefined as string | undefined, out: undefined as string | undefined, json: false };
+  const a = { split: "dev", final: false, repo: undefined as string | undefined, out: undefined as string | undefined, json: false, report: undefined as string | undefined, notes: undefined as string | undefined };
   for (let i = 0; i < argv.length; i++) {
     const v = argv[i];
     if (v === "--split") a.split = argv[++i] ?? "";
@@ -436,6 +582,8 @@ function parseArgs(argv: string[]) {
     else if (v === "--repo") a.repo = argv[++i];
     else if (v === "--out") a.out = argv[++i];
     else if (v === "--json") a.json = true;
+    else if (v === "--report") a.report = argv[++i];
+    else if (v === "--notes") a.notes = argv[++i];
     else throw new Error(`unknown argument ${v}`);
   }
   return a;
@@ -452,6 +600,15 @@ const die = (msg: string): never => {
 function main() {
   let args: ReturnType<typeof parseArgs>;
   try { args = parseArgs(process.argv.slice(2)); } catch (e) { return die(String((e as Error).message)); }
+  if (args.report) {
+    // Report mode: renders the .md next to a final run's JSON. Reads JSON only: no indexing, no gate, no log.
+    const f = JSON.parse(readFileSync(args.report, "utf8")) as FinalRun;
+    if (!f.reports?.["held-out"]) return die(`${args.report} is not a final --split all run`);
+    const md = args.report.replace(/\.json$/, ".md");
+    writeFileSync(md, renderMarkdown(f, args.notes ? readFileSync(args.notes, "utf8") : ""));
+    process.stdout.write(`wrote ${md}\n`);
+    return;
+  }
   const gate = gateSplit(args.split, args.final, LOG_PATH, args.final ? args.repo : undefined);
   if (!gate.ok) return die(gate.message);
   if (args.out && insideRepo(args.out) && !args.final) return die(`Refusing --out ${args.out}: must resolve outside the repo tree (dev runs write nothing into the repo).`);
@@ -477,6 +634,7 @@ function evaluate(repos: string[], split: Split, args: ReturnType<typeof parseAr
   const symKeys = new Set<string>();
   const parseErrs = new Set<string>();
   const timings: string[] = [];
+  const timingsMs: Record<string, { cold: number; warm: number }> = {};
   const tmpRoot = mkdtempSync(join(tmpdir(), "rust-semantic-calls-"));
   try {
     for (const repo of repos) {
@@ -486,6 +644,7 @@ function evaluate(repos: string[], split: Split, args: ReturnType<typeof parseAr
       const idx = indexRepo(copy);
       cw[repo] = idx.coldWarmIdentical;
       timings.push(`${repo}: cold ${idx.coldMs.toFixed(0)} ms, warm ${idx.warmMs.toFixed(0)} ms`);
+      timingsMs[repo] = { cold: Math.round(idx.coldMs), warm: Math.round(idx.warmMs) };
       for (const l of labels.filter((x) => x.repo === repo)) {
         if (!existsSync(join(copy, l.file))) throw new Error(`label file ${l.file} not found in ${repo} checkout: path mapping is wrong`);
         rows.push({ l, o: classifyOutcome(l, matchLabelToEdge(l, idx.calls), idx.symbolsById) });
@@ -502,11 +661,24 @@ function evaluate(repos: string[], split: Split, args: ReturnType<typeof parseAr
     rmSync(tmpRoot, { recursive: true, force: true });
   }
   const attrib: AttributionContext = { symbolExists: (r, f, l) => symKeys.has(`${r}:${f}:${l}`), parseErrorFiles: parseErrs };
-  const report = buildReport(rows, { split, counts: repoStats, ctx: attrib, coldWarm: cw });
-  const text = args.json ? JSON.stringify(report, null, 2) : formatReport(report);
+  const build = (sp: Split) => buildReport(rows, { split: sp, counts: repoStats, ctx: attrib, coldWarm: cw });
+  const report = build(split);
+  // A final `all` run carries dev, held-out and pooled reports from ONE indexing pass, plus run metadata for the results file.
+  const final: FinalRun | undefined = split === "all"
+    ? {
+        meta: { date: new Date().toISOString(), head: git("rev-parse", "--short", "HEAD"), indexVersion: INDEX_VERSION, argv: process.argv.slice(2).join(" ") },
+        reports: { dev: build("dev"), "held-out": build("held-out"), all: report },
+        timingsMs,
+        counts,
+        independence: independenceChecks(),
+      }
+    : undefined;
+  const out = final ?? report;
+  const text = args.json ? JSON.stringify(out, null, 2)
+    : final ? (["dev", "held-out", "all"] as const).map((k) => formatReport(final.reports[k])).join("\n\n") : formatReport(report);
   process.stdout.write(`${text}\n`);
   process.stderr.write(`timings (non-deterministic):\n${timings.map((t) => `  ${t}`).join("\n")}\n`);
-  if (args.out) writeFileSync(args.out, JSON.stringify(report, null, 2) + "\n");
+  if (args.out) writeFileSync(args.out, JSON.stringify(out, null, 2) + "\n");
   return Object.values(cw).some((v) => !v);
 }
 
