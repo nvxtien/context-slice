@@ -12,6 +12,7 @@ import {
   formatReport,
   assertFrozen,
   gateSplit,
+  FAILURE_CATEGORIES,
   runGuarded,
   indexRepo,
   matchLabelToEdge,
@@ -292,6 +293,20 @@ test("held-out protocol: --repo refused, completed entry blocks, crash leaves on
     assert.equal(lines().length, n);
     assert.equal(runGuarded(o({ split: "dev", final: false }), () => 1).ok, true); // dev never logs
     assert.equal(lines().length, n);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("gate: a `dev completed` log line does not block the held-out run; RUST_STATIC_LIMIT is not a category", () => {
+  const dir = mkdtempSync(join(tmpdir(), "rsc-devlog-"));
+  try {
+    const log = join(dir, "HELDOUT_RUNS.log");
+    writeFileSync(log, "# h\n2026-01-01T00:00:00.000Z abc1234 dev completed\n");
+    assert.equal(gateSplit("held-out", true, log).ok, true);
+    writeFileSync(log, "# h\n2026-01-01T00:00:00.000Z abc1234 all completed\n");
+    assert.equal(gateSplit("held-out", true, log).ok, false);
+    assert.equal((FAILURE_CATEGORIES as readonly string[]).includes("RUST_STATIC_LIMIT"), false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

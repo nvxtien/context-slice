@@ -158,7 +158,7 @@ export function scoreEntries(rows: Row[]): Metrics {
 // ---------------------------------------------------------------- failure attribution
 export const FAILURE_CATEGORIES = [
   "CALL_RESOLUTION", "TRAIT_RESOLUTION", "IMPL_RESOLUTION", "USE_RESOLUTION", "MACRO_EXPANSION_LIMIT",
-  "SYMBOL_INDEX", "PARSER", "RUST_STATIC_LIMIT", "GROUND_TRUTH", "UNKNOWN",
+  "SYMBOL_INDEX", "PARSER", "GROUND_TRUTH", "UNKNOWN",
 ] as const;
 export type FailureCategory = (typeof FAILURE_CATEGORIES)[number];
 /** Keyed by repo: symbolExists(repo,file,line); parseErrorFiles holds `repo:file`. */
@@ -359,7 +359,7 @@ export function gateSplit(split: string, final: boolean, logPath = LOG_PATH, rep
   if (split !== "dev" && !final)
     return { ok: false, message: `Refusing --split ${split}: the held-out split is measured exactly once at the end. Pass --final only for that run.` };
   if (final && repo) return { ok: false, message: "Refusing --final with --repo: a final run must cover all repos." };
-  if (final && split !== "dev" && existsSync(logPath) && readFileSync(logPath, "utf8").split("\n").some((l) => !l.startsWith("#") && l.split(" ")[3] === "completed"))
+  if (final && split !== "dev" && existsSync(logPath) && readFileSync(logPath, "utf8").split("\n").some((l) => { const f = l.split(" "); return !l.startsWith("#") && f[2] !== "dev" && f[3] === "completed"; }))
     return { ok: false, message: `Refusing --final: the single held-out run was already performed (see ${logPath}). Changing this requires a human editing the log and a note in CORRECTIONS.md.` };
   return { ok: true };
 }
