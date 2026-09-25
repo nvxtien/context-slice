@@ -202,6 +202,20 @@ test("external classification: std receiver or unknown receiver with no project 
   );
 });
 
+test("a path through a private `use` of an ancestor module resolves (crate-root re-import)", () => {
+  withRepo(
+    {
+      "src/lib.rs": "mod parse;\nmod cmd;\nuse parse::Parse;\n",
+      "src/parse.rs": "pub struct Parse;\nimpl Parse { pub fn new() -> Parse { Parse } pub fn next(&self) {} }\n",
+      "src/cmd.rs": "use crate::Parse;\nfn t() { let p = Parse::new(); p.next(); }\n",
+    },
+    (dir) => {
+      assert.equal(one(dir, "new", "t").target, "parse::Parse::new");
+      exact(one(dir, "next", "t"), "parse::Parse::next");
+    },
+  );
+});
+
 test("negative: a receiver of a generic external wrapper with a project method name is not external", () => {
   withRepo(
     { "src/lib.rs": `${AB}fn a(x: std::cell::RefCell<A>) { x.borrow().run(); }\n` },

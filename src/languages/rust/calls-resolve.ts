@@ -1,10 +1,12 @@
-import type { CallEdge, ExportRecord, ImportRecord, SymbolRecord } from "../../types/model.js";
+import type { CallEdge, ImportRecord, SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
 import { callEdge, field, rustParser, typeParamNames, type Node } from "./parse.js";
 
 /**
- * Rust call resolution, part A (structural targets): `self.m()`, `Self::f()`/`Type::f()`,
- * module paths and bare calls. Typed receivers (`x.m()`) are left unresolved for part B.
+ * Rust call resolution. Part A (structural targets): `self.m()`, `Self::f()`/`Type::f()`, module paths and
+ * bare calls. Part B (`x.m()`): the receiver's type is read syntactically from parameter / field / `let`
+ * annotations, constructor and exact-target return types (`?`, `unwrap` on std Result/Option); generic
+ * bounds, `impl Trait` and `dyn Trait` give only the trait declaration (probable).
  *
  * Conservative by construction: `exact` only for a single deterministic target; any ambiguity is
  * `unresolved` with `ambiguous:N`; a target reached only through a trait declaration is
@@ -69,8 +71,6 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   }
   const importsByFile = new Map<string, ImportRecord[]>();
   for (const r of context.imports) push(importsByFile, r.filePath, r);
-  const exportsByFile = new Map<string, ExportRecord[]>();
-  for (const r of context.exports) push(exportsByFile, r.filePath, r);
 
   // Files that are the root of a crate other than the library: `src/bin/*`, `tests/*`, `examples/*`,
   // `benches/*`, `build.rs`, and `src/main.rs` next to a `src/lib.rs`. The shared module index maps every file
@@ -219,15 +219,19 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (direct.length) return direct;
     const out = new Map<string, SymbolRecord>();
     const add = (list: SymbolRecord[]) => list.forEach((s) => out.set(s.id, s));
-    for (const rec of exportsByFile.get(file) ?? []) {
-      if (scopeOf(rec).vis || !rec.fromModule) continue;
-      const mod = rec.fromModule.split("::");
+    // Module-level `use` records, `pub` or not: a private `use` is importable from the module and its
+    // descendants, and compiling code only names it from there.
+    for (const rec of importsByFile.get(file) ?? []) {
+      const sc = scopeOf(rec);
+      if (sc.vis || sc.mod || rec.externalPackage) continue;
+      const mod = rec.module.split("::");
+      if (isAnchor(mod[0]) && foreignRoot(file)) continue;
       if (rec.wildcard) {
         const f = moduleFile(mod, file);
         if (f) add(lookupItems(f, name, seen));
-      } else if (rec.exportedName === name && rec.sourceName) {
+      } else if (rec.localName === name && rec.importedName && !(mod.length === 1 && mod[0] === rec.importedName)) {
         const f = moduleFile(mod, file);
-        if (f) add(lookupItems(f, rec.sourceName, seen));
+        if (f) add(lookupItems(f, rec.importedName, seen));
       }
     }
     return [...out.values()];
