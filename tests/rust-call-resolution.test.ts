@@ -134,9 +134,9 @@ test("an impl block in a different file than its type is found by Self type reso
   );
 });
 
-test("typed receivers stay unresolved for part B, with the candidate count", () => {
+test("receivers of unknown type stay unresolved, with the candidate count", () => {
   withRepo(
-    { "src/lib.rs": "struct A;\nimpl A { fn run(&self) {} }\nstruct B;\nimpl B { fn run(&self) {} }\nfn f(x: A) { x.run(); }\n" },
+    { "src/lib.rs": "struct A;\nimpl A { fn run(&self) {} }\nstruct B;\nimpl B { fn run(&self) {} }\nfn f(x: Mystery) { x.run(); }\n" },
     (dir) => {
       const e = one(dir, "run", "f");
       unresolved(e, "no-type:");

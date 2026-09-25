@@ -1,6 +1,6 @@
 import type { CallEdge, ExportRecord, ImportRecord, SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
-import { field, rustParser, type Node } from "./parse.js";
+import { callEdge, field, rustParser, typeParamNames, type Node } from "./parse.js";
 
 /**
  * Rust call resolution, part A (structural targets): `self.m()`, `Self::f()`/`Type::f()`,
@@ -138,15 +138,19 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   };
   const offsetIn = (sample: SymbolRecord, line: number, col: number) => fileText(sample).lines[line - 1] + col;
   /** [start, end) of the innermost `{ }` block enclosing `offset`, or undefined at module level. */
-  const blockAt = (sample: SymbolRecord, offset: number): [number, number] | undefined => {
+  /** Innermost node at `offset` of the sample's whole-file syntax tree, or undefined when unparsable. */
+  const nodeAt = (sample: SymbolRecord, offset: number): Node | undefined => {
     const c = fileText(sample);
     try {
       c.tree ??= rustParser().parse((i: number) => c.text.slice(i, i + 4_096));
-      for (let n: Node | null = c.tree.rootNode.descendantForIndex(offset); n; n = n.parent)
-        if (n.type === "block") return [n.startIndex, n.endIndex];
+      return c.tree.rootNode.descendantForIndex(offset);
     } catch {
-      /* unparsable: no block info */
+      return undefined;
     }
+  };
+  const blockAt = (sample: SymbolRecord, offset: number): [number, number] | undefined => {
+    for (let n: Node | null | undefined = nodeAt(sample, offset); n; n = n.parent)
+      if (n.type === "block") return [n.startIndex, n.endIndex];
     return undefined;
   };
   /** True when the block declaring the item at `at` also encloses the call being resolved. */
@@ -414,6 +418,15 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   }
   const traitMethods = (trait: SymbolRecord, name: string) =>
     (childrenOf.get(trait.id) ?? []).filter((s) => s.kind === "function" && s.name === name);
+  // Method names an in-repo impl gives to something that is not an in-repo type (blanket `impl<T> Tr for T`,
+  // `impl Tr for String`): a receiver of an external type may reach them.
+  const foreignNames = new Set<string>();
+  for (const impl of context.symbols.filter(isImpl)) {
+    if (impl.metadata?.implSelfType && implSelf(impl)?.t === "decl") continue;
+    const tr = impl.metadata?.implTrait ? implTrait(impl) : undefined;
+    for (const owner of [impl, ...(tr?.t === "decl" ? [tr.sym] : [])])
+      for (const m of childrenOf.get(owner.id) ?? []) if (m.kind === "function") foreignNames.add(m.name);
+  }
 
   // ---- caller facts
   /** `path` (`recv::f()`), `method` (`recv.f()`) or undefined, from the text right after the receiver. */
@@ -425,20 +438,25 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const after = tail.slice(rt.length).trimStart();
     return after.startsWith("::") ? "path" : after.startsWith(".") ? "method" : undefined;
   };
-  const bindingCache = new Map<string, Set<string>>();
-  /** Names bound by parameters, `let`, closures, `for`, `if let`/`match` patterns anywhere in the caller. */
-  const bindingsOf = (caller: SymbolRecord) => {
-    let set = bindingCache.get(caller.id);
-    if (set) return set;
-    set = new Set();
-    const collect = (n: Node | null) => {
+  const bindingCache = new Map<string, { sites: Map<string, Node[]>; root?: Node }>();
+  /**
+   * Binding sites (the let / parameter / for / closure / arm / const node) of every name bound by parameters,
+   * `let`, closures, `for`, `if let`/`match` patterns anywhere in the caller, parsed from the caller's own source
+   * (offsets relative to its start). `*` = unparsable: every name may be shadowed.
+   */
+  const bindingSites = (caller: SymbolRecord) => {
+    let c = bindingCache.get(caller.id);
+    if (c) return c;
+    const sites = new Map<string, Node[]>();
+    const add = (name: string, owner: Node) => push(sites, name, owner);
+    const collect = (n: Node | null, owner: Node) => {
       if (!n) return;
-      if (n.type === "identifier" || n.type === "shorthand_field_identifier") set!.add(n.text);
+      if (n.type === "identifier" || n.type === "shorthand_field_identifier") add(n.text, owner);
       for (let i = 0; i < n.namedChildCount; i++) {
         const c = n.namedChild(i)!;
         const parentField = ["tuple_struct_pattern", "struct_pattern"].includes(n.type) && n.childForFieldName("type")?.id === c.id;
         if (c.type === "scoped_identifier" || parentField) continue;
-        collect(c);
+        collect(c, owner);
       }
     };
     const visit = (n: Node) => {
@@ -448,29 +466,32 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
         case "let_condition":
         case "parameter":
         case "match_arm":
-          collect(n.childForFieldName("pattern"));
+          collect(n.childForFieldName("pattern"), n);
           break;
         case "closure_parameters":
-          collect(n);
+          collect(n, n);
           break;
         case "const_item":
         case "static_item":
-          if (n.childForFieldName("name")) set!.add(n.childForFieldName("name")!.text);
+          if (n.childForFieldName("name")) add(n.childForFieldName("name")!.text, n);
           break;
         case "self_parameter":
-          set!.add("self");
+          add("self", n);
           break;
       }
       for (const c of n.namedChildren) if (c.type !== "token_tree") visit(c);
     };
+    let root: Node | undefined;
     try {
-      visit(rustParser().parse(caller.source).rootNode);
+      root = rustParser().parse((i: number) => caller.source.slice(i, i + 4_096)).rootNode;
+      visit(root);
     } catch {
-      set.add("*"); // unparsable: treat every name as possibly shadowed
+      sites.set("*", []);
     }
-    bindingCache.set(caller.id, set);
-    return set;
+    bindingCache.set(caller.id, (c = { sites, root }));
+    return c;
   };
+  const bindingsOf = (caller: SymbolRecord) => bindingSites(caller).sites;
   const genericsCache = new Map<string, Set<string>>();
   /** Type/const parameter names declared by a fn / impl / trait, read from its syntax tree (any qualifiers). */
   const declaredGenerics = (s: SymbolRecord) => {
@@ -588,8 +609,295 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return { res: implSelf(owner), owner, trait: tr?.t === "decl" && tr.sym.kind === "interface" ? tr.sym : undefined };
   };
 
+  // ---- part B: syntactic receiver types (no inference engine)
+  // `bound` = a generic param / `impl Trait` / `dyn Trait`: only its traits are known (in-repo decls, external pkgs).
+  type Ty =
+    | { t: "decl"; sym: SymbolRecord; args: Ty[] }
+    | { t: "ext"; pkg: string; exact: boolean; name: string; args: Ty[] }
+    | { t: "bound"; traits: SymbolRecord[]; ext: string[]; unknown: boolean }
+    | { t: "ambiguous"; n: number }
+    | undefined;
+  /** Where a type is written: `from` resolves names; generics of `owners` are bounds only when `bounded`
+   * (the caller's own signature/body), else unknown (another fn's return type, a field). */
+  type Scope = { from: SymbolRecord; owners: SymbolRecord[]; bounded: boolean; subst?: Map<string, Ty>; self?: () => Ty };
+  const WRAPPERS = new Set(["Box", "Arc", "Rc"]);
+  // Methods the wrapper itself has (or gets from std traits): never pushed through to the inner type.
+  const WRAPPER_METHODS = new Set([
+    "clone", "as_ref", "as_mut", "borrow", "borrow_mut", "deref", "deref_mut", "eq", "ne", "cmp", "partial_cmp",
+    "fmt", "hash", "to_string", "to_owned", "into", "try_into", "downcast", "downcast_ref", "downcast_mut",
+  ]);
+  const UNWRAP = new Set(["unwrap", "expect", "unwrap_or_default", "unwrap_or", "unwrap_or_else"]);
+  const ITEM_NODES: Record<string, string[]> = {
+    function: ["function_item", "function_signature_item"], class: ["struct_item"], type: ["impl_item", "type_item"], interface: ["trait_item"],
+  };
+  /** Syntax node of a declaration in its whole-file tree. */
+  const declNode = (s: SymbolRecord): Node | undefined => {
+    const off = offsetIn(s, s.range.startLine, s.range.startColumn);
+    for (let n: Node | null | undefined = nodeAt(s, off); n; n = n.parent)
+      if (n.startIndex === off && ITEM_NODES[s.kind]?.includes(n.type)) return n;
+    return undefined;
+  };
+  // Items declared inside a fn body see block-local names we only model relative to the call: not typed.
+  const inFn = (s: SymbolRecord) => [...ancestors(s)].some((id) => id !== s.id && byId.get(id)?.kind === "function");
+  const ownerOf = (fn: SymbolRecord) => {
+    const o = enclosing(fn);
+    return o && (isImpl(o) || o.kind === "interface") ? o : undefined;
+  };
+  // A fn's signature scope: module-level names, never its own body's `use`/items (a distinct id hides them).
+  const sigFromCache = new Map<string, SymbolRecord>();
+  const sigFrom = (fn: SymbolRecord) => sigFromCache.get(fn.id) ?? sigFromCache.set(fn.id, { ...fn, id: `${fn.id}#sig` }).get(fn.id)!;
+  const selfTy = (owner: SymbolRecord | undefined, bounded: boolean): Ty => {
+    if (!owner || inFn(owner)) return undefined;
+    if (owner.kind === "interface") return bounded ? { t: "bound", traits: [owner], ext: [], unknown: false } : undefined;
+    if (!isImpl(owner) || !owner.metadata?.implSelfType) return undefined;
+    return tyOf(declNode(owner)?.childForFieldName("type"), { from: owner, owners: [owner], bounded });
+  };
+  const sigScope = (fn: SymbolRecord, bounded: boolean): Scope => {
+    const owner = ownerOf(fn);
+    return { from: sigFrom(fn), owners: owner ? [fn, owner] : [fn], bounded, self: () => selfTy(owner, bounded) };
+  };
+  const bodyScope = (caller: SymbolRecord): Scope => ({ ...sigScope(caller, true), from: caller });
+
+  /** Trait bounds written on generic `name` by an owner (inline and `where`), or undefined if it declares no such param. */
+  const boundNodes = (owner: Node, name: string): Node[] | undefined => {
+    let found = false;
+    const out: Node[] = [];
+    for (const p of field(owner, "type_parameters")?.namedChildren ?? []) {
+      const left = p.type === "type_identifier" ? p : (field(p, "left") ?? field(p, "name"));
+      if (left?.text !== name) continue;
+      found = true;
+      out.push(...(field(p, "bounds")?.namedChildren ?? []));
+    }
+    for (const w of owner.namedChildren.find((c) => c.type === "where_clause")?.namedChildren ?? [])
+      if (w.type === "where_predicate" && field(w, "left")?.text === name) out.push(...(field(w, "bounds")?.namedChildren ?? []));
+    return found ? out : undefined;
+  };
+  const boundTy = (nodes: Node[], sc: Scope): Ty => {
+    const b = { t: "bound" as const, traits: [] as SymbolRecord[], ext: [] as string[], unknown: false };
+    for (let n of nodes) {
+      if (n.type === "lifetime" || n.type === "removed_trait_bound") continue;
+      if (n.type === "higher_ranked_trait_bound") n = field(n, "type") ?? n;
+      if (n.type === "dynamic_type") n = field(n, "trait") ?? n;
+      if (n.type === "function_type") { // `Fn(..)` sugar: a std trait
+        b.ext.push("std");
+        continue;
+      }
+      const t = tyOf(n, { ...sc, bounded: false });
+      if (t?.t === "decl" && t.sym.kind === "interface") b.traits.push(t.sym);
+      else if (t?.t === "ext") b.ext.push(t.pkg);
+      else b.unknown = true;
+    }
+    return b;
+  };
+  /** A type alias `type X<P> = T;` expanded with its use-site arguments. */
+  const aliasTy = (alias: SymbolRecord, args: Ty[], depth: number): Ty => {
+    const node = inFn(alias) ? undefined : declNode(alias);
+    if (node?.type !== "type_item") return undefined;
+    const params = [...typeParamNames(node)];
+    if (args.length && args.length !== params.length) return undefined;
+    const subst = new Map<string, Ty>(params.map((p, i) => [p, args[i]]));
+    return tyOf(field(node, "type"), { from: alias, owners: [], bounded: false, subst }, depth + 1);
+  };
+  const named = (res: TypeRes, name: string, args: Ty[], depth: number): Ty => {
+    if (!res) return undefined;
+    if (res.t === "ambiguous") return res;
+    if (res.t === "external") return { t: "ext", pkg: res.pkg, exact: res.exact, name, args };
+    if (res.sym.kind === "type") return aliasTy(res.sym, args, depth);
+    return { t: "decl", sym: res.sym, args };
+  };
+  /** Type written as syntax `node` in scope `sc`. */
+  const tyOf = (node: Node | null | undefined, sc: Scope, depth = 0, args: Ty[] = []): Ty => {
+    if (!node || depth > 8) return undefined;
+    switch (node.type) {
+      case "reference_type":
+      case "pointer_type":
+        return tyOf(field(node, "type"), sc, depth + 1);
+      case "abstract_type":
+      case "dynamic_type": {
+        const tr = field(node, "trait");
+        return tr ? boundTy(tr.type === "bounded_type" ? tr.namedChildren : [tr], sc) : undefined;
+      }
+      case "bounded_type":
+        return boundTy(node.namedChildren, sc);
+      case "primitive_type":
+        return { t: "ext", pkg: "std", exact: true, name: node.text, args: [] };
+      case "generic_type": {
+        const list = (field(node, "type_arguments")?.namedChildren ?? []).filter((c) => c.type !== "lifetime" && !c.type.endsWith("comment"));
+        return tyOf(field(node, "type"), sc, depth + 1, list.map((a) => tyOf(a, sc, depth + 1)));
+      }
+      case "type_identifier": {
+        const name = node.text;
+        if (name === "Self") return sc.self?.();
+        if (sc.subst?.has(name)) return sc.subst.get(name);
+        for (const o of sc.owners) {
+          const g = declaredGenerics(o);
+          if (g.has("*")) return undefined;
+          if (!g.has(name)) continue;
+          const on = sc.bounded ? declNode(o) : undefined;
+          const bn = on && boundNodes(on, name);
+          return bn ? boundTy(bn, sc) : undefined;
+        }
+        return named(typeName(name, sc.from.filePath, sc.from), name, args, depth);
+      }
+      case "scoped_type_identifier": {
+        const segs = node.text.split("::").map((s) => s.trim());
+        // `T::Assoc` / `Self::Assoc` are associated types: unknown.
+        if (!segs.every((s) => IDENT.test(s)) || segs[0] === "Self" || sc.owners.some((o) => declaredGenerics(o).has(segs[0]))) return undefined;
+        return named(typePath(segs, sc.from.filePath, sc.from), segs.at(-1)!, args, depth);
+      }
+    }
+    return undefined;
+  };
+
+  /** `Result<T, _>` / `Option<T>` (std, or an alias of them) => T. */
+  const unwrapTy = (ty: Ty): Ty =>
+    ty?.t === "ext" && STD_ROOTS.has(ty.pkg) && (ty.name === "Result" || ty.name === "Option") ? ty.args[0] : undefined;
+  const derefTy = (ty: Ty): Ty => (ty?.t === "ext" && WRAPPERS.has(ty.name) && ty.args.length === 1 ? derefTy(ty.args[0]) : ty);
+
+  /** Type of field `name` of a struct-typed value (generic args substituted). */
+  const fieldTy = (base: Ty, name: string): Ty => {
+    if (base?.t !== "decl" || base.sym.kind !== "class" || inFn(base.sym)) return undefined;
+    const node = declNode(base.sym);
+    const body = node && field(node, "body");
+    let tn: Node | null | undefined;
+    if (body?.type === "field_declaration_list")
+      tn = body.namedChildren.find((f) => f.type === "field_declaration" && field(f, "name")?.text === name)?.childForFieldName("type");
+    else if (body && /^\d+$/.test(name)) tn = body.childrenForFieldName("type")[Number(name)];
+    if (!tn || !node) return undefined;
+    const params = [...typeParamNames(node)];
+    const subst = new Map<string, Ty>(params.map((p, i) => [p, base.args.length === params.length ? base.args[i] : undefined]));
+    return tyOf(tn, { from: base.sym, owners: [], bounded: false, subst, self: () => base });
+  };
+
+  /** Type of the local `name` used at `use` (caller-source offset): one binding site only, a plain `let`/parameter. */
+  const localTy = (caller: SymbolRecord, name: string, use: number, depth: number): Ty => {
+    const { sites } = bindingSites(caller);
+    const list = sites.get(name) ?? [];
+    if (sites.has("*") || list.length !== 1) return undefined; // shadowed / re-bound: never guessed
+    const site = list[0];
+    let pat = field(site, "pattern");
+    if (pat?.type === "mut_pattern") pat = pat.namedChild(0);
+    if (pat?.type !== "identifier") return undefined;
+    if (site.type === "parameter") return tyOf(field(site, "type"), sigScope(caller, true));
+    if (site.type !== "let_declaration" || use < site.endIndex || !site.parent || use >= site.parent.endIndex) return undefined;
+    const tn = field(site, "type");
+    return tn ? tyOf(tn, bodyScope(caller)) : exprTy(caller, field(site, "value"), depth + 1);
+  };
+
+  /** Type of expression `n` (a node of the caller's own source tree). */
+  const exprTy = (caller: SymbolRecord, n: Node | null | undefined, depth = 0): Ty => {
+    if (!n || depth > 8) return undefined;
+    switch (n.type) {
+      case "self":
+        return selfTy(ownerOf(caller), true);
+      case "identifier":
+        return localTy(caller, n.text, n.startIndex, depth);
+      case "parenthesized_expression":
+      case "reference_expression":
+        return exprTy(caller, n.namedChildren.at(-1), depth + 1);
+      case "field_expression":
+        return fieldTy(derefTy(exprTy(caller, field(n, "value"), depth + 1)), field(n, "field")?.text ?? "");
+      case "struct_expression":
+        return tyOf(field(n, "name"), bodyScope(caller));
+      case "try_expression":
+        return unwrapTy(exprTy(caller, n.namedChild(0), depth + 1));
+      case "call_expression":
+        return callTy(caller, n, depth);
+    }
+    return undefined;
+  };
+
+  let probeDepth = 0;
+  /** Resolves a call found inside another call's receiver as if it were an edge (not recorded). */
+  const probe = (caller: SymbolRecord, n: Node): CallEdge => {
+    const edge = callEdge(n, caller.filePath, caller.id);
+    // Positions of the caller-source tree are relative to the caller's start: shift them to the file.
+    const at = (p: { row: number; column: number }) => ({
+      line: caller.range.startLine + p.row,
+      col: p.row === 0 ? caller.range.startColumn + p.column : p.column,
+    });
+    const s = at(n.startPosition);
+    const e = at(n.endPosition);
+    edge.range = { startLine: s.line, startColumn: s.col, endLine: e.line, endColumn: e.col };
+    if (edge.evidence.some((x) => x.startsWith("macro:")) || probeDepth > 8) return edge;
+    const saved = currentCall;
+    currentCall = edge;
+    probeDepth++;
+    try {
+      resolveEdge(edge, caller)();
+    } finally {
+      probeDepth--;
+      currentCall = saved;
+    }
+    return edge;
+  };
+
+  /** Return type of a call: the exact in-repo target's declared return type, or std `unwrap`-style / `Default` rules. */
+  const callTy = (caller: SymbolRecord, n: Node, depth: number): Ty => {
+    let fn = field(n, "function");
+    if (fn?.type === "generic_function") fn = field(fn, "function");
+    if (fn?.type === "field_expression" && UNWRAP.has(field(fn, "field")?.text ?? "")) {
+      const inner = unwrapTy(exprTy(caller, field(fn, "value"), depth + 1));
+      if (inner) return inner;
+    }
+    const edge = probe(caller, n);
+    const target = edge.resolvedTargetId && edge.confidence === "exact" ? byId.get(edge.resolvedTargetId) : undefined;
+    if (target?.kind === "class") return { t: "decl", sym: target, args: [] }; // tuple-struct constructor
+    if (target?.kind === "function") {
+      const rt = inFn(target) ? undefined : declNode(target)?.childForFieldName("return_type");
+      return rt ? tyOf(rt, sigScope(target, false)) : undefined;
+    }
+    // `T::default()` is `Self` by the `Default` signature; `Enum::Variant(..)` is the enum.
+    if (fn?.type !== "scoped_identifier" || !edge.evidence.some((e) => e.startsWith("no-symbol:"))) return undefined;
+    const path = field(fn, "path");
+    const segs = (path?.type === "generic_type" ? field(path, "type") : path)?.text.split("::").map((s) => s.trim()) ?? [];
+    if (!segs.length || !segs.every((s) => IDENT.test(s)) || isGenericParam(caller, segs[0])) return undefined;
+    const t = segs.length === 1 && segs[0] === "Self" ? selfTy(ownerOf(caller), false) : named(typePath(segs, caller.filePath, caller), segs.at(-1)!, [], 0);
+    if (t?.t !== "decl") return undefined;
+    const name = edge.calleeName;
+    return (name === "default" && edge.argumentCount === 0) || (t.sym.kind === "enum" && /^[A-Z]/.test(name)) ? t : undefined;
+  };
+
+  /** `recv.m()` on a typed receiver. */
+  const methodOn = (call: CallEdge, ty: Ty): Outcome => {
+    const name = call.calleeName;
+    const cands = methodCount.get(name) ?? 0;
+    const nowhere = `method ${name} is defined by no project symbol`;
+    if (!ty) return cands ? unresolved(call, `no-type:receiver-type-unknown candidates=${cands}`) : external(call, "std-or-dependency", false, nowhere);
+    if (ty.t === "ambiguous") return ambiguous(call, ty.n, "types with that name");
+    if (ty.t === "decl") return memberOf(call, ty.sym, name, "declared-type");
+    if (ty.t === "bound") {
+      const traits = ty.traits.filter((t) => traitMethods(t, name).length);
+      if (traits.length) return traitDecl(call, traits, name);
+      // Only external bounds (e.g. `I: Iterator`): the method is theirs unless an in-repo blanket/foreign impl adds one.
+      if (!ty.unknown && !ty.traits.length && ty.ext.length && !foreignNames.has(name))
+        return external(call, new Set(ty.ext).size === 1 ? ty.ext[0] : "std-or-dependency", false, `trait bound method ${name}`);
+      return cands ? unresolved(call, `no-type:generic-param candidates=${cands}`) : external(call, "std-or-dependency", false, nowhere);
+    }
+    if (WRAPPERS.has(ty.name) && ty.args.length === 1 && ty.args[0]?.t !== "ext") {
+      if (!cands) return external(call, ty.pkg, ty.exact, nowhere);
+      if (WRAPPER_METHODS.has(name)) return ambiguous(call, 2, `${ty.name}::${name} or the inner type's`);
+      return methodOn(call, ty.args[0]);
+    }
+    if (!cands) return external(call, ty.pkg, ty.exact, `method on external type ${ty.name}`);
+    // A project method name: an in-repo trait impl for this type, or a Deref to an in-repo generic argument, may win.
+    if (foreignNames.has(name)) return ambiguous(call, 2, `external ${ty.name}::${name} or an in-repo trait impl`);
+    if (ty.args.some((a) => a?.t !== "ext")) return unresolved(call, `no-type:external-generic ${ty.name} candidates=${cands}`);
+    return external(call, ty.pkg, ty.exact, `method on external type ${ty.name}`);
+  };
+  const methodCall = (call: CallEdge, caller: SymbolRecord): Outcome => {
+    const { root } = bindingSites(caller);
+    const rel = offsetIn(caller, call.range.startLine, call.range.startColumn) - offsetIn(caller, caller.range.startLine, caller.range.startColumn);
+    const relEnd = offsetIn(caller, call.range.endLine, call.range.endColumn) - offsetIn(caller, caller.range.startLine, caller.range.startColumn);
+    let n: Node | null | undefined = root?.descendantForIndex(rel);
+    while (n && !(n.type === "call_expression" && n.startIndex === rel && n.endIndex === relEnd)) n = n.parent;
+    let fn = n && field(n, "function");
+    if (fn?.type === "generic_function") fn = field(fn, "function");
+    return methodOn(call, fn?.type === "field_expression" ? exprTy(caller, field(fn, "value")) : undefined);
+  };
+
   // ---- rules
-  const selfMethod = (call: CallEdge, caller: SymbolRecord): Outcome => {
+  const selfMethod =(call: CallEdge, caller: SymbolRecord): Outcome => {
     const { res, trait, owner } = enclosingTypeRes(caller);
     if (!owner) return unresolved(call, "no-type:self-outside-impl");
     if (!res) return unresolved(call, `no-type:self-type-unknown candidates=${methodCount.get(call.calleeName) ?? 0}`);
@@ -782,6 +1090,20 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return unresolved(call, "no-type:unknown-type");
   };
 
+  function resolveEdge(call: CallEdge, caller: SymbolRecord): Outcome {
+    const rt = call.receiverText;
+    if (call.evidence.includes("no-type:callee-expression")) return unresolved(call, "no-type:callee-expression");
+    if (rt === undefined) return bareCall(call, caller);
+    const shape = shapeOf(call, caller);
+    if (rt === "self" && shape === "method") return selfMethod(call, caller);
+    if (shape === "path") {
+      const segs = rt.split("::");
+      return rt.startsWith("<") || !segs.every((s) => IDENT.test(s)) ? unresolved(call, "no-type:qualified-path") : pathCall(call, caller, segs);
+    }
+    if (shape === "method") return methodCall(call, caller);
+    return unresolved(call, "no-type:call-shape");
+  }
+
   for (const call of context.calls) {
     const caller = byId.get(call.callerId);
     if (!caller) continue;
@@ -790,23 +1112,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     call.resolutionKind = "unresolved";
     call.confidence = "unresolved";
     if (call.evidence.some((e) => e.startsWith("macro:"))) continue;
-    let outcome: Outcome;
     currentCall = call;
-    const rt = call.receiverText;
-    if (call.evidence.includes("no-type:callee-expression")) outcome = unresolved(call, "no-type:callee-expression");
-    else if (rt === undefined) outcome = bareCall(call, caller);
-    else if (rt === "self" && shapeOf(call, caller) === "method") outcome = selfMethod(call, caller);
-    else {
-      const shape = shapeOf(call, caller);
-      if (shape === "path") {
-        const segs = rt.split("::");
-        outcome = rt.startsWith("<") || !segs.every((s) => IDENT.test(s))
-          ? unresolved(call, "no-type:qualified-path")
-          : pathCall(call, caller, segs);
-      } else if (shape === "method")
-        outcome = unresolved(call, `no-type:receiver-type-unknown candidates=${methodCount.get(call.calleeName) ?? 0}`);
-      else outcome = unresolved(call, "no-type:call-shape");
-    }
-    outcome();
+    resolveEdge(call, caller)();
   }
 }

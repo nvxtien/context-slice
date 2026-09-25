@@ -206,7 +206,7 @@ const isComment = (n: Node) => n.type.endsWith("comment");
 const namedNoComments = (n: Node | null) => (n?.namedChildren ?? []).filter((c) => !isComment(c));
 
 /** Names of an impl's own generic type parameters (not lifetimes/consts). */
-function typeParamNames(impl: Node): Set<string> {
+export function typeParamNames(impl: Node): Set<string> {
   const names = new Set<string>();
   for (const p of field(impl, "type_parameters")?.namedChildren ?? []) {
     const n = p.type === "type_identifier" ? p : (field(p, "left") ?? field(p, "name"));
@@ -298,7 +298,7 @@ const prefixText = (node: Node): string =>
   node.type === "generic_type" ? text(field(node, "type")) : node.text;
 
 /** Turns a call_expression / macro_invocation into an unresolved edge. */
-function callEdge(node: Node, filePath: string, callerId: string): CallEdge {
+export function callEdge(node: Node, filePath: string, callerId: string): CallEdge {
   const edge: CallEdge = {
     callerId,
     calleeName: "",
