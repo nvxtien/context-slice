@@ -10,7 +10,9 @@ import type {
 } from "../types/model.js";
 import { WorkflowError } from "../workflow/errors.js";
 
-// Bump whenever any language adapter's parse/resolve output changes: unchanged files are otherwise reused from cache.
+// Bump whenever any language adapter's parse OR resolve output changes: unchanged files and their cached (resolved)
+// call edges are otherwise reused from cache. Rust parse and resolve output is guarded by tests/rust-parse-snapshot.test.ts,
+// which refuses to regenerate its snapshot for changed output without a bump here.
 export const INDEX_VERSION = "1.7.0";
 
 export interface IndexedFileRecord {

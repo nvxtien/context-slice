@@ -1,13 +1,16 @@
-// Cache guard for Rust parse output (symbols, metadata, imports, exports, calls).
-// IF THIS TEST FAILS because parse output legitimately changed: bump INDEX_VERSION (src/storage/sqlite.ts)
+// Cache guard for Rust parse output (symbols, metadata, imports, exports, calls) AND resolver output (every
+// fixture edge's target/confidence/kind/evidence): both are stored in the SQLite cache and reused on warm rebuilds.
+// IF THIS TEST FAILS because the output legitimately changed: bump INDEX_VERSION (src/storage/sqlite.ts)
 // AND regenerate the snapshot with `UPDATE_RUST_PARSE_SNAPSHOT=1 npx tsx --test tests/rust-parse-snapshot.test.ts`.
 // Regeneration refuses to write a changed snapshot while INDEX_VERSION still equals the snapshot's version,
 // so old SQLite caches can never be reused with a different extraction output.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { ProjectIndex } from "../src/indexer/index.js";
 import { parseRust } from "../src/languages/rust/parse.js";
 import { INDEX_VERSION } from "../src/storage/sqlite.js";
 
@@ -42,17 +45,38 @@ function current() {
     counts: { symbols: big.symbols.length, imports: big.imports.length, calls: big.calls.length },
     sha256: createHash("sha256").update(JSON.stringify(big)).digest("hex"),
   };
+  files["resolved edges (fixtures indexed together)"] = resolvedSummary();
   return files;
+}
+
+/** Resolver output (cached in SQLite too, so it is guarded like parse output): every Rust edge's outcome. */
+function resolvedSummary() {
+  const dir = mkdtempSync(join(tmpdir(), "cs-rust-snap-"));
+  try {
+    mkdirSync(join(dir, "src"));
+    for (const f of FIXTURES) writeFileSync(join(dir, "src", f === "snapshot_calls.rs" ? "lib.rs" : f), readFileSync(join(DIR, f), "utf8"));
+    const index = new ProjectIndex(dir);
+    index.rebuild();
+    const byId = new Map(index.symbols.map((s) => [s.id, s]));
+    return index.calls.map((c) => {
+      const t = c.resolvedTargetId ? byId.get(c.resolvedTargetId) : undefined;
+      return [c.filePath, c.range.startLine, c.range.startColumn, c.calleeName, t ? `${t.filePath}:${t.range.startLine}` : null, c.externalPackage ?? null, c.confidence, c.resolutionKind, c.evidence];
+    }).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 type Snapshot = { indexVersion: string; files: Record<string, unknown> };
 const committed = (): Snapshot | undefined => (existsSync(SNAPSHOT) ? JSON.parse(readFileSync(SNAPSHOT, "utf8")) : undefined);
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+/** A snapshot entry present before changed or disappeared (a brand-new entry is not a change of output). */
+const changed = (old: Record<string, unknown>, now: Record<string, unknown>) => Object.keys(old).some((k) => !same(old[k], now[k]));
 
 if (process.env.UPDATE_RUST_PARSE_SNAPSHOT) {
   const old = committed();
   const files = current();
-  if (old && !same(old.files, files) && old.indexVersion === INDEX_VERSION)
+  if (old && changed(old.files, files) && old.indexVersion === INDEX_VERSION)
     throw new Error(`Rust parse output changed but INDEX_VERSION is still ${INDEX_VERSION}: bump it before regenerating the snapshot.`);
   writeFileSync(SNAPSHOT, JSON.stringify({ indexVersion: INDEX_VERSION, files }, null, 1) + "\n");
 }
