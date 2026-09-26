@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
-import { attributeFact, resolveTarget } from "../benchmarks/v1.5-rust-tasks.js";
+import { attributeFact, contextEntries_, resolveTarget } from "../benchmarks/v1.5-rust-tasks.js";
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), "cs-rust-tasks-"));
@@ -43,10 +43,28 @@ test("missing target and empty parse are adapter defects", () => {
   assert.equal(attributeFact(f, { target: undefined, fileParsed: true, selectedText: "", fullText: "", groundTruthText: "x", budget: 8 }), "TARGET_NOT_FOUND");
   assert.equal(attributeFact(f, { target: undefined, fileParsed: false, selectedText: "", fullText: "", groundTruthText: "x", budget: 8 }), "ADAPTER_EMPTY_FILE");
 });
-test("impact of a zero-caller symbol does not crash and never vacuously passes", () => {
+test("empty pattern list is never PRESERVED; zero-caller symbol has empty callers and no caller entries", () => {
   const index = fixture();
   const b = resolveTarget(index, "B.new", "src/b.rs").symbol!;
   assert.deepEqual(index.callers(b), []);
+  assert.equal(contextEntries_(index, b).some((e) => e.category === "caller-context"), false);
   const f = { id: "f", description: "", verification: { type: "source-fragment", patterns: [] } };
   assert.notEqual(attributeFact(f, { target: b, fileParsed: true, selectedText: "x", fullText: "x", groundTruthText: "x", budget: 8 }), "PRESERVED");
+});
+test("file-scoped retry resolves cross-file ambiguity; same-file ambiguity stays ambiguous", () => {
+  const index = fixture();
+  assert.equal(resolveTarget(index, "new").error, "ambiguous");
+  assert.ok(resolveTarget(index, "new", "src/a.rs").symbol);
+  assert.ok(resolveTarget(index, "new", "src/b.rs").symbol);
+  const root = mkdtempSync(join(tmpdir(), "cs-rust-amb-"));
+  mkdirSync(join(root, "src"));
+  writeFileSync(join(root, "Cargo.toml"), '[package]\nname = "f"\nversion = "0.1.0"\n');
+  writeFileSync(join(root, "src/lib.rs"), "pub mod a;\n");
+  writeFileSync(join(root, "src/a.rs"), "pub struct A; pub struct C;\nimpl A { pub fn go(&self) {} }\nimpl C { pub fn go(&self) {} }\n");
+  const idx = new ProjectIndex(root);
+  idx.rebuild();
+  const r = resolveTarget(idx, "go", "src/a.rs");
+  assert.equal(r.error, "ambiguous");
+  const f = { id: "f", description: "", verification: { type: "source-fragment", patterns: ["x"] } };
+  assert.equal(attributeFact(f, { target: undefined, ambiguous: true, fileParsed: true, selectedText: "", fullText: "", groundTruthText: "x", budget: 8 }), "TARGET_AMBIGUOUS");
 });

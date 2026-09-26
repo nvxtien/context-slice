@@ -19,7 +19,7 @@ type Task = {
   id: string; repository: string; category: string; task: string; targetSymbol: string;
   groundTruthFiles: string[]; requiredFacts: Fact[]; baselineFiles: string[];
 };
-export type Attribution = "PRESERVED" | "TARGET_NOT_FOUND" | "ADAPTER_EMPTY_FILE" | "NOT_SELECTED" | "BUDGET" | "NOT_IN_SOURCE";
+export type Attribution = "PRESERVED" | "TARGET_NOT_FOUND" | "ADAPTER_EMPTY_FILE" | "NOT_SELECTED" | "BUDGET" | "NOT_IN_SOURCE" | "TARGET_AMBIGUOUS";
 
 const budgets = [256, 512, 1_024, 2_048, 4_096, 8_192];
 const median = (values: number[]) => {
@@ -31,6 +31,7 @@ const readIfPresent = (file: string) => (existsSync(file) ? readFileSync(file, "
 // Adapter names look like `a::impl A::new`; tasks say `A.new`. Normalise and match on a
 // whole-segment suffix so `new` stays ambiguous and never picks the first of many.
 const normalise = (name: string) => name.replace(/impl /g, "").replace(/::/g, ".");
+export function contextEntries_(index: ProjectIndex, target: SymbolRecord) { return contextEntries(index, target); }
 export function resolveTarget(index: ProjectIndex, qualifiedName: string, file?: string) {
   const matches = index.symbols.filter((symbol) => {
     if (symbol.kind !== "function" && symbol.kind !== "method") return false;
@@ -84,8 +85,9 @@ const has = (fact: Fact, text: string) => patternsOf(fact).length > 0 && pattern
 /** Why a fact is (not) present. fullText is the unlimited-budget selection. */
 export function attributeFact(
   fact: Fact,
-  ctx: { target?: SymbolRecord; fileParsed: boolean; selectedText: string; fullText: string; groundTruthText: string; budget: number },
+  ctx: { target?: SymbolRecord; ambiguous?: boolean; fileParsed: boolean; selectedText: string; fullText: string; groundTruthText: string; budget: number },
 ): Attribution {
+  if (!ctx.target && ctx.ambiguous) return "TARGET_AMBIGUOUS";
   if (!ctx.target) return ctx.fileParsed ? "TARGET_NOT_FOUND" : "ADAPTER_EMPTY_FILE";
   if (!has(fact, ctx.groundTruthText)) return "NOT_IN_SOURCE";
   if (has(fact, ctx.selectedText)) return "PRESERVED";
@@ -93,7 +95,12 @@ export function attributeFact(
 }
 
 function evaluateTask(task: Task, index: ProjectIndex, repositoryRoot: string, baselines: ManualBaseline[]) {
-  const resolved = resolveTarget(index, task.targetSymbol);
+  let resolved = resolveTarget(index, task.targetSymbol);
+  if (resolved.error === "ambiguous") {
+    // The ground-truth file is task input: retry scoped to each file, accept only a unique hit.
+    const hits = task.groundTruthFiles.map((file) => resolveTarget(index, task.targetSymbol, file)).filter((hit) => hit.symbol);
+    if (hits.length === 1) resolved = hits[0];
+  }
   const target = resolved.symbol;
   const baseline = baselines.find((item) => item.taskId === task.id)!;
   const manualTokens = baseline.files.reduce((sum, file) => sum + estimateTokens(readIfPresent(join(repositoryRoot, file))), 0);
@@ -105,7 +112,7 @@ function evaluateTask(task: Task, index: ProjectIndex, repositoryRoot: string, b
     const selected = select(entries, budget);
     const facts = task.requiredFacts.map((fact) => ({
       id: fact.id,
-      attribution: attributeFact(fact, { target, fileParsed, selectedText: selected.text, fullText: full.text, groundTruthText, budget }),
+      attribution: attributeFact(fact, { target, ambiguous: resolved.error === "ambiguous", fileParsed, selectedText: selected.text, fullText: full.text, groundTruthText, budget }),
     }));
     return { budget, selected, facts, preserved: facts.filter((fact) => fact.attribution === "PRESERVED").length };
   });
@@ -160,7 +167,7 @@ function evaluateRepository(repository: Repository, tasks: Task[], root: string)
   const cold = coldIndex.rebuild();
   const warm = new ProjectIndex(repositoryRoot).rebuild();
   const changed = coldIndex.symbols.find((symbol) => symbol.filePath.endsWith(".rs"))?.filePath;
-  let singleFileRefreshMs = 0;
+  let singleFileRefreshMs: number | null = null;
   if (changed) {
     const file = join(repositoryRoot, changed);
     const original = readFileSync(file, "utf8");
@@ -173,10 +180,19 @@ function evaluateRepository(repository: Repository, tasks: Task[], root: string)
   }
   const index = new ProjectIndex(repositoryRoot);
   index.rebuild();
-  const previewTask = tasks.find((task) => task.repository === repository.id);
-  const started = performance.now();
-  if (previewTask) buildPreview(index, previewTask.task, {});
-  const previewMs = Math.round(performance.now() - started);
+  const timings: number[] = [];
+  let previewError: string | undefined;
+  for (const previewTask of tasks.filter((task) => task.repository === repository.id).slice(0, 3)) {
+    const started = performance.now();
+    try {
+      buildPreview(index, previewTask.task, {});
+      timings.push(Math.round(performance.now() - started));
+    } catch (error) {
+      previewError = `${previewTask.id}: ${error instanceof Error ? error.message : String(error)}`;
+      break;
+    }
+  }
+  const previewMs = timings.length ? median(timings) : null;
   const diagnostics = index.diagnostics();
   return {
     index,
@@ -193,7 +209,7 @@ function evaluateRepository(repository: Repository, tasks: Task[], root: string)
       callEdges: diagnostics.callEdgesTotal,
       callEdgesExact: diagnostics.callEdgesExact,
       callEdgesUnresolved: diagnostics.callEdgesUnresolved,
-      performance: { coldIndexMs: cold.elapsedMs, warmIndexMs: warm.elapsedMs, singleFileRefreshMs, previewMs, filesIndexed: cold.files },
+      performance: { coldIndexMs: cold.elapsedMs, warmIndexMs: warm.elapsedMs, singleFileRefreshMs, previewMs, previewError, filesIndexed: cold.files },
     },
   };
 }
@@ -306,7 +322,11 @@ function main() {
     "",
     "| Repository | Files | Cold | Warm | Single-file refresh | Preview |",
     "| --- | --- | --- | --- | --- | --- |",
-    ...performance.map((p) => `| ${p.repository} | ${p.filesIndexed} | ${p.coldIndexMs} ms | ${p.warmIndexMs} ms | ${p.singleFileRefreshMs} ms | ${p.previewMs} ms |`),
+    ...performance.map((p) => `| ${p.repository} | ${p.filesIndexed} | ${p.coldIndexMs} ms | ${p.warmIndexMs} ms | ${p.singleFileRefreshMs === null ? "n/a" : `${p.singleFileRefreshMs} ms`} | ${p.previewMs === null ? "n/a" : `${p.previewMs} ms (median of up to 3)`} |`),
+    "",
+    ...performance.filter((p) => p.previewError).map((p) => `Preview error (${p.repository}): ${p.previewError}`),
+    "",
+    "Limitation: wholeModuleFallback is a proxy (true only when a selected entry is a module/namespace symbol) and is expected to read 0% here.",
     "",
     "Timings are from one local machine and one pinned checkout each.",
     "",
