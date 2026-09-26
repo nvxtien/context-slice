@@ -1,12 +1,12 @@
 {
   "version": "1.5-phase3",
-  "generatedAt": "2026-09-26T09:56:13.397Z",
+  "generatedAt": "2026-09-26T10:09:54.261Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
   },
   "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
-  "note": "15 tasks; not comparable to Java/TypeScript/Python numbers.",
+  "note": "Small sample (n=15 tasks); not comparable to Java/TypeScript/Python numbers.",
   "repositories": [
     {
       "repository": "walkdir",
@@ -20,14 +20,14 @@
       },
       "parseErrors": 0,
       "symbols": 211,
-      "callEdges": 1140,
+      "callEdges": 1160,
       "callEdgesExact": 566,
-      "callEdgesUnresolved": 358,
+      "callEdgesUnresolved": 355,
       "performance": {
-        "coldIndexMs": 195,
-        "warmIndexMs": 33,
-        "singleFileRefreshMs": 44,
-        "previewMs": 8,
+        "coldIndexMs": 199,
+        "warmIndexMs": 36,
+        "singleFileRefreshMs": 45,
+        "previewMs": 6,
         "filesIndexed": 9
       }
     },
@@ -42,14 +42,14 @@
       },
       "parseErrors": 0,
       "symbols": 243,
-      "callEdges": 1049,
-      "callEdgesExact": 357,
-      "callEdgesUnresolved": 208,
+      "callEdges": 1066,
+      "callEdgesExact": 367,
+      "callEdgesUnresolved": 197,
       "performance": {
-        "coldIndexMs": 172,
-        "warmIndexMs": 36,
-        "singleFileRefreshMs": 36,
-        "previewMs": 7,
+        "coldIndexMs": 184,
+        "warmIndexMs": 42,
+        "singleFileRefreshMs": 39,
+        "previewMs": 8,
         "filesIndexed": 28
       }
     },
@@ -64,13 +64,13 @@
       },
       "parseErrors": 0,
       "symbols": 569,
-      "callEdges": 3706,
-      "callEdgesExact": 1304,
-      "callEdgesUnresolved": 1428,
+      "callEdges": 3708,
+      "callEdgesExact": 1309,
+      "callEdgesUnresolved": 1417,
       "performance": {
-        "coldIndexMs": 505,
-        "warmIndexMs": 111,
-        "singleFileRefreshMs": 105,
+        "coldIndexMs": 486,
+        "warmIndexMs": 115,
+        "singleFileRefreshMs": 111,
         "previewMs": 12,
         "filesIndexed": 13
       }
@@ -229,26 +229,26 @@
       "targetResolution": "resolved",
       "targetCandidates": 1,
       "targetFileParsed": true,
-      "retrievalRecall": 0,
+      "retrievalRecall": 1,
       "requiredFactsTotal": 3,
-      "requiredFactsPreserved": 2,
-      "requiredFactRecall": 0.6666666666666666,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
       "manualTokens": 13087,
       "manualFiles": 3,
-      "suppliedContextTokens": 180,
-      "contextItems": 3,
-      "minimumSufficientBudget": null,
-      "wholeFileFallback": true,
+      "suppliedContextTokens": 223,
+      "contextItems": 4,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9862458928707878,
+      "reduction": 0.9829601895010316,
       "metrics": {
-        "contextWindowReduction": 0.9862458928707878,
-        "inputTokenReduction": 0.9862458928707878,
-        "wholeFileAvoidanceRate": 0,
-        "developerContextEfficiency": 0.011111111111111112,
+        "contextWindowReduction": 0.9829601895010316,
+        "inputTokenReduction": 0.9829601895010316,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.013452914798206279,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.02197265625,
-        "requiredFactRecall": 0.6666666666666666
+        "contextBudgetPressure": 0.0272216796875,
+        "requiredFactRecall": 1
       },
       "facts": [
         {
@@ -257,7 +257,7 @@
         },
         {
           "id": "device-num",
-          "attribution": "NOT_SELECTED"
+          "attribution": "PRESERVED"
         },
         {
           "id": "error",
@@ -462,26 +462,26 @@
       "targetResolution": "resolved",
       "targetCandidates": 1,
       "targetFileParsed": true,
-      "retrievalRecall": 0,
+      "retrievalRecall": 1,
       "requiredFactsTotal": 3,
-      "requiredFactsPreserved": 2,
-      "requiredFactRecall": 0.6666666666666666,
+      "requiredFactsPreserved": 3,
+      "requiredFactRecall": 1,
       "manualTokens": 7897,
       "manualFiles": 4,
-      "suppliedContextTokens": 735,
-      "contextItems": 2,
-      "minimumSufficientBudget": null,
-      "wholeFileFallback": true,
+      "suppliedContextTokens": 447,
+      "contextItems": 3,
+      "minimumSufficientBudget": 512,
+      "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9069266810181081,
+      "reduction": 0.9433962264150944,
       "metrics": {
-        "contextWindowReduction": 0.9069266810181081,
-        "inputTokenReduction": 0.9069266810181081,
-        "wholeFileAvoidanceRate": 0,
-        "developerContextEfficiency": 0.0027210884353741495,
+        "contextWindowReduction": 0.9433962264150944,
+        "inputTokenReduction": 0.9433962264150944,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.006711409395973154,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0897216796875,
-        "requiredFactRecall": 0.6666666666666666
+        "contextBudgetPressure": 0.0545654296875,
+        "requiredFactRecall": 1
       },
       "facts": [
         {
@@ -494,7 +494,7 @@
         },
         {
           "id": "get-apply",
-          "attribution": "NOT_SELECTED"
+          "attribution": "PRESERVED"
         }
       ]
     },
@@ -507,26 +507,26 @@
       "targetResolution": "resolved",
       "targetCandidates": 1,
       "targetFileParsed": true,
-      "retrievalRecall": 0,
+      "retrievalRecall": 1,
       "requiredFactsTotal": 4,
-      "requiredFactsPreserved": 2,
-      "requiredFactRecall": 0.5,
+      "requiredFactsPreserved": 4,
+      "requiredFactRecall": 1,
       "manualTokens": 14327,
       "manualFiles": 4,
-      "suppliedContextTokens": 1441,
-      "contextItems": 4,
-      "minimumSufficientBudget": null,
-      "wholeFileFallback": true,
+      "suppliedContextTokens": 1816,
+      "contextItems": 5,
+      "minimumSufficientBudget": 2048,
+      "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.8994206742514135,
+      "reduction": 0.8732463181405737,
       "metrics": {
-        "contextWindowReduction": 0.8994206742514135,
-        "inputTokenReduction": 0.8994206742514135,
-        "wholeFileAvoidanceRate": 0,
-        "developerContextEfficiency": 0.0013879250520471894,
+        "contextWindowReduction": 0.8732463181405737,
+        "inputTokenReduction": 0.8732463181405737,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0022026431718061676,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.1759033203125,
-        "requiredFactRecall": 0.5
+        "contextBudgetPressure": 0.2216796875,
+        "requiredFactRecall": 1
       },
       "facts": [
         {
@@ -535,11 +535,11 @@
         },
         {
           "id": "server",
-          "attribution": "NOT_SELECTED"
+          "attribution": "PRESERVED"
         },
         {
           "id": "subscribe",
-          "attribution": "NOT_SELECTED"
+          "attribution": "PRESERVED"
         },
         {
           "id": "client",
@@ -754,19 +754,19 @@
       "requiredFactRecall": 0.75,
       "manualTokens": 13223,
       "manualFiles": 2,
-      "suppliedContextTokens": 1146,
-      "contextItems": 3,
+      "suppliedContextTokens": 1171,
+      "contextItems": 4,
       "minimumSufficientBudget": null,
       "wholeFileFallback": true,
       "wholeModuleFallback": false,
-      "reduction": 0.9133328291613099,
+      "reduction": 0.9114421840732058,
       "metrics": {
-        "contextWindowReduction": 0.9133328291613099,
-        "inputTokenReduction": 0.9133328291613099,
+        "contextWindowReduction": 0.9114421840732058,
+        "inputTokenReduction": 0.9114421840732058,
         "wholeFileAvoidanceRate": 0,
-        "developerContextEfficiency": 0.002617801047120419,
+        "developerContextEfficiency": 0.0025619128949615714,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.139892578125,
+        "contextBudgetPressure": 0.1429443359375,
         "requiredFactRecall": 0.75
       },
       "facts": [
@@ -792,36 +792,36 @@
   "summary": {
     "overall": {
       "tasks": 15,
-      "requiredFactRecall": 0.9074074074074074,
-      "retrievalRecall": 0.8,
-      "medianContextReduction": 0.9408713692946058,
+      "requiredFactRecall": 0.9814814814814815,
+      "retrievalRecall": 1,
+      "medianContextReduction": 0.9420030177291588,
       "medianManualTokens": 10604,
-      "medianContextTokens": 597,
+      "medianContextTokens": 500,
       "medianMinimumSufficientBudget": 256,
-      "wholeFileFallbackRate": 0.26666666666666666,
+      "wholeFileFallbackRate": 0.06666666666666667,
       "wholeModuleFallbackRate": 0
     },
     "byRepository": {
       "walkdir": {
         "tasks": 5,
-        "requiredFactRecall": 0.9411764705882353,
-        "retrievalRecall": 0.8,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
         "medianContextReduction": 0.9677780264041173,
         "medianManualTokens": 12921,
         "medianContextTokens": 432,
         "medianMinimumSufficientBudget": 256,
-        "wholeFileFallbackRate": 0.2,
+        "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "mini-redis": {
         "tasks": 5,
-        "requiredFactRecall": 0.8333333333333334,
-        "retrievalRecall": 0.6,
-        "medianContextReduction": 0.8994206742514135,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.8732463181405737,
         "medianManualTokens": 3532,
-        "medianContextTokens": 597,
+        "medianContextTokens": 500,
         "medianMinimumSufficientBudget": 256,
-        "wholeFileFallbackRate": 0.4,
+        "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "ripgrep-ignore": {
@@ -861,72 +861,67 @@
       },
       "change": {
         "tasks": 3,
-        "requiredFactRecall": 0.8,
-        "retrievalRecall": 0.3333333333333333,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
         "medianContextReduction": 0.9443315192446396,
         "medianManualTokens": 13087,
-        "medianContextTokens": 735,
-        "medianMinimumSufficientBudget": 1024,
-        "wholeFileFallbackRate": 0.6666666666666666,
+        "medianContextTokens": 447,
+        "medianMinimumSufficientBudget": 512,
+        "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "impact": {
         "tasks": 3,
-        "requiredFactRecall": 0.7272727272727273,
-        "retrievalRecall": 0.6666666666666666,
-        "medianContextReduction": 0.9133328291613099,
+        "requiredFactRecall": 0.9090909090909091,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9114421840732058,
         "medianManualTokens": 13223,
-        "medianContextTokens": 1146,
-        "medianMinimumSufficientBudget": 1024,
-        "wholeFileFallbackRate": 0.6666666666666666,
+        "medianContextTokens": 1171,
+        "medianMinimumSufficientBudget": 2048,
+        "wholeFileFallbackRate": 0.3333333333333333,
         "wholeModuleFallbackRate": 0
       }
     }
   },
   "failureAttribution": {
-    "NOT_SELECTED": 5
+    "NOT_SELECTED": 1
   },
   "findings": [
     {
       "cause": "NOT_SELECTED",
       "tasks": [
-        "walkdir-same-fs-change",
-        "mini-redis-command-apply-change",
-        "mini-redis-read-frame-impact",
         "ripgrep-ignore-is-hidden-path-impact"
       ],
       "repositories": [
-        "walkdir",
-        "mini-redis",
         "ripgrep-ignore"
       ],
-      "taskCount": 4,
-      "repositoryCount": 3,
-      "marker": "fix"
+      "taskCount": 1,
+      "repositoryCount": 1,
+      "marker": "report-only"
     }
   ],
   "performance": [
     {
       "repository": "walkdir",
-      "coldIndexMs": 195,
-      "warmIndexMs": 33,
-      "singleFileRefreshMs": 44,
-      "previewMs": 8,
+      "coldIndexMs": 199,
+      "warmIndexMs": 36,
+      "singleFileRefreshMs": 45,
+      "previewMs": 6,
       "filesIndexed": 9
     },
     {
       "repository": "mini-redis",
-      "coldIndexMs": 172,
-      "warmIndexMs": 36,
-      "singleFileRefreshMs": 36,
-      "previewMs": 7,
+      "coldIndexMs": 184,
+      "warmIndexMs": 42,
+      "singleFileRefreshMs": 39,
+      "previewMs": 8,
       "filesIndexed": 28
     },
     {
       "repository": "ripgrep-ignore",
-      "coldIndexMs": 505,
-      "warmIndexMs": 111,
-      "singleFileRefreshMs": 105,
+      "coldIndexMs": 486,
+      "warmIndexMs": 115,
+      "singleFileRefreshMs": 111,
       "previewMs": 12,
       "filesIndexed": 13
     }
