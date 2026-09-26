@@ -694,7 +694,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   ]);
   const UNWRAP = new Set(["unwrap", "expect", "unwrap_or_default", "unwrap_or", "unwrap_or_else"]);
   const ITEM_NODES: Record<string, string[]> = {
-    function: ["function_item", "function_signature_item"], class: ["struct_item"], type: ["impl_item", "type_item"], interface: ["trait_item"],
+    function: ["function_item", "function_signature_item"], class: ["struct_item"], enum: ["enum_item"], type: ["impl_item", "type_item"], interface: ["trait_item"],
   };
   /** Syntax node of a declaration in its whole-file tree. */
   const declNode = (s: SymbolRecord): Node | undefined => {
@@ -838,9 +838,11 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   /** Type of the local `name` used at `use` (caller-source offset): one binding site only, a plain `let`/parameter. */
   const localTy = (caller: SymbolRecord, name: string, use: number): Ty => {
     const { sites } = bindingSites(caller);
-    const list = sites.get(name) ?? [];
+    // A match arm's binding is visible only inside that arm: arms not containing the use are not rivals.
+    const list = (sites.get(name) ?? []).filter((s) => s.type !== "match_arm" || (use >= s.startIndex && use < s.endIndex));
     if (sites.has("*") || list.length !== 1) return undefined; // shadowed / re-bound: never guessed
     const site = list[0];
+    if (site.type === "match_arm") return armTy(caller, site, name);
     let pat = field(site, "pattern");
     if (pat?.type === "mut_pattern") pat = pat.namedChild(0);
     if (pat?.type !== "identifier") return undefined;
@@ -848,6 +850,34 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (site.type !== "let_declaration" || use < site.endIndex || !site.parent || use >= site.parent.endIndex) return undefined;
     const tn = field(site, "type");
     return tn ? tyOf(tn, bodyScope(caller)) : exprTy(caller, field(site, "value"));
+  };
+
+  /**
+   * Type of `name` bound as a direct field of a tuple-variant arm pattern (`Get(cmd)` / `E::Get(a, b)`): the
+   * variant's declared payload type. The enum comes from the scrutinee's type, else from the pattern path;
+   * undefined unless the enum, the variant and the field position are each unique.
+   */
+  const armTy = (caller: SymbolRecord, arm: Node, name: string): Ty => {
+    let pat = field(arm, "pattern");
+    if (pat?.type === "match_pattern") pat = pat.namedChild(0);
+    if (pat?.type !== "tuple_struct_pattern") return undefined;
+    const path = field(pat, "type");
+    const fields = pat.namedChildren.filter((c) => c.id !== path?.id && !c.type.endsWith("comment"));
+    const pos = fields.findIndex((c) => c.type === "identifier" && c.text === name);
+    if (!path || pos < 0 || fields.some((c) => c.type === "remaining_field_pattern")) return undefined;
+    const segs = path.text.split("::").map((s) => s.trim());
+    const scrutinee = arm.parent?.parent?.type === "match_expression" ? field(arm.parent.parent, "value") : null;
+    let en = derefTy(exprTy(caller, scrutinee));
+    if (en?.t !== "decl" && segs.length > 1 && segs.slice(0, -1).every((s) => IDENT.test(s)))
+      en = named(typePath(segs.slice(0, -1), caller.filePath, caller), segs.at(-2)!, [], 0);
+    if (en?.t !== "decl" || en.sym.kind !== "enum" || inFn(en.sym)) return undefined;
+    const node = declNode(en.sym);
+    const variants = (node && field(node, "body")?.namedChildren.filter((v) => v.type === "enum_variant" && field(v, "name")?.text === segs.at(-1))) ?? [];
+    const body = variants.length === 1 ? field(variants[0], "body") : null;
+    if (body?.type !== "ordered_field_declaration_list") return undefined;
+    const types = body.childrenForFieldName("type");
+    if (types.length !== fields.length || !node || typeParamNames(node).size) return undefined;
+    return tyOf(types[pos], { from: en.sym, owners: [], bounded: false, self: () => en });
   };
 
   // Recursion only moves to strictly earlier / smaller nodes (receivers, a `let` value before its use), so it
