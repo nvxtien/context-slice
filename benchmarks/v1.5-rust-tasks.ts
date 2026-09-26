@@ -235,6 +235,43 @@ export function buildFindings(rows: { task: string; repository: string; facts: {
   }));
 }
 
+// What each attribution means for the fix loop (the evidence behind a row, not a claim about one repo).
+export const ROOT_CAUSE_NOTES: Record<string, string> = {
+  NOT_SELECTED: "fact lies outside every selected symbol: a missing/unresolved call edge, or text that is not in any symbol (e.g. a `use` line)",
+  BUDGET: "fact is in the unlimited selection but not at 8192 tokens",
+  NOT_IN_SOURCE: "pattern absent from the ground-truth files: task defect",
+  TARGET_NOT_FOUND: "target symbol not indexed although its file parsed: adapter defect",
+  ADAPTER_EMPTY_FILE: "ground-truth file produced no symbols (empty/parse error): adapter defect",
+  TARGET_AMBIGUOUS: "target name matched several symbols, even scoped by file",
+};
+
+type FactRow = { task: string; category: string; facts: { id: string; attribution: string }[] };
+type Summary = { requiredFactRecall: number; retrievalRecall: number; wholeFileFallbackRate: number };
+type RunJson = { summary: { overall: Summary; byCategory: Record<string, Summary> }; tasks: FactRow[] };
+
+/** Before/after comparison of two runs (overall + per category) and every fact whose attribution changed. */
+export function buildBeforeAfter(before: RunJson, after: RunJson) {
+  const groups = [["all", before.summary.overall, after.summary.overall] as const,
+    ...Object.keys(after.summary.byCategory).map((c) => [c, before.summary.byCategory[c], after.summary.byCategory[c]] as const)];
+  const rows = groups.map(([group, b, a]) => ({
+    group,
+    factRecall: [b?.requiredFactRecall ?? null, a.requiredFactRecall],
+    retrievalRecall: [b?.retrievalRecall ?? null, a.retrievalRecall],
+    wholeFileFallback: [b?.wholeFileFallbackRate ?? null, a.wholeFileFallbackRate],
+  }));
+  const changes = after.tasks.flatMap((t) => t.facts.flatMap((f) => {
+    const old = before.tasks.find((x) => x.task === t.task)?.facts.find((x) => x.id === f.id)?.attribution ?? "absent";
+    return old === f.attribution ? [] : [{ task: t.task, fact: f.id, before: old, after: f.attribution }];
+  }));
+  return { rows, changes, regressions: changes.filter((c) => c.before === "PRESERVED") };
+}
+
+/** Categories with the lowest fact recall (ties all named). */
+export function weakestCategories(byCategory: Record<string, { requiredFactRecall: number }>) {
+  const min = Math.min(...Object.values(byCategory).map((s) => s.requiredFactRecall));
+  return Object.entries(byCategory).filter(([, s]) => s.requiredFactRecall === min).map(([c]) => c);
+}
+
 const pct = (value: number) => `${(value * 100).toFixed(2)}%`;
 function summarize(rows: any[]) {
   const total = rows.reduce((sum, row) => sum + row.requiredFactsTotal, 0);
@@ -289,7 +326,7 @@ function main() {
     generatedAt: new Date().toISOString(),
     environment: { node: process.version, platform: process.platform },
     tokenAccounting: "estimated deterministic context size; not assistant telemetry",
-    note: "15 tasks; not comparable to Java/TypeScript/Python numbers.",
+    note: "Small sample (n=15 tasks); not comparable to Java/TypeScript/Python numbers.",
     repositories: repositoryReports,
     tasks: taskResults,
     summary,
@@ -298,6 +335,12 @@ function main() {
     performance,
   };
   writeFileSync(join(outputDir, "v1.5-phase3-rust-tasks.json"), `${JSON.stringify(report, null, 2)}\n`);
+  const beforeFile = join(outputDir, "v1.5-phase3-rust-tasks.before-fixes.json");
+  const beforeAfter = existsSync(beforeFile) ? buildBeforeAfter(JSON.parse(readFileSync(beforeFile, "utf8")), report) : undefined;
+  const pp = (v: number | null) => (v === null ? "n/a" : pct(v));
+  const incomplete = taskResults.filter((r) => r.minimumSufficientBudget === null);
+  const weakest = weakestCategories(summary.byCategory);
+  const factTasks = (cause: string) => new Set(taskResults.filter((r) => r.facts.some((f: any) => f.attribution === cause)).map((r) => r.task)).size;
   const row = (name: string, s: ReturnType<typeof summarize>) =>
     `| ${name} | ${s.tasks} | ${pct(s.requiredFactRecall)} | ${pct(s.retrievalRecall)} | ${pct(s.medianContextReduction)} | ${pct(s.wholeFileFallbackRate)} | ${pct(s.wholeModuleFallbackRate)} | ${s.medianMinimumSufficientBudget} |`;
   const head = ["| Group | Tasks | Fact recall | Retrieval recall | Median reduction | Whole-file fallback | Whole-module fallback | Median min budget |", "| --- | --- | --- | --- | --- | --- | --- | --- |"];
@@ -306,7 +349,11 @@ function main() {
     "",
     `Generated: ${report.generatedAt}`,
     "",
-    "15 tasks; not comparable to Java/TypeScript/Python numbers.",
+    `${report.note}`,
+    "",
+    `Decision gate (every required fact preserved at <= 8192 tokens on all ${taskResults.length} tasks): ${incomplete.length ? `NOT MET — ${incomplete.length} task(s) incomplete: ${incomplete.map((r) => r.task).join(", ")}.` : "MET."}`,
+    "",
+    `Weakest categories (lowest fact recall, ${pct(summary.byCategory[weakest[0]]?.requiredFactRecall ?? 0)}): ${weakest.join(", ")}.`,
     "",
     "## Overall",
     "",
@@ -329,19 +376,41 @@ function main() {
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...taskResults.map((r) => `| ${r.task} | ${r.category} | ${r.targetFound ? "found" : r.targetResolution} | ${r.manualTokens} | ${r.suppliedContextTokens} | ${pct(r.reduction)} | ${pct(r.requiredFactRecall)} | ${r.retrievalRecall} | ${r.minimumSufficientBudget ?? "n/a"} |`),
     "",
+    "Note: retrieval recall 1 with min budget n/a is possible: every ground-truth file is selected but some fact text in it is not (e.g. a line outside every symbol).",
+    "",
     "## Failure attribution",
     "",
     "TARGET_NOT_FOUND/ADAPTER_EMPTY_FILE = adapter defect; NOT_SELECTED = missing edge/selection rule; BUDGET = budget too small; NOT_IN_SOURCE = task defect.",
     "",
-    "| Cause | Facts |",
-    "| --- | --- |",
-    ...(Object.keys(attribution).length ? Object.entries(attribution).map(([k, v]) => `| ${k} | ${v} |`) : ["| none | 0 |"]),
+    "| Cause | Facts | Distinct tasks |",
+    "| --- | --- | --- |",
+    ...(Object.keys(attribution).length ? Object.entries(attribution).map(([k, v]) => `| ${k} | ${v} | ${factTasks(k)} |`) : ["| none | 0 | 0 |"]),
     "",
     "## Findings",
     "",
-    "| Cause | Tasks | Repositories | Task count | Repo count | Marker |",
-    "| --- | --- | --- | --- | --- | --- |",
-    ...(findings.length ? findings.map((f) => `| ${f.cause} | ${f.tasks.join(", ")} | ${f.repositories.join(", ")} | ${f.taskCount} | ${f.repositoryCount} | ${f.marker} |`) : ["| none | - | - | 0 | 0 | - |"]),
+    "Counts are distinct tasks / repositories, not facts.",
+    "",
+    "| Cause | Tasks | Repositories | Task count | Repo count | Marker | Root-cause note |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    ...(findings.length ? findings.map((f) => `| ${f.cause} | ${f.tasks.join(", ")} | ${f.repositories.join(", ")} | ${f.taskCount} | ${f.repositoryCount} | ${f.marker} | ${ROOT_CAUSE_NOTES[f.cause] ?? "-"} |`) : ["| none | - | - | 0 | 0 | - | - |"]),
+    "",
+    "## Before / After",
+    "",
+    ...(beforeAfter
+      ? [
+          "Before = `v1.5-phase3-rust-tasks.before-fixes.json` (frozen baseline); After = this run.",
+          "",
+          "| Group | Fact recall | Retrieval recall | Whole-file fallback |",
+          "| --- | --- | --- | --- |",
+          ...beforeAfter.rows.map((r) => `| ${r.group} | ${pp(r.factRecall[0])} → ${pp(r.factRecall[1])} | ${pp(r.retrievalRecall[0])} → ${pp(r.retrievalRecall[1])} | ${pp(r.wholeFileFallback[0])} → ${pp(r.wholeFileFallback[1])} |`),
+          "",
+          "Fact status changes:",
+          "",
+          ...(beforeAfter.changes.length ? beforeAfter.changes.map((c) => `- ${c.task} / ${c.fact}: ${c.before} → ${c.after}`) : ["- none"]),
+          "",
+          `Regressions (a fact PRESERVED before and not after): ${beforeAfter.regressions.length ? beforeAfter.regressions.map((c) => `${c.task} / ${c.fact}`).join(", ") : "none"}.`,
+        ]
+      : ["No before-fixes baseline present."]),
     "",
     "## Missing facts",
     "",
