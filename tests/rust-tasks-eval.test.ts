@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
-import { attributeFact, contextEntries_, resolveTarget } from "../benchmarks/v1.5-rust-tasks.js";
+import { attributeFact, buildFindings, contextEntries_, resolveTarget } from "../benchmarks/v1.5-rust-tasks.js";
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), "cs-rust-tasks-"));
@@ -67,4 +67,10 @@ test("file-scoped retry resolves cross-file ambiguity; same-file ambiguity stays
   assert.equal(r.error, "ambiguous");
   const f = { id: "f", description: "", verification: { type: "source-fragment", patterns: ["x"] } };
   assert.equal(attributeFact(f, { target: undefined, ambiguous: true, fileParsed: true, selectedText: "", fullText: "", groundTruthText: "x", budget: 8 }), "TARGET_AMBIGUOUS");
+});
+test("findings mark repeated fact-losing causes fix, budget/source report-only", () => {
+  const r = (task: string, repository: string, ...a: string[]) => ({ task, repository, facts: a.map((attribution) => ({ attribution })) });
+  const f = buildFindings([r("t1", "x", "NOT_SELECTED", "PRESERVED"), r("t2", "x", "NOT_SELECTED"), r("t3", "y", "NOT_IN_SOURCE", "BUDGET"), r("t4", "z", "BUDGET"), r("t5", "z", "TARGET_NOT_FOUND")]);
+  const m = Object.fromEntries(f.map((x) => [x.cause, x.marker]));
+  assert.deepEqual(m, { NOT_SELECTED: "fix", NOT_IN_SOURCE: "report-only", BUDGET: "report-only", TARGET_NOT_FOUND: "report-only" });
 });

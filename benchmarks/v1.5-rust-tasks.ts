@@ -214,6 +214,27 @@ function evaluateRepository(repository: Repository, tasks: Task[], root: string)
   };
 }
 
+/** Per non-PRESERVED cause: tasks, repos, and fix/report-only (fix iff loses a fact/target and repeats in >=2 tasks or >=2 repos). */
+export function buildFindings(rows: { task: string; repository: string; facts: { attribution: string }[] }[]) {
+  const causes = new Map<string, { tasks: Set<string>; repos: Set<string> }>();
+  for (const row of rows)
+    for (const fact of row.facts) {
+      if (fact.attribution === "PRESERVED") continue;
+      const entry = causes.get(fact.attribution) ?? { tasks: new Set<string>(), repos: new Set<string>() };
+      entry.tasks.add(row.task);
+      entry.repos.add(row.repository);
+      causes.set(fact.attribution, entry);
+    }
+  return [...causes].map(([cause, { tasks, repos }]) => ({
+    cause,
+    tasks: [...tasks],
+    repositories: [...repos],
+    taskCount: tasks.size,
+    repositoryCount: repos.size,
+    marker: cause !== "NOT_IN_SOURCE" && cause !== "BUDGET" && (tasks.size >= 2 || repos.size >= 2) ? "fix" : "report-only",
+  }));
+}
+
 const pct = (value: number) => `${(value * 100).toFixed(2)}%`;
 function summarize(rows: any[]) {
   const total = rows.reduce((sum, row) => sum + row.requiredFactsTotal, 0);
@@ -261,6 +282,7 @@ function main() {
   const attribution: Record<string, number> = {};
   for (const row of taskResults)
     for (const fact of row.facts) if (fact.attribution !== "PRESERVED") attribution[fact.attribution] = (attribution[fact.attribution] ?? 0) + 1;
+  const findings = buildFindings(taskResults);
   const performance = repositoryReports.filter((r) => r.performance).map((r) => ({ repository: r.repository, ...r.performance }));
   const report = {
     version: "1.5-phase3",
@@ -272,6 +294,7 @@ function main() {
     tasks: taskResults,
     summary,
     failureAttribution: attribution,
+    findings,
     performance,
   };
   writeFileSync(join(outputDir, "v1.5-phase3-rust-tasks.json"), `${JSON.stringify(report, null, 2)}\n`);
@@ -313,6 +336,12 @@ function main() {
     "| Cause | Facts |",
     "| --- | --- |",
     ...(Object.keys(attribution).length ? Object.entries(attribution).map(([k, v]) => `| ${k} | ${v} |`) : ["| none | 0 |"]),
+    "",
+    "## Findings",
+    "",
+    "| Cause | Tasks | Repositories | Task count | Repo count | Marker |",
+    "| --- | --- | --- | --- | --- | --- |",
+    ...(findings.length ? findings.map((f) => `| ${f.cause} | ${f.tasks.join(", ")} | ${f.repositories.join(", ")} | ${f.taskCount} | ${f.repositoryCount} | ${f.marker} |`) : ["| none | - | - | 0 | 0 | - |"]),
     "",
     "## Missing facts",
     "",
