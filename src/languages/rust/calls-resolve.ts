@@ -148,6 +148,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     let vis: SymbolRecord | undefined;
     let mod: SymbolRecord | undefined;
     for (const s of symbolsByFile.get(rec.filePath) ?? []) {
+      if (s.kind === "namespace" && s.metadata?.moduleScope === true) continue; // synthetic per-file import symbol, not a real scope
       if ((s.kind !== "function" && s.kind !== "namespace") || !contains(s.range, rec.range)) continue;
       if (!vis || contains(vis.range, s.range)) vis = s;
       if (s.kind === "namespace" && (!mod || contains(mod.range, s.range))) mod = s;

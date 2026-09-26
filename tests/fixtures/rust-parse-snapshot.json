@@ -1,5 +1,5 @@
 {
- "indexVersion": "1.8.0",
+ "indexVersion": "1.9.0",
  "files": {
   "functions.rs": {
    "parseError": false,
@@ -573,6 +573,20 @@
        "w": "&Walker<u8>"
       }
      }
+    },
+    {
+     "kind": "namespace",
+     "name": "src/snapshot_calls.rs",
+     "qualifiedName": "src/snapshot_calls.rs",
+     "range": {
+      "startLine": 1,
+      "startColumn": 0,
+      "endLine": 59,
+      "endColumn": 0
+     },
+     "metadata": {
+      "moduleScope": true
+     }
     }
    ],
    "imports": [
@@ -1030,11 +1044,11 @@
   },
   "large.rs (generated)": {
    "counts": {
-    "symbols": 1385,
+    "symbols": 1386,
     "imports": 2,
     "calls": 1385
    },
-   "sha256": "76ece2e75f5156e1539e76044bfe55af3ce90afb890693e1b0df5baf24e37613"
+   "sha256": "cdf855da1e0241eb5ee3641bbf191f43e4afe7af7d41062dec5a1735bf9dc0e2"
   },
   "resolved edges (fixtures indexed together)": [
    [

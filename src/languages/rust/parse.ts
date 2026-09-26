@@ -521,5 +521,26 @@ export function parseRust(filePath: string, source: string): ParsedFile {
     for (const child of node.namedChildren) collectUses(child);
   };
   collectUses(tree.rootNode);
+  const topLevelUses = tree.rootNode.namedChildren.filter(
+    (child) => child.type === "use_declaration",
+  );
+  if (topLevelUses.length) {
+    const moduleId = `${filePath}::module::${filePath}`;
+    symbols.push({
+      id: moduleId,
+      language: LANGUAGE_ID,
+      kind: "namespace",
+      name: filePath,
+      qualifiedName: filePath,
+      canonicalIdentity: moduleId,
+      signature: `module ${filePath}`,
+      filePath,
+      range: range(tree.rootNode),
+      annotations: [],
+      modifiers: [],
+      metadata: { moduleScope: true },
+      source: topLevelUses.map((node) => node.text).join("\n"),
+    });
+  }
   return { symbols, calls, imports, exports, parseError };
 }
