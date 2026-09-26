@@ -76,3 +76,39 @@ test("(a) match-arm binding takes the enum variant's payload type", () => {
   assert.equal(u[0].conf, "unresolved");
   assert.ok(u[0].ev.some((x) => x.startsWith("no-type:")), JSON.stringify(u));
 });
+
+// Cause (b) calls inside macro token trees: `tokio::select! { res = self.conn.read_frame() => .. }` produced
+// only the `select` macro edge, so `read_frame` had no caller. Expected (spec §36: macros are not expanded):
+// the invocation's argument text is re-parsed as expressions, recovered calls are resolved like any other but
+// never `exact` (at most `probable`) and carry `macro:arg <macro>` evidence; format/assert/log-style macros
+// are not looked into.
+const MACRO = `
+pub struct Conn;
+impl Conn { pub fn read_frame(&self) -> u8 { 0 } pub fn flush(&self) {} }
+pub struct Handler { conn: Conn }
+impl Handler {
+    pub async fn run(&self, other: &Conn) {
+        tokio::select! {
+            res = self.conn.read_frame() => { other.flush(); }
+            _ = other.read_frame() => {}
+        }
+        println!("{}", self.conn.read_frame());
+        assert_eq!(other.read_frame(), 0);
+        log::debug!("{}", other.read_frame());
+    }
+}
+`;
+
+test("(b) calls inside non-format macros are recovered as probable with macro evidence", () => {
+  const reads = edges({ "src/lib.rs": MACRO }, "read_frame");
+  // Only the two select! calls: println!/assert_eq!/log::debug! are not looked into.
+  assert.equal(reads.length, 2, JSON.stringify(reads));
+  for (const e of reads) {
+    assert.deepEqual([e.target, e.conf], [3, "probable"], JSON.stringify(e));
+    assert.ok(e.ev.includes("macro:arg select"), JSON.stringify(e));
+  }
+  const flush = edges({ "src/lib.rs": MACRO }, "flush");
+  assert.deepEqual(flush.map((e) => [e.target, e.conf]), [[3, "probable"]], JSON.stringify(flush));
+  // The macro edge itself is unchanged.
+  assert.deepEqual(edges({ "src/lib.rs": MACRO }, "select").map((e) => [e.conf, e.ev]), [["unresolved", ["macro:select"]]]);
+});

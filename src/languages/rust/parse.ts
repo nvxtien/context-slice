@@ -345,6 +345,67 @@ export function callEdge(node: Node, filePath: string, callerId: string): CallEd
   return edge;
 }
 
+// Macro arguments (spec §36: never expanded). A macro's token tree is re-parsed, best effort, as the body of a
+// dummy fn so ordinary expressions inside it (`tokio::select!` branches, `stream!` bodies) yield call nodes.
+// DENYLIST, for precision: format / print / write / assert / panic / vec style macros and logging macros (a
+// `log::` or `tracing::` path, or the bare log-level names) are never looked into; their arguments are
+// format strings and values, not control flow a developer navigates.
+const OPAQUE_MACROS = new Set([
+  "println", "print", "eprintln", "eprint", "format", "format_args", "write", "writeln", "vec", "panic",
+  "unreachable", "todo", "unimplemented", "trace", "debug", "info", "warn", "error", "log", "event", "span",
+]);
+const OPAQUE_ROOTS = new Set(["log", "tracing", "std", "core", "alloc"]);
+const MACRO_PREFIX = "fn __m() {";
+export type MacroArgs = { root: Node; tt: Node; macro: string };
+/** Re-parsed argument tree of a macro invocation, or undefined for denylisted / argument-less macros. */
+export function macroArgs(mac: Node): MacroArgs | undefined {
+  const m = field(mac, "macro");
+  if (!m) return undefined;
+  const name = m.type === "scoped_identifier" ? text(field(m, "name")) : m.text;
+  if (m.type === "scoped_identifier" && OPAQUE_ROOTS.has(m.text.split("::")[0].trim())) return undefined;
+  if (OPAQUE_MACROS.has(name) || /^(debug_)?assert/.test(name)) return undefined;
+  const tt = mac.namedChildren.find((c) => c.type === "token_tree");
+  if (!tt || tt.text.length < 3) return undefined;
+  const src = `${MACRO_PREFIX}${tt.text.slice(1, -1)}}`;
+  try {
+    return { root: rustParser().parse((i: number) => src.slice(i, i + 4_096)).rootNode, tt, macro: name };
+  } catch {
+    return undefined;
+  }
+}
+/** Index / position in the token tree's own tree of a node of the re-parsed argument tree. */
+export const macroIndex = (a: MacroArgs, i: number) => a.tt.startIndex + 1 + i - MACRO_PREFIX.length;
+const macroPos = (a: MacroArgs, p: Parser.Point): Parser.Point =>
+  p.row === 0
+    ? { row: a.tt.startPosition.row, column: a.tt.startPosition.column + 1 + p.column - MACRO_PREFIX.length }
+    : { row: a.tt.startPosition.row + p.row, column: p.column };
+
+/**
+ * Calls inside a macro's arguments, recursively through nested non-denylisted macros. `pos` maps a position
+ * of `a`'s own tree to the file. Each edge carries `macro:arg <macro>` (resolution caps it at `probable`).
+ */
+function macroCalls(a: MacroArgs, pos: (p: Parser.Point) => Parser.Point, filePath: string, callerId: string, out: CallEdge[]) {
+  const here = (p: Parser.Point) => pos(macroPos(a, p));
+  const walk = (n: Node) => {
+    for (const c of n.namedChildren) {
+      if (c.type === "call_expression") {
+        const edge = callEdge(c, filePath, callerId);
+        const s = here(c.startPosition);
+        const e = here(c.endPosition);
+        edge.range = { startLine: s.row + 1, startColumn: s.column, endLine: e.row + 1, endColumn: e.column };
+        edge.evidence = [...edge.evidence, `macro:arg ${a.macro}`];
+        out.push(edge);
+      } else if (c.type === "macro_invocation") {
+        const inner = macroArgs(c);
+        if (inner) macroCalls(inner, here, filePath, callerId, out);
+        continue;
+      }
+      walk(c);
+    }
+  };
+  walk(a.root);
+}
+
 export function parseRust(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
   const seenIds = new Set<string>();
@@ -419,13 +480,17 @@ export function parseRust(filePath: string, source: string): ParsedFile {
 
   walk(tree.rootNode, undefined, []);
   const calls: CallEdge[] = [];
-  // Caller = innermost enclosing fn (closures/async blocks belong to it); token trees are opaque.
+  // Caller = innermost enclosing fn (closures/async blocks belong to it); token trees are only re-parsed via macroArgs.
   const collectCalls = (node: Node, caller: SymbolRecord | undefined) => {
     for (const child of node.namedChildren) {
       if (child.type === "token_tree") continue;
       const owner = fnByNode.get(child.id) ?? caller;
       if (owner && (child.type === "call_expression" || child.type === "macro_invocation"))
         calls.push(callEdge(child, filePath, owner.id));
+      if (owner && child.type === "macro_invocation") {
+        const args = macroArgs(child);
+        if (args) macroCalls(args, (p) => p, filePath, owner.id, calls);
+      }
       collectCalls(child, owner);
     }
   };

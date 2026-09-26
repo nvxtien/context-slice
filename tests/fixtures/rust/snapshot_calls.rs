@@ -51,3 +51,8 @@ fn helper(a: usize, b: usize) -> Result<usize, String> {
     let f = |x: usize| x + 1;
     Ok(f(a) + b)
 }
+
+fn in_macro(w: &Walker<u8>) {
+    tokio::select! { _ = w.done() => { helper(1, 2); } }
+    assert!(helper(0, 0).is_ok());
+}

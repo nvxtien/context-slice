@@ -1,6 +1,6 @@
 import type { CallEdge, ImportRecord, SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
-import { callEdge, field, modulePathFor, rustParser, typeParamNames, type Node } from "./parse.js";
+import { callEdge, field, macroArgs, macroIndex, modulePathFor, rustParser, typeParamNames, type Node } from "./parse.js";
 
 /**
  * Rust call resolution. Part A (structural targets): `self.m()`, `Self::f()`/`Type::f()`, module paths and
@@ -59,7 +59,7 @@ export function leaveUnresolvedOnError(call: CallEdge) {
   call.declaredTargetId = call.resolvedTargetId = call.externalPackage = undefined;
   call.resolutionKind = "unresolved";
   call.confidence = "unresolved";
-  if (!call.evidence.some((e) => e.startsWith("macro:"))) call.evidence = withBase(call, "no-type:resolver-error");
+  if (isMacroArg(call) || !call.evidence.some((e) => e.startsWith("macro:"))) call.evidence = withBase(call, "no-type:resolver-error");
 }
 
 type Tree = ReturnType<ReturnType<typeof rustParser>["parse"]>;
@@ -70,6 +70,12 @@ type Bindings = { source: string; sites: Map<string, Node[]>; calls: Map<string,
  * rebuilds do not re-parse unchanged files / fns. Every hit is checked against the current text (a changed
  * file or fn is re-parsed); entries for files / symbols no longer indexed are dropped at the start of each run.
  */
+/** Trees re-parsed from a macro's arguments -> maps their indices to caller-source indices. */
+const MACRO_SHIFT = new WeakMap<object, (i: number) => number>();
+const callerIndex = (n: Node) => MACRO_SHIFT.get(n.tree)?.(n.startIndex) ?? n.startIndex;
+/** A call recovered from a macro's arguments (never `exact`); a bare `macro:<name>` edge is the invocation itself. */
+const MACRO_ARG = "macro:arg ";
+const isMacroArg = (call: CallEdge) => call.evidence.some((e) => e.startsWith(MACRO_ARG));
 const PERSIST = {
   files: new Map<string, FileFacts>(),
   bindings: new Map<string, Bindings>(),
@@ -516,8 +522,17 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     };
     const visit = (n: Node) => {
       switch (n.type) {
+        case "macro_invocation": {
+          const args = macroArgs(n);
+          if (args) {
+            const outer = MACRO_SHIFT.get(n.tree) ?? ((i: number) => i);
+            MACRO_SHIFT.set(args.root.tree, (i) => outer(macroIndex(args, i)));
+            visit(args.root);
+          }
+          break;
+        }
         case "call_expression":
-          calls.set(`${n.startIndex}:${n.endIndex}`, n);
+          calls.set(`${callerIndex(n)}:${callerIndex(n) + n.endIndex - n.startIndex}`, n);
           break;
         case "let_declaration":
         case "for_expression":
@@ -839,6 +854,8 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const localTy = (caller: SymbolRecord, name: string, use: number): Ty => {
     const { sites } = bindingSites(caller);
     // A match arm's binding is visible only inside that arm: arms not containing the use are not rivals.
+    // A binding written inside a macro's arguments: its scope is not modelled, never guessed.
+    if ((sites.get(name) ?? []).some((s) => MACRO_SHIFT.has(s.tree))) return undefined;
     const list = (sites.get(name) ?? []).filter((s) => s.type !== "match_arm" || (use >= s.startIndex && use < s.endIndex));
     if (sites.has("*") || list.length !== 1) return undefined; // shadowed / re-bound: never guessed
     const site = list[0];
@@ -903,7 +920,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       case "self":
         return selfTy(ownerOf(caller), true);
       case "identifier":
-        return localTy(caller, n.text, n.startIndex);
+        return localTy(caller, n.text, callerIndex(n));
       case "parenthesized_expression":
       case "reference_expression":
         return exprTy(caller, n.namedChildren.at(-1));
@@ -1231,10 +1248,11 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     call.declaredTargetId = call.resolvedTargetId = call.externalPackage = undefined;
     call.resolutionKind = "unresolved";
     call.confidence = "unresolved";
-    if (call.evidence.some((e) => e.startsWith("macro:"))) continue;
+    if (call.evidence.some((e) => e.startsWith("macro:")) && !isMacroArg(call)) continue;
     currentCall = call;
     try {
       resolveEdge(call, caller)();
+      if (isMacroArg(call) && (call.confidence as string) === "exact") call.confidence = "probable";
     } catch {
       // One bad edge (e.g. a file that vanished mid-rebuild) must not abort the rebuild for every language.
       leaveUnresolvedOnError(call);

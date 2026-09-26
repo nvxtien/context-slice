@@ -1,5 +1,5 @@
 {
- "indexVersion": "1.7.0",
+ "indexVersion": "1.8.0",
  "files": {
   "functions.rs": {
    "parseError": false,
@@ -557,6 +557,22 @@
        "b": "usize"
       }
      }
+    },
+    {
+     "kind": "function",
+     "name": "in_macro",
+     "qualifiedName": "snapshot_calls::in_macro",
+     "range": {
+      "startLine": 55,
+      "startColumn": 0,
+      "endLine": 58,
+      "endColumn": 1
+     },
+     "metadata": {
+      "declaredTypes": {
+       "w": "&Walker<u8>"
+      }
+     }
     }
    ],
    "imports": [
@@ -955,6 +971,60 @@
       "endColumn": 11
      },
      "evidence": []
+    },
+    {
+     "calleeName": "select",
+     "receiverText": "tokio",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 56,
+      "startColumn": 4,
+      "endLine": 56,
+      "endColumn": 56
+     },
+     "evidence": [
+      "macro:select"
+     ]
+    },
+    {
+     "calleeName": "done",
+     "receiverText": "w",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 56,
+      "startColumn": 25,
+      "endLine": 56,
+      "endColumn": 33
+     },
+     "evidence": [
+      "macro:arg select"
+     ]
+    },
+    {
+     "calleeName": "helper",
+     "argumentCount": 2,
+     "range": {
+      "startLine": 56,
+      "startColumn": 39,
+      "endLine": 56,
+      "endColumn": 51
+     },
+     "evidence": [
+      "macro:arg select"
+     ]
+    },
+    {
+     "calleeName": "assert",
+     "argumentCount": 0,
+     "range": {
+      "startLine": 57,
+      "startColumn": 4,
+      "endLine": 57,
+      "endColumn": 33
+     },
+     "evidence": [
+      "macro:assert"
+     ]
     }
    ]
   },
@@ -1265,6 +1335,60 @@
     "unresolved",
     [
      "no-type:local-binding"
+    ]
+   ],
+   [
+    "src/lib.rs",
+    56,
+    25,
+    "done",
+    "src/lib.rs:11",
+    null,
+    "probable",
+    "interface",
+    [
+     "macro:arg select",
+     "trait:declaration Visit::done"
+    ]
+   ],
+   [
+    "src/lib.rs",
+    56,
+    39,
+    "helper",
+    "src/lib.rs:50",
+    null,
+    "probable",
+    "same-file",
+    [
+     "macro:arg select",
+     "same-file fn helper"
+    ]
+   ],
+   [
+    "src/lib.rs",
+    56,
+    4,
+    "select",
+    null,
+    null,
+    "unresolved",
+    "unresolved",
+    [
+     "macro:select"
+    ]
+   ],
+   [
+    "src/lib.rs",
+    57,
+    4,
+    "assert",
+    null,
+    null,
+    "unresolved",
+    "unresolved",
+    [
+     "macro:assert"
     ]
    ],
    [
