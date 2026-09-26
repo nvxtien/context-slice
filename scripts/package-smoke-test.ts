@@ -63,6 +63,13 @@ type SmokeReport = {
     gracefulShutdown: boolean;
     stderr: string;
   };
+  rust: {
+    init: boolean;
+    status: string;
+    preview: boolean;
+    mcpResponded: boolean;
+    repositoryClean: boolean;
+  };
   upgrade: { simulated: boolean; cachePreserved: boolean; schema: string };
   uninstall: {
     executableGone: boolean;
@@ -141,6 +148,35 @@ function javaRepo(root: string) {
   return repository;
 }
 
+function rustRepo(root: string) {
+  const repository = mkdtempSync(join(root, "context slice repo-"));
+  execFileSync("git", ["init", "--quiet"], { cwd: repository });
+  mkdirSync(join(repository, "src"), { recursive: true });
+  cpSync(join(process.cwd(), "tests/fixtures/rust"), join(repository, "src"), {
+    recursive: true,
+    filter: (source) => !source.includes(".context-slice"),
+  });
+  writeFileSync(
+    join(repository, "Cargo.toml"),
+    '[package]\nname = "smoke"\nversion = "0.1.0"\n',
+  );
+  // Commit the fixture so `git status --porcelain` starts clean; otherwise
+  // the untracked fixture itself (not context-slice) would show up and the
+  // "repository stays clean" check below would be meaningless.
+  const gitEnv = {
+    GIT_AUTHOR_NAME: "smoke",
+    GIT_AUTHOR_EMAIL: "smoke@example.com",
+    GIT_COMMITTER_NAME: "smoke",
+    GIT_COMMITTER_EMAIL: "smoke@example.com",
+  };
+  execFileSync("git", ["add", "-A"], { cwd: repository });
+  execFileSync("git", ["commit", "--quiet", "-m", "init"], {
+    cwd: repository,
+    env: { ...process.env, ...gitEnv },
+  });
+  return repository;
+}
+
 function filesUnder(root: string): string[] {
   return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
     const path = join(root, entry.name);
@@ -204,10 +240,15 @@ function requestMcp(binary: string, cwd: string) {
   return { child, request, invalid, getStderr: () => stderr };
 }
 
-async function smokeMcp(binary: string, cwd: string) {
+async function smokeMcp(
+  binary: string,
+  cwd: string,
+  query = "retryPayment",
+) {
   const session = requestMcp(binary, cwd);
   let responded = false;
   let gracefulShutdown = false;
+  let toolResponseText = "";
   try {
     await session.request("initialize", {
       protocolVersion: "2025-03-26",
@@ -218,10 +259,11 @@ async function smokeMcp(binary: string, cwd: string) {
     session.child.stdin?.write(
       `${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} })}\n`,
     );
-    await session.request("tools/call", {
+    const toolResult = await session.request("tools/call", {
       name: "context.search",
-      arguments: { query: "retryPayment" },
+      arguments: { query },
     });
+    toolResponseText = toolResult.result?.content?.[0]?.text ?? "";
   } finally {
     session.child.kill("SIGTERM");
     await new Promise<void>((resolve) =>
@@ -236,6 +278,7 @@ async function smokeMcp(binary: string, cwd: string) {
     protocolSafe: session.invalid.length === 0,
     gracefulShutdown,
     stderr: session.getStderr(),
+    toolResponseText,
   };
 }
 
@@ -270,6 +313,10 @@ function markdown(report: SmokeReport) {
     "## MCP packaged integration",
     "",
     `- Stable command: ${report.mcp.startedFromStableCommand}; responded: ${report.mcp.responded}; protocol-safe stdout: ${report.mcp.protocolSafe}; graceful shutdown: ${report.mcp.gracefulShutdown}`,
+    "",
+    "## Rust packaged integration",
+    "",
+    `- init=${report.rust.init}, status=${report.rust.status}, preview=${report.rust.preview}, mcp responded=${report.rust.mcpResponded}, repository clean=${report.rust.repositoryClean}`,
     "",
     "## Upgrade and uninstall",
     "",
@@ -374,6 +421,35 @@ export async function runPackageSmoke(
       "utf8",
     );
     const mcp = await smokeMcp(binary, nested);
+
+    const rustRepository = rustRepo(workspace);
+    const rustInit = run(binary, ["init"], rustRepository);
+    const rustStatus = JSON.parse(
+      run(binary, ["status", "--json"], rustRepository),
+    );
+    const rustPreview = run(
+      binary,
+      ["preview", "explain create_order behavior", "--explain"],
+      rustRepository,
+    );
+    const rustMcp = await smokeMcp(binary, rustRepository, "create_order");
+    const rustGitStatus = execFileSync(
+      "git",
+      ["status", "--porcelain"],
+      { cwd: rustRepository, encoding: "utf8" },
+    );
+    if (!rustPreview.includes("pub fn create_order"))
+      throw new Error(
+        `Rust smoke preview missing real fixture signature: ${rustPreview}`,
+      );
+    if (
+      !rustMcp.toolResponseText.includes("create_order") ||
+      !rustMcp.toolResponseText.includes(".rs")
+    )
+      throw new Error(
+        `Rust smoke MCP response missing real fixture symbol/path: ${rustMcp.toolResponseText}`,
+      );
+
     run(
       "npm",
       ["install", "--prefix", prefix, tarball, "--no-audit", "--no-fund"],
@@ -452,6 +528,13 @@ export async function runPackageSmoke(
         responded: mcp.responded,
         gracefulShutdown: mcp.gracefulShutdown,
         stderr: mcp.stderr,
+      },
+      rust: {
+        init: rustInit.includes("Indexed"),
+        status: rustStatus.result.freshness.state,
+        preview: rustPreview.includes("pub fn create_order"),
+        mcpResponded: rustMcp.responded,
+        repositoryClean: rustGitStatus.trim() === "",
       },
       upgrade: {
         simulated: true,
