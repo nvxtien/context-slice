@@ -5,6 +5,7 @@ import { renderSkeleton } from "../render/compact-context.js";
 import type { SymbolRecord } from "../types/model.js";
 import {
   composeImportContext,
+  composeRouteContext,
   composeSiblings,
   type CompositionReason,
 } from "../planner/composition.js";
@@ -271,7 +272,14 @@ export function buildPreview(
     options.composition === false
       ? []
       : composeImportContext(index, target, relatedFiles, includedIds);
-  for (const candidate of [...siblings, ...importCandidates]) {
+  const relatedIds = new Set(
+    [...includedIds].filter((id) => id !== target.id),
+  );
+  const routeCandidates =
+    options.composition === false
+      ? []
+      : composeRouteContext(index, target, relatedIds, includedIds);
+  for (const candidate of [...siblings, ...importCandidates, ...routeCandidates]) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
       omitted.push({

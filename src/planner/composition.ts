@@ -140,3 +140,47 @@ export function composeImportContext(
   }
   return candidates;
 }
+
+/**
+ * Compose the route(s) that reach the target: a ROUTE_TO_HANDLER relation
+ * whose source is the target itself, or an already-included caller of it
+ * (recovering the controller→service direction when the target is a
+ * service method one hop below the route handler). Java only: other
+ * languages have no Spring MVC extractor to find relations from.
+ */
+export function composeRouteContext(
+  index: ProjectIndex,
+  target: SymbolRecord,
+  relatedIds: ReadonlySet<string>,
+  alreadyIncluded: ReadonlySet<string>,
+): CompositionCandidate[] {
+  if (target.language !== "java") return [];
+  const candidateIds = new Set([target.id, ...relatedIds]);
+  const candidates: CompositionCandidate[] = [];
+  const seenRelations = new Set<string>();
+  for (const relation of index.enterpriseRelations) {
+    if (relation.kind !== "ROUTE_TO_HANDLER") continue;
+    if (relation.confidence === "unresolved") continue;
+    if (!candidateIds.has(relation.sourceSymbolId)) continue;
+    const key = `${relation.sourceSymbolId}:${relation.kind}:${relation.targetLabel ?? ""}`;
+    if (seenRelations.has(key)) continue;
+    seenRelations.add(key);
+    // The handler symbol is looked up only for a friendlier filePath; it is
+    // never attached as `symbol` here, since it may already be in the slice
+    // (as the target itself, or as an already-included caller) and the
+    // shared composition loop in buildPreview dedupes candidates by symbol
+    // id — attaching it would silently drop the very route line this
+    // function exists to surface.
+    const handlerSymbol = index.symbols.find((s) => s.id === relation.sourceSymbolId);
+    const rendered = `// Route\n${relation.targetLabel} → ${handlerSymbol?.name ?? target.name}`;
+    candidates.push({
+      label: relation.targetLabel ?? "route",
+      reason: "enterprise relation",
+      evidence: relation.evidence,
+      rendered,
+      estimatedTokens: estimateTokens(rendered),
+      filePath: handlerSymbol?.filePath ?? relation.filePath,
+    });
+  }
+  return candidates;
+}
