@@ -16,7 +16,8 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
-            "for ancestor in self.stack_path.iter().rev() {"
+            "for ancestor in self.stack_path.iter().rev() {",
+            ".is_same(&hchild)"
           ]
         }
       },
@@ -352,10 +353,11 @@
       },
       {
         "id": "insert",
-        "description": "The new expiration is recorded",
+        "description": "The value is stored and the new expiration is recorded",
         "verification": {
           "type": "source-fragment",
           "patterns": [
+            "let prev = state.entries.insert(",
             "state.expirations.insert((when, key));"
           ]
         }
@@ -366,6 +368,7 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
+            "drop(state);",
             "self.shared.background_task.notify_one();"
           ]
         }
@@ -461,8 +464,7 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
-            "pub(crate) async fn apply(self, db: &Db, dst: &mut Connection) -> crate::Result<()> {",
-            "dst.write_frame(&response).await?;"
+            "let response = if let Some(value) = db.get(&self.key) {"
           ]
         }
       }
@@ -553,6 +555,7 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
+            "A leading ./ is completely superfluous.",
             "if let Some(p) = strip_prefix(\"./\", path) {"
           ]
         }
@@ -632,6 +635,7 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
+            "if glob.actual.ends_with(\"/**\") {",
             ".literal_separator(true)"
           ]
         }
@@ -688,7 +692,9 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
-            "Match::Whitelist(glob)"
+            "if glob.is_whitelist() {",
+            "Match::Whitelist(glob)",
+            "Match::Ignore(glob)"
           ]
         }
       }
@@ -726,6 +732,7 @@
         "verification": {
           "type": "source-fragment",
           "patterns": [
+            "if mat.is_none() && self.num_whitelists() > 0 && !is_dir {",
             "return Match::Ignore(Glob::unmatched());"
           ]
         }

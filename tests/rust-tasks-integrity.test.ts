@@ -19,6 +19,12 @@ test("15 tasks, 5 per repository, all four categories, unique ids", () => {
   for (const c of ["locate", "explain", "change", "impact"])
     assert.ok(tasks.some((t) => t.category === c), c);
 });
+test("each repository has 2 explain, 1 locate, 1 change, 1 impact", () => {
+  for (const r of repos) {
+    const n = (c: string) => tasks.filter((t) => t.repository === r.id && t.category === c).length;
+    assert.deepEqual([n("explain"), n("locate"), n("change"), n("impact")], [2, 1, 1, 1], r.id);
+  }
+});
 test("every task has a baseline and 3-4 facts", () => {
   for (const t of tasks) {
     assert.ok(baselines.some((b) => b.taskId === t.id), t.id);
