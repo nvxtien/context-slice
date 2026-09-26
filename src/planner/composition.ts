@@ -5,7 +5,8 @@ import { estimateTokens } from "./budget.js";
 /** Why a sibling of the target was composed into the slice. */
 export type CompositionReason =
   | "enclosing type"
-  | "enterprise relation";
+  | "enterprise relation"
+  | "file imports";
 
 export interface CompositionCandidate {
   symbol?: SymbolRecord;
@@ -103,4 +104,39 @@ export function composeSiblings(
       filePath: parent.filePath,
     },
   ];
+}
+
+/**
+ * Compose each related file's top-level `use` declarations (Task 1's
+ * synthetic per-file import symbol) into the slice, so a caller's imports
+ * explain names the caller's skeleton references. Rust only: other
+ * languages don't get a synthetic import symbol to find.
+ */
+export function composeImportContext(
+  index: ProjectIndex,
+  target: SymbolRecord,
+  relatedFiles: ReadonlySet<string>,
+  alreadyIncluded: ReadonlySet<string>,
+): CompositionCandidate[] {
+  if (target.language !== "rust") return [];
+  const candidates: CompositionCandidate[] = [];
+  const seen = new Set<string>();
+  for (const file of relatedFiles) {
+    if (seen.has(file)) continue;
+    seen.add(file);
+    const symbol = index.symbols.find(
+      (s) => s.kind === "namespace" && s.metadata?.moduleScope === true && s.filePath === file,
+    );
+    if (!symbol || alreadyIncluded.has(symbol.id) || !symbol.source) continue;
+    candidates.push({
+      symbol,
+      label: `Imports in ${file}`,
+      reason: "file imports",
+      evidence: [`file-level use declarations for ${file}`],
+      rendered: symbol.source,
+      estimatedTokens: estimateTokens(symbol.source),
+      filePath: file,
+    });
+  }
+  return candidates;
 }

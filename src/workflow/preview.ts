@@ -4,6 +4,7 @@ import { rankSymbol } from "../planner/rank.js";
 import { renderSkeleton } from "../render/compact-context.js";
 import type { SymbolRecord } from "../types/model.js";
 import {
+  composeImportContext,
   composeSiblings,
   type CompositionReason,
 } from "../planner/composition.js";
@@ -184,6 +185,7 @@ export function buildPreview(
     "direct callee": 0,
     "enclosing type": 0,
     "enterprise relation": 0,
+    "file imports": 0,
   };
   let estimatedTokens = 0;
   const add = (
@@ -251,15 +253,25 @@ export function buildPreview(
     );
   }
 
-  // Same-enclosing-type composition runs after callers and callees, so it can
-  // only use budget they left, and never replaces them.
+  const relatedFiles = new Set(
+    [...includedIds]
+      .map((id) => index.symbols.find((s) => s.id === id)?.filePath)
+      .filter((file): file is string => Boolean(file) && file !== target.filePath),
+  );
+
+  // Same-enclosing-type and import-context composition run after callers and
+  // callees, so they can only use budget they left, and never replace them.
   let compositionTokens = 0;
   const compositionAllowance = Math.floor(budget * COMPOSITION_BUDGET_SHARE);
   const siblings =
     options.composition === false
       ? []
       : composeSiblings(index, target, includedIds);
-  for (const candidate of siblings) {
+  const importCandidates =
+    options.composition === false
+      ? []
+      : composeImportContext(index, target, relatedFiles, includedIds);
+  for (const candidate of [...siblings, ...importCandidates]) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
       omitted.push({
