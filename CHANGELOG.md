@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.0 — Rust support (unpublished)
+
+- **Rust adapter.** `.rs` files indexed with Tree-sitter: functions (including `async` and trait default/signature methods), structs (including tuple structs), enums, traits, inherent and trait impl blocks, file-backed and inline modules, consts, statics, and type aliases.
+- **Modules, `use`, re-exports.** Module paths follow the filesystem convention (crate roots at `[]`, each `mod foo;` extends the path). A single recursive use-tree parser covers top-level lists, nested groups, `self`, wildcards, and aliases. Measured on three real repositories: anchored `use` resolution 100%, re-export resolution 100%, module-path agreement with an independent oracle 64-100% (every disagreement is a non-lib crate root — `src/bin/*`, `tests/*`, `examples/*`, `build.rs`).
+- **Call resolution.** Same-file, self, field/param/local-method (typed-receiver), associated (`Type::f()`), and trait dispatch (`probable`), plus three conservative additions: match-arm receiver typing, best-effort macro-argument call recovery (denylisted for format/log/assert-style macros), and `#[cfg(...)]`-duplicate handling that attaches all candidates as `probable` targets.
+- **Import-context composer.** A synthetic per-file module-scope import symbol is composed into a slice's caller/callee files, so a caller's imports explain names its skeleton references. Rust only.
+- **Benchmark (15 tasks, 3 pinned repositories: walkdir, mini-redis, ripgrep's `crates/ignore`).** Required-fact recall **100%**, retrieval recall **100%**, median context reduction **93.52%**, whole-file fallback **0%**. Small sample; not directly comparable to the Java/TypeScript/Python numbers.
+- **No rust-analyzer.** The §75 decision gate (required facts lost, real tasks harmed, failures repeating across repositories, structural analysis unable to solve them) is not met after the structural fixes above closed the one remaining gap. See `docs/superpowers/plans/2026-09-26-v1.5-phase3-phase4-recommendation.md`.
+- **Known limitations.** `#[cfg(...)]` alternatives are all attached as probable targets, but context composition only follows the first-listed one. The macro-argument call-recovery denylist does not yet include `anyhow!`/`bail!`/`ensure!`/`dbg!`/`matches!` (capped to `probable`, low precision cost). No Cargo/workspace crate-name resolution; `Cargo.toml` is not read by the adapter. See `docs/rust-support.md`.
+- **Version.** `package.json`'s `"version"` was last bumped to `1.3.0` for the Python release; `1.4.0` (Java enterprise semantics work) was never released as its own version bump. This release jumps directly to `1.5.0`; no `1.4.0` entry exists.
+
+Not published to npm. No Git tag or GitHub Release was created.
+
 ## 1.3.0 — Python support (unpublished)
 
 - **Python and `.pyi`.** Modules, functions, async functions, nested functions, named lambdas, classes, `__init__`, methods, properties, `@classmethod`, `@staticmethod` and dataclass fields, with decorators kept verbatim as searchable metadata.

@@ -1,6 +1,6 @@
 # ContextSlice
 
-ContextSlice is a local, read-only developer tool for Java, TypeScript, TSX and Python that builds a small, task-specific code context before it is sent to a coding assistant. Instead of opening and pasting whole files, ask for the method, its callers, callees, and explicit omissions that matter to the task.
+ContextSlice is a local, read-only developer tool for Java, TypeScript, TSX, Python and Rust that builds a small, task-specific code context before it is sent to a coding assistant. Instead of opening and pasting whole files, ask for the method, its callers, callees, and explicit omissions that matter to the task.
 
 It indexes source with Tree-sitter, keeps a local SQLite cache, and exposes the same workflow through a CLI and stdio MCP server. It does not edit the target repository.
 
@@ -16,8 +16,9 @@ Large context windows still waste attention when they contain unrelated files. C
 | TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts` | Imports, re-exports and barrels, overloads, arrow functions               |
 | TSX        | `.tsx`                         | React components, handlers, JSX component references                      |
 | Python     | `.py`, `.pyi`                  | Packages and `__init__` re-exports, decorators, `self`/`cls`, dataclasses |
+| Rust       | `.rs`                          | Functions, structs, enums, traits, impls, modules; `use`/re-export resolution; self/associated/trait call resolution |
 
-One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md) and [docs/python-support.md](docs/python-support.md) for what each language's resolution does and does not cover.
+One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md), [docs/python-support.md](docs/python-support.md) and [docs/rust-support.md](docs/rust-support.md) for what each language's resolution does and does not cover.
 
 ## Scope
 
@@ -45,7 +46,7 @@ The package is publish-ready but is not currently published to the npm registry.
 ```sh
 npm ci
 npm pack
-npm install -g ./context-slice-1.3.0.tgz
+npm install -g ./context-slice-1.5.0.tgz
 context-slice --version
 ```
 
@@ -89,7 +90,15 @@ Included:
 - direct callee: SqlOrderRepository.save — Direct callee of OrderService.create.
 ```
 
-`status` reports the file count per extension, so a mixed repository shows `.java`, `.ts` and `.tsx` separately.
+In a Rust repository the workflow is identical:
+
+```sh
+cd /absolute/path/to/my-rust-project
+context-slice init
+context-slice preview "explain the retry loop" --explain
+```
+
+`status` reports the file count per extension, so a mixed repository shows `.java`, `.ts`, `.tsx` and `.rs` separately.
 
 Use `context-slice --version` and `context-slice --help` to inspect the installed package without relying on the source checkout.
 
@@ -212,14 +221,17 @@ In the 15-task Java benchmark across three pinned Java repositories, ContextSlic
 
 Run the TypeScript benchmark with `npm run benchmark:v11`; its report is [v1.1 TypeScript support](benchmarks/results/v1.1-typescript-support.md).
 
+Rust support is measured separately across three pinned repositories (walkdir, mini-redis, ripgrep's `crates/ignore`). Module-path assignment, `use` resolution and re-export resolution were measured on real repositories (module resolution 64-100% depending on crate layout, anchored `use` resolution 100%, re-export resolution 100%; see [v1.5 Phase 1](benchmarks/results/v1.5-phase1-rust-real-repositories.md)). In the 15-task Rust benchmark across the same three repositories, ContextSlice reduced median context size by 93.52% while preserving 100% required-fact recall and 100% retrieval recall, with 0% whole-file fallback; see [v1.5 Phase 3](benchmarks/results/v1.5-phase3-rust-tasks.md). Rust resolution is static analysis, Tree-sitter-first: there is no rust-analyzer or rustc dependency, macro-generated semantics may remain unresolved, and trait dispatch may remain conservative (structural evidence only).
+
 - [v0.6 developer context efficiency](benchmarks/results/v0.6-developer-context-efficiency.md) compares auditable manual whole-file baselines with ContextSlice on pinned Java repositories. Token counts are deterministic estimates unless telemetry is explicitly available.
 - [v0.5 semantic call resolution](benchmarks/results/v0.5-semantic-call-resolution.md) documents declared versus runtime target limitations.
 - [v0.4 symbol index hardening](benchmarks/results/v0.4-symbol-index-hardening.md) documents stable symbol identity and lookup behavior.
 
 ## Limitations
 
-- Java, TypeScript, TSX and Python only; no other languages, embeddings, vector database, compiler, tsserver, type checker, or LSP integration.
+- Java, TypeScript, TSX, Python and Rust only; no other languages, embeddings, vector database, compiler, tsserver, type checker, rust-analyzer, rustc, or LSP integration.
 - Python is dynamic: receivers built by factories, `getattr`, dynamic imports and monkey patching stay unresolved rather than guessed.
+- Rust: `#[cfg(...)]` alternatives are all attached as probable call targets, but only the first-listed alternative is reachable via context composition. The macro-argument call-recovery denylist does not yet include `anyhow!`/`bail!`/`ensure!`/`dbg!`/`matches!` (capped to `probable`, so the precision cost is low). No Cargo/workspace crate-name resolution.
 - TypeScript resolution is structural. Receivers whose type needs inference, CommonJS `require`, and imports that leave the checked-out source stay unresolved rather than guessed.
 - Target selection from task text is heuristic and may choose a nearby but not ideal symbol. Naming the method in the task gives a better slice.
 - Tree-sitter analysis cannot prove runtime dispatch, framework-generated implementations, or all generic/fluent call behavior.
