@@ -112,3 +112,44 @@ test("(b) calls inside non-format macros are recovered as probable with macro ev
   // The macro edge itself is unchanged.
   assert.deepEqual(edges({ "src/lib.rs": MACRO }, "select").map((e) => [e.conf, e.ev]), [["unresolved", ["macro:select"]]]);
 });
+
+// Cause (c) cfg-duplicated callees: `#[cfg(unix)] fn device_num` / `#[cfg(windows)] fn device_num` / ... in
+// one file made `util::device_num(p)` `ambiguous:3`, so no alternative reached the context. Expected (spec §40:
+// gated code is not always active): when every candidate sits in one scope of one file and they differ only
+// by `#[cfg]` attributes, ALL alternatives are attached (`runtimeTargetIds`), the first in source order as the
+// resolved target, `probable` with `ambiguous:cfg` evidence. Other same-name ambiguity is unchanged.
+const CFG = {
+  "src/lib.rs": `
+mod util;
+mod plain;
+pub fn a() -> u64 { util::device_num(1) }
+pub fn b() -> u64 { plain::twice() }
+`,
+  "src/util.rs": `
+#[cfg(unix)]
+pub fn device_num(p: u8) -> u64 { 1 }
+#[cfg(windows)]
+pub fn device_num(p: u8) -> u64 { 2 }
+#[cfg(not(any(unix, windows)))]
+pub fn device_num(_: u8) -> u64 { 0 }
+pub fn same() -> u64 { device_num(0) }
+`,
+  "src/plain.rs": `
+pub fn twice() -> u64 { 1 }
+#[inline]
+pub fn twice() -> u64 { 2 }
+`,
+};
+
+test("(c) cfg-gated alternatives are all attached as probable targets", () => {
+  const dn = edges(CFG, "device_num");
+  assert.equal(dn.length, 2, JSON.stringify(dn));
+  for (const e of dn) {
+    assert.deepEqual([e.target, e.all, e.conf], [3, [3, 5, 7], "probable"], JSON.stringify(e));
+    assert.ok(e.ev.some((x) => x.startsWith("ambiguous:cfg")), JSON.stringify(e));
+  }
+  // Not cfg-gated: plain same-name ambiguity stays unresolved.
+  const tw = edges(CFG, "twice");
+  assert.deepEqual(tw.map((e) => [e.target, e.conf]), [[undefined, "unresolved"]], JSON.stringify(tw));
+  assert.ok(tw[0].ev.some((x) => x.startsWith("ambiguous:2")), JSON.stringify(tw));
+});

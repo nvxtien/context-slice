@@ -56,7 +56,7 @@ const BASE = (e: string) => e.startsWith("macro:") || e.startsWith("qualified:")
 const withBase = (call: CallEdge, ev: string) => [...new Set([...call.evidence.filter(BASE), ev])];
 /** The conservative outcome when resolution throws: no target, `no-type:resolver-error` (macro edges keep theirs). */
 export function leaveUnresolvedOnError(call: CallEdge) {
-  call.declaredTargetId = call.resolvedTargetId = call.externalPackage = undefined;
+  call.declaredTargetId = call.resolvedTargetId = call.externalPackage = call.runtimeTargetIds = undefined;
   call.resolutionKind = "unresolved";
   call.confidence = "unresolved";
   if (isMacroArg(call) || !call.evidence.some((e) => e.startsWith("macro:"))) call.evidence = withBase(call, "no-type:resolver-error");
@@ -597,6 +597,24 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     call.evidence = withBase(call, ev);
   };
   const ambiguous = (call: CallEdge, n: number, what: string) => unresolved(call, `ambiguous:${n} ${what}`);
+  /**
+   * Same-name fns in one scope of one file that differ only by `#[cfg(..)]` (spec §40: which one is active is
+   * not known): every alternative is attached (`runtimeTargetIds`), the first in source order as the target,
+   * `probable`. Any other same-name ambiguity stays `ambiguous:N`.
+   */
+  const fnChoice = (call: CallEdge, fns: SymbolRecord[], what: string, kind: CallEdge["resolutionKind"] = "same-file"): Outcome => {
+    const isCfg = (a: string) => /^#\[\s*cfg\s*\(/.test(a);
+    const rest = (s: SymbolRecord) => JSON.stringify((s.annotations ?? []).filter((a) => !isCfg(a)));
+    const gated = fns.every((f) => f.kind === "function" && f.filePath === fns[0].filePath && f.parentId === fns[0].parentId &&
+      (f.annotations ?? []).some(isCfg) && rest(f) === rest(fns[0]));
+    if (!gated) return ambiguous(call, fns.length, what);
+    const sorted = [...fns].sort((a, b) => a.range.startLine - b.range.startLine);
+    const pick = settle(call, sorted[0], kind, `ambiguous:cfg ${fns.length} cfg-gated alternatives of ${sorted[0].qualifiedName}`, "probable");
+    return () => {
+      pick();
+      call.runtimeTargetIds = sorted.map((f) => f.id);
+    };
+  };
   const settle = (
     call: CallEdge,
     target: SymbolRecord,
@@ -1109,7 +1127,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     if (local.length) return bareViaImports(call, name, local); // fn-local `use` shadows module items
     const fns = scopeFns(caller, name);
     if (fns.length === 1) return settle(call, fns[0], "same-file", `same-file fn ${fns[0].qualifiedName}`);
-    if (fns.length > 1) return ambiguous(call, fns.length, `same-scope fns named ${name}`);
+    if (fns.length > 1) return fnChoice(call, fns, `same-scope fns named ${name}`);
     const ctors = declsHere(caller, name).filter(isTupleStruct);
     if (ctors.length === 1) return settle(call, ctors[0], "constructor", `constructor ${ctors[0].qualifiedName}`);
     if (ctors.length > 1) return ambiguous(call, ctors.length, `constructors named ${name}`);
@@ -1137,7 +1155,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       const s = cands[0];
       return settle(call, s, isTupleStruct(s) ? "constructor" : kind, `module path ${full.segs.join("::")}::${name}`);
     }
-    if (cands.length > 1) return ambiguous(call, cands.length, `fns named ${name} in ${full.segs.join("::")}`);
+    if (cands.length > 1) return fnChoice(call, cands, `fns named ${name} in ${full.segs.join("::")}`, kind);
     return unresolved(call, `no-symbol:member ${full.segs.join("::")}::${name}`);
   };
 
@@ -1160,7 +1178,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     }
     const fns = scopeChildren(container).filter((s) => s.kind === "function" && s.name === call.calleeName);
     if (fns.length === 1) return settle(call, fns[0], "same-file", `same-file module fn ${fns[0].qualifiedName}`);
-    if (fns.length > 1) return ambiguous(call, fns.length, `fns named ${call.calleeName} in module`);
+    if (fns.length > 1) return fnChoice(call, fns, `fns named ${call.calleeName} in module`);
     return undefined;
   };
 
@@ -1245,7 +1263,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     const caller = byId.get(call.callerId);
     if (!caller) continue;
     // Recomputed from scratch each rebuild: clear a previous resolution.
-    call.declaredTargetId = call.resolvedTargetId = call.externalPackage = undefined;
+    call.declaredTargetId = call.resolvedTargetId = call.externalPackage = call.runtimeTargetIds = undefined;
     call.resolutionKind = "unresolved";
     call.confidence = "unresolved";
     if (call.evidence.some((e) => e.startsWith("macro:")) && !isMacroArg(call)) continue;

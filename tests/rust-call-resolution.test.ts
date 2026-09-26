@@ -339,10 +339,14 @@ test("a pattern binding (match arm / if let / for) shadows; a variant name in a 
   );
 });
 
-test("cfg-gated duplicate fns with the same name stay unresolved (ambiguous)", () => {
+test("cfg-gated duplicate fns with the same name are probable, never exact (spec §40)", () => {
   withRepo(
     { "src/lib.rs": "#[cfg(unix)]\nfn f() {}\n#[cfg(not(unix))]\nfn f() {}\nfn t() { f(); }\n" },
-    (dir) => unresolved(one(dir, "f", "t"), "ambiguous:2"),
+    (dir) => {
+      const e = one(dir, "f", "t");
+      assert.equal(e.conf, "probable");
+      assert.ok(e.ev.some((x) => x.startsWith("ambiguous:cfg 2")), JSON.stringify(e));
+    },
   );
 });
 
