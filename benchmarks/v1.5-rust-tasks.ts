@@ -426,6 +426,8 @@ function main() {
     "",
     "Limitation: wholeModuleFallback is a proxy (true only when a selected entry is a module/namespace symbol) and is expected to read 0% here.",
     "",
+    "Limitation: cfg-gated alternatives are all attached as probable targets, but caller/callee graph traversal only follows the first-listed target in source order, so non-first cfg alternatives are not reachable via context composition yet.",
+    "",
     "Timings are from one local machine and one pinned checkout each.",
     "",
   ].join("\n");

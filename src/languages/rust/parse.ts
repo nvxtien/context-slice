@@ -350,6 +350,8 @@ export function callEdge(node: Node, filePath: string, callerId: string): CallEd
 // DENYLIST, for precision: format / print / write / assert / panic / vec style macros and logging macros (a
 // `log::` or `tracing::` path, or the bare log-level names) are never looked into; their arguments are
 // format strings and values, not control flow a developer navigates.
+// Not denylisted (yet): anyhow!/bail!/ensure!/dbg!/matches!; acceptable because recovered calls are capped at
+// `probable`, candidates for future tightening.
 const OPAQUE_MACROS = new Set([
   "println", "print", "eprintln", "eprint", "format", "format_args", "write", "writeln", "vec", "panic",
   "unreachable", "todo", "unimplemented", "trace", "debug", "info", "warn", "error", "log", "event", "span",

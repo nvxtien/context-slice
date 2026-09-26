@@ -1,6 +1,6 @@
 {
   "version": "1.5-phase3",
-  "generatedAt": "2026-09-26T10:09:54.261Z",
+  "generatedAt": "2026-09-26T12:03:51.527Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -24,9 +24,9 @@
       "callEdgesExact": 566,
       "callEdgesUnresolved": 355,
       "performance": {
-        "coldIndexMs": 199,
-        "warmIndexMs": 36,
-        "singleFileRefreshMs": 45,
+        "coldIndexMs": 188,
+        "warmIndexMs": 35,
+        "singleFileRefreshMs": 40,
         "previewMs": 6,
         "filesIndexed": 9
       }
@@ -46,9 +46,9 @@
       "callEdgesExact": 367,
       "callEdgesUnresolved": 197,
       "performance": {
-        "coldIndexMs": 184,
-        "warmIndexMs": 42,
-        "singleFileRefreshMs": 39,
+        "coldIndexMs": 166,
+        "warmIndexMs": 41,
+        "singleFileRefreshMs": 50,
         "previewMs": 8,
         "filesIndexed": 28
       }
@@ -68,9 +68,9 @@
       "callEdgesExact": 1309,
       "callEdgesUnresolved": 1417,
       "performance": {
-        "coldIndexMs": 486,
-        "warmIndexMs": 115,
-        "singleFileRefreshMs": 111,
+        "coldIndexMs": 474,
+        "warmIndexMs": 109,
+        "singleFileRefreshMs": 112,
         "previewMs": 12,
         "filesIndexed": 13
       }
@@ -903,25 +903,25 @@
   "performance": [
     {
       "repository": "walkdir",
-      "coldIndexMs": 199,
-      "warmIndexMs": 36,
-      "singleFileRefreshMs": 45,
+      "coldIndexMs": 188,
+      "warmIndexMs": 35,
+      "singleFileRefreshMs": 40,
       "previewMs": 6,
       "filesIndexed": 9
     },
     {
       "repository": "mini-redis",
-      "coldIndexMs": 184,
-      "warmIndexMs": 42,
-      "singleFileRefreshMs": 39,
+      "coldIndexMs": 166,
+      "warmIndexMs": 41,
+      "singleFileRefreshMs": 50,
       "previewMs": 8,
       "filesIndexed": 28
     },
     {
       "repository": "ripgrep-ignore",
-      "coldIndexMs": 486,
-      "warmIndexMs": 115,
-      "singleFileRefreshMs": 111,
+      "coldIndexMs": 474,
+      "warmIndexMs": 109,
+      "singleFileRefreshMs": 112,
       "previewMs": 12,
       "filesIndexed": 13
     }
