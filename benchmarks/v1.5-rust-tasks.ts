@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { ProjectIndex } from "../src/indexer/index.js";
-import { composeSiblings } from "../src/planner/composition.js";
+import { composeSiblings, composeImportContext } from "../src/planner/composition.js";
 import { estimateTokens } from "../src/planner/budget.js";
 import { buildPreview, COMPOSITION_BUDGET_SHARE } from "../src/workflow/preview.js";
 import type { SymbolRecord } from "../src/types/model.js";
@@ -58,6 +58,13 @@ function contextEntries(index: ProjectIndex, target: SymbolRecord): ContextEntry
   add("caller-context", index.callers(target));
   add("callee-context", index.dependencies(target));
   for (const candidate of composeSiblings(index, target, seen))
+    entries.push({ category: "types", symbolId: candidate.symbol?.id, filePath: candidate.filePath, text: candidate.rendered });
+  const relatedFiles = new Set(
+    [...seen]
+      .map((id) => index.symbols.find((s) => s.id === id)?.filePath)
+      .filter((file): file is string => Boolean(file) && file !== target.filePath),
+  );
+  for (const candidate of composeImportContext(index, target, relatedFiles, seen))
     entries.push({ category: "types", symbolId: candidate.symbol?.id, filePath: candidate.filePath, text: candidate.rendered });
   return entries;
 }

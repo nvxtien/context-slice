@@ -1,6 +1,6 @@
 {
   "version": "1.5-phase3",
-  "generatedAt": "2026-09-26T12:03:51.527Z",
+  "generatedAt": "2026-09-26T14:34:24.073Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -19,14 +19,14 @@
         ".rs": 8
       },
       "parseErrors": 0,
-      "symbols": 211,
+      "symbols": 218,
       "callEdges": 1160,
       "callEdgesExact": 566,
       "callEdgesUnresolved": 355,
       "performance": {
-        "coldIndexMs": 188,
-        "warmIndexMs": 35,
-        "singleFileRefreshMs": 40,
+        "coldIndexMs": 214,
+        "warmIndexMs": 34,
+        "singleFileRefreshMs": 48,
         "previewMs": 6,
         "filesIndexed": 9
       }
@@ -41,14 +41,14 @@
         ".rs": 28
       },
       "parseErrors": 0,
-      "symbols": 243,
+      "symbols": 270,
       "callEdges": 1066,
       "callEdgesExact": 367,
       "callEdgesUnresolved": 197,
       "performance": {
-        "coldIndexMs": 166,
-        "warmIndexMs": 41,
-        "singleFileRefreshMs": 50,
+        "coldIndexMs": 221,
+        "warmIndexMs": 47,
+        "singleFileRefreshMs": 45,
         "previewMs": 8,
         "filesIndexed": 28
       }
@@ -63,15 +63,15 @@
         ".rs": 13
       },
       "parseErrors": 0,
-      "symbols": 569,
+      "symbols": 580,
       "callEdges": 3708,
       "callEdgesExact": 1309,
       "callEdgesUnresolved": 1417,
       "performance": {
-        "coldIndexMs": 474,
-        "warmIndexMs": 109,
-        "singleFileRefreshMs": 112,
-        "previewMs": 12,
+        "coldIndexMs": 532,
+        "warmIndexMs": 116,
+        "singleFileRefreshMs": 107,
+        "previewMs": 13,
         "filesIndexed": 13
       }
     }
@@ -92,19 +92,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 12921,
       "manualFiles": 2,
-      "suppliedContextTokens": 191,
-      "contextItems": 2,
+      "suppliedContextTokens": 215,
+      "contextItems": 3,
       "minimumSufficientBudget": 256,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9852178623945516,
+      "reduction": 0.9833604210200448,
       "metrics": {
-        "contextWindowReduction": 0.9852178623945516,
-        "inputTokenReduction": 0.9852178623945516,
+        "contextWindowReduction": 0.9833604210200448,
+        "inputTokenReduction": 0.9833604210200448,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.015706806282722512,
+        "developerContextEfficiency": 0.013953488372093023,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0233154296875,
+        "contextBudgetPressure": 0.0262451171875,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -235,19 +235,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 13087,
       "manualFiles": 3,
-      "suppliedContextTokens": 223,
-      "contextItems": 4,
+      "suppliedContextTokens": 256,
+      "contextItems": 6,
       "minimumSufficientBudget": 256,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9829601895010316,
+      "reduction": 0.9804386031940093,
       "metrics": {
-        "contextWindowReduction": 0.9829601895010316,
-        "inputTokenReduction": 0.9829601895010316,
+        "contextWindowReduction": 0.9804386031940093,
+        "inputTokenReduction": 0.9804386031940093,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.013452914798206279,
+        "developerContextEfficiency": 0.01171875,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0272216796875,
+        "contextBudgetPressure": 0.03125,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -468,19 +468,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 7897,
       "manualFiles": 4,
-      "suppliedContextTokens": 447,
-      "contextItems": 3,
+      "suppliedContextTokens": 512,
+      "contextItems": 6,
       "minimumSufficientBudget": 512,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9433962264150944,
+      "reduction": 0.9351652526275801,
       "metrics": {
-        "contextWindowReduction": 0.9433962264150944,
-        "inputTokenReduction": 0.9433962264150944,
+        "contextWindowReduction": 0.9351652526275801,
+        "inputTokenReduction": 0.9351652526275801,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.006711409395973154,
+        "developerContextEfficiency": 0.005859375,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0545654296875,
+        "contextBudgetPressure": 0.0625,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -513,19 +513,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 14327,
       "manualFiles": 4,
-      "suppliedContextTokens": 1816,
-      "contextItems": 5,
+      "suppliedContextTokens": 2021,
+      "contextItems": 8,
       "minimumSufficientBudget": 2048,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.8732463181405737,
+      "reduction": 0.8589376701333147,
       "metrics": {
-        "contextWindowReduction": 0.8732463181405737,
-        "inputTokenReduction": 0.8732463181405737,
+        "contextWindowReduction": 0.8589376701333147,
+        "inputTokenReduction": 0.8589376701333147,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.0022026431718061676,
+        "developerContextEfficiency": 0.0019792182088075212,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.2216796875,
+        "contextBudgetPressure": 0.2467041015625,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -705,19 +705,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 15251,
       "manualFiles": 3,
-      "suppliedContextTokens": 849,
-      "contextItems": 10,
+      "suppliedContextTokens": 1011,
+      "contextItems": 12,
       "minimumSufficientBudget": 1024,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9443315192446396,
+      "reduction": 0.9337092649662317,
       "metrics": {
-        "contextWindowReduction": 0.9443315192446396,
-        "inputTokenReduction": 0.9443315192446396,
+        "contextWindowReduction": 0.9337092649662317,
+        "inputTokenReduction": 0.9337092649662317,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.004711425206124852,
+        "developerContextEfficiency": 0.003956478733926805,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.1036376953125,
+        "contextBudgetPressure": 0.1234130859375,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -750,24 +750,24 @@
       "targetFileParsed": true,
       "retrievalRecall": 1,
       "requiredFactsTotal": 4,
-      "requiredFactsPreserved": 3,
-      "requiredFactRecall": 0.75,
+      "requiredFactsPreserved": 4,
+      "requiredFactRecall": 1,
       "manualTokens": 13223,
       "manualFiles": 2,
-      "suppliedContextTokens": 1171,
-      "contextItems": 4,
-      "minimumSufficientBudget": null,
-      "wholeFileFallback": true,
+      "suppliedContextTokens": 1216,
+      "contextItems": 5,
+      "minimumSufficientBudget": 2048,
+      "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9114421840732058,
+      "reduction": 0.9080390229146185,
       "metrics": {
-        "contextWindowReduction": 0.9114421840732058,
-        "inputTokenReduction": 0.9114421840732058,
-        "wholeFileAvoidanceRate": 0,
-        "developerContextEfficiency": 0.0025619128949615714,
+        "contextWindowReduction": 0.9080390229146185,
+        "inputTokenReduction": 0.9080390229146185,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.003289473684210526,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.1429443359375,
-        "requiredFactRecall": 0.75
+        "contextBudgetPressure": 0.1484375,
+        "requiredFactRecall": 1
       },
       "facts": [
         {
@@ -776,7 +776,7 @@
         },
         {
           "id": "import",
-          "attribution": "NOT_SELECTED"
+          "attribution": "PRESERVED"
         },
         {
           "id": "dir-check",
@@ -792,13 +792,13 @@
   "summary": {
     "overall": {
       "tasks": 15,
-      "requiredFactRecall": 0.9814814814814815,
+      "requiredFactRecall": 1,
       "retrievalRecall": 1,
-      "medianContextReduction": 0.9420030177291588,
+      "medianContextReduction": 0.9351652526275801,
       "medianManualTokens": 10604,
-      "medianContextTokens": 500,
+      "medianContextTokens": 512,
       "medianMinimumSufficientBudget": 256,
-      "wholeFileFallbackRate": 0.06666666666666667,
+      "wholeFileFallbackRate": 0,
       "wholeModuleFallbackRate": 0
     },
     "byRepository": {
@@ -817,22 +817,22 @@
         "tasks": 5,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.8732463181405737,
+        "medianContextReduction": 0.8589376701333147,
         "medianManualTokens": 3532,
-        "medianContextTokens": 500,
+        "medianContextTokens": 512,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "ripgrep-ignore": {
         "tasks": 5,
-        "requiredFactRecall": 0.9473684210526315,
+        "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9443315192446396,
+        "medianContextReduction": 0.9337092649662317,
         "medianManualTokens": 9281,
         "medianContextTokens": 805,
         "medianMinimumSufficientBudget": 256,
-        "wholeFileFallbackRate": 0.2,
+        "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       }
     },
@@ -863,66 +863,51 @@
         "tasks": 3,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9443315192446396,
+        "medianContextReduction": 0.9351652526275801,
         "medianManualTokens": 13087,
-        "medianContextTokens": 447,
+        "medianContextTokens": 512,
         "medianMinimumSufficientBudget": 512,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "impact": {
         "tasks": 3,
-        "requiredFactRecall": 0.9090909090909091,
+        "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9114421840732058,
+        "medianContextReduction": 0.9080390229146185,
         "medianManualTokens": 13223,
-        "medianContextTokens": 1171,
+        "medianContextTokens": 1216,
         "medianMinimumSufficientBudget": 2048,
-        "wholeFileFallbackRate": 0.3333333333333333,
+        "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       }
     }
   },
-  "failureAttribution": {
-    "NOT_SELECTED": 1
-  },
-  "findings": [
-    {
-      "cause": "NOT_SELECTED",
-      "tasks": [
-        "ripgrep-ignore-is-hidden-path-impact"
-      ],
-      "repositories": [
-        "ripgrep-ignore"
-      ],
-      "taskCount": 1,
-      "repositoryCount": 1,
-      "marker": "report-only"
-    }
-  ],
+  "failureAttribution": {},
+  "findings": [],
   "performance": [
     {
       "repository": "walkdir",
-      "coldIndexMs": 188,
-      "warmIndexMs": 35,
-      "singleFileRefreshMs": 40,
+      "coldIndexMs": 214,
+      "warmIndexMs": 34,
+      "singleFileRefreshMs": 48,
       "previewMs": 6,
       "filesIndexed": 9
     },
     {
       "repository": "mini-redis",
-      "coldIndexMs": 166,
-      "warmIndexMs": 41,
-      "singleFileRefreshMs": 50,
+      "coldIndexMs": 221,
+      "warmIndexMs": 47,
+      "singleFileRefreshMs": 45,
       "previewMs": 8,
       "filesIndexed": 28
     },
     {
       "repository": "ripgrep-ignore",
-      "coldIndexMs": 474,
-      "warmIndexMs": 109,
-      "singleFileRefreshMs": 112,
-      "previewMs": 12,
+      "coldIndexMs": 532,
+      "warmIndexMs": 116,
+      "singleFileRefreshMs": 107,
+      "previewMs": 13,
       "filesIndexed": 13
     }
   ]
