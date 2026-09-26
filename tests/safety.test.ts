@@ -28,7 +28,7 @@ test("production retrieval never reads benchmark answers", () => {
   // into retrieval; the runtime must only ever see repository source.
   const runtime = walk(join(process.cwd(), "src"));
   const forbidden =
-    /benchmarks\/|requiredFacts|expectedSymbols|manual-context|typescript-tasks|semantic-calls|groundTruth/;
+    /benchmarks\/|requiredFacts|expectedSymbols|manual-context|typescript-tasks|semantic-calls|rust-tasks|rust-manual-context|groundTruth/;
   const offenders = runtime.filter((file) =>
     forbidden.test(readFileSync(file, "utf8")),
   );

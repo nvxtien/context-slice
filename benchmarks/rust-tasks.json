@@ -1,0 +1,818 @@
+[
+  {
+    "id": "walkdir-check-loop-locate",
+    "repository": "walkdir",
+    "category": "locate",
+    "task": "Where does the directory walker detect a symbolic link cycle?",
+    "targetSymbol": "IntoIter.check_loop",
+    "groundTruthFiles": [
+      "src/lib.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "ancestors",
+        "description": "Every ancestor directory on the stack is compared with the child",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "for ancestor in self.stack_path.iter().rev() {"
+          ]
+        }
+      },
+      {
+        "id": "handle",
+        "description": "A file handle is opened for the child path",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "let hchild = Handle::from_path(&child)"
+          ]
+        }
+      },
+      {
+        "id": "loop-error",
+        "description": "A loop error is built when an ancestor is the same file",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return Err(Error::from_loop("
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/lib.rs",
+      "src/error.rs"
+    ]
+  },
+  {
+    "id": "walkdir-push-explain",
+    "repository": "walkdir",
+    "category": "explain",
+    "task": "Explain how the iterator opens a directory and limits open file descriptors.",
+    "targetSymbol": "IntoIter.push",
+    "groundTruthFiles": [
+      "src/lib.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "max-open",
+        "description": "The oldest open directory stream is closed at the max_open limit",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if free == self.opts.max_open {",
+            "self.stack_list[self.oldest_opened].close();"
+          ]
+        }
+      },
+      {
+        "id": "read-dir",
+        "description": "The directory is opened with read_dir",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "let rd = fs::read_dir(dent.path()).map_err(|err| {"
+          ]
+        }
+      },
+      {
+        "id": "sorter",
+        "description": "Entries are sorted eagerly when a sorter is configured",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if let Some(ref mut cmp) = self.opts.sorter {"
+          ]
+        }
+      },
+      {
+        "id": "ancestor",
+        "description": "An ancestor is recorded when following links",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.stack_path.push(ancestor);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/lib.rs"
+    ]
+  },
+  {
+    "id": "walkdir-handle-entry-explain",
+    "repository": "walkdir",
+    "category": "explain",
+    "task": "Explain how a single directory entry is processed before it is yielded.",
+    "targetSymbol": "IntoIter.handle_entry",
+    "groundTruthFiles": [
+      "src/lib.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "follow",
+        "description": "Symlinks are resolved when follow_links is enabled",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "dent = itry!(self.follow(dent));"
+          ]
+        }
+      },
+      {
+        "id": "normal-dir",
+        "description": "Only non-symlink directories are descended into",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "let is_normal_dir = !dent.file_type().is_symlink() && dent.is_dir();"
+          ]
+        }
+      },
+      {
+        "id": "deferred",
+        "description": "With contents_first directories are deferred",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.deferred_dirs.push(dent);"
+          ]
+        }
+      },
+      {
+        "id": "skippable",
+        "description": "Entries outside the depth window are dropped",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "} else if self.skippable() {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/lib.rs",
+      "src/dent.rs"
+    ]
+  },
+  {
+    "id": "walkdir-same-fs-change",
+    "repository": "walkdir",
+    "category": "change",
+    "task": "What must be read to change how the same-file-system restriction is checked?",
+    "targetSymbol": "IntoIter.is_same_file_system",
+    "groundTruthFiles": [
+      "src/lib.rs",
+      "src/util.rs",
+      "src/error.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "caller",
+        "description": "The check compares the entry device with the root device",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "util::device_num(dent.path())",
+            "d == dent_device"
+          ]
+        }
+      },
+      {
+        "id": "device-num",
+        "description": "device_num reads the device id on unix",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pub fn device_num<P: AsRef<Path>>(path: P) -> io::Result<u64> {",
+            "path.as_ref().metadata().map(|md| md.dev())"
+          ]
+        }
+      },
+      {
+        "id": "error",
+        "description": "Failures are wrapped by Error::from_entry",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pub(crate) fn from_entry(dent: &DirEntry, err: io::Error) -> Self {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/lib.rs",
+      "src/util.rs",
+      "src/error.rs"
+    ]
+  },
+  {
+    "id": "walkdir-skippable-impact",
+    "repository": "walkdir",
+    "category": "impact",
+    "task": "Which code is affected if the depth-window predicate skippable changes?",
+    "targetSymbol": "IntoIter.skippable",
+    "groundTruthFiles": [
+      "src/lib.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "skippable compares depth with min_depth and max_depth",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "fn skippable(&self) -> bool {",
+            "self.depth < self.opts.min_depth || self.depth > self.opts.max_depth"
+          ]
+        }
+      },
+      {
+        "id": "handle-entry",
+        "description": "handle_entry calls skippable",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "} else if self.skippable() {",
+            "fn handle_entry("
+          ]
+        }
+      },
+      {
+        "id": "deferred",
+        "description": "get_deferred_dir calls skippable",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if !self.skippable() {",
+            "fn get_deferred_dir(&mut self) -> Option<DirEntry> {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/lib.rs"
+    ]
+  },
+  {
+    "id": "mini-redis-from-frame-locate",
+    "repository": "mini-redis",
+    "category": "locate",
+    "task": "Where is a received frame turned into a command?",
+    "targetSymbol": "Command.from_frame",
+    "groundTruthFiles": [
+      "src/cmd/mod.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "name",
+        "description": "The command name is read and lowercased",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "let command_name = parse.next_string()?.to_lowercase();"
+          ]
+        }
+      },
+      {
+        "id": "dispatch",
+        "description": "The name is dispatched to a per-command parser",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "\"get\" => Command::Get(Get::parse_frames(&mut parse)?),"
+          ]
+        }
+      },
+      {
+        "id": "unknown",
+        "description": "Unrecognized names produce Unknown",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return Ok(Command::Unknown(Unknown::new(command_name)));"
+          ]
+        }
+      },
+      {
+        "id": "finish",
+        "description": "Unconsumed fields are rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "parse.finish()?;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/cmd/mod.rs",
+      "src/parse.rs"
+    ]
+  },
+  {
+    "id": "mini-redis-db-set-explain",
+    "repository": "mini-redis",
+    "category": "explain",
+    "task": "Explain how a key is stored with an optional expiration.",
+    "targetSymbol": "Db.set",
+    "groundTruthFiles": [
+      "src/db.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "notify",
+        "description": "The purge task is notified only when the new expiry is the earliest",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "notify = state",
+            "expiration > when"
+          ]
+        }
+      },
+      {
+        "id": "replace",
+        "description": "A previous expiration entry is removed when a key is overwritten",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "state.expirations.remove(&(when, key.clone()));"
+          ]
+        }
+      },
+      {
+        "id": "insert",
+        "description": "The new expiration is recorded",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "state.expirations.insert((when, key));"
+          ]
+        }
+      },
+      {
+        "id": "wake",
+        "description": "The background task is woken after the lock is released",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.shared.background_task.notify_one();"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/db.rs"
+    ]
+  },
+  {
+    "id": "mini-redis-purge-explain",
+    "repository": "mini-redis",
+    "category": "explain",
+    "task": "Explain how expired keys are purged.",
+    "targetSymbol": "Shared.purge_expired_keys",
+    "groundTruthFiles": [
+      "src/db.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "shutdown",
+        "description": "Nothing is purged after shutdown",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if state.shutdown {"
+          ]
+        }
+      },
+      {
+        "id": "future",
+        "description": "The next future expiration is returned",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if when > now {",
+            "return Some(when);"
+          ]
+        }
+      },
+      {
+        "id": "remove",
+        "description": "Expired entries and expirations are removed",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "state.entries.remove(key);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/db.rs"
+    ]
+  },
+  {
+    "id": "mini-redis-command-apply-change",
+    "repository": "mini-redis",
+    "category": "change",
+    "task": "What must be read to change how a parsed command is executed?",
+    "targetSymbol": "Command.apply",
+    "groundTruthFiles": [
+      "src/cmd/mod.rs",
+      "src/cmd/get.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "dispatch",
+        "description": "apply delegates to each command",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "Get(cmd) => cmd.apply(db, dst).await,",
+            "Subscribe(cmd) => cmd.apply(db, dst, shutdown).await,"
+          ]
+        }
+      },
+      {
+        "id": "unsubscribe",
+        "description": "Unsubscribe is rejected outside a subscription",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "Unsubscribe(_) => Err(\"`Unsubscribe` is unsupported in this context\".into()),"
+          ]
+        }
+      },
+      {
+        "id": "get-apply",
+        "description": "Get::apply reads the db and writes a frame",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pub(crate) async fn apply(self, db: &Db, dst: &mut Connection) -> crate::Result<()> {",
+            "dst.write_frame(&response).await?;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/cmd/mod.rs",
+      "src/cmd/get.rs",
+      "src/db.rs",
+      "src/connection.rs"
+    ]
+  },
+  {
+    "id": "mini-redis-read-frame-impact",
+    "repository": "mini-redis",
+    "category": "impact",
+    "task": "Which code is affected if Connection::read_frame changes?",
+    "targetSymbol": "Connection.read_frame",
+    "groundTruthFiles": [
+      "src/connection.rs",
+      "src/server.rs",
+      "src/cmd/subscribe.rs",
+      "src/clients/client.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "read_frame returns an optional frame",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pub async fn read_frame(&mut self) -> crate::Result<Option<Frame>> {"
+          ]
+        }
+      },
+      {
+        "id": "server",
+        "description": "The server handler reads frames",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "res = self.connection.read_frame() => res?,"
+          ]
+        }
+      },
+      {
+        "id": "subscribe",
+        "description": "The subscribe command reads frames",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "res = dst.read_frame() => {"
+          ]
+        }
+      },
+      {
+        "id": "client",
+        "description": "The client reads responses",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "let response = self.connection.read_frame().await?;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/connection.rs",
+      "src/server.rs",
+      "src/cmd/subscribe.rs",
+      "src/clients/client.rs"
+    ]
+  },
+  {
+    "id": "ripgrep-ignore-strip-locate",
+    "repository": "ripgrep-ignore",
+    "category": "locate",
+    "task": "Where is the gitignore root prefix stripped from a candidate path?",
+    "targetSymbol": "Gitignore.strip",
+    "groundTruthFiles": [
+      "crates/ignore/src/gitignore.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "dot-slash",
+        "description": "A leading ./ is removed",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if let Some(p) = strip_prefix(\"./\", path) {"
+          ]
+        }
+      },
+      {
+        "id": "root",
+        "description": "The root is stripped unless the path is a bare file name",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if self.root != Path::new(\".\") && !is_file_name(path) {",
+            "if let Some(p) = strip_prefix(&self.root, path) {"
+          ]
+        }
+      },
+      {
+        "id": "slash",
+        "description": "A leading slash is removed afterwards",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if let Some(p) = strip_prefix(\"/\", path) {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "crates/ignore/src/gitignore.rs",
+      "crates/ignore/src/pathutil.rs"
+    ]
+  },
+  {
+    "id": "ripgrep-ignore-add-line-explain",
+    "repository": "ripgrep-ignore",
+    "category": "explain",
+    "task": "Explain how a gitignore line is parsed into a glob.",
+    "targetSymbol": "GitignoreBuilder.add_line",
+    "groundTruthFiles": [
+      "crates/ignore/src/gitignore.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "negation",
+        "description": "A leading ! marks a whitelist glob",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if line.starts_with(\"!\") {",
+            "glob.is_whitelist = true;"
+          ]
+        }
+      },
+      {
+        "id": "dir-only",
+        "description": "A trailing slash marks a directory-only glob",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "glob.is_only_dir = true;"
+          ]
+        }
+      },
+      {
+        "id": "prefix",
+        "description": "Slashless globs get a **/ prefix",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "glob.actual = format!(\"**/{}\", glob.actual);"
+          ]
+        }
+      },
+      {
+        "id": "build",
+        "description": "The glob is compiled with literal separators",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            ".literal_separator(true)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "crates/ignore/src/gitignore.rs"
+    ]
+  },
+  {
+    "id": "ripgrep-ignore-matched-stripped-explain",
+    "repository": "ripgrep-ignore",
+    "category": "explain",
+    "task": "Explain how a stripped path is matched against gitignore globs.",
+    "targetSymbol": "Gitignore.matched_stripped",
+    "groundTruthFiles": [
+      "crates/ignore/src/gitignore.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "candidate",
+        "description": "The path is matched against the glob set",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.set.matches_candidate_into(&candidate, &mut *matches);"
+          ]
+        }
+      },
+      {
+        "id": "precedence",
+        "description": "The last matching glob wins",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "for &i in matches.iter().rev() {"
+          ]
+        }
+      },
+      {
+        "id": "dir-only",
+        "description": "Directory-only globs skip files",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if !glob.is_only_dir() || is_dir {"
+          ]
+        }
+      },
+      {
+        "id": "result",
+        "description": "Whitelist and ignore results differ",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "Match::Whitelist(glob)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "crates/ignore/src/gitignore.rs"
+    ]
+  },
+  {
+    "id": "ripgrep-ignore-override-matched-change",
+    "repository": "ripgrep-ignore",
+    "category": "change",
+    "task": "What must be read to change how override globs are matched?",
+    "targetSymbol": "Override.matched",
+    "groundTruthFiles": [
+      "crates/ignore/src/overrides.rs",
+      "crates/ignore/src/gitignore.rs",
+      "crates/ignore/src/lib.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "invert",
+        "description": "Gitignore matching is inverted",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "let mat = self.0.matched(path, is_dir).invert();"
+          ]
+        }
+      },
+      {
+        "id": "unmatched",
+        "description": "Unmatched files are ignored when whitelists exist",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return Match::Ignore(Glob::unmatched());"
+          ]
+        }
+      },
+      {
+        "id": "inner",
+        "description": "Gitignore::matched strips the path first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.matched_stripped(self.strip(path.as_ref()), is_dir)"
+          ]
+        }
+      },
+      {
+        "id": "invert-def",
+        "description": "Match::invert swaps ignore and whitelist",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pub fn invert(self) -> Match<T> {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "crates/ignore/src/overrides.rs",
+      "crates/ignore/src/gitignore.rs",
+      "crates/ignore/src/lib.rs"
+    ]
+  },
+  {
+    "id": "ripgrep-ignore-is-hidden-path-impact",
+    "repository": "ripgrep-ignore",
+    "category": "impact",
+    "task": "Which code is affected if is_hidden_path changes?",
+    "targetSymbol": "is_hidden_path",
+    "groundTruthFiles": [
+      "crates/ignore/src/pathutil.rs",
+      "crates/ignore/src/incremental.rs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "is_hidden_path is a crate-private helper",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pub(crate) fn is_hidden_path(dent: &Path) -> bool {"
+          ]
+        }
+      },
+      {
+        "id": "import",
+        "description": "incremental.rs imports it",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "pathutil::is_hidden_path,"
+          ]
+        }
+      },
+      {
+        "id": "dir-check",
+        "description": "Directory matching applies it",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "self.options.hidden && mat.is_none() && is_hidden_path(&path);"
+          ]
+        }
+      },
+      {
+        "id": "file-check",
+        "description": "File matching applies it",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if self.options.hidden && mat.is_none() && is_hidden_path(&path) {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "crates/ignore/src/pathutil.rs",
+      "crates/ignore/src/incremental.rs"
+    ]
+  }
+]

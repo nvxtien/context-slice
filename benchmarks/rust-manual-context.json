@@ -1,0 +1,167 @@
+[
+  {
+    "taskId": "walkdir-check-loop-locate",
+    "files": [
+      "src/lib.rs",
+      "src/error.rs"
+    ],
+    "reasoning": {
+      "src/lib.rs": "declares check_loop, the ancestor stack and the loop error",
+      "src/error.rs": "defines Error::from_loop"
+    }
+  },
+  {
+    "taskId": "walkdir-push-explain",
+    "files": [
+      "src/lib.rs"
+    ],
+    "reasoning": {
+      "src/lib.rs": "contains push and the max_open and sorter logic"
+    }
+  },
+  {
+    "taskId": "walkdir-handle-entry-explain",
+    "files": [
+      "src/lib.rs",
+      "src/dent.rs"
+    ],
+    "reasoning": {
+      "src/lib.rs": "contains handle_entry",
+      "src/dent.rs": "defines DirEntry accessors used here"
+    }
+  },
+  {
+    "taskId": "walkdir-same-fs-change",
+    "files": [
+      "src/lib.rs",
+      "src/util.rs",
+      "src/error.rs"
+    ],
+    "reasoning": {
+      "src/lib.rs": "contains is_same_file_system",
+      "src/util.rs": "defines device_num per platform",
+      "src/error.rs": "defines Error::from_entry"
+    }
+  },
+  {
+    "taskId": "walkdir-skippable-impact",
+    "files": [
+      "src/lib.rs"
+    ],
+    "reasoning": {
+      "src/lib.rs": "contains skippable and both callers"
+    }
+  },
+  {
+    "taskId": "mini-redis-from-frame-locate",
+    "files": [
+      "src/cmd/mod.rs",
+      "src/parse.rs"
+    ],
+    "reasoning": {
+      "src/cmd/mod.rs": "contains from_frame and the dispatch match",
+      "src/parse.rs": "defines the Parse cursor used"
+    }
+  },
+  {
+    "taskId": "mini-redis-db-set-explain",
+    "files": [
+      "src/db.rs"
+    ],
+    "reasoning": {
+      "src/db.rs": "contains set and the expiration bookkeeping"
+    }
+  },
+  {
+    "taskId": "mini-redis-purge-explain",
+    "files": [
+      "src/db.rs"
+    ],
+    "reasoning": {
+      "src/db.rs": "contains purge_expired_keys and its state"
+    }
+  },
+  {
+    "taskId": "mini-redis-command-apply-change",
+    "files": [
+      "src/cmd/mod.rs",
+      "src/cmd/get.rs",
+      "src/db.rs",
+      "src/connection.rs"
+    ],
+    "reasoning": {
+      "src/cmd/mod.rs": "contains Command::apply",
+      "src/cmd/get.rs": "a representative command apply implementation",
+      "src/db.rs": "Db is passed to every apply",
+      "src/connection.rs": "Connection receives the response"
+    }
+  },
+  {
+    "taskId": "mini-redis-read-frame-impact",
+    "files": [
+      "src/connection.rs",
+      "src/server.rs",
+      "src/cmd/subscribe.rs",
+      "src/clients/client.rs"
+    ],
+    "reasoning": {
+      "src/connection.rs": "defines read_frame",
+      "src/server.rs": "Handler::run caller",
+      "src/cmd/subscribe.rs": "Subscribe::apply caller",
+      "src/clients/client.rs": "client callers"
+    }
+  },
+  {
+    "taskId": "ripgrep-ignore-strip-locate",
+    "files": [
+      "crates/ignore/src/gitignore.rs",
+      "crates/ignore/src/pathutil.rs"
+    ],
+    "reasoning": {
+      "crates/ignore/src/gitignore.rs": "contains strip",
+      "crates/ignore/src/pathutil.rs": "defines strip_prefix and is_file_name"
+    }
+  },
+  {
+    "taskId": "ripgrep-ignore-add-line-explain",
+    "files": [
+      "crates/ignore/src/gitignore.rs"
+    ],
+    "reasoning": {
+      "crates/ignore/src/gitignore.rs": "contains add_line"
+    }
+  },
+  {
+    "taskId": "ripgrep-ignore-matched-stripped-explain",
+    "files": [
+      "crates/ignore/src/gitignore.rs"
+    ],
+    "reasoning": {
+      "crates/ignore/src/gitignore.rs": "contains matched_stripped"
+    }
+  },
+  {
+    "taskId": "ripgrep-ignore-override-matched-change",
+    "files": [
+      "crates/ignore/src/overrides.rs",
+      "crates/ignore/src/gitignore.rs",
+      "crates/ignore/src/lib.rs"
+    ],
+    "reasoning": {
+      "crates/ignore/src/overrides.rs": "contains Override::matched",
+      "crates/ignore/src/gitignore.rs": "Gitignore::matched it delegates to",
+      "crates/ignore/src/lib.rs": "defines Match::invert"
+    }
+  },
+  {
+    "taskId": "ripgrep-ignore-is-hidden-path-impact",
+    "files": [
+      "crates/ignore/src/pathutil.rs",
+      "crates/ignore/src/incremental.rs"
+    ],
+    "reasoning": {
+      "crates/ignore/src/pathutil.rs": "defines is_hidden_path",
+      "crates/ignore/src/incremental.rs": "contains both callers"
+    }
+  }
+]
