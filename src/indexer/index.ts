@@ -26,6 +26,7 @@ import "../languages/java.js";
 import "../languages/typescript/index.js";
 import "../languages/python/index.js";
 import "../languages/rust/index.js";
+import "../languages/java/enterprise/spring-mvc.js";
 
 const coreIgnored = new Set([
   ".git",
