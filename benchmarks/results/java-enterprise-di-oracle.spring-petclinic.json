@@ -1,0 +1,56 @@
+[
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "className": "OwnerController",
+    "injectionKind": "constructor",
+    "typeName": "OwnerRepository",
+    "memberName": "owners",
+    "startLine": 55
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "className": "PetController",
+    "injectionKind": "constructor",
+    "typeName": "OwnerRepository",
+    "memberName": "owners",
+    "startLine": 57
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "className": "PetController",
+    "injectionKind": "constructor",
+    "typeName": "PetTypeRepository",
+    "memberName": "types",
+    "startLine": 57
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetTypeFormatter.java",
+    "className": "PetTypeFormatter",
+    "injectionKind": "constructor",
+    "typeName": "PetTypeRepository",
+    "memberName": "types",
+    "startLine": 41
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/VisitController.java",
+    "className": "VisitController",
+    "injectionKind": "constructor",
+    "typeName": "OwnerRepository",
+    "memberName": "owners",
+    "startLine": 47
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/vet/VetController.java",
+    "className": "VetController",
+    "injectionKind": "constructor",
+    "typeName": "VetRepository",
+    "memberName": "vetRepository",
+    "startLine": 40
+  }
+]

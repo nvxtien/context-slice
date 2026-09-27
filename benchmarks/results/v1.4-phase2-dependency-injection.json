@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-09-27T09:10:37.467Z",
+  "oracleBeanTotal": 35,
+  "matched": 35,
+  "falsePositiveCount": 0,
+  "dependency_linkage_recall": 1,
+  "dependency_linkage_precision": 1,
+  "perRepo": {
+    "spring-petclinic": {
+      "oracleTotal": 6,
+      "oracleBeanTotal": 6,
+      "matched": 6,
+      "falsePositives": 0
+    },
+    "petclinic-rest": {
+      "oracleTotal": 39,
+      "oracleBeanTotal": 29,
+      "matched": 29,
+      "falsePositives": 0
+    }
+  },
+  "failureAttribution": {
+    "ANNOTATION_EXTRACTION": 0,
+    "DI_RESOLUTION": 0,
+    "CONTEXT_COMPOSITION": 0,
+    "TOKEN_BUDGET": 0,
+    "GROUND_TRUTH": 0,
+    "UNKNOWN": 0
+  },
+  "misses": [],
+  "falsePositives": []
+}

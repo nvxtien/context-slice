@@ -1,0 +1,353 @@
+[
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcOwnerRepositoryImpl.java",
+    "className": "JdbcOwnerRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 65
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcPetRepositoryImpl.java",
+    "className": "JdbcPetRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 68
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcPetRepositoryImpl.java",
+    "className": "JdbcPetRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "OwnerRepository",
+    "memberName": "ownerRepository",
+    "startLine": 68
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcPetTypeRepositoryImpl.java",
+    "className": "JdbcPetTypeRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 55
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcSpecialtyRepositoryImpl.java",
+    "className": "JdbcSpecialtyRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcUserRepositoryImpl.java",
+    "className": "JdbcUserRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 29
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcVetRepositoryImpl.java",
+    "className": "JdbcVetRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 65
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcVetRepositoryImpl.java",
+    "className": "JdbcVetRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "JdbcTemplate",
+    "memberName": "jdbcTemplate",
+    "startLine": 65
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/repository/jdbc/JdbcVisitRepositoryImpl.java",
+    "className": "JdbcVisitRepositoryImpl",
+    "injectionKind": "constructor",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 64
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+    "className": "OwnerRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 64
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+    "className": "OwnerRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "OwnerMapper",
+    "memberName": "ownerMapper",
+    "startLine": 64
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+    "className": "OwnerRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "PetMapper",
+    "memberName": "petMapper",
+    "startLine": 64
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/OwnerRestControllerV1.java",
+    "className": "OwnerRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "VisitMapper",
+    "memberName": "visitMapper",
+    "startLine": 64
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/PetRestControllerV1.java",
+    "className": "PetRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 47
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/PetRestControllerV1.java",
+    "className": "PetRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "PetMapper",
+    "memberName": "petMapper",
+    "startLine": 47
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/PetTypeRestControllerV1.java",
+    "className": "PetTypeRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 46
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/PetTypeRestControllerV1.java",
+    "className": "PetTypeRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "PetTypeMapper",
+    "memberName": "petTypeMapper",
+    "startLine": 46
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/SpecialtyRestControllerV1.java",
+    "className": "SpecialtyRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 48
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/SpecialtyRestControllerV1.java",
+    "className": "SpecialtyRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "SpecialtyMapper",
+    "memberName": "specialtyMapper",
+    "startLine": 48
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/UserRestControllerV1.java",
+    "className": "UserRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "UserService",
+    "memberName": "userService",
+    "startLine": 40
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/UserRestControllerV1.java",
+    "className": "UserRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "UserMapper",
+    "memberName": "userMapper",
+    "startLine": 40
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/VetRestControllerV1.java",
+    "className": "VetRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/VetRestControllerV1.java",
+    "className": "VetRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "VetMapper",
+    "memberName": "vetMapper",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/VetRestControllerV1.java",
+    "className": "VetRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "SpecialtyMapper",
+    "memberName": "specialtyMapper",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/VisitRestControllerV1.java",
+    "className": "VisitRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 49
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/VisitRestControllerV1.java",
+    "className": "VisitRestControllerV1",
+    "injectionKind": "constructor",
+    "typeName": "VisitMapper",
+    "memberName": "visitMapper",
+    "startLine": 49
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v2/OwnerRestControllerV2.java",
+    "className": "OwnerRestControllerV2",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 26
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v2/OwnerRestControllerV2.java",
+    "className": "OwnerRestControllerV2",
+    "injectionKind": "constructor",
+    "typeName": "OwnerMapper",
+    "memberName": "ownerMapper",
+    "startLine": 26
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v2/PetRestControllerV2.java",
+    "className": "PetRestControllerV2",
+    "injectionKind": "constructor",
+    "typeName": "ClinicService",
+    "memberName": "clinicService",
+    "startLine": 26
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v2/PetRestControllerV2.java",
+    "className": "PetRestControllerV2",
+    "injectionKind": "constructor",
+    "typeName": "PetMapper",
+    "memberName": "petMapper",
+    "startLine": 26
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/security/BasicAuthenticationConfig.java",
+    "className": "BasicAuthenticationConfig",
+    "injectionKind": "field",
+    "typeName": "DataSource",
+    "memberName": "dataSource",
+    "startLine": 23
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/security/BasicAuthenticationConfig.java",
+    "className": "BasicAuthenticationConfig",
+    "injectionKind": "setter",
+    "typeName": "AuthenticationManagerBuilder",
+    "memberName": "configureGlobal",
+    "startLine": 45
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "injectionKind": "constructor",
+    "typeName": "PetRepository",
+    "memberName": "petRepository",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "injectionKind": "constructor",
+    "typeName": "VetRepository",
+    "memberName": "vetRepository",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "injectionKind": "constructor",
+    "typeName": "OwnerRepository",
+    "memberName": "ownerRepository",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "injectionKind": "constructor",
+    "typeName": "VisitRepository",
+    "memberName": "visitRepository",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "injectionKind": "constructor",
+    "typeName": "SpecialtyRepository",
+    "memberName": "specialtyRepository",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "injectionKind": "constructor",
+    "typeName": "PetTypeRepository",
+    "memberName": "petTypeRepository",
+    "startLine": 50
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/UserServiceImpl.java",
+    "className": "UserServiceImpl",
+    "injectionKind": "field",
+    "typeName": "UserRepository",
+    "memberName": "userRepository",
+    "startLine": 13
+  }
+]
