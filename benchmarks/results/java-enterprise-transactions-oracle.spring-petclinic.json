@@ -1,0 +1,28 @@
+[
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java",
+    "className": "VetRepository",
+    "methodName": "findAll",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 46
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java",
+    "className": "VetRepository",
+    "methodName": "findAll",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 56
+  }
+]

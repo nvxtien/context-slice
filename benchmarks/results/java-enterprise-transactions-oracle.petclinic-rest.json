@@ -1,0 +1,249 @@
+[
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findAllPets",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 67
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findPets",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 73
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findVisitById",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 85
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findAllVisits",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 91
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findVetById",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 103
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findAllVets",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 109
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findAllOwners",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 127
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findOwners",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 133
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findPetTypeById",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 148
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findAllPetTypes",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 154
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findSpecialtyById",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 172
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findAllSpecialties",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 178
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findPetTypes",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 196
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findOwnerById",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 202
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findPetById",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 208
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findVets",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 228
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findOwnerByLastName",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 241
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findVisitsByPetId",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 247
+  },
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java",
+    "className": "ClinicServiceImpl",
+    "methodName": "findSpecialtiesByNameIn",
+    "attributes": [
+      {
+        "name": "readOnly",
+        "value": "true"
+      }
+    ],
+    "startLine": 253
+  }
+]
