@@ -9,7 +9,7 @@ import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./regis
 
 const INJECT_RE = /@(Autowired|Inject|Resource)\b(?:\s*\([^)]*\))?/g;
 const QUALIFIER_RE = /@Qualifier\s*\(\s*(?:value\s*=\s*)?"([^"]*)"\s*\)/;
-const QUALIFIER_EVIDENCE_RE = /^@Qualifier\("(.*)"\)$/;
+const STEREOTYPES = new Set(["Component", "Service", "Repository", "Controller", "RestController", "Configuration"]);
 
 /** Text between the first top-level "(" and its matching ")", string-aware. */
 function firstParenGroup(text: string): string | undefined {
@@ -120,8 +120,19 @@ function extractDependencyInjection(
   const own = symbols.filter((s) => s.filePath === filePath);
   const relations: EnterpriseRelation[] = [];
 
-  // Constructor injection first (§12 preference ordering).
+  // Constructor injection first (§12 preference ordering). Gated: only a Spring-managed class
+  // (stereotype) or an explicitly @Autowired/@Inject constructor counts, so value objects like
+  // Order(Customer c) never become false "exact" edges (§57).
+  const seen = new Set<string>();
   for (const ctor of own.filter((s) => s.kind === "constructor")) {
+    // parseJava can emit an annotated constructor twice (same range/source, "#2" id); keep one.
+    const key = `${ctor.range.startLine}:${ctor.range.startColumn}:${ctor.source}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const cls = own.find((s) => s.id === ctor.parentId);
+    const stereotyped = cls?.annotations.some((a) => STEREOTYPES.has(a.slice(a.lastIndexOf(".") + 1).replace("@", "")));
+    const annotated = new RegExp(`@(?:Autowired|Inject)\\b[\\s\\S]*?\\b${ctor.name}\\s*\\(`).test(ctor.source);
+    if (!stereotyped && !annotated) continue;
     const params = firstParenGroup(ctor.source);
     if (!params) continue;
     for (const param of splitTopLevel(params)) {
@@ -164,19 +175,16 @@ function extractDependencyInjection(
 
 /**
  * Bean identity (§13): exactly one project class/interface with the simple name -> exact;
- * several, with a @Qualifier equal to exactly one candidate's simple name -> exact; any
- * other multi-candidate case -> unresolved (never a guessed winner); zero -> not a bean.
+ * several -> unresolved (never a guessed winner); zero -> not a bean. A @Qualifier value is
+ * kept as evidence only: candidates all share the simple name, so it can't break a tie.
  */
 export function resolveBeanType(
   typeName: string,
-  qualifier: string | undefined,
   projectTypes: SymbolRecord[],
 ): { confidence: "exact" | "unresolved"; targetSymbolId?: string } | undefined {
   const candidates = projectTypes.filter((s) => s.name === typeName);
   if (candidates.length === 0) return undefined;
   if (candidates.length === 1) return { confidence: "exact", targetSymbolId: candidates[0].id };
-  const qualified = candidates.filter((s) => s.name === qualifier);
-  if (qualified.length === 1) return { confidence: "exact", targetSymbolId: qualified[0].id };
   return { confidence: "unresolved" };
 }
 
@@ -188,8 +196,7 @@ export function resolveDependencyRelations(
   const projectTypes = allSymbols.filter((s) => s.kind === "class" || s.kind === "interface");
   return relations.flatMap((r) => {
     if (r.kind !== "INJECTS_DEPENDENCY" || r.family !== "dependency-injection") return [r];
-    const qualifier = r.evidence.map((e) => e.match(QUALIFIER_EVIDENCE_RE)?.[1]).find((q) => q !== undefined);
-    const resolved = resolveBeanType(r.targetLabel ?? "", qualifier, projectTypes);
+    const resolved = resolveBeanType(r.targetLabel ?? "", projectTypes);
     if (!resolved) return [];
     const { targetSymbolId: _stale, ...rest } = r;
     return [{ ...rest, ...resolved }];

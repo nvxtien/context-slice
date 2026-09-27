@@ -17,6 +17,7 @@ function resolved(allSymbols: ReturnType<typeof parseJava>["symbols"], filePath:
 test("constructor injection resolves a unique project type as exact", () => {
   const source = `
 class OrderRepository {}
+@Service
 class OrderService {
     private final OrderRepository repo;
     OrderService(OrderRepository repo) { this.repo = repo; }
@@ -80,6 +81,7 @@ class Checkout {
 test("an ambiguous type with no qualifier is unresolved, never guessed", () => {
   const source = `
 class Validator {}
+@Service
 class Checkout {
     private final Validator v;
     Checkout(Validator v) { this.v = v; }
@@ -106,6 +108,7 @@ test("a @Qualifier equal to the shared simple name cannot break a tie, so stays 
   const first = parseJava("src/main/java/other/Validator.java", "package other;\nclass Validator {}");
   const source = `
 class Validator {}
+@Service
 class Checkout {
     Checkout(@Qualifier("Validator") Validator v) {}
 }
@@ -120,19 +123,20 @@ class Checkout {
   assert.match(rel.evidence.join(" "), /@Qualifier\("Validator"\)/);
 });
 
-test("resolveBeanType: unique -> exact, zero -> none, tie (with or without qualifier) -> unresolved", () => {
+test("resolveBeanType: unique -> exact, zero -> none, tie -> unresolved", () => {
   const types = parseJava("A.java", "class Fast {}\nclass Slow {}\nclass Fast2 {}").symbols;
   const dup = { ...types[0], id: "other::Fast" };
-  assert.equal(resolveBeanType("Fast", undefined, [...types, dup])?.confidence, "unresolved");
-  assert.deepEqual(resolveBeanType("Fast", "Slow", [...types, dup]), { confidence: "unresolved" });
-  assert.deepEqual(resolveBeanType("Slow", undefined, types), { confidence: "exact", targetSymbolId: types[1].id });
-  assert.equal(resolveBeanType("Nope", undefined, types), undefined);
+  assert.equal(resolveBeanType("Fast", [...types, dup])?.confidence, "unresolved");
+  assert.deepEqual(resolveBeanType("Fast", [...types, dup]), { confidence: "unresolved" });
+  assert.deepEqual(resolveBeanType("Slow", types), { confidence: "exact", targetSymbolId: types[1].id });
+  assert.equal(resolveBeanType("Nope", types), undefined);
 });
 
 test("both constructor and field injection on the same class produce distinct relations", () => {
   const source = `
 class Repo {}
 class Gateway {}
+@Service
 class Service {
     private final Repo repo;
     @Autowired
@@ -195,7 +199,7 @@ test("ProjectIndex resolves bean identity across files in its post-pass", async 
   const { ProjectIndex } = await import("../src/indexer/index.js");
   const root = mkdtempSync(join(tmpdir(), "di-"));
   mkdirSync(join(root, "src"));
-  writeFileSync(join(root, "src/Service.java"), "class Service {\n  Service(Repo r) {}\n}\n");
+  writeFileSync(join(root, "src/Service.java"), "@Service\nclass Service {\n  Service(Repo r) {}\n}\n");
   writeFileSync(join(root, "src/Repo.java"), "interface Repo {}\n");
   const index = new ProjectIndex(root);
   index.rebuild();
@@ -203,4 +207,44 @@ test("ProjectIndex resolves bean identity across files in its post-pass", async 
   const repo = index.symbols.find((s) => s.name === "Repo")!;
   assert.equal(rel.confidence, "exact");
   assert.equal(rel.targetSymbolId, repo.id);
+});
+
+test("stereotyped class: unannotated constructor injection resolves", () => {
+  const source = `
+class OrderRepository {}
+@Service
+class OrderService {
+    OrderService(OrderRepository repo) {}
+}
+`;
+  const { symbols, relations } = relationsFor(source);
+  const ctor = symbols.find((s) => s.kind === "constructor")!;
+  assert.equal(relations.length, 1);
+  assert.equal(relations[0].sourceSymbolId, ctor.id);
+  assert.equal(relations[0].confidence, "exact");
+});
+
+test("plain class constructor taking a project type is not injection", () => {
+  const source = `
+class Customer {}
+class Order {
+    Order(Customer c) {}
+}
+`;
+  const { relations } = relationsFor(source, "src/main/java/Order.java");
+  assert.equal(relations.length, 0);
+});
+
+test("non-stereotyped class with an @Autowired constructor resolves, once", () => {
+  const source = `
+class Repo {}
+class Helper {
+    @Autowired
+    Helper(Repo r) {}
+}
+`;
+  const { relations } = relationsFor(source, "src/main/java/Helper.java");
+  assert.equal(relations.length, 1);
+  assert.equal(relations[0].targetLabel, "Repo");
+  assert.equal(relations[0].confidence, "exact");
 });
