@@ -4,6 +4,7 @@ import { rankSymbol } from "../planner/rank.js";
 import { renderSkeleton } from "../render/compact-context.js";
 import type { SymbolRecord } from "../types/model.js";
 import {
+  composeDependencyContext,
   composeImportContext,
   composeRouteContext,
   composeSiblings,
@@ -279,7 +280,16 @@ export function buildPreview(
     options.composition === false
       ? []
       : composeRouteContext(index, target, relatedIds, includedIds);
-  for (const candidate of [...siblings, ...importCandidates, ...routeCandidates]) {
+  const dependencyCandidates =
+    options.composition === false
+      ? []
+      : composeDependencyContext(index, target, relatedIds, includedIds);
+  for (const candidate of [
+    ...siblings,
+    ...importCandidates,
+    ...routeCandidates,
+    ...dependencyCandidates,
+  ]) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
       omitted.push({

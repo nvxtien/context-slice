@@ -148,6 +148,91 @@ export function composeImportContext(
  * service method one hop below the route handler). Java only: other
  * languages have no Spring MVC extractor to find relations from.
  */
+/** Pull the injected field/param/setter name out of a DI relation's evidence text. */
+function fieldOrParamName(evidence: string): string | undefined {
+  return (
+    evidence.match(/constructor parameter \S+ (\S+)/)?.[1] ??
+    evidence.match(/@\w+ field \S+ (\S+)/)?.[1] ??
+    evidence.match(/@\w+ setter (\w+)\(/)?.[1]
+  );
+}
+
+function injectionMechanism(evidence: string): string {
+  if (evidence.startsWith("constructor parameter")) return "constructor-injected";
+  if (/@\w+ field /.test(evidence)) return "field-injected";
+  if (/@\w+ setter /.test(evidence)) return "setter-injected";
+  return "dependency-injected";
+}
+
+/**
+ * Compose the dependencies the target's own type injects, but only the ones
+ * relevant to this task: a dependency is surfaced only when the resolved
+ * type owns a member already present in `relatedIds` (a direct caller or
+ * callee already in the slice) — otherwise it's annotation spam. Java only:
+ * other languages have no DI extractor to find relations from.
+ */
+export function composeDependencyContext(
+  index: ProjectIndex,
+  target: SymbolRecord,
+  relatedIds: ReadonlySet<string>,
+  alreadyIncluded: ReadonlySet<string>,
+): CompositionCandidate[] {
+  if (target.language !== "java") return [];
+
+  let owner: SymbolRecord | undefined =
+    target.kind === "class" ? target : undefined;
+  let cursor = target.parentId
+    ? index.symbols.find((s) => s.id === target.parentId)
+    : undefined;
+  while (!owner && cursor) {
+    if (cursor.kind === "class") owner = cursor;
+    else cursor = cursor.parentId ? index.symbols.find((s) => s.id === cursor!.parentId) : undefined;
+  }
+  if (!owner) return [];
+
+  const ownSymbolIds = new Set(
+    index.symbols
+      .filter(
+        (s) =>
+          s.parentId === owner!.id &&
+          (s.kind === "constructor" || s.kind === "method"),
+      )
+      .map((s) => s.id),
+  );
+  ownSymbolIds.add(owner.id);
+
+  const candidates: CompositionCandidate[] = [];
+  const seenRelations = new Set<string>();
+  for (const relation of index.enterpriseRelations) {
+    if (relation.kind !== "INJECTS_DEPENDENCY") continue;
+    if (relation.confidence === "unresolved") continue;
+    if (!ownSymbolIds.has(relation.sourceSymbolId)) continue;
+    if (!relation.targetSymbolId) continue;
+    const dependencyMembers = index.symbols.filter(
+      (s) => s.parentId === relation.targetSymbolId,
+    );
+    const isRelevant = dependencyMembers.some((s) => relatedIds.has(s.id));
+    if (!isRelevant) continue;
+    const key = `${relation.sourceSymbolId}:${relation.targetSymbolId}`;
+    if (seenRelations.has(key)) continue;
+    seenRelations.add(key);
+
+    const evidence = relation.evidence[0] ?? "";
+    const name = fieldOrParamName(evidence);
+    const mechanism = injectionMechanism(evidence);
+    const rendered = `// Dependency\n${owner.name}.${name ?? relation.targetLabel} → ${relation.targetLabel} (${mechanism})`;
+    candidates.push({
+      label: relation.targetLabel ?? "dependency",
+      reason: "enterprise relation",
+      evidence: relation.evidence,
+      rendered,
+      estimatedTokens: estimateTokens(rendered),
+      filePath: relation.filePath,
+    });
+  }
+  return candidates;
+}
+
 export function composeRouteContext(
   index: ProjectIndex,
   target: SymbolRecord,
