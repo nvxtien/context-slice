@@ -126,5 +126,85 @@ function resolvePersistsEntity(relations: EnterpriseRelation[], allSymbols: Symb
   });
 }
 
+/**
+ * Real-repository finding (petclinic-rest): a "plain" repository interface with NO generic of
+ * its own (e.g. `OwnerRepository`, no `<Entity, Id>`) declares the derived-query methods the
+ * service layer actually calls, while a separate sibling (e.g. `SpringDataOwnerRepository`)
+ * `extends OwnerRepository, Repository<Owner, Integer>` and re-declares only SOME of them. Under
+ * per-file extraction alone, the plain interface's methods get zero REPOSITORY_QUERY relations,
+ * because repositoryShape() only recognizes an interface that itself carries the `<Entity, Id>`
+ * generic. This resolver closes that gap: once an interface's PERSISTS_ENTITY has resolved
+ * "exact" (so we know its entity with certainty, never a guess), walk its own supertype chain
+ * (SymbolRecord.supertypes — plain identifier list, already stripped of generics by the parser)
+ * and, for every reachable supertype that is itself a project interface with NO generic shape of
+ * its own (so it wasn't already extracted directly), run the exact same derived-query/@Query
+ * extraction on its methods, attributing REPOSITORY_QUERY relations to the SAME entity the
+ * subinterface resolved. A supertype name that doesn't resolve to exactly one project interface
+ * (ambiguous or external, e.g. the framework's own `Repository`) is skipped, never guessed —
+ * same discipline as resolvePersistsEntity and resolveEntityRelations.
+ */
+function resolveRepositoryQueryPropagation(relations: EnterpriseRelation[], allSymbols: SymbolRecord[]): EnterpriseRelation[] {
+  const persistsByInterface = new Map<string, EnterpriseRelation>();
+  for (const r of relations) {
+    if (r.kind === "PERSISTS_ENTITY" && r.family === "spring-data-jpa" && r.confidence === "exact") {
+      persistsByInterface.set(r.sourceSymbolId, r);
+    }
+  }
+  if (persistsByInterface.size === 0) return relations;
+
+  const interfacesByName = new Map<string, SymbolRecord[]>();
+  const interfaceById = new Map<string, SymbolRecord>();
+  for (const s of allSymbols) {
+    if (s.kind !== "interface") continue;
+    interfaceById.set(s.id, s);
+    const list = interfacesByName.get(s.name) ?? [];
+    list.push(s);
+    interfacesByName.set(s.name, list);
+  }
+
+  const existingQuerySources = new Set(
+    relations.filter((r) => r.kind === "REPOSITORY_QUERY" && r.family === "spring-data-jpa").map((r) => r.sourceSymbolId),
+  );
+
+  const added: EnterpriseRelation[] = [];
+  for (const ifaceId of persistsByInterface.keys()) {
+    const iface = interfaceById.get(ifaceId);
+    if (!iface) continue;
+    const visited = new Set<string>([iface.id]);
+    const queue = [...(iface.supertypes ?? [])];
+    while (queue.length) {
+      const name = queue.shift()!;
+      const candidates = interfacesByName.get(name);
+      if (!candidates || candidates.length !== 1) continue; // unresolved/ambiguous/external: never guess
+      const supIface = candidates[0];
+      if (visited.has(supIface.id)) continue;
+      visited.add(supIface.id);
+      queue.push(...(supIface.supertypes ?? []));
+      if (persistsByInterface.has(supIface.id)) continue; // has its own generic: already extracted directly
+
+      for (const method of allSymbols) {
+        if (method.kind !== "method" || method.parentId !== supIface.id) continue;
+        if (existingQuerySources.has(method.id)) continue;
+        const properties = derivedProperties(method.name);
+        const query = queryText(method);
+        if (!properties && query === undefined) continue;
+        added.push({
+          kind: "REPOSITORY_QUERY",
+          family: "spring-data-jpa",
+          sourceSymbolId: method.id,
+          targetLabel: properties ? `${method.name.match(DERIVED_RE)![0]}: ${properties.map((p) => p.slice(10)).join(", ")}` : "query",
+          confidence: "exact",
+          evidence: [...(properties ?? []), ...(query !== undefined ? [query] : []), `propagated from ${supIface.name} via ${iface.name}`],
+          range: method.range,
+          filePath: method.filePath,
+        });
+        existingQuerySources.add(method.id);
+      }
+    }
+  }
+  return added.length === 0 ? relations : [...relations, ...added];
+}
+
 registerEnterpriseExtractor(extractSpringData);
 registerEnterpriseResolver(resolvePersistsEntity);
+registerEnterpriseResolver(resolveRepositoryQueryPropagation);

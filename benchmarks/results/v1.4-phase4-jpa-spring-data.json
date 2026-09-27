@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-09-27T16:15:57.024Z",
+  "entity_relation": {
+    "oracleTotal": 10,
+    "matched": 10,
+    "falsePositiveCount": 0,
+    "recall": 1,
+    "precision": 1,
+    "failureAttribution": {},
+    "misses": [],
+    "falsePositives": []
+  },
+  "repository_linkage": {
+    "oracleTotal": 26,
+    "matched": 24,
+    "falsePositiveCount": 2,
+    "recall": 0.9230769230769231,
+    "precision": 0.9230769230769231,
+    "failureAttribution": {
+      "REPOSITORY_QUERY_MISSING": 2
+    },
+    "persistsMisses": [],
+    "queryMisses": [
+      {
+        "repo": "petclinic-rest",
+        "oracle": {
+          "repo": "petclinic-rest",
+          "entitySimpleName": "Owner",
+          "ownerInterface": "SpringDataOwnerRepository",
+          "declaredIn": [
+            "src/main/java/org/springframework/samples/petclinic/repository/springdatajpa/SpringDataOwnerRepository.java"
+          ],
+          "methodName": "findAll",
+          "paramCount": 1,
+          "isDerived": false,
+          "hasQuery": true,
+          "startLine": 47
+        },
+        "category": "REPOSITORY_QUERY_MISSING",
+        "detail": "Entity \"Owner\" repository method \"findAll\"/1 (declared in [src/main/java/org/springframework/samples/petclinic/repository/springdatajpa/SpringDataOwnerRepository.java]) has no REPOSITORY_QUERY relation on any of its declaring symbols."
+      },
+      {
+        "repo": "petclinic-rest",
+        "oracle": {
+          "repo": "petclinic-rest",
+          "entitySimpleName": "Pet",
+          "ownerInterface": "SpringDataPetRepository",
+          "declaredIn": [
+            "src/main/java/org/springframework/samples/petclinic/repository/springdatajpa/SpringDataPetRepository.java"
+          ],
+          "methodName": "findAll",
+          "paramCount": 1,
+          "isDerived": false,
+          "hasQuery": true,
+          "startLine": 42
+        },
+        "category": "REPOSITORY_QUERY_MISSING",
+        "detail": "Entity \"Pet\" repository method \"findAll\"/1 (declared in [src/main/java/org/springframework/samples/petclinic/repository/springdatajpa/SpringDataPetRepository.java]) has no REPOSITORY_QUERY relation on any of its declaring symbols."
+      }
+    ],
+    "falsePositives": [
+      {
+        "repo": "spring-petclinic",
+        "kind": "PERSISTS_ENTITY",
+        "filePath": "src/main/java/org/springframework/samples/petclinic/owner/OwnerRepository.java",
+        "targetLabel": "Owner",
+        "detail": "Extractor emitted a PERSISTS_ENTITY relation the oracle has no corresponding <Entity,Id>-shaped interface for."
+      },
+      {
+        "repo": "spring-petclinic",
+        "kind": "PERSISTS_ENTITY",
+        "filePath": "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java",
+        "targetLabel": "Vet",
+        "detail": "Extractor emitted a PERSISTS_ENTITY relation the oracle has no corresponding <Entity,Id>-shaped interface for."
+      }
+    ]
+  },
+  "perRepo": {
+    "spring-petclinic": {
+      "entityOracleTotal": 3,
+      "entityMatched": 3,
+      "linkageOracleTotal": 6,
+      "linkageMatched": 6
+    },
+    "petclinic-rest": {
+      "entityOracleTotal": 7,
+      "entityMatched": 7,
+      "linkageOracleTotal": 20,
+      "linkageMatched": 18
+    }
+  }
+}

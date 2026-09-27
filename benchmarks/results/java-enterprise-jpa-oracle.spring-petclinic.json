@@ -1,0 +1,105 @@
+{
+  "entityRelations": [
+    {
+      "repo": "spring-petclinic",
+      "file": "src/main/java/org/springframework/samples/petclinic/owner/Owner.java",
+      "entityClass": "Owner",
+      "fieldName": "pets",
+      "relationKind": "OneToMany",
+      "targetSimpleName": "Pet",
+      "fetch": "FetchType.EAGER",
+      "cascade": "CascadeType.ALL",
+      "joinColumn": "name = \"owner_id\"",
+      "startLine": 64
+    },
+    {
+      "repo": "spring-petclinic",
+      "file": "src/main/java/org/springframework/samples/petclinic/owner/Pet.java",
+      "entityClass": "Pet",
+      "fieldName": "type",
+      "relationKind": "ManyToOne",
+      "targetSimpleName": "PetType",
+      "joinColumn": "name = \"type_id\"",
+      "startLine": 52
+    },
+    {
+      "repo": "spring-petclinic",
+      "file": "src/main/java/org/springframework/samples/petclinic/owner/Pet.java",
+      "entityClass": "Pet",
+      "fieldName": "visits",
+      "relationKind": "OneToMany",
+      "targetSimpleName": "Visit",
+      "fetch": "FetchType.EAGER",
+      "cascade": "CascadeType.ALL",
+      "joinColumn": "name = \"pet_id\"",
+      "startLine": 56
+    }
+  ],
+  "persistsEntity": [
+    {
+      "repo": "spring-petclinic",
+      "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerRepository.java",
+      "interfaceName": "OwnerRepository",
+      "entitySimpleName": "Owner",
+      "idType": "Integer",
+      "startLine": 36
+    },
+    {
+      "repo": "spring-petclinic",
+      "file": "src/main/java/org/springframework/samples/petclinic/owner/PetTypeRepository.java",
+      "interfaceName": "PetTypeRepository",
+      "entitySimpleName": "PetType",
+      "idType": "Integer",
+      "startLine": 30
+    },
+    {
+      "repo": "spring-petclinic",
+      "file": "src/main/java/org/springframework/samples/petclinic/vet/VetRepository.java",
+      "interfaceName": "VetRepository",
+      "entitySimpleName": "Vet",
+      "idType": "Integer",
+      "startLine": 38
+    }
+  ],
+  "repositoryQueries": [
+    {
+      "repo": "spring-petclinic",
+      "entitySimpleName": "Owner",
+      "ownerInterface": "OwnerRepository",
+      "declaredIn": [
+        "src/main/java/org/springframework/samples/petclinic/owner/OwnerRepository.java"
+      ],
+      "methodName": "findByLastNameStartingWith",
+      "paramCount": 2,
+      "isDerived": true,
+      "hasQuery": false,
+      "startLine": 1
+    },
+    {
+      "repo": "spring-petclinic",
+      "entitySimpleName": "Owner",
+      "ownerInterface": "OwnerRepository",
+      "declaredIn": [
+        "src/main/java/org/springframework/samples/petclinic/owner/OwnerRepository.java"
+      ],
+      "methodName": "findById",
+      "paramCount": 1,
+      "isDerived": true,
+      "hasQuery": false,
+      "startLine": 45
+    },
+    {
+      "repo": "spring-petclinic",
+      "entitySimpleName": "PetType",
+      "ownerInterface": "PetTypeRepository",
+      "declaredIn": [
+        "src/main/java/org/springframework/samples/petclinic/owner/PetTypeRepository.java"
+      ],
+      "methodName": "findPetTypes",
+      "paramCount": 0,
+      "isDerived": false,
+      "hasQuery": true,
+      "startLine": 1
+    }
+  ]
+}
