@@ -21,12 +21,16 @@ import {
   type ResolveContext,
 } from "../languages/adapter.js";
 import type { EnterpriseRelation } from "../types/enterprise.js";
-import { extractEnterpriseRelations } from "../languages/java/enterprise/registry.js";
+import {
+  extractEnterpriseRelations,
+  resolveEnterpriseRelations,
+} from "../languages/java/enterprise/registry.js";
 import "../languages/java.js";
 import "../languages/typescript/index.js";
 import "../languages/python/index.js";
 import "../languages/rust/index.js";
 import "../languages/java/enterprise/spring-mvc.js";
+import "../languages/java/enterprise/dependency-injection.js";
 
 const coreIgnored = new Set([
   ".git",
@@ -172,6 +176,10 @@ export class ProjectIndex {
         );
       }
     }
+    this.enterpriseRelations = resolveEnterpriseRelations(
+      this.enterpriseRelations,
+      this.symbols.filter((symbol) => symbol.language === "java"),
+    );
     // Each language resolves only its own edges; cross-language calls stay unresolved.
     for (const adapter of languages()) {
       const context: ResolveContext = {
