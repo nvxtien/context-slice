@@ -110,6 +110,39 @@ test("only the relationship whose target owns a related symbol surfaces (no full
   assert.ok(!entityRelationCandidates.some((c) => c.rendered.includes("Vet")));
 });
 
+function sameTargetFixture() {
+  const root = mkdtempSync(join(tmpdir(), "cs-java-jpa-same-target-"));
+  mkdirSync(join(root, "src/main/java"), { recursive: true });
+  writeFileSync(
+    join(root, "src/main/java/Invoice.java"),
+    [
+      "@Entity",
+      "class Invoice {",
+      "    @ManyToOne",
+      "    private Address billingAddress;",
+      "    @ManyToOne",
+      "    private Address shippingAddress;",
+      "    void ship() { shippingAddress.format(); billingAddress.format(); }",
+      "}",
+    ].join("\n"),
+  );
+  writeFileSync(join(root, "src/main/java/Address.java"), "@Entity\nclass Address {\n    String format() { return null; }\n}");
+  const index = new ProjectIndex(root);
+  index.rebuild();
+  return index;
+}
+
+test("two same-kind relations to the same target type both surface as distinct candidates", () => {
+  const index = sameTargetFixture();
+  const target = index.symbols.find((s) => s.name === "ship")!;
+  const format = index.symbols.find((s) => s.name === "format")!;
+  const candidates = composeJpaContext(index, target, new Set([format.id]), new Set([target.id]));
+  const entityRelationCandidates = candidates.filter((c) => c.rendered.includes("// Entity relationship"));
+  assert.equal(entityRelationCandidates.length, 2);
+  assert.ok(entityRelationCandidates.some((c) => c.rendered.includes("billingAddress")));
+  assert.ok(entityRelationCandidates.some((c) => c.rendered.includes("shippingAddress")));
+});
+
 test("buildPreview on a Rust target never produces a JPA-sourced composition item", () => {
   const root = mkdtempSync(join(tmpdir(), "cs-rust-jpa-guard-"));
   mkdirSync(join(root, "src"), { recursive: true });

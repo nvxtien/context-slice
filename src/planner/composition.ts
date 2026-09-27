@@ -344,7 +344,12 @@ export function composeJpaContext(
       const targetMembers = index.symbols.filter((s) => s.parentId === relation.targetSymbolId);
       if (!targetMembers.some((s) => relatedIds.has(s.id))) continue;
     }
-    const key = `${relation.sourceSymbolId}:${relation.kind}:${relation.targetLabel ?? ""}`;
+    // evidence[0] names the declaring field (e.g. "@ManyToOne on field
+    // billingAddress"): without it, two distinct fields of the same kind on
+    // the same class pointing at the same target type (billingAddress and
+    // shippingAddress, both @ManyToOne Address) would collapse into one key
+    // and silently drop the second relation.
+    const key = `${relation.sourceSymbolId}:${relation.kind}:${relation.targetLabel ?? ""}:${relation.evidence[0] ?? ""}`;
     if (seenRelations.has(key)) continue;
     seenRelations.add(key);
 
