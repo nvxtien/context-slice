@@ -233,6 +233,46 @@ export function composeDependencyContext(
   return candidates;
 }
 
+/**
+ * Compose the transaction attributes carried by the target itself or by an
+ * already-included caller/callee — a method's own @Transactional attributes
+ * matter regardless of which symbol in the slice they belong to, since this
+ * family's relations are already keyed directly to the method (no
+ * class-ownership walk needed, unlike composeDependencyContext). Java only:
+ * other languages have no @Transactional extractor to find relations from.
+ */
+export function composeTransactionContext(
+  index: ProjectIndex,
+  target: SymbolRecord,
+  relatedIds: ReadonlySet<string>,
+  alreadyIncluded: ReadonlySet<string>,
+): CompositionCandidate[] {
+  if (target.language !== "java") return [];
+  const candidateIds = new Set([target.id, ...relatedIds]);
+  const candidates: CompositionCandidate[] = [];
+  for (const relation of index.enterpriseRelations) {
+    if (relation.kind !== "TRANSACTION_BOUNDARY") continue;
+    if (!candidateIds.has(relation.sourceSymbolId)) continue;
+    // The method symbol is looked up only for a friendlier label/name; it is
+    // never attached as `symbol` here, since it is always already in the
+    // slice (as the target itself, or as an already-included caller/callee)
+    // and the shared composition loop in buildPreview dedupes candidates by
+    // symbol id — attaching it would silently drop this very candidate.
+    const methodSymbol = index.symbols.find((s) => s.id === relation.sourceSymbolId);
+    const name = methodSymbol?.qualifiedName ?? methodSymbol?.name ?? target.name;
+    const rendered = `// Transaction\n${name} (${relation.targetLabel})`;
+    candidates.push({
+      label: relation.targetLabel ?? "transaction",
+      reason: "enterprise relation",
+      evidence: relation.evidence,
+      rendered,
+      estimatedTokens: estimateTokens(rendered),
+      filePath: methodSymbol?.filePath ?? relation.filePath,
+    });
+  }
+  return candidates;
+}
+
 export function composeRouteContext(
   index: ProjectIndex,
   target: SymbolRecord,

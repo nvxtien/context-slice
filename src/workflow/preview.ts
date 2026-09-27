@@ -8,6 +8,7 @@ import {
   composeImportContext,
   composeRouteContext,
   composeSiblings,
+  composeTransactionContext,
   type CompositionReason,
 } from "../planner/composition.js";
 import { WorkflowError } from "./errors.js";
@@ -284,11 +285,16 @@ export function buildPreview(
     options.composition === false
       ? []
       : composeDependencyContext(index, target, relatedIds, includedIds);
+  const transactionCandidates =
+    options.composition === false
+      ? []
+      : composeTransactionContext(index, target, relatedIds, includedIds);
   for (const candidate of [
     ...siblings,
     ...importCandidates,
     ...routeCandidates,
     ...dependencyCandidates,
+    ...transactionCandidates,
   ]) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
