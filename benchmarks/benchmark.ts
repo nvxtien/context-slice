@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { estimateTokens } from "../src/planner/budget.js";
 
-type Fact = { id: string; description: string; patterns: string[] };
+type Fact = { id: string; description: string; verification: { patterns: string[] } };
 type Task = {
   id: string;
   repository: string;
@@ -12,9 +12,40 @@ type Task = {
   requiredFacts: Fact[];
 };
 const root = join(process.cwd(), "test-fixtures/java");
-const tasks = JSON.parse(
-  readFileSync(join(process.cwd(), "benchmarks/tasks.json"), "utf8"),
-) as Task[];
+// Self-contained smoke fixture (matches docs/prompt/CONTEXTSLICE_V0.2_VALIDATION.md's own
+// example): a synthetic 4-file project, not benchmarks/tasks.json — that file was later
+// repointed at real repositories (spring-petclinic, petclinic-rest, keycloak-services) by the
+// v0.3+ benchmarks and no longer describes symbols present in this fixture.
+const tasks: Task[] = [
+  {
+    id: "fixture-retry-payment",
+    repository: "test-fixtures/java",
+    task: "Explain how a failed payment is retried.",
+    targetSymbol: "retryPayment",
+    requiredFacts: [
+      {
+        id: "transactional",
+        description: "retryPayment is annotated @Transactional",
+        verification: { patterns: ["@Transactional"] },
+      },
+      {
+        id: "status-guard",
+        description: "Only a FAILED payment is retried",
+        verification: { patterns: ["Status.FAILED"] },
+      },
+      {
+        id: "publishes-event",
+        description: "A retry publishes an event",
+        verification: { patterns: ["publisher.publish"] },
+      },
+      {
+        id: "controller-calls-it",
+        description: "PaymentController.retry calls retryPayment",
+        verification: { patterns: ["service.retryPayment"] },
+      },
+    ],
+  },
+];
 rmSync(join(root, ".context-slice"), { recursive: true, force: true });
 const index = new ProjectIndex(root);
 const cold = index.rebuild();
@@ -29,7 +60,7 @@ const files = [
   .join("\n");
 function recall(text: string, facts: Fact[]) {
   return facts
-    .filter((fact) => fact.patterns.every((pattern) => text.includes(pattern)))
+    .filter((fact) => fact.verification.patterns.every((pattern) => text.includes(pattern)))
     .map((fact) => fact.id);
 }
 function sliceFor(targetSymbol: string, budget: number) {
