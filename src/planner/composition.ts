@@ -273,6 +273,95 @@ export function composeTransactionContext(
   return candidates;
 }
 
+const JPA_RELATION_KINDS = new Set([
+  "ENTITY_RELATION",
+  "PERSISTS_ENTITY",
+  "REPOSITORY_QUERY",
+]);
+
+/** `"@OneToMany on field pets"` → `{ relKind: "OneToMany", field: "pets" }`. */
+function entityRelationParts(evidence: string) {
+  const match = evidence.match(/^@(\w+) on field (\w+)/);
+  return { relKind: match?.[1], field: match?.[2] };
+}
+
+/** `"extends JpaRepository<Owner, Integer>"` → `"JpaRepository"`. */
+function baseRepositoryName(evidence: string): string | undefined {
+  return evidence.match(/extends\s+(\w+)/)?.[1];
+}
+
+/**
+ * Compose the JPA entity relationships and Spring Data repository/query
+ * facts relevant to the target: an ENTITY_RELATION owned by the target's
+ * enclosing entity class (fields aren't indexed as symbols, so a member
+ * target needs the class-ownership walk, same as composeDependencyContext),
+ * or a PERSISTS_ENTITY/REPOSITORY_QUERY keyed directly to the target itself
+ * (repository interface or query method are already indexed symbols, so no
+ * walk is needed for those two). Java only: other languages have no JPA/
+ * Spring Data extractor to find relations from.
+ */
+export function composeJpaContext(
+  index: ProjectIndex,
+  target: SymbolRecord,
+  relatedIds: ReadonlySet<string>,
+  alreadyIncluded: ReadonlySet<string>,
+): CompositionCandidate[] {
+  if (target.language !== "java") return [];
+
+  let owner: SymbolRecord | undefined =
+    target.kind === "class" ? target : undefined;
+  let cursor = target.parentId
+    ? index.symbols.find((s) => s.id === target.parentId)
+    : undefined;
+  while (!owner && cursor) {
+    if (cursor.kind === "class") owner = cursor;
+    else cursor = cursor.parentId ? index.symbols.find((s) => s.id === cursor!.parentId) : undefined;
+  }
+
+  const candidateIds = new Set([target.id, ...relatedIds]);
+  if (owner) candidateIds.add(owner.id);
+
+  const candidates: CompositionCandidate[] = [];
+  const seenRelations = new Set<string>();
+  for (const relation of index.enterpriseRelations) {
+    if (!JPA_RELATION_KINDS.has(relation.kind)) continue;
+    if (relation.confidence === "unresolved") continue;
+    if (!candidateIds.has(relation.sourceSymbolId)) continue;
+    const key = `${relation.sourceSymbolId}:${relation.kind}:${relation.targetLabel ?? ""}`;
+    if (seenRelations.has(key)) continue;
+    seenRelations.add(key);
+
+    // The source symbol is looked up only for a friendlier label/name; it is
+    // never attached as `symbol` here, since it may already be in the slice
+    // (as the target itself, its enclosing class, or an already-included
+    // relative) and the shared composition loop in buildPreview dedupes
+    // candidates by symbol id — attaching it would silently drop this very
+    // candidate.
+    const sourceSymbol = index.symbols.find((s) => s.id === relation.sourceSymbolId);
+    const name = sourceSymbol?.name ?? target.name;
+    let rendered: string;
+    if (relation.kind === "ENTITY_RELATION") {
+      const { relKind, field } = entityRelationParts(relation.evidence[0] ?? "");
+      rendered = `// Entity relationship\n${name}${field ? `.${field}` : ""} → ${relation.targetLabel}${relKind ? ` (${relKind})` : ""}`;
+    } else if (relation.kind === "PERSISTS_ENTITY") {
+      const base = baseRepositoryName(relation.evidence[0] ?? "");
+      rendered = `// Repository\n${name} → ${relation.targetLabel}${base ? ` (${base})` : ""}`;
+    } else {
+      rendered = `// Query\n${name} → ${relation.evidence.join(", ")}`;
+    }
+
+    candidates.push({
+      label: relation.targetLabel ?? relation.kind,
+      reason: "enterprise relation",
+      evidence: relation.evidence,
+      rendered,
+      estimatedTokens: estimateTokens(rendered),
+      filePath: sourceSymbol?.filePath ?? relation.filePath,
+    });
+  }
+  return candidates;
+}
+
 export function composeRouteContext(
   index: ProjectIndex,
   target: SymbolRecord,

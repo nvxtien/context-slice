@@ -6,6 +6,7 @@ import type { SymbolRecord } from "../types/model.js";
 import {
   composeDependencyContext,
   composeImportContext,
+  composeJpaContext,
   composeRouteContext,
   composeSiblings,
   composeTransactionContext,
@@ -289,12 +290,17 @@ export function buildPreview(
     options.composition === false
       ? []
       : composeTransactionContext(index, target, relatedIds, includedIds);
+  const jpaCandidates =
+    options.composition === false
+      ? []
+      : composeJpaContext(index, target, relatedIds, includedIds);
   for (const candidate of [
     ...siblings,
     ...importCandidates,
     ...routeCandidates,
     ...dependencyCandidates,
     ...transactionCandidates,
+    ...jpaCandidates,
   ]) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
