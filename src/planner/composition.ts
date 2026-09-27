@@ -297,8 +297,13 @@ function baseRepositoryName(evidence: string): string | undefined {
  * target needs the class-ownership walk, same as composeDependencyContext),
  * or a PERSISTS_ENTITY/REPOSITORY_QUERY keyed directly to the target itself
  * (repository interface or query method are already indexed symbols, so no
- * walk is needed for those two). Java only: other languages have no JPA/
- * Spring Data extractor to find relations from.
+ * walk is needed for those two). An ENTITY_RELATION is further gated by
+ * relevance (its resolved target entity must own a member already in
+ * `relatedIds`), same "no annotation spam" rule composeDependencyContext
+ * applies — PERSISTS_ENTITY/REPOSITORY_QUERY don't need this, they're
+ * already scoped to the single interface/method, not an owning class with
+ * multiple children. Java only: other languages have no JPA/Spring Data
+ * extractor to find relations from.
  */
 export function composeJpaContext(
   index: ProjectIndex,
@@ -327,6 +332,18 @@ export function composeJpaContext(
     if (!JPA_RELATION_KINDS.has(relation.kind)) continue;
     if (relation.confidence === "unresolved") continue;
     if (!candidateIds.has(relation.sourceSymbolId)) continue;
+    // Unlike PERSISTS_ENTITY/REPOSITORY_QUERY (already keyed directly to the
+    // interface/method, no class-ownership walk involved), an
+    // ENTITY_RELATION is keyed to the whole owning class, so without a
+    // relevance gate every relationship field on that class would surface
+    // for any member target — same "no annotation spam" discipline as
+    // composeDependencyContext: only surface it when its resolved target
+    // entity type owns a member already in the slice.
+    if (relation.kind === "ENTITY_RELATION") {
+      if (!relation.targetSymbolId) continue;
+      const targetMembers = index.symbols.filter((s) => s.parentId === relation.targetSymbolId);
+      if (!targetMembers.some((s) => relatedIds.has(s.id))) continue;
+    }
     const key = `${relation.sourceSymbolId}:${relation.kind}:${relation.targetLabel ?? ""}`;
     if (seenRelations.has(key)) continue;
     seenRelations.add(key);

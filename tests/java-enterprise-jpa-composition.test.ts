@@ -17,11 +17,14 @@ function fixture() {
       "class Owner {",
       "    @OneToMany(fetch = FetchType.EAGER)",
       "    private java.util.List<Pet> pets;",
-      "    void addPet(Pet p) { pets.add(p); }",
+      "    void addPet(Pet p) { p.getName(); pets.add(p); }",
       "}",
     ].join("\n"),
   );
-  writeFileSync(join(root, "src/main/java/Pet.java"), "@Entity\nclass Pet {}");
+  writeFileSync(
+    join(root, "src/main/java/Pet.java"),
+    "@Entity\nclass Pet {\n    String getName() { return null; }\n}",
+  );
   writeFileSync(
     join(root, "src/main/java/OwnerRepository.java"),
     "interface OwnerRepository extends JpaRepository<Owner, Integer> {\n    java.util.List<Owner> findByLastName(String n);\n}",
@@ -31,11 +34,19 @@ function fixture() {
   return index;
 }
 
-test("a member of an entity class surfaces its class's relationship relation", () => {
+test("a member of an entity class surfaces its class's relationship relation when the target entity is relevant", () => {
+  const index = fixture();
+  const target = index.symbols.find((s) => s.name === "addPet")!;
+  const getName = index.symbols.find((s) => s.name === "getName")!;
+  const candidates = composeJpaContext(index, target, new Set([getName.id]), new Set([target.id]));
+  assert.ok(candidates.some((c) => c.rendered.includes("Pet")));
+});
+
+test("a class relationship relation is not surfaced when its target entity is not relevant (no spam)", () => {
   const index = fixture();
   const target = index.symbols.find((s) => s.name === "addPet")!;
   const candidates = composeJpaContext(index, target, new Set(), new Set([target.id]));
-  assert.ok(candidates.some((c) => c.rendered.includes("Pet")));
+  assert.ok(!candidates.some((c) => c.rendered.includes("// Entity relationship")));
 });
 
 test("a repository interface target surfaces its own PERSISTS_ENTITY relation", () => {
@@ -63,6 +74,40 @@ test("buildPreview surfaces JPA context end to end", () => {
   const index = fixture();
   const preview = buildPreview(index, "explain addPet");
   assert.ok(preview.included.some((item) => item.reason === "enterprise relation"));
+});
+
+function multiRelationFixture() {
+  const root = mkdtempSync(join(tmpdir(), "cs-java-jpa-multi-"));
+  mkdirSync(join(root, "src/main/java"), { recursive: true });
+  writeFileSync(
+    join(root, "src/main/java/Order.java"),
+    [
+      "@Entity",
+      "class Order {",
+      "    @ManyToOne",
+      "    private Customer customer;",
+      "    @ManyToOne",
+      "    private Vet vet;",
+      "    void place() { customer.getId(); }",
+      "}",
+    ].join("\n"),
+  );
+  writeFileSync(join(root, "src/main/java/Customer.java"), "@Entity\nclass Customer {\n    long getId() { return 0; }\n}");
+  writeFileSync(join(root, "src/main/java/Vet.java"), "@Entity\nclass Vet {\n    String getName() { return null; }\n}");
+  const index = new ProjectIndex(root);
+  index.rebuild();
+  return index;
+}
+
+test("only the relationship whose target owns a related symbol surfaces (no full relationship-graph dump)", () => {
+  const index = multiRelationFixture();
+  const target = index.symbols.find((s) => s.name === "place")!;
+  const getId = index.symbols.find((s) => s.name === "getId")!;
+  const candidates = composeJpaContext(index, target, new Set([getId.id]), new Set([target.id]));
+  const entityRelationCandidates = candidates.filter((c) => c.rendered.includes("// Entity relationship"));
+  assert.equal(entityRelationCandidates.length, 1);
+  assert.ok(entityRelationCandidates[0].rendered.includes("Customer"));
+  assert.ok(!entityRelationCandidates.some((c) => c.rendered.includes("Vet")));
 });
 
 test("buildPreview on a Rust target never produces a JPA-sourced composition item", () => {
