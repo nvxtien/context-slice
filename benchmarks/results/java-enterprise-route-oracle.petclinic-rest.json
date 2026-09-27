@@ -1,0 +1,12 @@
+[
+  {
+    "repo": "petclinic-rest",
+    "file": "src/main/java/org/springframework/samples/petclinic/rest/controller/v1/RootRestControllerV1.java",
+    "classPath": "/",
+    "methodPath": "/",
+    "httpMethod": "REQUEST",
+    "composedRoute": "REQUEST /",
+    "handlerName": "redirectToSwagger",
+    "startLine": 42
+  }
+]

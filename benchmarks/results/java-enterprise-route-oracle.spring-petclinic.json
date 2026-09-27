@@ -1,0 +1,172 @@
+[
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners/new",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/new",
+    "handlerName": "initCreationForm",
+    "startLine": 73
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners/new",
+    "httpMethod": "POST",
+    "composedRoute": "POST /owners/new",
+    "handlerName": "processCreationForm",
+    "startLine": 78
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners/find",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/find",
+    "handlerName": "initFindForm",
+    "startLine": 90
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners",
+    "handlerName": "processFindForm",
+    "startLine": 95
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners/{ownerId}/edit",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/{ownerId}/edit",
+    "handlerName": "initUpdateOwnerForm",
+    "startLine": 140
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners/{ownerId}/edit",
+    "httpMethod": "POST",
+    "composedRoute": "POST /owners/{ownerId}/edit",
+    "handlerName": "processUpdateOwnerForm",
+    "startLine": 145
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/OwnerController.java",
+    "classPath": "",
+    "methodPath": "/owners/{ownerId}",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/{ownerId}",
+    "handlerName": "showOwner",
+    "startLine": 170
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "classPath": "/owners/{ownerId}",
+    "methodPath": "/pets/new",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/{ownerId}/pets/new",
+    "handlerName": "initCreationForm",
+    "startLine": 101
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "classPath": "/owners/{ownerId}",
+    "methodPath": "/pets/new",
+    "httpMethod": "POST",
+    "composedRoute": "POST /owners/{ownerId}/pets/new",
+    "handlerName": "processCreationForm",
+    "startLine": 108
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "classPath": "/owners/{ownerId}",
+    "methodPath": "/pets/{petId}/edit",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/{ownerId}/pets/{petId}/edit",
+    "handlerName": "initUpdateForm",
+    "startLine": 140
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/PetController.java",
+    "classPath": "/owners/{ownerId}",
+    "methodPath": "/pets/{petId}/edit",
+    "httpMethod": "POST",
+    "composedRoute": "POST /owners/{ownerId}/pets/{petId}/edit",
+    "handlerName": "processUpdateForm",
+    "startLine": 145
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/VisitController.java",
+    "classPath": "",
+    "methodPath": "/owners/{ownerId}/pets/{petId}/visits/new",
+    "httpMethod": "GET",
+    "composedRoute": "GET /owners/{ownerId}/pets/{petId}/visits/new",
+    "handlerName": "initNewVisitForm",
+    "startLine": 91
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/owner/VisitController.java",
+    "classPath": "",
+    "methodPath": "/owners/{ownerId}/pets/{petId}/visits/new",
+    "httpMethod": "POST",
+    "composedRoute": "POST /owners/{ownerId}/pets/{petId}/visits/new",
+    "handlerName": "processNewVisitForm",
+    "startLine": 98
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/system/CrashController.java",
+    "classPath": "",
+    "methodPath": "/oups",
+    "httpMethod": "GET",
+    "composedRoute": "GET /oups",
+    "handlerName": "triggerException",
+    "startLine": 32
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/system/WelcomeController.java",
+    "classPath": "",
+    "methodPath": "/",
+    "httpMethod": "GET",
+    "composedRoute": "GET /",
+    "handlerName": "welcome",
+    "startLine": 26
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/vet/VetController.java",
+    "classPath": "",
+    "methodPath": "/vets.html",
+    "httpMethod": "GET",
+    "composedRoute": "GET /vets.html",
+    "handlerName": "showVetList",
+    "startLine": 45
+  },
+  {
+    "repo": "spring-petclinic",
+    "file": "src/main/java/org/springframework/samples/petclinic/vet/VetController.java",
+    "classPath": "",
+    "methodPath": "/vets",
+    "httpMethod": "GET",
+    "composedRoute": "GET /vets",
+    "handlerName": "showResourcesVetList",
+    "startLine": 66
+  }
+]

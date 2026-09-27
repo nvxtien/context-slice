@@ -1,0 +1,76 @@
+{
+  "generatedAt": "2026-09-27T06:43:42.720Z",
+  "oracleTotal": 18,
+  "matched": 15,
+  "falsePositiveCount": 0,
+  "route_linkage_recall": 0.8333333333333334,
+  "route_linkage_precision": 1,
+  "perRepo": {
+    "spring-petclinic": {
+      "oracleCount": 17,
+      "matched": 14,
+      "falsePositives": 0
+    },
+    "petclinic-rest": {
+      "oracleCount": 1,
+      "matched": 1,
+      "falsePositives": 0
+    }
+  },
+  "failureAttribution": {
+    "ANNOTATION_EXTRACTION": 3,
+    "ROUTE_RESOLUTION": 0,
+    "CONTEXT_COMPOSITION": 0,
+    "TOKEN_BUDGET": 0,
+    "GROUND_TRUTH": 0,
+    "UNKNOWN": 0
+  },
+  "misses": [
+    {
+      "repo": "spring-petclinic",
+      "oracle": {
+        "repo": "spring-petclinic",
+        "file": "src/main/java/org/springframework/samples/petclinic/owner/VisitController.java",
+        "classPath": "",
+        "methodPath": "/owners/{ownerId}/pets/{petId}/visits/new",
+        "httpMethod": "GET",
+        "composedRoute": "GET /owners/{ownerId}/pets/{petId}/visits/new",
+        "handlerName": "initNewVisitForm",
+        "startLine": 91
+      },
+      "category": "ANNOTATION_EXTRACTION",
+      "detail": "Extractor produced no ROUTE_TO_HANDLER relation for this handler method at all."
+    },
+    {
+      "repo": "spring-petclinic",
+      "oracle": {
+        "repo": "spring-petclinic",
+        "file": "src/main/java/org/springframework/samples/petclinic/owner/VisitController.java",
+        "classPath": "",
+        "methodPath": "/owners/{ownerId}/pets/{petId}/visits/new",
+        "httpMethod": "POST",
+        "composedRoute": "POST /owners/{ownerId}/pets/{petId}/visits/new",
+        "handlerName": "processNewVisitForm",
+        "startLine": 98
+      },
+      "category": "ANNOTATION_EXTRACTION",
+      "detail": "Extractor produced no ROUTE_TO_HANDLER relation for this handler method at all."
+    },
+    {
+      "repo": "spring-petclinic",
+      "oracle": {
+        "repo": "spring-petclinic",
+        "file": "src/main/java/org/springframework/samples/petclinic/vet/VetController.java",
+        "classPath": "",
+        "methodPath": "/vets",
+        "httpMethod": "GET",
+        "composedRoute": "GET /vets",
+        "handlerName": "showResourcesVetList",
+        "startLine": 66
+      },
+      "category": "ANNOTATION_EXTRACTION",
+      "detail": "Extractor produced no ROUTE_TO_HANDLER relation for this handler method at all."
+    }
+  ],
+  "falsePositives": []
+}
