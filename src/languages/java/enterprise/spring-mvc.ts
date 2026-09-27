@@ -48,14 +48,34 @@ function header(symbol: SymbolRecord): string {
 }
 
 /**
- * Guards against parseJava's own regex picking up an annotation-shaped comment (e.g.
- * "// example: @RequestMapping(...)") as if it preceded a real declaration: the symbol's
- * range starts at that bogus annotation text, so if "//" appears earlier on that same
- * source line, this isn't a real annotated declaration.
+ * Guards against a mapping-annotation-shaped match that is itself commented out on its own
+ * physical line (e.g. "// example: @RequestMapping(...)") rather than a real annotation.
+ *
+ * parseJava's own leading-trivia scan absorbs starting from wherever an "@Word(...)"-shaped
+ * token first appears, even inside a "//" comment — so a commented-out annotation's "//" prefix
+ * is silently stripped OUT of symbol.source itself (confirmed by inspection: for
+ * `// example: @RequestMapping("/fake")` the captured source begins at the "@", not the "//").
+ * Checking the header text alone can therefore never see that stripped prefix. This instead maps
+ * the match's position back to the REAL file (via symbol.range.startLine/startColumn plus the
+ * newline count before the match within the header), and checks only THAT one physical source
+ * line for a preceding "//" — not the symbol's leading trivia as a whole, since a real handler
+ * can have an ordinary explanatory "//" comment on a PREVIOUS line (e.g. VisitController's
+ * "// Spring MVC calls method ..." above a genuine @GetMapping) without the annotation itself
+ * being "inside" a comment.
  */
-function startsInsideLineComment(symbol: SymbolRecord, fullSource: string): boolean {
-  const line = fullSource.split("\n")[symbol.range.startLine - 1] ?? "";
-  return line.slice(0, symbol.range.startColumn).includes("//");
+function matchIsInsideLineComment(
+  symbol: SymbolRecord,
+  headerText: string,
+  match: RegExpMatchArray,
+  fullSource: string,
+): boolean {
+  const index = match.index ?? 0;
+  const before = headerText.slice(0, index);
+  const lastNewline = before.lastIndexOf("\n");
+  const lineNumber = symbol.range.startLine + (before.match(/\n/g)?.length ?? 0);
+  const column = lastNewline === -1 ? symbol.range.startColumn + index : index - lastNewline - 1;
+  const fileLine = fullSource.split("\n")[lineNumber - 1] ?? "";
+  return fileLine.slice(0, column).includes("//");
 }
 
 type PathResolution =
@@ -109,10 +129,11 @@ function extractSpringMvcRelations(
   const classes = symbols.filter((s) => s.kind === "class");
 
   for (const method of symbols.filter((s) => s.kind === "method")) {
-    if (startsInsideLineComment(method, source)) continue;
     const parent = classes.find((c) => c.id === method.parentId);
-    const methodMatch = header(method).match(MAPPING_RE);
+    const methodHeader = header(method);
+    const methodMatch = methodHeader.match(MAPPING_RE);
     if (!methodMatch) continue; // not a handler: no annotation spam for non-mapped methods
+    if (matchIsInsideLineComment(method, methodHeader, methodMatch, source)) continue; // commented-out annotation text, not real
 
     const httpMethod = MAPPING_ANNOTATIONS[methodMatch[1]];
     const classSourceForConstants = parent?.source ?? "";
@@ -120,9 +141,13 @@ function extractSpringMvcRelations(
 
     const evidence: string[] = [];
     let classMatch: RegExpMatchArray | null = null;
-    if (parent && !startsInsideLineComment(parent, source)) {
-      classMatch = header(parent).match(MAPPING_RE);
-      if (classMatch) evidence.push(describeAnnotation(classMatch[1], classMatch[2], "class", parent.name));
+    if (parent) {
+      const classHeader = header(parent);
+      const candidate = classHeader.match(MAPPING_RE);
+      if (candidate && !matchIsInsideLineComment(parent, classHeader, candidate, source)) {
+        classMatch = candidate;
+        evidence.push(describeAnnotation(classMatch[1], classMatch[2], "class", parent.name));
+      }
     }
     evidence.push(describeAnnotation(methodMatch[1], methodMatch[2], "method", method.name));
 

@@ -107,3 +107,25 @@ class PlainUtil {
   const { relations } = relationsFor(source, "src/main/java/PlainUtil.java");
   assert.equal(relations.length, 0);
 });
+
+test("a real handler preceded by an ordinary explanatory comment on a previous line is still extracted", () => {
+  // Reproduces spring-petclinic's VisitController shape: an unrelated "//" explanatory comment
+  // directly above a genuine, clean mapping annotation line must not be mistaken for the
+  // annotation itself being commented out (that guard only applies within the annotation's own
+  // physical line, per the "annotation-shaped string in a comment" test above).
+  const source = `
+@Controller
+class VisitController {
+    // Spring MVC calls method loadPetWithVisit(...) before initNewVisitForm is
+    // called
+    @GetMapping("/owners/{ownerId}/pets/{petId}/visits/new")
+    String initNewVisitForm() { return "pets/createOrUpdateVisitForm"; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/VisitController.java");
+  const handler = symbols.find((s) => s.name === "initNewVisitForm" && s.kind === "method")!;
+  const route = relations.find((r) => r.kind === "ROUTE_TO_HANDLER" && r.sourceSymbolId === handler.id);
+  assert.ok(route, "expected a ROUTE_TO_HANDLER relation despite the preceding comment lines");
+  assert.equal(route!.targetLabel, "GET /owners/{ownerId}/pets/{petId}/visits/new");
+  assert.equal(route!.confidence, "exact");
+});
