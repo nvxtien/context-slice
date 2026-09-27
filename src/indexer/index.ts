@@ -31,6 +31,7 @@ import "../languages/python/index.js";
 import "../languages/rust/index.js";
 import "../languages/java/enterprise/spring-mvc.js";
 import "../languages/java/enterprise/dependency-injection.js";
+import "../languages/java/enterprise/transactions.js";
 
 const coreIgnored = new Set([
   ".git",
