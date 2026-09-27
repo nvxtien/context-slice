@@ -10,8 +10,26 @@ import type {
 const annotationRe = /@([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)?)/g;
 const typeRe =
   /((?:\s*@[A-Za-z_$][\w$]*(?:\([^\n]*\))?\s*)*)((?:(?:public|protected|private|static|final|abstract|default|sealed|non-sealed)\s+)*)\b(class|interface|enum|record)\s+([A-Za-z_$][\w$]*)/g;
-const methodRe =
-  /((?:\s*@[A-Za-z_$][\w$]*(?:\([^\n]*\))?\s*)*)((?:(?:public|protected|private|static|final|abstract|default|synchronized|native)\s+)*)(?:<[A-Za-z0-9_, ? extends super]+>\s+)?([A-Za-z_$][\w$<>?,.\[\]]*)\s+([A-Za-z_$][\w$]*)\s*\(((?:[^()]|\([^()]*\))*)\)\s*(?:throws\s+[A-Za-z_$][\w$., ]*)?(?:\{|;)/g;
+// A real handler can look like `public @ResponseBody Vets showResourcesVetList()`: an inline
+// return-type annotation AFTER the access modifier, which the original two-fixed-groups shape
+// (annotations, then modifiers, then the type) never allowed. Group 3 below accepts zero or more
+// EXTRA annotations/modifiers in any order right before the return type, to cover that. It does
+// NOT replace groups 1-2 (kept byte-identical to the original regex): group1's leading `\s*` per
+// item is what lets a real annotation's match reach backward across a preceding blank line (so
+// the annotation ends up part of the symbol's own source), while group2's modifiers have no such
+// leading `\s*` and must be immediately adjacent — that asymmetry is exactly what stops a
+// plain `public` method with NO annotation from also swallowing a preceding blank line into its
+// source (tried merging into one group first; it broke tests/composition.test.ts's Java skeleton
+// rendering by doing exactly that for annotation-free methods).
+const METHOD_EXTRA_PREFIX_ITEM =
+  "(?:@[A-Za-z_$][\\w$]*(?:\\([^\\n]*\\))?|public|protected|private|static|final|abstract|default|synchronized|native)";
+const methodRe = new RegExp(
+  "((?:\\s*@[A-Za-z_$][\\w$]*(?:\\([^\\n]*\\))?\\s*)*)" + // group1: leading annotations (unchanged)
+    "((?:(?:public|protected|private|static|final|abstract|default|synchronized|native)\\s+)*)" + // group2: leading modifiers (unchanged)
+    `((?:${METHOD_EXTRA_PREFIX_ITEM}\\s+)*)` + // group3: NEW — extra interleaved annotations/modifiers
+    `(?:<[A-Za-z0-9_, ? extends super]+>\\s+)?([A-Za-z_$][\\w$<>?,.\\[\\]]*)\\s+([A-Za-z_$][\\w$]*)\\s*\\(((?:[^()]|\\([^()]*\\))*)\\)\\s*(?:throws\\s+[A-Za-z_$][\\w$., ]*)?(?:\\{|;)`,
+  "g",
+);
 const constructorRe =
   /((?:\s*@[A-Za-z_$][\w$]*(?:\([^\n]*\))?\s*)*)((?:(?:public|protected|private|static|final)\s+)*)\b([A-Z_$][\w$]*)\s*\(((?:[^()]|\([^()]*\))*)\)\s*\{/g;
 
@@ -42,6 +60,16 @@ function closingBrace(source: string, open: number): number {
 }
 function annotationList(text: string): string[] {
   return [...text.matchAll(annotationRe)].map((m) => `@${m[1]}`);
+}
+const modifierKeywordRe =
+  /\b(?:public|protected|private|static|final|abstract|default|synchronized|native)\b/g;
+/**
+ * Modifier keywords out of a combined annotations+modifiers prefix (see methodRe), in order.
+ * Strips parenthesized annotation arguments first so a modifier-keyword substring inside an
+ * annotation's own argument text (e.g. `@Description("static config")`) is never miscounted.
+ */
+function modifierList(text: string): string[] {
+  return [...text.replace(/\([^)]*\)/g, "").matchAll(modifierKeywordRe)].map((m) => m[0]);
 }
 function canonicalId(
   filePath: string,
@@ -151,9 +179,9 @@ export function parseJava(filePath: string, source: string) {
   }
   for (const match of source.matchAll(methodRe)) {
     const start = match.index ?? 0;
-    const name = match[4];
+    const name = match[5];
     if (
-      match[3] === "new" ||
+      match[4] === "new" ||
       [
         "if",
         "for",
@@ -178,8 +206,8 @@ export function parseJava(filePath: string, source: string) {
       )
       .sort((a, b) => b.range.startLine - a.range.startLine)[0];
     const kind: SymbolKind = parent?.name === name ? "constructor" : "method";
-    const parameters = parameterSignature(match[5]);
-    const signature = `${name}(${parameters}): ${match[3]}`;
+    const parameters = parameterSignature(match[6]);
+    const signature = `${name}(${parameters}): ${match[4]}`;
     const typeChain = parent?.qualifiedName
       ? parent.qualifiedName.replace(`${packageName}.`, "").split(".")
       : [];
@@ -204,8 +232,11 @@ export function parseJava(filePath: string, source: string) {
       range: sourceRange(source, start, end),
       bodyRange: open >= 0 ? sourceRange(source, open, end) : undefined,
       parentId: parent?.id,
-      annotations: annotationList(match[1]),
-      modifiers: match[2].trim().split(/\s+/).filter(Boolean),
+      annotations: [...annotationList(match[1]), ...annotationList(match[3])],
+      modifiers: [
+        ...match[2].trim().split(/\s+/).filter(Boolean),
+        ...modifierList(match[3]),
+      ],
       source: source.slice(start, end),
       body: open >= 0 ? source.slice(open, end) : undefined,
     });
