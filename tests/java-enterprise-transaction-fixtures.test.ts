@@ -49,7 +49,7 @@ test("self-invocation: the callee's own relation exists, keyed to the callee met
   assert.equal(relations[0].sourceSymbolId, callee.id);
 });
 
-test("self-invocation: composed evidence for the caller never implies proxy interception across the self-call", () => {
+test("a transactional method's own attributes surface via composeTransactionContext regardless of an unrelated caller being in relatedIds", () => {
   const caller = index.symbols.find(
     (s) => s.name === "lookupOrder" && s.filePath.endsWith("SelfInvokedTransactionalService.java"),
   )!;
@@ -57,9 +57,15 @@ test("self-invocation: composed evidence for the caller never implies proxy inte
     (s) => s.name === "findById" && s.filePath.endsWith("SelfInvokedTransactionalService.java"),
   )!;
 
-  // Both caller and callee are in the composed slice (caller is the target, callee is an
-  // already-included related symbol reached via the self-call) — the scenario Review Focus
-  // item 3 calls out.
+  // §17 is satisfied structurally, not by call-graph-aware logic: neither the extractor
+  // (transactions.ts, pure per-method annotation matching) nor composeTransactionContext
+  // (pure id-set filtering with a fixed template) ever inspects call relationships. So this
+  // test cannot distinguish "caller happens to call callee" from "caller and callee are
+  // merely both present in the same composed slice" — it exercises the generic relation-
+  // lookup-by-id path, which is exactly why no self-invocation-specific claim can leak in:
+  // there's no self-invocation-aware code path to produce one. If a later phase ever adds
+  // call-graph-aware propagation logic, this test would need a real self-invocation-specific
+  // assertion alongside it.
   const candidates = composeTransactionContext(
     index,
     caller,
