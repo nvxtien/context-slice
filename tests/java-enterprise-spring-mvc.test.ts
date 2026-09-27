@@ -108,6 +108,55 @@ class PlainUtil {
   assert.equal(relations.length, 0);
 });
 
+test("a produces-only mapping argument is not a path and must not fabricate an exact route", () => {
+  const source = `
+@RestController
+class MediaController {
+    @GetMapping(produces = "application/json")
+    String list() { return "[]"; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/MediaController.java");
+  const handler = symbols.find((s) => s.name === "list")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.notEqual(route.confidence, "exact");
+  assert.ok(
+    !route.targetLabel || !route.targetLabel.includes("application/json"),
+    "must not treat produces= as a path",
+  );
+});
+
+test("a value= argument built via string concatenation is unresolved, not exact", () => {
+  const source = `
+@RestController
+class ConcatController {
+    @GetMapping(value = Paths.P + "/x")
+    void x() {}
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/ConcatController.java");
+  const handler = symbols.find((s) => s.name === "x")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.equal(route.confidence, "unresolved");
+  assert.ok(!route.targetLabel || !route.targetLabel.includes("GET /x"), "must not treat concatenation as a literal");
+});
+
+test("an array-literal mapping value is never resolved to an exact single route", () => {
+  const source = `
+@RestController
+class MultiPathController {
+    @GetMapping({"/a", "/b"})
+    void both() {}
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/MultiPathController.java");
+  const handler = symbols.find((s) => s.name === "both")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.notEqual(route.confidence, "exact");
+  assert.equal(route.confidence, "probable");
+  assert.equal(route.targetLabel, "GET /a");
+});
+
 test("a real handler preceded by an ordinary explanatory comment on a previous line is still extracted", () => {
   // Reproduces spring-petclinic's VisitController shape: an unrelated "//" explanatory comment
   // directly above a genuine, clean mapping annotation line must not be mistaken for the

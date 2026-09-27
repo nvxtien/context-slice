@@ -82,6 +82,7 @@ type PathResolution =
   | { kind: "absent" }
   | { kind: "literal"; value: string }
   | { kind: "const"; value: string }
+  | { kind: "array"; value: string }
   | { kind: "unresolved"; raw: string };
 
 /**
@@ -89,6 +90,10 @@ type PathResolution =
  * - A quoted string literal is exact.
  * - A same-class `static final String NAME = "literal"` constant resolves through
  *   one hop, downgrading confidence to at most "probable".
+ * - An array literal (`{"/a", "/b"}`, including a single-element `{"/a"}`) is never
+ *   treated as an unambiguous single route; its first element resolves through the
+ *   same "probable" downgrade as a const hop, with the raw `{...}` text kept in
+ *   evidence so a developer can see it was an array.
  * - Anything else (a call, a qualified constant, a placeholder) is unresolved;
  *   the raw expression is kept for evidence/targetLabel, never guessed into a path.
  */
@@ -96,9 +101,26 @@ function resolvePath(rawInside: string | undefined, classSource: string): PathRe
   if (rawInside === undefined) return { kind: "absent" };
   let text = rawInside.trim();
   if (text === "") return { kind: "absent" };
+
+  // produces=/consumes=/a bare method= attribute (no value=/path= alongside it) isn't a
+  // path argument at all — treat it the same as no path, never as a fabricated route.
+  if (/^(?:produces|consumes|method)\s*=/.test(text) && !/\b(?:value|path)\s*=/.test(text)) {
+    return { kind: "absent" };
+  }
+
   text = text.replace(/^(?:value|path)\s*=\s*/, "").trim();
 
-  const quoted = text.match(/"([^"]*)"/);
+  // An array literal (`{"/a", "/b"}`) is never a single exact route — take the first
+  // element but downgrade to "probable" (like a const hop), never "exact".
+  if (text.startsWith("{")) {
+    const firstElement = text.match(/"([^"]*)"/);
+    if (firstElement) return { kind: "array", value: firstElement[1] };
+    return { kind: "unresolved", raw: text };
+  }
+
+  // Only a literal that IS the whole argument value counts — not string concatenation
+  // (`Paths.P + "/x"`) or a quoted substring buried inside other tokens.
+  const quoted = text.match(/^"([^"]*)"$/);
   if (quoted) return { kind: "literal", value: quoted[1] };
 
   const identMatch = text.match(/^([A-Za-z_$][\w$]*)$/);
@@ -167,9 +189,16 @@ function extractSpringMvcRelations(
     } else {
       const classPath = classResolution.kind === "absent" ? "" : classResolution.value;
       const methodPath = methodResolution.kind === "absent" ? "" : methodResolution.value;
-      const usedConstHop = classResolution.kind === "const" || methodResolution.kind === "const";
-      confidence = usedConstHop ? "probable" : "exact";
-      targetLabel = `${httpMethod} ${joinPaths(classPath, methodPath)}`;
+      const usedConstOrArrayHop =
+        classResolution.kind === "const" ||
+        methodResolution.kind === "const" ||
+        classResolution.kind === "array" ||
+        methodResolution.kind === "array";
+      // No path text resolved anywhere (e.g. a produces=-only mapping with no class prefix):
+      // never claim "exact" for a route that has no actual path evidence behind it.
+      const noPathAtAll = classPath === "" && methodPath === "";
+      confidence = usedConstOrArrayHop || noPathAtAll ? "probable" : "exact";
+      targetLabel = `${httpMethod} ${joinPaths(classPath, methodPath)}`.trimEnd();
     }
 
     relations.push({
