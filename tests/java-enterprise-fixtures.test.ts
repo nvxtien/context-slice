@@ -52,4 +52,11 @@ test("overload-routes: two overloaded handlers each get their own distinct corre
   assert.notEqual(routes[0].sourceSymbolId, routes[1].sourceSymbolId);
 });
 
+test("constant-route: a same-class static final String constant resolves through one hop", () => {
+  const routes = routesFor("ConstantRouteController.java");
+  assert.equal(routes.length, 1);
+  assert.equal(routes[0].targetLabel, "GET /api/v2/ping");
+  assert.equal(routes[0].confidence, "probable");
+});
+
 test.after(() => rmSync(root, { recursive: true, force: true }));
