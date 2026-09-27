@@ -60,6 +60,12 @@ function extractEntityRelations(symbols: SymbolRecord[], filePath: string, _sour
     for (const match of body.matchAll(RELATION_RE)) {
       const rest = body.slice((match.index ?? 0) + match[0].length);
       // Stacked annotations (@JoinColumn, @OrderBy, ...) belong to the same field.
+      // ponytail: `[^)]*` isn't nested-paren-aware, so a stacked annotation with a
+      // nested-annotation argument (e.g. `@JoinColumn(foreignKey = @ForeignKey(name = "fk_x"))`)
+      // under-consumes at the inner `)`, leaving `decl` misaligned so the field-declaration
+      // regex below fails to match — this silently drops the WHOLE relation for that field
+      // (not just the JoinColumn evidence). Fix if it shows up on a real repo: a depth-counting
+      // scanner like `memberLevelBody`'s own brace walk, not a smarter regex.
       const lead = rest.match(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?)*/)![0];
       const decl = rest.slice(lead.length);
       const end = decl.search(/[;=(]/);
