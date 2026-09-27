@@ -43,13 +43,29 @@ let matched = 0;
 let falsePositiveCount = 0;
 const misses: Miss[] = [];
 const falsePositives: FalsePositive[] = [];
-const perRepo: Record<string, { oracleTotal: number; oracleBeanTotal: number; matched: number; falsePositives: number }> = {};
+type KindCounts = { oracleTotal: number; oracleBeanTotal: number; matched: number };
+type RepoStats = {
+  oracleTotal: number;
+  oracleBeanTotal: number;
+  matched: number;
+  falsePositives: number;
+  byKind: Record<"constructor" | "field" | "setter", KindCounts>;
+};
+function emptyKindCounts(): Record<"constructor" | "field" | "setter", KindCounts> {
+  return {
+    constructor: { oracleTotal: 0, oracleBeanTotal: 0, matched: 0 },
+    field: { oracleTotal: 0, oracleBeanTotal: 0, matched: 0 },
+    setter: { oracleTotal: 0, oracleBeanTotal: 0, matched: 0 },
+  };
+}
+const perRepo: Record<string, RepoStats> = {};
 
 for (const repo of targets) {
   const repoRoot = join(root, repo.source);
   const oracleEntries = extractOracleDependencyInjection(repoRoot, repo.id);
   const typeNameCounts = projectTypeNameCounts(repoRoot);
-  perRepo[repo.id] = { oracleTotal: oracleEntries.length, oracleBeanTotal: 0, matched: 0, falsePositives: 0 };
+  perRepo[repo.id] = { oracleTotal: oracleEntries.length, oracleBeanTotal: 0, matched: 0, falsePositives: 0, byKind: emptyKindCounts() };
+  for (const e of oracleEntries) perRepo[repo.id].byKind[e.injectionKind].oracleTotal++;
 
   const index = new ProjectIndex(repoRoot);
   index.rebuild();
@@ -96,6 +112,7 @@ for (const repo of targets) {
     if (expectedBean === "unique") {
       oracleBeanTotal++;
       perRepo[repo.id].oracleBeanTotal++;
+      perRepo[repo.id].byKind[oracle.injectionKind].oracleBeanTotal++;
       if (!relation) {
         misses.push({
           repo: repo.id,
@@ -122,6 +139,7 @@ for (const repo of targets) {
       }
       matched++;
       perRepo[repo.id].matched++;
+      perRepo[repo.id].byKind[oracle.injectionKind].matched++;
       claimedRelations.add(relation);
     } else {
       // Ambiguous or external: a relation is fine as long as it is never "exact" (never a
@@ -194,6 +212,15 @@ console.log(`Oracle bean total: ${oracleBeanTotal}, matched: ${matched}, false p
 console.log(`dependency_linkage_recall: ${(dependency_linkage_recall * 100).toFixed(1)}%`);
 console.log(`dependency_linkage_precision: ${(dependency_linkage_precision * 100).toFixed(1)}%`);
 console.log("Failure attribution:", failureAttribution);
+for (const [repoId, stats] of Object.entries(perRepo)) {
+  console.log(
+    `${repoId} sample composition: constructor=${stats.byKind.constructor.oracleTotal}` +
+      ` field=${stats.byKind.field.oracleTotal} setter=${stats.byKind.setter.oracleTotal}` +
+      ` (unique-bean/matched: ctor ${stats.byKind.constructor.matched}/${stats.byKind.constructor.oracleBeanTotal},` +
+      ` field ${stats.byKind.field.matched}/${stats.byKind.field.oracleBeanTotal},` +
+      ` setter ${stats.byKind.setter.matched}/${stats.byKind.setter.oracleBeanTotal})`,
+  );
+}
 if (existsSync(join(outDir, "v1.4-phase2-dependency-injection.json"))) {
   console.log("Wrote benchmarks/results/v1.4-phase2-dependency-injection.json");
 }

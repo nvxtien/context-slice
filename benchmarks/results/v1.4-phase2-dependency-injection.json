@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T09:10:37.467Z",
+  "generatedAt": "2026-09-27T09:14:28.184Z",
   "oracleBeanTotal": 35,
   "matched": 35,
   "falsePositiveCount": 0,
@@ -10,13 +10,47 @@
       "oracleTotal": 6,
       "oracleBeanTotal": 6,
       "matched": 6,
-      "falsePositives": 0
+      "falsePositives": 0,
+      "byKind": {
+        "constructor": {
+          "oracleTotal": 6,
+          "oracleBeanTotal": 6,
+          "matched": 6
+        },
+        "field": {
+          "oracleTotal": 0,
+          "oracleBeanTotal": 0,
+          "matched": 0
+        },
+        "setter": {
+          "oracleTotal": 0,
+          "oracleBeanTotal": 0,
+          "matched": 0
+        }
+      }
     },
     "petclinic-rest": {
       "oracleTotal": 39,
       "oracleBeanTotal": 29,
       "matched": 29,
-      "falsePositives": 0
+      "falsePositives": 0,
+      "byKind": {
+        "constructor": {
+          "oracleTotal": 36,
+          "oracleBeanTotal": 28,
+          "matched": 28
+        },
+        "field": {
+          "oracleTotal": 2,
+          "oracleBeanTotal": 1,
+          "matched": 1
+        },
+        "setter": {
+          "oracleTotal": 1,
+          "oracleBeanTotal": 0,
+          "matched": 0
+        }
+      }
     }
   },
   "failureAttribution": {
