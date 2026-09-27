@@ -99,3 +99,64 @@ test("a non-repository interface produces nothing, even with derived-looking met
   const { relations } = relationsFor({ "src/main/java/UserRepository.java": src, "src/main/java/User.java": `class User {}` });
   assert.equal(relations.length, 0);
 });
+
+// --- resolveRepositoryQueryPropagation (Task 5 fix round 1: zero coverage on the propagation
+// resolver itself — real-repository recall/precision numbers alone don't exercise the resolver's
+// own resolution logic, e.g. its ambiguous/external-supertype guard). ---
+
+test("a plain supertype interface's derived-query method is propagated to the resolved entity", () => {
+  const plain = `interface OwnerRepository {\n    java.util.List<Owner> findByLastName(String lastName);\n}`;
+  const springData = `interface SpringDataOwnerRepository extends OwnerRepository, Repository<Owner, Integer> {}`;
+  const owner = `@Entity\nclass Owner {}`;
+  const { symbols, relations } = relationsFor({
+    "src/main/java/OwnerRepository.java": plain,
+    "src/main/java/SpringDataOwnerRepository.java": springData,
+    "src/main/java/Owner.java": owner,
+  });
+  const plainIface = symbols.find((s) => s.name === "OwnerRepository")!;
+  const method = symbols.find((s) => s.kind === "method" && s.name === "findByLastName" && s.parentId === plainIface.id)!;
+  const rel = relations.find((r) => r.kind === "REPOSITORY_QUERY" && r.sourceSymbolId === method.id)!;
+  assert.ok(rel, "expected the plain interface's own method to carry a propagated REPOSITORY_QUERY relation");
+  assert.equal(rel.confidence, "exact");
+  assert.match(rel.evidence.join(" "), /lastName/);
+  assert.match(rel.evidence.join(" "), /propagated from OwnerRepository via SpringDataOwnerRepository/);
+});
+
+test("a method declared on both the plain interface and its @Override sibling gets two relations, one per declaring symbol", () => {
+  const plain = `interface OwnerRepository {\n    Owner findById(int id);\n}`;
+  const springData = `interface SpringDataOwnerRepository extends OwnerRepository, Repository<Owner, Integer> {\n    @Override\n    Owner findById(int id);\n}`;
+  const owner = `@Entity\nclass Owner {}`;
+  const { symbols, relations } = relationsFor({
+    "src/main/java/OwnerRepository.java": plain,
+    "src/main/java/SpringDataOwnerRepository.java": springData,
+    "src/main/java/Owner.java": owner,
+  });
+  const methods = symbols.filter((s) => s.kind === "method" && s.name === "findById");
+  assert.equal(methods.length, 2, "expected one findById symbol per declaring interface");
+  const queryRelations = relations.filter((r) => r.kind === "REPOSITORY_QUERY" && methods.some((m) => m.id === r.sourceSymbolId));
+  assert.equal(queryRelations.length, 2, "both the plain declaration and the override should independently carry a relation");
+});
+
+test("propagation is skipped when the supertype name does not resolve to a project interface (external/framework type)", () => {
+  const springData = `interface SpringDataOwnerRepository extends SomeExternalMarkerInterface, Repository<Owner, Integer> {}`;
+  const owner = `@Entity\nclass Owner {}`;
+  const { relations } = relationsFor({ "src/main/java/SpringDataOwnerRepository.java": springData, "src/main/java/Owner.java": owner });
+  // No crash, and nothing fabricated beyond the direct PERSISTS_ENTITY fact for the interface itself.
+  assert.ok(relations.some((r) => r.kind === "PERSISTS_ENTITY"));
+  assert.ok(!relations.some((r) => r.kind === "REPOSITORY_QUERY"));
+});
+
+test("propagation is skipped when the supertype name is ambiguous (two same-named project interfaces)", () => {
+  const plainA = `interface PetRepository {\n    Pet findById(int id);\n}`;
+  const plainB = `interface PetRepository {\n    Pet findByName(String name);\n}`;
+  const springData = `interface SpringDataPetRepository extends PetRepository, Repository<Pet, Integer> {}`;
+  const pet = `@Entity\nclass Pet {}`;
+  const { relations } = relationsFor({
+    "src/main/java/a/PetRepository.java": plainA,
+    "src/main/java/b/PetRepository.java": plainB,
+    "src/main/java/SpringDataPetRepository.java": springData,
+    "src/main/java/Pet.java": pet,
+  });
+  // Ambiguous same-simple-name supertype: never guess which one to propagate from.
+  assert.ok(!relations.some((r) => r.kind === "REPOSITORY_QUERY"));
+});

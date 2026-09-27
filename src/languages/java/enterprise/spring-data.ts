@@ -142,6 +142,14 @@ function resolvePersistsEntity(relations: EnterpriseRelation[], allSymbols: Symb
  * subinterface resolved. A supertype name that doesn't resolve to exactly one project interface
  * (ambiguous or external, e.g. the framework's own `Repository`) is skipped, never guessed —
  * same discipline as resolvePersistsEntity and resolveEntityRelations.
+ *
+ * ponytail: SymbolRecord.supertypes (java-parser.ts) is built from a regex that stops at the
+ * first `<`, so a supertype list like `extends Repository<Owner, Integer>, OwnerRepository`
+ * (generic-bearing supertype listed FIRST) loses `OwnerRepository` entirely — this only works
+ * reliably when the plain supertype is listed before the generic one, which happens to be every
+ * real occurrence seen so far (petclinic-rest always writes the plain interface first). If a
+ * real repository is found with the generic-first ordering, the parser's supertypes regex needs
+ * fixing (shared file — full shared-file discipline applies), not this resolver.
  */
 function resolveRepositoryQueryPropagation(relations: EnterpriseRelation[], allSymbols: SymbolRecord[]): EnterpriseRelation[] {
   const persistsByInterface = new Map<string, EnterpriseRelation>();
