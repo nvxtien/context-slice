@@ -110,6 +110,23 @@ function supertypesOf(node: Node): string[] {
   return [];
 }
 
+/**
+ * The nodes to scan for direct method/constructor members of a type's body. For class/interface/record
+ * bodies these are the body node's own namedChildren. For an enum, the grammar nests them one level
+ * deeper: `enum_body`'s real members (methods, constructors, fields declared after the constant list)
+ * live inside a child `enum_body_declarations` node, not as direct children of `enum_body` itself
+ * (an enum with no such members after its constants has no `enum_body_declarations` child at all).
+ */
+function memberNodesOf(bodyNode: Node): Node[] {
+  if (bodyNode.type === "enum_body") {
+    const decls = bodyNode.namedChildren.find(
+      (c) => c.type === "enum_body_declarations",
+    );
+    return decls ? decls.namedChildren : [];
+  }
+  return bodyNode.namedChildren;
+}
+
 /** Recursive walk over top-level/nested type declarations (class/interface/enum/record), mirroring src/languages/rust/parse.ts's walk(node, parent, chain) shape. */
 function walkTypes(
   node: Node,
@@ -167,7 +184,7 @@ function walkTypes(
     symbols.push(symbol);
     types.push(symbol);
     if (bodyNode) {
-      for (const member of bodyNode.namedChildren) {
+      for (const member of memberNodesOf(bodyNode)) {
         if (member.type === "method_declaration") {
           symbols.push(
             methodSymbol(member, symbol, typeChain, filePath, source, packageName),
