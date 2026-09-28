@@ -59,6 +59,34 @@ test("parameterSignature stripping still matches the old convention exactly", ()
   assert.equal(m.signature, "m(String a, int b): void");
 });
 
+test("an enum's own methods and constructor are extracted (nested one level deeper in enum_body_declarations, not direct children of enum_body)", () => {
+  const source = "enum Color {\n    RED, GREEN;\n    Color() {}\n    int code() { return 1; }\n}";
+  const { symbols } = parseJava("Color.java", source);
+  const enumType = symbols.find((s) => s.kind === "enum" && s.name === "Color")!;
+  const ctor = symbols.find((s) => s.kind === "constructor" && s.name === "Color");
+  const method = symbols.find((s) => s.kind === "method" && s.name === "code");
+  assert.ok(ctor, "the enum's constructor must be found");
+  assert.ok(method, "the enum's method must be found");
+  assert.equal(ctor!.parentId, enumType.id);
+  assert.equal(method!.parentId, enumType.id);
+});
+
+test("a method inside an anonymous class body is NOT emitted as its own symbol (known, deliberate divergence from the old regex parser, which used to emit a spurious duplicate attributed to the enclosing type)", () => {
+  const source = "class A {\n    void m() {\n        Runnable r = new Runnable() {\n            public void run() {}\n        };\n    }\n}";
+  const { symbols } = parseJava("A.java", source);
+  const methods = symbols.filter((s) => s.kind === "method");
+  assert.equal(methods.length, 1, "only the enclosing method `m` should be emitted, not the anonymous class's `run`");
+  assert.equal(methods[0].name, "m");
+  assert.ok(methods[0].body!.includes("run"), "the anonymous class's code is still present in m's own body text, just not as a separate symbol");
+});
+
+test("a record's explicit compact constructor produces NO constructor symbol currently (known, deliberate divergence from the old regex parser, which fabricated a constructor from the record header and could emit a duplicate for an explicit compact constructor)", () => {
+  const source = "record R(int x) {\n    R {\n    }\n}";
+  const { symbols } = parseJava("R.java", source);
+  const constructors = symbols.filter((s) => s.kind === "constructor");
+  assert.equal(constructors.length, 0);
+});
+
 test("duplicate top-level types/methods sharing a canonicalIdentity get deterministic dedup id suffixes (types-then-methods-then-constructors global order, matching the old parser's convention)", () => {
   // Two top-level classes both named "Foo" (illegal Java, but the parser doesn't validate) each
   // declaring a same-signature "dup" method: this is the scenario where two symbols in one file
