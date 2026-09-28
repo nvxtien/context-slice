@@ -333,3 +333,36 @@ class Alerts {
   assert.ok(rel, "a multi-line annotation argument must not hide the setter injection");
   assert.equal(rel.targetLabel, "Notifier");
 });
+
+test("field injection with a fully-qualified declared type resolves to the project class", () => {
+  const source = `
+class Repo {}
+class Checkout {
+    @Autowired
+    private com.example.Repo repo;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
+  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
+  const repoType = symbols.find((s) => s.kind === "class" && s.name === "Repo")!;
+  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  assert.equal(rel.targetLabel, "Repo");
+  assert.equal(rel.confidence, "exact");
+  assert.equal(rel.targetSymbolId, repoType.id);
+});
+
+test("field injection with an array declared type normalizes to the element type", () => {
+  const source = `
+class Repo {}
+class Checkout {
+    @Autowired
+    private Repo[] arr;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
+  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
+  const repoType = symbols.find((s) => s.kind === "class" && s.name === "Repo")!;
+  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  assert.equal(rel.confidence, "exact");
+  assert.equal(rel.targetSymbolId, repoType.id);
+});

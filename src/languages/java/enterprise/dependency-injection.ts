@@ -120,14 +120,11 @@ function extractDependencyInjection(
     if (!annotation) continue;
     const cls = own.find((s) => s.id === field.parentId);
     if (!cls) continue;
-    const qualifier = field.source.match(QUALIFIER_RE)?.[1];
+    const decl = parseDeclaration(`${field.metadata?.declaredType ?? ""} ${field.name}`);
+    if (!decl) continue;
+    decl.qualifier ??= field.source.match(QUALIFIER_RE)?.[1];
     relations.push(
-      relation(
-        cls,
-        filePath,
-        { type: field.metadata?.declaredType ?? "", qualifier },
-        `${annotation} field ${field.metadata?.declaredType ?? ""} ${field.name}`,
-      ),
+      relation(cls, filePath, decl, `@${bareName(annotation)} field ${decl.type} ${field.name}`),
     );
   }
 
