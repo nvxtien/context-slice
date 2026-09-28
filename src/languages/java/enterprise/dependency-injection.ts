@@ -7,9 +7,14 @@ import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./regis
 // every project class/interface, so resolveDependencyRelations runs as a post-pass once
 // all files are parsed (see registry.ts resolveEnterpriseRelations).
 
-const INJECT_RE = /@(Autowired|Inject|Resource)\b(?:\s*\([^)]*\))?/g;
 const QUALIFIER_RE = /@Qualifier\s*\(\s*(?:value\s*=\s*)?"([^"]*)"\s*\)/;
 const STEREOTYPES = new Set(["Component", "Service", "Repository", "Controller", "RestController", "Configuration"]);
+const INJECT_ANNOTATIONS = new Set(["Autowired", "Inject", "Resource"]);
+
+/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Autowired" -> "Autowired". */
+function bareName(annotation: string): string {
+  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
+}
 
 /** Text between the first top-level "(" and its matching ")", string-aware. */
 function firstParenGroup(text: string): string | undefined {
@@ -61,39 +66,6 @@ function parseDeclaration(text: string) {
   return { type: match[2], name: match[3], qualifier };
 }
 
-/**
- * The class body at member depth only: nested bodies (methods, initializers, inner classes),
- * and comments are blanked to spaces, so positions still line up with the
- * class source while annotations on locals or inside comments can never match.
- */
-function memberLevelBody(classSource: string): string {
-  const out = classSource.split("");
-  let depth = 0;
-  let inString = false;
-  for (let i = 0; i < out.length; i++) {
-    const ch = classSource[i];
-    if (!inString && ch === "/" && classSource[i + 1] === "/") {
-      while (i < out.length && classSource[i] !== "\n") out[i++] = " ";
-      continue;
-    }
-    if (!inString && ch === "/" && classSource[i + 1] === "*") {
-      const end = classSource.indexOf("*/", i + 2);
-      const stop = end === -1 ? out.length : end + 2;
-      for (; i < stop; i++) if (out[i] !== "\n") out[i] = " ";
-      i--;
-      continue;
-    }
-    if (ch === '"' && classSource[i - 1] !== "\\") inString = !inString;
-    const keep = depth === 1; // member-level string literals kept: @Qualifier values live there
-    if (!inString) {
-      if (ch === "{") depth++;
-      else if (ch === "}") depth--;
-    }
-    if (!keep && out[i] !== "\n") out[i] = " ";
-  }
-  return out.join("");
-}
-
 function relation(
   source: SymbolRecord,
   filePath: string,
@@ -130,7 +102,7 @@ function extractDependencyInjection(
     if (seen.has(key)) continue;
     seen.add(key);
     const cls = own.find((s) => s.id === ctor.parentId);
-    const stereotyped = cls?.annotations.some((a) => STEREOTYPES.has(a.slice(a.lastIndexOf(".") + 1).replace("@", "")));
+    const stereotyped = cls?.annotations.some((a) => STEREOTYPES.has(bareName(a)));
     const annotated = new RegExp(`@(?:Autowired|Inject)\\b[\\s\\S]*?\\b${ctor.name}\\s*\\(`).test(ctor.source);
     if (!stereotyped && !annotated) continue;
     const params = firstParenGroup(ctor.source);
@@ -141,33 +113,40 @@ function extractDependencyInjection(
     }
   }
 
-  // Field and explicit-setter injection, scanned at class-member depth only.
-  for (const cls of own.filter((s) => s.kind === "class")) {
-    const body = memberLevelBody(cls.source);
-    for (const match of body.matchAll(INJECT_RE)) {
-      const annotation = match[1];
-      const rest = body.slice((match.index ?? 0) + match[0].length);
-      // Other annotations stacked after this one (e.g. @Qualifier) belong to the same member.
-      const lead = rest.match(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?)*/)![0];
-      const leadQualifier = lead.match(QUALIFIER_RE)?.[1];
-      const decl = rest.slice(lead.length);
-      const end = decl.search(/[;(=]/);
-      if (end === -1) continue;
-      if (decl[end] === "(") {
-        const methodName = decl.slice(0, end).match(/([\w$]+)\s*$/)?.[1];
-        const setter = own.find((s) => s.kind === "method" && s.parentId === cls.id && s.name === methodName);
-        const params = firstParenGroup(decl.slice(end));
-        if (!setter || params === undefined) continue; // e.g. an annotated constructor, handled above
-        for (const param of splitTopLevel(params)) {
-          const p = parseDeclaration(param);
-          if (!p) continue;
-          p.qualifier ??= leadQualifier;
-          relations.push(relation(setter, filePath, p, `@${annotation} setter ${setter.name}(${p.type})`));
-        }
-      } else {
-        const field = parseDeclaration(lead + decl.slice(0, end));
-        if (field) relations.push(relation(cls, filePath, field, `@${annotation} field ${field.type} ${field.name}`));
-      }
+  // Field injection, using field symbols directly (Phase 0 AST rewrite) instead of a
+  // regex scan over class-member text.
+  for (const field of own.filter((s) => s.kind === "field")) {
+    const annotation = field.annotations.find((a) => INJECT_ANNOTATIONS.has(bareName(a)));
+    if (!annotation) continue;
+    const cls = own.find((s) => s.id === field.parentId);
+    if (!cls) continue;
+    const qualifier = field.source.match(QUALIFIER_RE)?.[1];
+    relations.push(
+      relation(
+        cls,
+        filePath,
+        { type: field.metadata?.declaredType ?? "", qualifier },
+        `${annotation} field ${field.metadata?.declaredType ?? ""} ${field.name}`,
+      ),
+    );
+  }
+
+  // Explicit setter injection, using method symbols directly.
+  for (const method of own.filter((s) => s.kind === "method")) {
+    const annotation = method.annotations.find((a) => INJECT_ANNOTATIONS.has(bareName(a)));
+    if (!annotation) continue;
+    // method.source includes any leading annotations (tree-sitter's method_declaration node
+    // starts at the modifiers); strip them first so a parenthesized annotation argument (e.g.
+    // @Autowired(required = false)) isn't mistaken by firstParenGroup for the method's own params.
+    const bodyText = method.source.replace(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?\s*)*/, "");
+    const params = firstParenGroup(bodyText);
+    if (params === undefined) continue;
+    const qualifier = method.source.match(QUALIFIER_RE)?.[1];
+    for (const param of splitTopLevel(params)) {
+      const p = parseDeclaration(param);
+      if (!p) continue;
+      p.qualifier ??= qualifier;
+      relations.push(relation(method, filePath, p, `${annotation} setter ${method.name}(${p.type})`));
     }
   }
   return relations;

@@ -248,3 +248,88 @@ class Helper {
   assert.equal(relations[0].targetLabel, "Repo");
   assert.equal(relations[0].confidence, "exact");
 });
+
+test("a field injected via @Inject resolves the same as @Autowired", () => {
+  const source = `
+class PaymentGateway {}
+class Checkout {
+    @Inject
+    private PaymentGateway gateway;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
+  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
+  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  assert.ok(rel, "expected an @Inject field-injection relation");
+  assert.equal(rel.targetLabel, "PaymentGateway");
+  assert.match(rel.evidence.join(" "), /@Inject field/);
+});
+
+test("a field injected via @Resource resolves the same as @Autowired", () => {
+  const source = `
+class PaymentGateway {}
+class Checkout {
+    @Resource
+    private PaymentGateway gateway;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
+  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
+  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  assert.ok(rel, "expected an @Resource field-injection relation");
+  assert.equal(rel.targetLabel, "PaymentGateway");
+  assert.match(rel.evidence.join(" "), /@Resource field/);
+});
+
+test("a multi-declarator field sharing an @Qualifier still detects the injection but loses the qualifier value (accepted divergence)", () => {
+  const source = `
+class PaymentGateway {}
+class Checkout {
+    @Autowired @Qualifier("strict")
+    private PaymentGateway a, b;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
+  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
+  const diRelations = relations.filter((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id);
+  assert.equal(diRelations.length, 2, "both declarators must still be detected as injection points");
+  for (const rel of diRelations) {
+    assert.equal(rel.targetLabel, "PaymentGateway");
+    assert.doesNotMatch(rel.evidence.join(" "), /@Qualifier/, "multi-declarator fields cannot recover the shared qualifier's value (accepted divergence, see spec)");
+  }
+});
+
+test("a multi-line @Autowired-with-arguments field is not lost (AST-native immunity inherited from Phase 0)", () => {
+  const source = `
+class PaymentGateway {}
+class Checkout {
+    @Autowired(
+        required = false
+    )
+    private PaymentGateway gateway;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
+  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
+  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  assert.ok(rel, "a multi-line annotation argument must not hide the field injection");
+  assert.equal(rel.targetLabel, "PaymentGateway");
+});
+
+test("a multi-line @Autowired-with-arguments setter is not lost", () => {
+  const source = `
+class Notifier {}
+class Alerts {
+    private Notifier notifier;
+    @Autowired(
+        required = false
+    )
+    void setNotifier(Notifier notifier) { this.notifier = notifier; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Alerts.java");
+  const setter = symbols.find((s) => s.kind === "method" && s.name === "setNotifier")!;
+  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === setter.id)!;
+  assert.ok(rel, "a multi-line annotation argument must not hide the setter injection");
+  assert.equal(rel.targetLabel, "Notifier");
+});
