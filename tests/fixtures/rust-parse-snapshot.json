@@ -1,5 +1,5 @@
 {
- "indexVersion": "1.10.0",
+ "indexVersion": "1.11.0",
  "files": {
   "functions.rs": {
    "parseError": false,

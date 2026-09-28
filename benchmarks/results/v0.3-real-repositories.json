@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-19T18:01:39.249Z",
+  "generatedAt": "2026-09-28T11:49:21.881Z",
   "repositories": [
     {
       "id": "spring-petclinic",
@@ -23,15 +23,19 @@
       "url": "https://github.com/keycloak/keycloak.git",
       "commit": "dd4ae31d1b67c91a7f85f7c60df5c9718b111f0a",
       "source": "benchmarks/checkouts/keycloak",
+      "sparse": [
+        "services/src/main/java/org/keycloak/services",
+        "services/src/test/java/org/keycloak/services"
+      ],
       "scope": "services/src/main/java/org/keycloak/services and matching tests"
     }
   ],
   "taskCount": 15,
   "totalRequiredFacts": 33,
   "overallRequiredFactRecall": 1,
-  "medianTokenReduction": 94.52,
-  "p25TokenReduction": 91.19,
-  "p75TokenReduction": 95.75,
+  "medianTokenReduction": 94.61,
+  "p25TokenReduction": 91.32,
+  "p75TokenReduction": 95.83,
   "resolutionHarmRate": 0,
   "resolutionFactLossRate": 0,
   "parserFailureCount": 0,
@@ -49,8 +53,8 @@
       "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
       "budget": 256,
       "baselineTokens": 4183,
-      "sliceTokens": 207,
-      "tokenReductionPercent": 95.05,
+      "sliceTokens": 206,
+      "tokenReductionPercent": 95.08,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -58,20 +62,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -84,8 +97,8 @@
       "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
       "budget": 512,
       "baselineTokens": 4183,
-      "sliceTokens": 207,
-      "tokenReductionPercent": 95.05,
+      "sliceTokens": 206,
+      "tokenReductionPercent": 95.08,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -93,20 +106,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -119,8 +141,8 @@
       "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
       "budget": 1024,
       "baselineTokens": 4183,
-      "sliceTokens": 207,
-      "tokenReductionPercent": 95.05,
+      "sliceTokens": 206,
+      "tokenReductionPercent": 95.08,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -128,20 +150,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -154,8 +185,8 @@
       "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
       "budget": 2048,
       "baselineTokens": 4183,
-      "sliceTokens": 207,
-      "tokenReductionPercent": 95.05,
+      "sliceTokens": 206,
+      "tokenReductionPercent": 95.08,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -163,20 +194,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -189,8 +229,8 @@
       "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
       "budget": 4096,
       "baselineTokens": 4183,
-      "sliceTokens": 207,
-      "tokenReductionPercent": 95.05,
+      "sliceTokens": 206,
+      "tokenReductionPercent": 95.08,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -198,20 +238,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -224,8 +273,8 @@
       "groundTruth": "Manual source inspection at pinned commit plus OwnerControllerTests",
       "budget": 8192,
       "baselineTokens": 4183,
-      "sliceTokens": 207,
-      "tokenReductionPercent": 95.05,
+      "sliceTokens": 206,
+      "tokenReductionPercent": 95.08,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -233,20 +282,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -259,8 +317,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 1566,
-      "sliceTokens": 138,
-      "tokenReductionPercent": 91.19,
+      "sliceTokens": 136,
+      "tokenReductionPercent": 91.32,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -268,20 +326,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -294,8 +361,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 1566,
-      "sliceTokens": 138,
-      "tokenReductionPercent": 91.19,
+      "sliceTokens": 136,
+      "tokenReductionPercent": 91.32,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -303,20 +370,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -329,8 +405,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 1566,
-      "sliceTokens": 138,
-      "tokenReductionPercent": 91.19,
+      "sliceTokens": 136,
+      "tokenReductionPercent": 91.32,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -338,20 +414,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -364,8 +449,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 1566,
-      "sliceTokens": 138,
-      "tokenReductionPercent": 91.19,
+      "sliceTokens": 136,
+      "tokenReductionPercent": 91.32,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -373,20 +458,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -399,8 +493,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 1566,
-      "sliceTokens": 138,
-      "tokenReductionPercent": 91.19,
+      "sliceTokens": 136,
+      "tokenReductionPercent": 91.32,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -408,20 +502,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -434,8 +537,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 1566,
-      "sliceTokens": 138,
-      "tokenReductionPercent": 91.19,
+      "sliceTokens": 136,
+      "tokenReductionPercent": 91.32,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -443,20 +546,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -469,8 +581,8 @@
       "groundTruth": "Manual source inspection and test names at pinned commit",
       "budget": 256,
       "baselineTokens": 4183,
-      "sliceTokens": 118,
-      "tokenReductionPercent": 97.18,
+      "sliceTokens": 117,
+      "tokenReductionPercent": 97.2,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -478,20 +590,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -504,8 +625,8 @@
       "groundTruth": "Manual source inspection and test names at pinned commit",
       "budget": 512,
       "baselineTokens": 4183,
-      "sliceTokens": 118,
-      "tokenReductionPercent": 97.18,
+      "sliceTokens": 117,
+      "tokenReductionPercent": 97.2,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -513,20 +634,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -539,8 +669,8 @@
       "groundTruth": "Manual source inspection and test names at pinned commit",
       "budget": 1024,
       "baselineTokens": 4183,
-      "sliceTokens": 118,
-      "tokenReductionPercent": 97.18,
+      "sliceTokens": 117,
+      "tokenReductionPercent": 97.2,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -548,20 +678,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -574,8 +713,8 @@
       "groundTruth": "Manual source inspection and test names at pinned commit",
       "budget": 2048,
       "baselineTokens": 4183,
-      "sliceTokens": 118,
-      "tokenReductionPercent": 97.18,
+      "sliceTokens": 117,
+      "tokenReductionPercent": 97.2,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -583,20 +722,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -609,8 +757,8 @@
       "groundTruth": "Manual source inspection and test names at pinned commit",
       "budget": 4096,
       "baselineTokens": 4183,
-      "sliceTokens": 118,
-      "tokenReductionPercent": 97.18,
+      "sliceTokens": 117,
+      "tokenReductionPercent": 97.2,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -618,20 +766,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -644,8 +801,8 @@
       "groundTruth": "Manual source inspection and test names at pinned commit",
       "budget": 8192,
       "baselineTokens": 4183,
-      "sliceTokens": 118,
-      "tokenReductionPercent": 97.18,
+      "sliceTokens": 117,
+      "tokenReductionPercent": 97.2,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -653,20 +810,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -679,8 +845,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 1117,
-      "sliceTokens": 162,
-      "tokenReductionPercent": 85.5,
+      "sliceTokens": 167,
+      "tokenReductionPercent": 85.05,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -688,20 +854,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -714,8 +889,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 1117,
-      "sliceTokens": 162,
-      "tokenReductionPercent": 85.5,
+      "sliceTokens": 167,
+      "tokenReductionPercent": 85.05,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -723,20 +898,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -749,8 +933,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 1117,
-      "sliceTokens": 162,
-      "tokenReductionPercent": 85.5,
+      "sliceTokens": 167,
+      "tokenReductionPercent": 85.05,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -758,20 +942,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -784,8 +977,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 1117,
-      "sliceTokens": 162,
-      "tokenReductionPercent": 85.5,
+      "sliceTokens": 167,
+      "tokenReductionPercent": 85.05,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -793,20 +986,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -819,8 +1021,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 1117,
-      "sliceTokens": 162,
-      "tokenReductionPercent": 85.5,
+      "sliceTokens": 167,
+      "tokenReductionPercent": 85.05,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -828,20 +1030,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -854,8 +1065,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 1117,
-      "sliceTokens": 162,
-      "tokenReductionPercent": 85.5,
+      "sliceTokens": 167,
+      "tokenReductionPercent": 85.05,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -863,20 +1074,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -898,20 +1118,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -924,8 +1153,8 @@
       "groundTruth": "Manual source inspection and PetControllerTests at pinned commit",
       "budget": 512,
       "baselineTokens": 4232,
-      "sliceTokens": 475,
-      "tokenReductionPercent": 88.78,
+      "sliceTokens": 483,
+      "tokenReductionPercent": 88.59,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -933,20 +1162,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -959,29 +1197,38 @@
       "groundTruth": "Manual source inspection and PetControllerTests at pinned commit",
       "budget": 1024,
       "baselineTokens": 4232,
-      "sliceTokens": 475,
-      "tokenReductionPercent": 88.78,
+      "sliceTokens": 556,
+      "tokenReductionPercent": 86.86,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 5,
+      "symbolsIncluded": 6,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -994,29 +1241,38 @@
       "groundTruth": "Manual source inspection and PetControllerTests at pinned commit",
       "budget": 2048,
       "baselineTokens": 4232,
-      "sliceTokens": 475,
-      "tokenReductionPercent": 88.78,
+      "sliceTokens": 556,
+      "tokenReductionPercent": 86.86,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 5,
+      "symbolsIncluded": 6,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -1029,29 +1285,38 @@
       "groundTruth": "Manual source inspection and PetControllerTests at pinned commit",
       "budget": 4096,
       "baselineTokens": 4232,
-      "sliceTokens": 475,
-      "tokenReductionPercent": 88.78,
+      "sliceTokens": 556,
+      "tokenReductionPercent": 86.86,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 5,
+      "symbolsIncluded": 6,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -1064,29 +1329,38 @@
       "groundTruth": "Manual source inspection and PetControllerTests at pinned commit",
       "budget": 8192,
       "baselineTokens": 4232,
-      "sliceTokens": 475,
-      "tokenReductionPercent": 88.78,
+      "sliceTokens": 556,
+      "tokenReductionPercent": 86.86,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 5,
+      "symbolsIncluded": 6,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 1454,
-      "ambiguousCallsSeen": 40,
+      "unresolvedCallsSeen": 1388,
+      "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 240,
-      "warmQueryMs": 147,
+      "coldIndexMs": 252,
+      "warmQueryMs": 118,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 49,
-        "symbols": 266,
-        "symbolsUpdated": 266,
-        "calls": 1643,
-        "elapsedMs": 158
+        "filesByExtension": {
+          ".java": 50
+        },
+        "filesByLanguage": {
+          "Java": 50
+        },
+        "symbols": 240,
+        "symbolsUpdated": 240,
+        "calls": 1587,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 123
       }
     },
     {
@@ -1094,40 +1368,67 @@
       "scale": "small",
       "status": "aggregate",
       "javaFiles": 50,
-      "symbols": 266,
-      "calls": 1643,
-      "unresolvedCallRate": 0.8849665246500305,
-      "ambiguousCallRate": 0.024345709068776627,
+      "symbols": 240,
+      "calls": 1587,
+      "unresolvedCallRate": 0.8746061751732829,
+      "ambiguousCallRate": 0.018273471959672338,
       "cache": {
         "cold": {
           "files": 50,
           "filesScanned": 50,
           "filesParsed": 50,
+          "parseErrors": 0,
           "cacheHits": 0,
-          "symbols": 266,
-          "symbolsUpdated": 266,
-          "calls": 1643,
-          "elapsedMs": 240
+          "filesByExtension": {
+            ".java": 50
+          },
+          "filesByLanguage": {
+            "Java": 50
+          },
+          "symbols": 240,
+          "symbolsUpdated": 240,
+          "calls": 1587,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 252
         },
         "warm": {
           "files": 50,
           "filesScanned": 50,
           "filesParsed": 0,
+          "parseErrors": 0,
           "cacheHits": 50,
-          "symbols": 266,
-          "symbolsUpdated": 266,
-          "calls": 1643,
-          "elapsedMs": 147
+          "filesByExtension": {
+            ".java": 50
+          },
+          "filesByLanguage": {
+            "Java": 50
+          },
+          "symbols": 240,
+          "symbolsUpdated": 240,
+          "calls": 1587,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 118
         },
         "update": {
           "files": 50,
           "filesScanned": 50,
           "filesParsed": 1,
+          "parseErrors": 0,
           "cacheHits": 49,
-          "symbols": 266,
-          "symbolsUpdated": 266,
-          "calls": 1643,
-          "elapsedMs": 158
+          "filesByExtension": {
+            ".java": 50
+          },
+          "filesByLanguage": {
+            "Java": 50
+          },
+          "symbols": 240,
+          "symbolsUpdated": 240,
+          "calls": 1587,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 123
         }
       }
     },
@@ -1141,8 +1442,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 4177,
-      "sliceTokens": 254,
-      "tokenReductionPercent": 93.92,
+      "sliceTokens": 252,
+      "tokenReductionPercent": 93.97,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1150,20 +1451,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1176,8 +1486,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 4177,
-      "sliceTokens": 254,
-      "tokenReductionPercent": 93.92,
+      "sliceTokens": 252,
+      "tokenReductionPercent": 93.97,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1185,20 +1495,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1211,8 +1530,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 4177,
-      "sliceTokens": 254,
-      "tokenReductionPercent": 93.92,
+      "sliceTokens": 252,
+      "tokenReductionPercent": 93.97,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1220,20 +1539,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1246,8 +1574,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 4177,
-      "sliceTokens": 254,
-      "tokenReductionPercent": 93.92,
+      "sliceTokens": 252,
+      "tokenReductionPercent": 93.97,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1255,20 +1583,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1281,8 +1618,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 4177,
-      "sliceTokens": 254,
-      "tokenReductionPercent": 93.92,
+      "sliceTokens": 252,
+      "tokenReductionPercent": 93.97,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1290,20 +1627,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1316,8 +1662,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 4177,
-      "sliceTokens": 254,
-      "tokenReductionPercent": 93.92,
+      "sliceTokens": 252,
+      "tokenReductionPercent": 93.97,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1325,20 +1671,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1351,8 +1706,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 4177,
-      "sliceTokens": 236,
-      "tokenReductionPercent": 94.35,
+      "sliceTokens": 235,
+      "tokenReductionPercent": 94.37,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1360,20 +1715,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 4,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1386,8 +1750,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 4177,
-      "sliceTokens": 398,
-      "tokenReductionPercent": 90.47,
+      "sliceTokens": 397,
+      "tokenReductionPercent": 90.5,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1395,20 +1759,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 4,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1421,8 +1794,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 4177,
-      "sliceTokens": 398,
-      "tokenReductionPercent": 90.47,
+      "sliceTokens": 397,
+      "tokenReductionPercent": 90.5,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1430,20 +1803,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 4,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1456,8 +1838,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 4177,
-      "sliceTokens": 398,
-      "tokenReductionPercent": 90.47,
+      "sliceTokens": 397,
+      "tokenReductionPercent": 90.5,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1465,20 +1847,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 4,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1491,8 +1882,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 4177,
-      "sliceTokens": 398,
-      "tokenReductionPercent": 90.47,
+      "sliceTokens": 397,
+      "tokenReductionPercent": 90.5,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1500,20 +1891,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 4,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1526,8 +1926,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 4177,
-      "sliceTokens": 398,
-      "tokenReductionPercent": 90.47,
+      "sliceTokens": 397,
+      "tokenReductionPercent": 90.5,
       "requiredFactsTotal": 3,
       "requiredFactsPreserved": 3,
       "requiredFactRecall": 1,
@@ -1535,20 +1935,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 4,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1561,8 +1970,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 2888,
-      "sliceTokens": 71,
-      "tokenReductionPercent": 97.54,
+      "sliceTokens": 68,
+      "tokenReductionPercent": 97.65,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1570,20 +1979,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1596,8 +2014,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 2888,
-      "sliceTokens": 71,
-      "tokenReductionPercent": 97.54,
+      "sliceTokens": 68,
+      "tokenReductionPercent": 97.65,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1605,20 +2023,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1631,8 +2058,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 2888,
-      "sliceTokens": 71,
-      "tokenReductionPercent": 97.54,
+      "sliceTokens": 68,
+      "tokenReductionPercent": 97.65,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1640,20 +2067,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1666,8 +2102,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 2888,
-      "sliceTokens": 71,
-      "tokenReductionPercent": 97.54,
+      "sliceTokens": 68,
+      "tokenReductionPercent": 97.65,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1675,20 +2111,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1701,8 +2146,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 2888,
-      "sliceTokens": 71,
-      "tokenReductionPercent": 97.54,
+      "sliceTokens": 68,
+      "tokenReductionPercent": 97.65,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1710,20 +2155,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1736,8 +2190,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 2888,
-      "sliceTokens": 71,
-      "tokenReductionPercent": 97.54,
+      "sliceTokens": 68,
+      "tokenReductionPercent": 97.65,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1745,20 +2199,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1771,8 +2234,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 2839,
-      "sliceTokens": 78,
-      "tokenReductionPercent": 97.25,
+      "sliceTokens": 75,
+      "tokenReductionPercent": 97.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1780,20 +2243,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1806,8 +2278,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 2839,
-      "sliceTokens": 78,
-      "tokenReductionPercent": 97.25,
+      "sliceTokens": 75,
+      "tokenReductionPercent": 97.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1815,20 +2287,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1841,8 +2322,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 2839,
-      "sliceTokens": 78,
-      "tokenReductionPercent": 97.25,
+      "sliceTokens": 75,
+      "tokenReductionPercent": 97.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1850,20 +2331,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1876,8 +2366,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 2839,
-      "sliceTokens": 78,
-      "tokenReductionPercent": 97.25,
+      "sliceTokens": 75,
+      "tokenReductionPercent": 97.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1885,20 +2375,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1911,8 +2410,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 2839,
-      "sliceTokens": 78,
-      "tokenReductionPercent": 97.25,
+      "sliceTokens": 75,
+      "tokenReductionPercent": 97.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1920,20 +2419,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1946,8 +2454,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 2839,
-      "sliceTokens": 78,
-      "tokenReductionPercent": 97.25,
+      "sliceTokens": 75,
+      "tokenReductionPercent": 97.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1955,20 +2463,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -1981,8 +2498,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 338,
-      "sliceTokens": 255,
-      "tokenReductionPercent": 24.56,
+      "sliceTokens": 254,
+      "tokenReductionPercent": 24.85,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -1990,20 +2507,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -2016,8 +2542,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 338,
-      "sliceTokens": 255,
-      "tokenReductionPercent": 24.56,
+      "sliceTokens": 254,
+      "tokenReductionPercent": 24.85,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2025,20 +2551,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -2051,8 +2586,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 338,
-      "sliceTokens": 255,
-      "tokenReductionPercent": 24.56,
+      "sliceTokens": 254,
+      "tokenReductionPercent": 24.85,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2060,20 +2595,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -2086,8 +2630,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 338,
-      "sliceTokens": 255,
-      "tokenReductionPercent": 24.56,
+      "sliceTokens": 254,
+      "tokenReductionPercent": 24.85,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2095,20 +2639,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -2121,8 +2674,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 338,
-      "sliceTokens": 255,
-      "tokenReductionPercent": 24.56,
+      "sliceTokens": 254,
+      "tokenReductionPercent": 24.85,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2130,20 +2683,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -2156,8 +2718,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 338,
-      "sliceTokens": 255,
-      "tokenReductionPercent": 24.56,
+      "sliceTokens": 254,
+      "tokenReductionPercent": 24.85,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2165,20 +2727,29 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 3,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 3098,
-      "ambiguousCallsSeen": 240,
+      "unresolvedCallsSeen": 2979,
+      "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 601,
-      "warmQueryMs": 427,
+      "coldIndexMs": 634,
+      "warmQueryMs": 318,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 108,
-        "symbols": 693,
-        "symbolsUpdated": 693,
-        "calls": 3592,
-        "elapsedMs": 418
+        "filesByExtension": {
+          ".java": 109
+        },
+        "filesByLanguage": {
+          "Java": 109
+        },
+        "symbols": 634,
+        "symbolsUpdated": 634,
+        "calls": 3394,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 312
       }
     },
     {
@@ -2186,40 +2757,67 @@
       "scale": "medium",
       "status": "aggregate",
       "javaFiles": 109,
-      "symbols": 693,
-      "calls": 3592,
-      "unresolvedCallRate": 0.8624721603563474,
-      "ambiguousCallRate": 0.066815144766147,
+      "symbols": 634,
+      "calls": 3394,
+      "unresolvedCallRate": 0.8777253977607543,
+      "ambiguousCallRate": 0.06216853270477313,
       "cache": {
         "cold": {
           "files": 109,
           "filesScanned": 109,
           "filesParsed": 109,
+          "parseErrors": 0,
           "cacheHits": 0,
-          "symbols": 693,
-          "symbolsUpdated": 693,
-          "calls": 3592,
-          "elapsedMs": 601
+          "filesByExtension": {
+            ".java": 109
+          },
+          "filesByLanguage": {
+            "Java": 109
+          },
+          "symbols": 634,
+          "symbolsUpdated": 634,
+          "calls": 3394,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 634
         },
         "warm": {
           "files": 109,
           "filesScanned": 109,
           "filesParsed": 0,
+          "parseErrors": 0,
           "cacheHits": 109,
-          "symbols": 693,
-          "symbolsUpdated": 693,
-          "calls": 3592,
-          "elapsedMs": 427
+          "filesByExtension": {
+            ".java": 109
+          },
+          "filesByLanguage": {
+            "Java": 109
+          },
+          "symbols": 634,
+          "symbolsUpdated": 634,
+          "calls": 3394,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 318
         },
         "update": {
           "files": 109,
           "filesScanned": 109,
           "filesParsed": 1,
+          "parseErrors": 0,
           "cacheHits": 108,
-          "symbols": 693,
-          "symbolsUpdated": 693,
-          "calls": 3592,
-          "elapsedMs": 418
+          "filesByExtension": {
+            ".java": 109
+          },
+          "filesByLanguage": {
+            "Java": 109
+          },
+          "symbols": 634,
+          "symbolsUpdated": 634,
+          "calls": 3394,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 312
         }
       }
     },
@@ -2233,8 +2831,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 3689,
-      "sliceTokens": 177,
-      "tokenReductionPercent": 95.2,
+      "sliceTokens": 172,
+      "tokenReductionPercent": 95.34,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2242,20 +2840,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2268,8 +2875,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 3689,
-      "sliceTokens": 177,
-      "tokenReductionPercent": 95.2,
+      "sliceTokens": 172,
+      "tokenReductionPercent": 95.34,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2277,20 +2884,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2303,8 +2919,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 3689,
-      "sliceTokens": 177,
-      "tokenReductionPercent": 95.2,
+      "sliceTokens": 172,
+      "tokenReductionPercent": 95.34,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2312,20 +2928,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2338,8 +2963,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 3689,
-      "sliceTokens": 177,
-      "tokenReductionPercent": 95.2,
+      "sliceTokens": 172,
+      "tokenReductionPercent": 95.34,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2347,20 +2972,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2373,8 +3007,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 3689,
-      "sliceTokens": 177,
-      "tokenReductionPercent": 95.2,
+      "sliceTokens": 172,
+      "tokenReductionPercent": 95.34,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2382,20 +3016,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2408,8 +3051,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 3689,
-      "sliceTokens": 177,
-      "tokenReductionPercent": 95.2,
+      "sliceTokens": 172,
+      "tokenReductionPercent": 95.34,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2417,20 +3060,29 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2443,8 +3095,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 3689,
-      "sliceTokens": 202,
-      "tokenReductionPercent": 94.52,
+      "sliceTokens": 199,
+      "tokenReductionPercent": 94.61,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2452,20 +3104,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2478,29 +3139,38 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 3689,
-      "sliceTokens": 263,
-      "tokenReductionPercent": 92.87,
+      "sliceTokens": 487,
+      "tokenReductionPercent": 86.8,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 4,
+      "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2513,29 +3183,38 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 3689,
-      "sliceTokens": 263,
-      "tokenReductionPercent": 92.87,
+      "sliceTokens": 487,
+      "tokenReductionPercent": 86.8,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 4,
+      "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2548,29 +3227,38 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 3689,
-      "sliceTokens": 263,
-      "tokenReductionPercent": 92.87,
+      "sliceTokens": 487,
+      "tokenReductionPercent": 86.8,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 4,
+      "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2583,29 +3271,38 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 3689,
-      "sliceTokens": 263,
-      "tokenReductionPercent": 92.87,
+      "sliceTokens": 487,
+      "tokenReductionPercent": 86.8,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 4,
+      "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2618,29 +3315,38 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 3689,
-      "sliceTokens": 263,
-      "tokenReductionPercent": 92.87,
+      "sliceTokens": 487,
+      "tokenReductionPercent": 86.8,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
       "minimumSufficientBudget": 256,
-      "symbolsIncluded": 4,
+      "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2653,8 +3359,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 3690,
-      "sliceTokens": 157,
-      "tokenReductionPercent": 95.75,
+      "sliceTokens": 154,
+      "tokenReductionPercent": 95.83,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2662,20 +3368,29 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2688,8 +3403,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 3690,
-      "sliceTokens": 295,
-      "tokenReductionPercent": 92.01,
+      "sliceTokens": 291,
+      "tokenReductionPercent": 92.11,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2697,20 +3412,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2723,8 +3447,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 3690,
-      "sliceTokens": 295,
-      "tokenReductionPercent": 92.01,
+      "sliceTokens": 291,
+      "tokenReductionPercent": 92.11,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2732,20 +3456,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2758,8 +3491,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 3690,
-      "sliceTokens": 295,
-      "tokenReductionPercent": 92.01,
+      "sliceTokens": 291,
+      "tokenReductionPercent": 92.11,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2767,20 +3500,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2793,8 +3535,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 3690,
-      "sliceTokens": 295,
-      "tokenReductionPercent": 92.01,
+      "sliceTokens": 291,
+      "tokenReductionPercent": 92.11,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2802,20 +3544,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2828,8 +3579,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 3690,
-      "sliceTokens": 295,
-      "tokenReductionPercent": 92.01,
+      "sliceTokens": 291,
+      "tokenReductionPercent": 92.11,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2837,20 +3588,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2863,8 +3623,8 @@
       "groundTruth": "Manual source inspection and pinned test source",
       "budget": 256,
       "baselineTokens": 4366,
-      "sliceTokens": 322,
-      "tokenReductionPercent": 92.62,
+      "sliceTokens": 320,
+      "tokenReductionPercent": 92.67,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 1,
       "requiredFactRecall": 0.5,
@@ -2872,8 +3632,8 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [
         {
           "id": "transaction",
@@ -2881,17 +3641,26 @@
           "attribution": "TOKEN_BUDGET"
         }
       ],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2904,8 +3673,8 @@
       "groundTruth": "Manual source inspection and pinned test source",
       "budget": 512,
       "baselineTokens": 4366,
-      "sliceTokens": 416,
-      "tokenReductionPercent": 90.47,
+      "sliceTokens": 412,
+      "tokenReductionPercent": 90.56,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2913,20 +3682,29 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2939,8 +3717,8 @@
       "groundTruth": "Manual source inspection and pinned test source",
       "budget": 1024,
       "baselineTokens": 4366,
-      "sliceTokens": 996,
-      "tokenReductionPercent": 77.19,
+      "sliceTokens": 989,
+      "tokenReductionPercent": 77.35,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2948,20 +3726,29 @@
       "symbolsIncluded": 6,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -2974,8 +3761,8 @@
       "groundTruth": "Manual source inspection and pinned test source",
       "budget": 2048,
       "baselineTokens": 4366,
-      "sliceTokens": 1331,
-      "tokenReductionPercent": 69.51,
+      "sliceTokens": 1322,
+      "tokenReductionPercent": 69.72,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -2983,20 +3770,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3009,8 +3805,8 @@
       "groundTruth": "Manual source inspection and pinned test source",
       "budget": 4096,
       "baselineTokens": 4366,
-      "sliceTokens": 1331,
-      "tokenReductionPercent": 69.51,
+      "sliceTokens": 1322,
+      "tokenReductionPercent": 69.72,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3018,20 +3814,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3044,8 +3849,8 @@
       "groundTruth": "Manual source inspection and pinned test source",
       "budget": 8192,
       "baselineTokens": 4366,
-      "sliceTokens": 1331,
-      "tokenReductionPercent": 69.51,
+      "sliceTokens": 1322,
+      "tokenReductionPercent": 69.72,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3053,20 +3858,29 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3079,8 +3893,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 256,
       "baselineTokens": 3689,
-      "sliceTokens": 173,
-      "tokenReductionPercent": 95.31,
+      "sliceTokens": 171,
+      "tokenReductionPercent": 95.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3088,20 +3902,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3114,8 +3937,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 512,
       "baselineTokens": 3689,
-      "sliceTokens": 173,
-      "tokenReductionPercent": 95.31,
+      "sliceTokens": 171,
+      "tokenReductionPercent": 95.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3123,20 +3946,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3149,8 +3981,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 1024,
       "baselineTokens": 3689,
-      "sliceTokens": 173,
-      "tokenReductionPercent": 95.31,
+      "sliceTokens": 171,
+      "tokenReductionPercent": 95.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3158,20 +3990,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3184,8 +4025,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 2048,
       "baselineTokens": 3689,
-      "sliceTokens": 173,
-      "tokenReductionPercent": 95.31,
+      "sliceTokens": 171,
+      "tokenReductionPercent": 95.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3193,20 +4034,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3219,8 +4069,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 4096,
       "baselineTokens": 3689,
-      "sliceTokens": 173,
-      "tokenReductionPercent": 95.31,
+      "sliceTokens": 171,
+      "tokenReductionPercent": 95.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3228,20 +4078,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3254,8 +4113,8 @@
       "groundTruth": "Manual source inspection at pinned commit",
       "budget": 8192,
       "baselineTokens": 3689,
-      "sliceTokens": 173,
-      "tokenReductionPercent": 95.31,
+      "sliceTokens": 171,
+      "tokenReductionPercent": 95.36,
       "requiredFactsTotal": 2,
       "requiredFactsPreserved": 2,
       "requiredFactRecall": 1,
@@ -3263,20 +4122,29 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 21243,
-      "ambiguousCallsSeen": 6826,
+      "unresolvedCallsSeen": 14187,
+      "ambiguousCallsSeen": 3783,
       "missingFacts": [],
-      "coldIndexMs": 64053,
-      "warmQueryMs": 13105,
+      "coldIndexMs": 6513,
+      "warmQueryMs": 4408,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
         "filesParsed": 1,
+        "parseErrors": 0,
         "cacheHits": 418,
-        "symbols": 5505,
-        "symbolsUpdated": 5505,
-        "calls": 24823,
-        "elapsedMs": 10730
+        "filesByExtension": {
+          ".java": 419
+        },
+        "filesByLanguage": {
+          "Java": 419
+        },
+        "symbols": 4280,
+        "symbolsUpdated": 4280,
+        "calls": 17350,
+        "imports": 0,
+        "exports": 0,
+        "elapsedMs": 4105
       }
     },
     {
@@ -3284,40 +4152,67 @@
       "scale": "large",
       "status": "aggregate",
       "javaFiles": 419,
-      "symbols": 5505,
-      "calls": 24823,
-      "unresolvedCallRate": 0.8557789147161906,
-      "ambiguousCallRate": 0.2749869073037103,
+      "symbols": 4280,
+      "calls": 17350,
+      "unresolvedCallRate": 0.8176945244956773,
+      "ambiguousCallRate": 0.21804034582132564,
       "cache": {
         "cold": {
           "files": 419,
           "filesScanned": 419,
           "filesParsed": 419,
+          "parseErrors": 8,
           "cacheHits": 0,
-          "symbols": 5505,
-          "symbolsUpdated": 5505,
-          "calls": 24823,
-          "elapsedMs": 64053
+          "filesByExtension": {
+            ".java": 419
+          },
+          "filesByLanguage": {
+            "Java": 419
+          },
+          "symbols": 4280,
+          "symbolsUpdated": 4280,
+          "calls": 17350,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 6513
         },
         "warm": {
           "files": 419,
           "filesScanned": 419,
           "filesParsed": 0,
+          "parseErrors": 0,
           "cacheHits": 419,
-          "symbols": 5505,
-          "symbolsUpdated": 5505,
-          "calls": 24823,
-          "elapsedMs": 13105
+          "filesByExtension": {
+            ".java": 419
+          },
+          "filesByLanguage": {
+            "Java": 419
+          },
+          "symbols": 4280,
+          "symbolsUpdated": 4280,
+          "calls": 17350,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 4408
         },
         "update": {
           "files": 419,
           "filesScanned": 419,
           "filesParsed": 1,
+          "parseErrors": 0,
           "cacheHits": 418,
-          "symbols": 5505,
-          "symbolsUpdated": 5505,
-          "calls": 24823,
-          "elapsedMs": 10730
+          "filesByExtension": {
+            ".java": 419
+          },
+          "filesByLanguage": {
+            "Java": 419
+          },
+          "symbols": 4280,
+          "symbolsUpdated": 4280,
+          "calls": 17350,
+          "imports": 0,
+          "exports": 0,
+          "elapsedMs": 4105
         }
       }
     }
