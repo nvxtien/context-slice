@@ -280,6 +280,41 @@ function constructorSymbol(
   };
 }
 
+function byRange(a: SymbolRecord, b: SymbolRecord): number {
+  return (
+    a.range.startLine - b.range.startLine ||
+    a.range.startColumn - b.range.startColumn
+  );
+}
+
+/**
+ * Mutates each symbol's `id`, appending `#N` for the Nth+ symbol sharing a `canonicalIdentity`
+ * within this file. The old regex parser built `symbols` in a fixed global order — all types
+ * (via the type walk), then ALL methods across the whole file in document order (one regex pass),
+ * then ALL constructors across the whole file in document order (another pass) — and dedup
+ * suffixes were assigned by iterating that order. The new AST walk instead pushes each type's
+ * own methods/constructors immediately after the type itself (per-type nested order), which can
+ * differ from the old flat order when the file has multiple types. To keep dedup suffixes
+ * byte-identical to the old parser regardless of that ordering change, this recomputes the
+ * old global order (types, then methods sorted by position, then constructors sorted by
+ * position) purely for suffix assignment; the returned `symbols` array itself keeps its
+ * (unrelated) per-type nested order.
+ */
+function assignDedupIds(symbols: SymbolRecord[], types: SymbolRecord[]): void {
+  const methods = symbols.filter((s) => s.kind === "method").sort(byRange);
+  const constructors = symbols
+    .filter((s) => s.kind === "constructor")
+    .sort(byRange);
+  const dedupOrder = [...types, ...methods, ...constructors];
+  const identityCounts = new Map<string, number>();
+  for (const symbol of dedupOrder) {
+    const count =
+      identityCounts.get(symbol.canonicalIdentity ?? symbol.id) ?? 0;
+    if (count > 0) symbol.id = `${symbol.canonicalIdentity}#${count + 1}`;
+    identityCounts.set(symbol.canonicalIdentity ?? symbol.id, count + 1);
+  }
+}
+
 export function parseJava(filePath: string, source: string) {
   const parser = new Parser();
   parser.setLanguage(Java as any);
@@ -298,13 +333,7 @@ export function parseJava(filePath: string, source: string) {
   const packageName = packageDecl?.namedChildren[0]?.text ?? "";
   if (tree)
     walkTypes(tree.rootNode, undefined, [], filePath, source, packageName, symbols, types);
-  const identityCounts = new Map<string, number>();
-  for (const symbol of symbols) {
-    const count =
-      identityCounts.get(symbol.canonicalIdentity ?? symbol.id) ?? 0;
-    if (count > 0) symbol.id = `${symbol.canonicalIdentity}#${count + 1}`;
-    identityCounts.set(symbol.canonicalIdentity ?? symbol.id, count + 1);
-  }
+  assignDedupIds(symbols, types);
   const calls: CallEdge[] = [];
   const callable = symbols.filter(
     (s) => s.kind === "method" || s.kind === "constructor",

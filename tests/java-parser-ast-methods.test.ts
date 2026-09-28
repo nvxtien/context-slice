@@ -58,3 +58,19 @@ test("parameterSignature stripping still matches the old convention exactly", ()
   const m = symbols.find((s) => s.kind === "method" && s.name === "m")!;
   assert.equal(m.signature, "m(String a, int b): void");
 });
+
+test("duplicate top-level types/methods sharing a canonicalIdentity get deterministic dedup id suffixes (types-then-methods-then-constructors global order, matching the old parser's convention)", () => {
+  // Two top-level classes both named "Foo" (illegal Java, but the parser doesn't validate) each
+  // declaring a same-signature "dup" method: this is the scenario where two symbols in one file
+  // can genuinely share a canonicalIdentity, exercising the dedup id-suffix logic.
+  const source = "class Foo {\n    void dup() {}\n}\nclass Foo {\n    void dup() {}\n}\n";
+  const { symbols } = parseJava("Dup.java", source);
+  const types = symbols.filter((s) => s.kind === "class");
+  const methods = symbols.filter((s) => s.kind === "method");
+  assert.equal(types.length, 2);
+  assert.equal(methods.length, 2);
+  assert.equal(types[0].id, types[0].canonicalIdentity);
+  assert.equal(types[1].id, `${types[1].canonicalIdentity}#2`);
+  assert.equal(methods[0].id, methods[0].canonicalIdentity);
+  assert.equal(methods[1].id, `${methods[1].canonicalIdentity}#2`);
+});
