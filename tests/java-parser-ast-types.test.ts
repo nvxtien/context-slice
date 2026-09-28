@@ -64,6 +64,15 @@ test("nested types produce the correct parentId chain and qualifiedName", () => 
   assert.equal(inner.qualifiedName, "Outer.Inner");
 });
 
+test("generic type arguments in extends/implements are stripped to the bare type name, matching the old parser", () => {
+  const classSrc = "class Foo extends AbstractFoo<Bar> {}";
+  const ifaceSrc = "interface UserRepository extends JpaRepository<User, Long> {}";
+  const { symbols: classSyms } = parseJava("Foo.java", classSrc);
+  const { symbols: ifaceSyms } = parseJava("R.java", ifaceSrc);
+  assert.deepEqual(classSyms.find((s) => s.name === "Foo")!.supertypes, ["AbstractFoo"]);
+  assert.deepEqual(ifaceSyms.find((s) => s.name === "UserRepository")!.supertypes, ["JpaRepository"]);
+});
+
 test("enum and record kinds are both recognized", () => {
   const source = "enum Status { ACTIVE, INACTIVE }\nrecord Point(int x, int y) {}\n";
   const { symbols } = parseJava("Both.java", source);

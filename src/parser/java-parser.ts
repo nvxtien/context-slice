@@ -123,15 +123,26 @@ function modifiersNodeParts(modifiersNode: Node | undefined): {
   return { annotations, modifiers };
 }
 
+/** Strip generic type arguments (e.g. `JpaRepository<User, Long>` -> `JpaRepository`), matching the old regex parser's bare-identifier-only behavior. */
+function stripGenericArgs(name: string): string {
+  const idx = name.indexOf("<");
+  return (idx === -1 ? name : name.slice(0, idx)).trim();
+}
+
 /** class/interface supertypes: class uses `superclass`/`interfaces` fields, interface uses a direct `extends_interfaces` child (no matching field). */
 function supertypesOf(node: Node): string[] {
   if (node.type === "class_declaration") {
     const superclass = node.childForFieldName("superclass");
     const interfaces = node.childForFieldName("interfaces");
     return [
-      ...(superclass ? [superclass.text.replace(/^extends\s+/, "")] : []),
+      ...(superclass
+        ? [stripGenericArgs(superclass.text.replace(/^extends\s+/, ""))]
+        : []),
       ...(interfaces
-        ? interfaces.text.replace(/^implements\s+/, "").split(/\s*,\s*/)
+        ? interfaces
+            .text.replace(/^implements\s+/, "")
+            .split(/\s*,\s*/)
+            .map(stripGenericArgs)
         : []),
     ];
   }
@@ -142,7 +153,7 @@ function supertypesOf(node: Node): string[] {
     const typeList = extendsNode?.namedChildren.find(
       (c) => c.type === "type_list",
     );
-    return typeList?.namedChildren.map((t) => t.text) ?? [];
+    return typeList?.namedChildren.map((t) => stripGenericArgs(t.text)) ?? [];
   }
   return [];
 }
