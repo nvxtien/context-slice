@@ -83,13 +83,31 @@ A field symbol is a normal `SymbolRecord` with:
 - `kind: "field"` (already a valid `SymbolKind`; this is the first Java
   code to populate it)
 - `name`: from the `variable_declarator`'s `name` field
-- `type`: raw text of the `field_declaration`'s `type` field, **not**
-  generic-stripped (unlike `supertypes`, which strips generics to match the
-  old parser's bare-identifier convention — there is no old-parser
-  convention for fields to match, since fields were never extracted before,
-  so the full, useful type text is kept: `List<Pet>` stays `List<Pet>`)
-- `signature`: `` `${name}: ${type}` ``, mirroring the method convention of
-  `` `${name}(${params}): ${type}` `` minus the parameter list
+- **Type text is NOT a top-level `SymbolRecord` property** — `SymbolRecord`
+  has no `type` field (confirmed against `src/types/model.ts`; even
+  `methodSymbol`'s return type only ever appears inside `.signature`, never
+  as its own stored property). The established, existing convention for
+  "this symbol's declared type" is `metadata.declaredType` — already used
+  by the TypeScript adapter for class properties
+  (`src/languages/typescript/parse.ts:513,579,608-609`) and the Python
+  adapter for annotated assignments (`src/languages/python/parse.ts:333`),
+  and already CONSUMED by TypeScript's own call-resolution
+  (`src/languages/typescript/resolve.ts:409`) to determine a receiver's
+  type for `this.field.method()`-style resolution. Field symbols follow
+  this exact convention: `metadata: { declaredType: rawTypeText }`, where
+  `rawTypeText` is the `field_declaration`/`constant_declaration`'s `type`
+  field text, **not** generic-stripped (unlike `supertypes`, which strips
+  generics to match the old parser's bare-identifier convention — there is
+  no old-parser convention for fields to match, since fields were never
+  extracted before, so the full, useful type text is kept: `List<Pet>`
+  stays `List<Pet>`). This also means a future Java call-resolution
+  enhancement could consume `field.metadata.declaredType` the same way
+  TypeScript's resolver already does — real, immediate alignment with the
+  project's existing cross-language pattern, not just a naming choice.
+- `signature`: `` `${name}: ${declaredType}` ``, mirroring the method
+  convention of `` `${name}(${params}): ${type}` `` minus the parameter
+  list — the type appears in `.signature` for human/tooling readability
+  even though it is NOT duplicated as a separate top-level property.
 - `annotations`/`modifiers`: via the same `modifiersNodeParts` helper
   Task 1 introduced, reused unchanged — a field's `modifiers` node is
   structurally identical in shape to a class's or method's
@@ -191,11 +209,13 @@ New test file `tests/java-parser-ast-fields.test.ts` (TDD, mirroring Task
 1-2's own test-first discipline), covering at minimum:
 
 - A single field with an annotation and modifiers (asserting `kind`,
-  `name`, `type`, `signature`, `annotations`, `modifiers`, `parentId`)
+  `name`, `metadata.declaredType`, `signature`, `annotations`, `modifiers`,
+  `parentId`)
 - Multi-declarator: `private int a, b = 2;` produces two distinct field
-  symbols with correct individual names/ranges, shared type/modifiers
-- A field with a generic type (`List<Pet> pets`) — asserting the type text
-  is kept whole, not stripped
+  symbols with correct individual names/ranges, shared
+  `metadata.declaredType`/modifiers
+- A field with a generic type (`List<Pet> pets`) — asserting
+  `metadata.declaredType` is kept whole, not stripped
 - A field inside an `interface` body (a `constant_declaration` node, not
   `field_declaration` — see the grammar-asymmetry note in Architecture)
 - A field inside an `enum` body (alongside the enum's existing
