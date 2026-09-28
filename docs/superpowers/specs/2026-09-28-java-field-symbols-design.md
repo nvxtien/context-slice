@@ -125,9 +125,21 @@ node), but each with its own `name` and `range` (from its own
 declarator's own text and is included in that field's `.source`, exactly
 like a method's body is part of its `.source`.
 
-Interface fields (implicitly `public static final` constants) use the
-identical `field_declaration` node shape inside `interface_body` and are
-extracted the same way — no special-casing needed.
+**Correction after direct grammar verification (tree-sitter-java probed
+2026-09-28):** interface constants do NOT use `field_declaration` — they
+use a distinct node type, `constant_declaration`, inside `interface_body`.
+Its internal shape is otherwise identical (a `modifiers` child,
+`childForFieldName("type")`, one-or-more `variable_declarator` named
+children — confirmed with both an implicit-modifier case and an explicit
+`@Deprecated public static final int X = 1, Y = 2;` multi-declarator
+case), so the same `fieldSymbols` builder function handles both node types
+without any shape-specific branching inside it — but the member loop that
+decides *which* nodes to hand to `fieldSymbols` must check for both
+`field_declaration` and `constant_declaration`, not just the former. This
+is a real, easy-to-miss grammar asymmetry (the same category of surprise
+as `interface_declaration`'s `extends_interfaces` vs. `class_declaration`'s
+`interfaces` field from the parent AST rewrite) and must not be assumed
+away.
 
 ### Integration with existing member-loop infrastructure
 
@@ -176,7 +188,8 @@ New test file `tests/java-parser-ast-fields.test.ts` (TDD, mirroring Task
   symbols with correct individual names/ranges, shared type/modifiers
 - A field with a generic type (`List<Pet> pets`) — asserting the type text
   is kept whole, not stripped
-- A field inside an `interface` body
+- A field inside an `interface` body (a `constant_declaration` node, not
+  `field_declaration` — see the grammar-asymmetry note in Architecture)
 - A field inside an `enum` body (alongside the enum's existing
   method/constructor coverage)
 - A field inside a `record` body (a real field, not the record's canonical
