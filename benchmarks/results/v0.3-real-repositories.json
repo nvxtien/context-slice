@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T11:49:21.881Z",
+  "generatedAt": "2026-09-28T15:18:26.384Z",
   "repositories": [
     {
       "id": "spring-petclinic",
@@ -65,8 +65,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -79,12 +79,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -109,8 +109,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -123,12 +123,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -153,8 +153,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -167,12 +167,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -197,8 +197,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -211,12 +211,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -241,8 +241,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -255,12 +255,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -285,8 +285,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -299,12 +299,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -329,8 +329,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -343,12 +343,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -373,8 +373,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -387,12 +387,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -417,8 +417,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -431,12 +431,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -461,8 +461,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -475,12 +475,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -505,8 +505,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -519,12 +519,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -549,8 +549,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -563,12 +563,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -593,8 +593,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -607,12 +607,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -637,8 +637,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -651,12 +651,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -681,8 +681,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -695,12 +695,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -725,8 +725,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -739,12 +739,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -769,8 +769,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -783,12 +783,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -813,8 +813,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -827,12 +827,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -857,8 +857,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -871,12 +871,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -901,8 +901,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -915,12 +915,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -945,8 +945,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -959,12 +959,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -989,8 +989,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1003,12 +1003,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1033,8 +1033,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1047,12 +1047,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1077,8 +1077,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1091,12 +1091,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1121,8 +1121,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1135,12 +1135,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1165,8 +1165,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1179,12 +1179,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1209,8 +1209,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1223,12 +1223,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1253,8 +1253,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1267,12 +1267,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1297,8 +1297,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1311,12 +1311,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1341,8 +1341,8 @@
       "unresolvedCallsSeen": 1388,
       "ambiguousCallsSeen": 29,
       "missingFacts": [],
-      "coldIndexMs": 252,
-      "warmQueryMs": 118,
+      "coldIndexMs": 283,
+      "warmQueryMs": 128,
       "cacheUpdate": {
         "files": 50,
         "filesScanned": 50,
@@ -1355,12 +1355,12 @@
         "filesByLanguage": {
           "Java": 50
         },
-        "symbols": 240,
-        "symbolsUpdated": 240,
+        "symbols": 318,
+        "symbolsUpdated": 318,
         "calls": 1587,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 123
+        "elapsedMs": 135
       }
     },
     {
@@ -1368,7 +1368,7 @@
       "scale": "small",
       "status": "aggregate",
       "javaFiles": 50,
-      "symbols": 240,
+      "symbols": 318,
       "calls": 1587,
       "unresolvedCallRate": 0.8746061751732829,
       "ambiguousCallRate": 0.018273471959672338,
@@ -1385,12 +1385,12 @@
           "filesByLanguage": {
             "Java": 50
           },
-          "symbols": 240,
-          "symbolsUpdated": 240,
+          "symbols": 318,
+          "symbolsUpdated": 318,
           "calls": 1587,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 252
+          "elapsedMs": 283
         },
         "warm": {
           "files": 50,
@@ -1404,12 +1404,12 @@
           "filesByLanguage": {
             "Java": 50
           },
-          "symbols": 240,
-          "symbolsUpdated": 240,
+          "symbols": 318,
+          "symbolsUpdated": 318,
           "calls": 1587,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 118
+          "elapsedMs": 128
         },
         "update": {
           "files": 50,
@@ -1423,12 +1423,12 @@
           "filesByLanguage": {
             "Java": 50
           },
-          "symbols": 240,
-          "symbolsUpdated": 240,
+          "symbols": 318,
+          "symbolsUpdated": 318,
           "calls": 1587,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 123
+          "elapsedMs": 135
         }
       }
     },
@@ -1454,8 +1454,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1468,12 +1468,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1498,8 +1498,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1512,12 +1512,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1542,8 +1542,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1556,12 +1556,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1586,8 +1586,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1600,12 +1600,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1630,8 +1630,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1644,12 +1644,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1674,8 +1674,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1688,12 +1688,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1718,8 +1718,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1732,12 +1732,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1762,8 +1762,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1776,12 +1776,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1806,8 +1806,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1820,12 +1820,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1850,8 +1850,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1864,12 +1864,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1894,8 +1894,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1908,12 +1908,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1938,8 +1938,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1952,12 +1952,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -1982,8 +1982,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -1996,12 +1996,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2026,8 +2026,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2040,12 +2040,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2070,8 +2070,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2084,12 +2084,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2114,8 +2114,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2128,12 +2128,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2158,8 +2158,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2172,12 +2172,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2202,8 +2202,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2216,12 +2216,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2246,8 +2246,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2260,12 +2260,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2290,8 +2290,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2304,12 +2304,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2334,8 +2334,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2348,12 +2348,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2378,8 +2378,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2392,12 +2392,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2422,8 +2422,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2436,12 +2436,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2466,8 +2466,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2480,12 +2480,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2510,8 +2510,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2524,12 +2524,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2554,8 +2554,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2568,12 +2568,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2598,8 +2598,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2612,12 +2612,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2642,8 +2642,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2656,12 +2656,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2686,8 +2686,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2700,12 +2700,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2730,8 +2730,8 @@
       "unresolvedCallsSeen": 2979,
       "ambiguousCallsSeen": 211,
       "missingFacts": [],
-      "coldIndexMs": 634,
-      "warmQueryMs": 318,
+      "coldIndexMs": 631,
+      "warmQueryMs": 352,
       "cacheUpdate": {
         "files": 109,
         "filesScanned": 109,
@@ -2744,12 +2744,12 @@
         "filesByLanguage": {
           "Java": 109
         },
-        "symbols": 634,
-        "symbolsUpdated": 634,
+        "symbols": 781,
+        "symbolsUpdated": 781,
         "calls": 3394,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 312
+        "elapsedMs": 347
       }
     },
     {
@@ -2757,7 +2757,7 @@
       "scale": "medium",
       "status": "aggregate",
       "javaFiles": 109,
-      "symbols": 634,
+      "symbols": 781,
       "calls": 3394,
       "unresolvedCallRate": 0.8777253977607543,
       "ambiguousCallRate": 0.06216853270477313,
@@ -2774,12 +2774,12 @@
           "filesByLanguage": {
             "Java": 109
           },
-          "symbols": 634,
-          "symbolsUpdated": 634,
+          "symbols": 781,
+          "symbolsUpdated": 781,
           "calls": 3394,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 634
+          "elapsedMs": 631
         },
         "warm": {
           "files": 109,
@@ -2793,12 +2793,12 @@
           "filesByLanguage": {
             "Java": 109
           },
-          "symbols": 634,
-          "symbolsUpdated": 634,
+          "symbols": 781,
+          "symbolsUpdated": 781,
           "calls": 3394,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 318
+          "elapsedMs": 352
         },
         "update": {
           "files": 109,
@@ -2812,12 +2812,12 @@
           "filesByLanguage": {
             "Java": 109
           },
-          "symbols": 634,
-          "symbolsUpdated": 634,
+          "symbols": 781,
+          "symbolsUpdated": 781,
           "calls": 3394,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 312
+          "elapsedMs": 347
         }
       }
     },
@@ -2840,11 +2840,11 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2857,12 +2857,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -2884,11 +2884,11 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2901,12 +2901,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -2928,11 +2928,11 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2945,12 +2945,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -2972,11 +2972,11 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -2989,12 +2989,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3016,11 +3016,11 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3033,12 +3033,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3060,11 +3060,11 @@
       "symbolsIncluded": 4,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3077,12 +3077,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3104,11 +3104,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3121,12 +3121,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3148,11 +3148,11 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3165,12 +3165,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3192,11 +3192,11 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3209,12 +3209,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3236,11 +3236,11 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3253,12 +3253,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3280,11 +3280,11 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3297,12 +3297,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3324,11 +3324,11 @@
       "symbolsIncluded": 5,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3341,12 +3341,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3368,11 +3368,11 @@
       "symbolsIncluded": 2,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3385,12 +3385,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3412,11 +3412,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3429,12 +3429,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3456,11 +3456,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3473,12 +3473,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3500,11 +3500,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3517,12 +3517,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3544,11 +3544,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3561,12 +3561,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3588,11 +3588,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3605,12 +3605,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3632,8 +3632,8 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [
         {
           "id": "transaction",
@@ -3641,8 +3641,8 @@
           "attribution": "TOKEN_BUDGET"
         }
       ],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3655,12 +3655,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3682,11 +3682,11 @@
       "symbolsIncluded": 3,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3699,12 +3699,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3726,11 +3726,11 @@
       "symbolsIncluded": 6,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3743,12 +3743,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3770,11 +3770,11 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3787,12 +3787,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3814,11 +3814,11 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3831,12 +3831,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3858,11 +3858,11 @@
       "symbolsIncluded": 7,
       "filesTouchedByContext": 2,
       "wholeFilesRequired": 2,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3875,12 +3875,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3902,11 +3902,11 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3919,12 +3919,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3946,11 +3946,11 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -3963,12 +3963,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -3990,11 +3990,11 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -4007,12 +4007,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -4034,11 +4034,11 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -4051,12 +4051,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -4078,11 +4078,11 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -4095,12 +4095,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -4122,11 +4122,11 @@
       "symbolsIncluded": 1,
       "filesTouchedByContext": 1,
       "wholeFilesRequired": 1,
-      "unresolvedCallsSeen": 14187,
-      "ambiguousCallsSeen": 3783,
+      "unresolvedCallsSeen": 14185,
+      "ambiguousCallsSeen": 3784,
       "missingFacts": [],
-      "coldIndexMs": 6513,
-      "warmQueryMs": 4408,
+      "coldIndexMs": 10283,
+      "warmQueryMs": 7355,
       "cacheUpdate": {
         "files": 419,
         "filesScanned": 419,
@@ -4139,12 +4139,12 @@
         "filesByLanguage": {
           "Java": 419
         },
-        "symbols": 4280,
-        "symbolsUpdated": 4280,
-        "calls": 17350,
+        "symbols": 5838,
+        "symbolsUpdated": 5838,
+        "calls": 17352,
         "imports": 0,
         "exports": 0,
-        "elapsedMs": 4105
+        "elapsedMs": 6340
       }
     },
     {
@@ -4152,10 +4152,10 @@
       "scale": "large",
       "status": "aggregate",
       "javaFiles": 419,
-      "symbols": 4280,
-      "calls": 17350,
-      "unresolvedCallRate": 0.8176945244956773,
-      "ambiguousCallRate": 0.21804034582132564,
+      "symbols": 5838,
+      "calls": 17352,
+      "unresolvedCallRate": 0.8174850161364684,
+      "ambiguousCallRate": 0.21807284462886123,
       "cache": {
         "cold": {
           "files": 419,
@@ -4169,12 +4169,12 @@
           "filesByLanguage": {
             "Java": 419
           },
-          "symbols": 4280,
-          "symbolsUpdated": 4280,
-          "calls": 17350,
+          "symbols": 5838,
+          "symbolsUpdated": 5838,
+          "calls": 17352,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 6513
+          "elapsedMs": 10283
         },
         "warm": {
           "files": 419,
@@ -4188,12 +4188,12 @@
           "filesByLanguage": {
             "Java": 419
           },
-          "symbols": 4280,
-          "symbolsUpdated": 4280,
-          "calls": 17350,
+          "symbols": 5838,
+          "symbolsUpdated": 5838,
+          "calls": 17352,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 4408
+          "elapsedMs": 7355
         },
         "update": {
           "files": 419,
@@ -4207,12 +4207,12 @@
           "filesByLanguage": {
             "Java": 419
           },
-          "symbols": 4280,
-          "symbolsUpdated": 4280,
-          "calls": 17350,
+          "symbols": 5838,
+          "symbolsUpdated": 5838,
+          "calls": 17352,
           "imports": 0,
           "exports": 0,
-          "elapsedMs": 4105
+          "elapsedMs": 6340
         }
       }
     }
