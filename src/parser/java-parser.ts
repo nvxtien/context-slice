@@ -193,6 +193,10 @@ function walkTypes(
           symbols.push(
             constructorSymbol(member, symbol, typeChain, filePath, source, packageName),
           );
+        } else if (member.type === "field_declaration" || member.type === "constant_declaration") {
+          symbols.push(
+            ...fieldSymbols(member, symbol, typeChain, filePath, source, packageName),
+          );
         }
       }
       walkTypes(bodyNode, symbol, typeChain, filePath, source, packageName, symbols, types);
@@ -297,6 +301,55 @@ function constructorSymbol(
   };
 }
 
+/**
+ * A field_declaration (class/enum/record) or constant_declaration (interface — a
+ * different node type with an identical internal shape) can carry multiple
+ * variable_declarator children (`private int a, b;`), so this returns one SymbolRecord
+ * per declarator, all sharing the same declared type/annotations/modifiers. A field has
+ * no top-level `type` property on SymbolRecord (only methods put a type-like thing in
+ * `.signature`); the declared type goes in `metadata.declaredType`, the same convention
+ * the TypeScript and Python adapters already use.
+ */
+function fieldSymbols(
+  node: Node,
+  parent: SymbolRecord,
+  typeChain: string[],
+  filePath: string,
+  source: string,
+  packageName: string,
+): SymbolRecord[] {
+  const declaredType = node.childForFieldName("type")!.text;
+  const modifiersNode = node.namedChildren.find((c) => c.type === "modifiers");
+  const { annotations, modifiers } = modifiersNodeParts(modifiersNode);
+  const declarators = node.namedChildren.filter((c) => c.type === "variable_declarator");
+  const single = declarators.length === 1;
+  return declarators.map((declarator) => {
+    const name = declarator.childForFieldName("name")!.text;
+    const start = single ? node.startIndex : declarator.startIndex;
+    const end = single ? node.endIndex : declarator.endIndex;
+    const canonicalIdentity = canonicalId(filePath, packageName, typeChain, "field", name);
+    return {
+      id: canonicalIdentity,
+      language: "java",
+      kind: "field",
+      name,
+      packageName,
+      qualifiedName: `${packageName ? `${packageName}.` : ""}${[...typeChain, name].join(".")}`,
+      canonicalIdentity,
+      signature: `${name}: ${declaredType}`,
+      filePath,
+      range: sourceRange(source, start, end),
+      bodyRange: undefined,
+      parentId: parent.id,
+      annotations,
+      modifiers,
+      metadata: { declaredType },
+      source: source.slice(start, end),
+      body: undefined,
+    };
+  });
+}
+
 function byRange(a: SymbolRecord, b: SymbolRecord): number {
   return (
     a.range.startLine - b.range.startLine ||
@@ -315,14 +368,15 @@ function byRange(a: SymbolRecord, b: SymbolRecord): number {
  * byte-identical to the old parser regardless of that ordering change, this recomputes the
  * old global order (types, then methods sorted by position, then constructors sorted by
  * position) purely for suffix assignment; the returned `symbols` array itself keeps its
- * (unrelated) per-type nested order.
+ * (unrelated) per-type nested order. Fields (a new symbol kind with no old-parser precedent to match) are included in this same ordering, inserted after types and before methods — the exact position has no behavioral significance since there is no legacy ordering to preserve for fields, but must stay consistent.
  */
 function assignDedupIds(symbols: SymbolRecord[], types: SymbolRecord[]): void {
+  const fields = symbols.filter((s) => s.kind === "field").sort(byRange);
   const methods = symbols.filter((s) => s.kind === "method").sort(byRange);
   const constructors = symbols
     .filter((s) => s.kind === "constructor")
     .sort(byRange);
-  const dedupOrder = [...types, ...methods, ...constructors];
+  const dedupOrder = [...types, ...fields, ...methods, ...constructors];
   const identityCounts = new Map<string, number>();
   for (const symbol of dedupOrder) {
     const count =

@@ -34,7 +34,7 @@ class OrderService {
   assert.match(rel.evidence.join(" "), /constructor parameter/);
 });
 
-test("field injection resolves via the enclosing class, since fields aren't symbols", () => {
+test("field injection resolves via the enclosing class (even though fields are now symbols)", () => {
   const source = `
 class PaymentGateway {}
 class Checkout {

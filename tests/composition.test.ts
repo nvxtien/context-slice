@@ -32,15 +32,15 @@ test("a large enclosing type yields a compact skeleton, never a class dump", () 
   assert.ok(skeleton.estimatedTokens < 200, "skeleton must stay compact");
 });
 
-test("a Java skeleton carries field declarations without indexing them", () => {
+test("a Java skeleton carries field declarations and fields are now indexed as symbols", () => {
   const [skeleton] = composeSiblings(index, targetOf("demo.Counter.increment"));
   assert.match(skeleton.rendered, /private int count;/);
   assert.match(skeleton.rendered, /public int current\(\)/);
-  assert.equal(
+  assert.ok(
     index.symbols.some(
-      (symbol) => symbol.name === "count" && symbol.filePath.endsWith(".java"),
+      (symbol) => symbol.name === "count" && symbol.filePath.endsWith(".java") && symbol.kind === "field",
     ),
-    false,
+    "field 'count' should be indexed as a separate symbol",
   );
 });
 
