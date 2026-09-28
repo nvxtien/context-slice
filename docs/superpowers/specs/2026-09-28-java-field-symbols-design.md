@@ -95,19 +95,27 @@ A field symbol is a normal `SymbolRecord` with:
   structurally identical in shape to a class's or method's
 - `parentId`: the enclosing type's id (class, interface, enum, or record —
   whichever body the `field_declaration` was found in)
-- `range`: spans the individual `variable_declarator` this symbol
-  represents (see Multi-declarator handling below) — **not** the whole
-  `field_declaration` node when there are multiple declarators, so that two
-  fields declared on one line (`private int a, b;`) get distinct,
-  non-overlapping ranges
+- `range`/`source`: every other symbol kind in this codebase maintains the
+  invariant `symbol.source === fullSource.slice(range.start, range.end)` —
+  `.source` is never a synthetic string assembled from disjoint slices.
+  Field symbols keep that invariant:
+  - **Single-declarator field** (the common case, e.g.
+    `@Autowired private UserRepository userRepository;`): `range`/`source`
+    span the WHOLE `field_declaration`/`constant_declaration` node,
+    exactly like a method or type symbol — annotations and modifiers are
+    part of `.source`, matching what a person reading the field would
+    expect.
+  - **Multi-declarator field** (`private int a, b = 2;`): there is no
+    single non-overlapping range each declarator could claim that still
+    includes the shared annotations/type text, since two symbols cannot
+    share a range under the existing invariant. Each field's `range`/
+    `source` therefore span only its OWN `variable_declarator` node
+    (e.g. `"a"` and `"b = 2"` as two separate, non-overlapping symbols) —
+    the shared `type`/`annotations`/`modifiers` are still fully present on
+    each symbol as their own structured fields, just not repeated in
+    `.source`'s text.
 - `bodyRange`: never set (`undefined`) — a field has no body, matching how
   an abstract/interface method already leaves `bodyRange` unset
-- `source`: the individual declarator's own slice, prefixed with the shared
-  leading annotations/modifiers text (so a field's `.source` reads like
-  real Java: `"@Autowired private UserRepository userRepository"`) —
-  concretely: `` `${prefixText}${declaratorNode.text}` `` where
-  `prefixText` is the `field_declaration`'s own text up to (not including)
-  its first `variable_declarator`
 - `qualifiedName`/`canonicalIdentity`: via the existing `canonicalId()`
   helper, called with `kind: "field"` and no `parameters` argument (fields
   have no parameter signature) — this already works generically since
