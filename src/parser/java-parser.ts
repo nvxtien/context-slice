@@ -7,9 +7,17 @@ import type {
   SymbolRecord,
 } from "../types/model.js";
 
+type Node = Parser.SyntaxNode;
+
+// Java grammar node type -> SymbolKind, matching the old regex parser's exact kind values.
+const TYPE_DECL_NODE_TYPES: Record<string, SymbolKind> = {
+  class_declaration: "class",
+  interface_declaration: "interface",
+  enum_declaration: "enum",
+  record_declaration: "record",
+};
+
 const annotationRe = /@([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)?)/g;
-const typeRe =
-  /((?:\s*@[A-Za-z_$][\w$]*(?:\([^\n]*\))?\s*)*)((?:(?:public|protected|private|static|final|abstract|default|sealed|non-sealed)\s+)*)\b(class|interface|enum|record)\s+([A-Za-z_$][\w$]*)/g;
 // A real handler can look like `public @ResponseBody Vets showResourcesVetList()`: an inline
 // return-type annotation AFTER the access modifier, which the original two-fixed-groups shape
 // (annotations, then modifiers, then the type) never allowed. Group 3 below accepts zero or more
@@ -98,47 +106,67 @@ function callArguments(source: string, open: number) {
   return "";
 }
 
-export function parseJava(filePath: string, source: string) {
-  const parser = new Parser();
-  parser.setLanguage(Java as any);
-  let parseError = false;
-  try {
-    parser.parse(source);
-  } catch {
-    parseError = true;
+/** Annotation names + modifier keywords out of a `modifiers` node, in source order (bare annotation names only, no arguments). */
+function modifiersNodeParts(modifiersNode: Node | undefined): {
+  annotations: string[];
+  modifiers: string[];
+} {
+  const annotations: string[] = [];
+  const modifiers: string[] = [];
+  for (const child of modifiersNode?.children ?? []) {
+    if (child.type === "marker_annotation" || child.type === "annotation") {
+      annotations.push(`@${child.childForFieldName("name")!.text}`);
+    } else if (!child.isNamed) {
+      modifiers.push(child.type);
+    }
   }
-  const symbols: SymbolRecord[] = [];
-  const types: SymbolRecord[] = [];
-  const packageName =
-    source.match(
-      /\bpackage\s+([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*;/,
-    )?.[1] ?? "";
-  for (const match of source.matchAll(typeRe)) {
-    const start = match.index ?? 0;
-    const name = match[4];
-    const open = source.indexOf("{", start + match[0].length);
-    const end =
-      open >= 0 ? closingBrace(source, open) : start + match[0].length;
-    const kind = match[3] as SymbolKind;
-    const parent = types
-      .filter(
-        (item) =>
-          item.range.startLine <= point(source, start).line &&
-          item.range.endLine >= point(source, end).line &&
-          item.range.startLine !== point(source, start).line,
-      )
-      .sort(
-        (a, b) =>
-          a.range.endLine -
-          a.range.startLine -
-          (b.range.endLine - b.range.startLine),
-      )[0];
-    const typeChain = [
-      ...(parent?.qualifiedName
-        ?.split(".")
-        .slice(packageName ? packageName.split(".").length : 0) ?? []),
-      name,
+  return { annotations, modifiers };
+}
+
+/** class/interface supertypes: class uses `superclass`/`interfaces` fields, interface uses a direct `extends_interfaces` child (no matching field). */
+function supertypesOf(node: Node): string[] {
+  if (node.type === "class_declaration") {
+    const superclass = node.childForFieldName("superclass");
+    const interfaces = node.childForFieldName("interfaces");
+    return [
+      ...(superclass ? [superclass.text.replace(/^extends\s+/, "")] : []),
+      ...(interfaces
+        ? interfaces.text.replace(/^implements\s+/, "").split(/\s*,\s*/)
+        : []),
     ];
+  }
+  if (node.type === "interface_declaration") {
+    const extendsNode = node.children.find(
+      (c) => c.type === "extends_interfaces",
+    );
+    const typeList = extendsNode?.namedChildren.find(
+      (c) => c.type === "type_list",
+    );
+    return typeList?.namedChildren.map((t) => t.text) ?? [];
+  }
+  return [];
+}
+
+/** Recursive walk over top-level/nested type declarations (class/interface/enum/record), mirroring src/languages/rust/parse.ts's walk(node, parent, chain) shape. */
+function walkTypes(
+  node: Node,
+  parent: SymbolRecord | undefined,
+  chain: string[],
+  filePath: string,
+  source: string,
+  packageName: string,
+  symbols: SymbolRecord[],
+  types: SymbolRecord[],
+) {
+  for (const child of node.namedChildren) {
+    const kind = TYPE_DECL_NODE_TYPES[child.type];
+    if (!kind) {
+      walkTypes(child, parent, chain, filePath, source, packageName, symbols, types);
+      continue;
+    }
+    const name = child.childForFieldName("name")!.text;
+    const bodyNode = child.childForFieldName("body");
+    const typeChain = [...chain, name];
     const canonicalIdentity = canonicalId(
       filePath,
       packageName,
@@ -146,15 +174,10 @@ export function parseJava(filePath: string, source: string) {
       kind,
       name,
     );
-    const declaration = source.slice(
-      start,
-      open >= 0 ? open : start + match[0].length,
+    const modifiersNode = child.namedChildren.find(
+      (c) => c.type === "modifiers",
     );
-    const supertypes = [
-      ...declaration.matchAll(
-        /\b(?:extends|implements)\s+([A-Za-z_$][\w$]*(?:\s*,\s*[A-Za-z_$][\w$]*)*)/g,
-      ),
-    ].flatMap((m) => m[1].split(/\s*,\s*/));
+    const { annotations, modifiers } = modifiersNodeParts(modifiersNode);
     const symbol: SymbolRecord = {
       id: canonicalIdentity,
       language: "java",
@@ -165,18 +188,44 @@ export function parseJava(filePath: string, source: string) {
       canonicalIdentity,
       signature: `${kind} ${name}`,
       filePath,
-      range: sourceRange(source, start, end),
-      bodyRange: open >= 0 ? sourceRange(source, open, end) : undefined,
+      range: sourceRange(source, child.startIndex, child.endIndex),
+      bodyRange: bodyNode
+        ? sourceRange(source, bodyNode.startIndex, bodyNode.endIndex)
+        : undefined,
       parentId: parent?.id,
-      supertypes,
-      annotations: annotationList(match[1]),
-      modifiers: match[2].trim().split(/\s+/).filter(Boolean),
-      source: source.slice(start, end),
-      body: open >= 0 ? source.slice(open, end) : undefined,
+      supertypes: supertypesOf(child),
+      annotations,
+      modifiers,
+      source: source.slice(child.startIndex, child.endIndex),
+      body: bodyNode
+        ? source.slice(bodyNode.startIndex, bodyNode.endIndex)
+        : undefined,
     };
     symbols.push(symbol);
     types.push(symbol);
+    if (bodyNode)
+      walkTypes(bodyNode, symbol, typeChain, filePath, source, packageName, symbols, types);
   }
+}
+
+export function parseJava(filePath: string, source: string) {
+  const parser = new Parser();
+  parser.setLanguage(Java as any);
+  let parseError = false;
+  let tree: Parser.Tree | undefined;
+  try {
+    tree = parser.parse(source);
+  } catch {
+    parseError = true;
+  }
+  const symbols: SymbolRecord[] = [];
+  const types: SymbolRecord[] = [];
+  const packageDecl = tree?.rootNode.namedChildren.find(
+    (c) => c.type === "package_declaration",
+  );
+  const packageName = packageDecl?.namedChildren[0]?.text ?? "";
+  if (tree)
+    walkTypes(tree.rootNode, undefined, [], filePath, source, packageName, symbols, types);
   for (const match of source.matchAll(methodRe)) {
     const start = match.index ?? 0;
     const name = match[5];
