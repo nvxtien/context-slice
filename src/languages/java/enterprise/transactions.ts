@@ -2,8 +2,25 @@ import type { SymbolRecord } from "../../../types/model.js";
 import type { EnterpriseRelation } from "../../../types/enterprise.js";
 import { registerEnterpriseExtractor } from "./registry.js";
 
-const TRANSACTIONAL_RE = /@Transactional(?:\(([^]*?)\))?/;
 const KEPT_ATTRS = new Set(["readOnly", "propagation", "isolation", "rollbackFor", "noRollbackFor", "timeout"]);
+
+/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Transactional" -> "Transactional". */
+function bareName(annotation: string): string {
+  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
+}
+
+/**
+ * Matches an already-AST-confirmed @Transactional annotation's own argument text. Detection
+ * of whether the annotation is present happens via SymbolRecord.annotations, never via this
+ * regex -- this only ever runs to extract an argument list once .annotations has confirmed
+ * the annotation is real. The optional `(?:[\w.]+\.)?` prefix tolerates a fully-qualified
+ * annotation name the same way bareName() already tolerates one for detection -- without it,
+ * a qualified @Transactional would be correctly DETECTED but its attributes would never be
+ * found, silently downgrading it to "no fact to record" (the same brief's Review Focus item 2).
+ */
+function transactionalArgsRegex(): RegExp {
+  return /@(?:[\w.]+\.)?Transactional(?:\(([^]*?)\))?/;
+}
 
 /**
  * The symbol's own header text (annotations + declaration), stopping before its body's
@@ -24,28 +41,6 @@ function header(symbol: SymbolRecord): string {
     else if (ch === "{" && depth === 0) return text.slice(0, i);
   }
   return text;
-}
-
-/**
- * Guards against a "@Transactional(...)"-shaped match that is itself commented out on its
- * own physical line (e.g. "// example: @Transactional(readOnly = true)"). Re-derived from
- * spring-mvc.ts's matchIsInsideLineComment: parseJava's leading-trivia scan strips a "//"
- * prefix out of symbol.source itself, so the header text alone can never see it — this maps
- * the match position back to the real file line and checks only that line for a preceding "//".
- */
-function matchIsInsideLineComment(
-  symbol: SymbolRecord,
-  headerText: string,
-  match: RegExpMatchArray,
-  fullSource: string,
-): boolean {
-  const index = match.index ?? 0;
-  const before = headerText.slice(0, index);
-  const lastNewline = before.lastIndexOf("\n");
-  const lineNumber = symbol.range.startLine + (before.match(/\n/g)?.length ?? 0);
-  const column = lastNewline === -1 ? symbol.range.startColumn + index : index - lastNewline - 1;
-  const fileLine = fullSource.split("\n")[lineNumber - 1] ?? "";
-  return fileLine.slice(0, column).includes("//");
 }
 
 /** Splits an annotation argument list on commas outside (), strings, so dotted constants
@@ -78,12 +73,11 @@ function extractTransactionRelations(
   const relations: EnterpriseRelation[] = [];
 
   for (const method of symbols.filter((s) => s.kind === "method")) {
-    const methodHeader = header(method);
-    const match = methodHeader.match(TRANSACTIONAL_RE);
-    if (!match) continue;
-    if (matchIsInsideLineComment(method, methodHeader, match, source)) continue;
+    const hasTransactional = method.annotations.some((a) => bareName(a) === "Transactional");
+    if (!hasTransactional) continue;
 
-    const rawArgs = match[1];
+    const match = header(method).match(transactionalArgsRegex());
+    const rawArgs = match?.[1];
     if (rawArgs === undefined || rawArgs.trim() === "") continue; // bare or empty-parens: no fact to record
 
     const evidence: string[] = [];

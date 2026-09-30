@@ -100,3 +100,34 @@ class PlainUtil {
   const { relations } = relationsFor(source, "src/main/java/PlainUtil.java");
   assert.equal(relations.length, 0);
 });
+
+test("a fully-qualified @Transactional annotation still extracts its attributes", () => {
+  const source = `
+class PaymentService {
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    void charge() {}
+}
+`;
+  const { symbols, relations } = relationsFor(source);
+  const method = symbols.find((s) => s.name === "charge")!;
+  const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
+  assert.equal(rel.targetLabel, "readOnly=true");
+  assert.equal(rel.confidence, "exact");
+});
+
+test("a multi-line @Transactional argument list is not lost", () => {
+  const source = `
+class PaymentService {
+    @Transactional(
+        readOnly = true,
+        timeout = 30
+    )
+    void charge() {}
+}
+`;
+  const { symbols, relations } = relationsFor(source);
+  const method = symbols.find((s) => s.name === "charge")!;
+  const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
+  assert.equal(rel.targetLabel, "readOnly=true, timeout=30");
+  assert.equal(rel.confidence, "exact");
+});
