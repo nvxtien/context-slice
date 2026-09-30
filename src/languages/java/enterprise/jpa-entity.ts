@@ -7,37 +7,29 @@ import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./regis
 // (the side-channel the resolver reads); resolveEntityRelations then applies the
 // unique-simple-name rule once every project symbol is known.
 
-const RELATION_RE = /@(OneToOne|OneToMany|ManyToOne|ManyToMany)\b(?:\s*\(([^)]*)\))?/g;
-const JOIN_COLUMN_RE = /@JoinColumn\s*\(([^)]*)\)/;
+const RELATION_ANNOTATIONS = new Set(["OneToOne", "OneToMany", "ManyToOne", "ManyToMany"]);
 const COLLECTION_RE = /\b(?:List|Set|Collection)<\s*([\w.]+)\s*>/;
 
-/** Class body at member depth only; comments and nested bodies blanked (same as DI's). */
-function memberLevelBody(classSource: string): string {
-  const out = classSource.split("");
-  let depth = 0;
-  let inString = false;
-  for (let i = 0; i < out.length; i++) {
-    const ch = classSource[i];
-    if (!inString && ch === "/" && classSource[i + 1] === "/") {
-      while (i < out.length && classSource[i] !== "\n") out[i++] = " ";
-      continue;
-    }
-    if (!inString && ch === "/" && classSource[i + 1] === "*") {
-      const end = classSource.indexOf("*/", i + 2);
-      const stop = end === -1 ? out.length : end + 2;
-      for (; i < stop; i++) if (out[i] !== "\n") out[i] = " ";
-      i--;
-      continue;
-    }
-    if (ch === '"' && classSource[i - 1] !== "\\") inString = !inString;
-    const keep = depth === 1;
-    if (!inString) {
-      if (ch === "{") depth++;
-      else if (ch === "}") depth--;
-    }
-    if (!keep && out[i] !== "\n") out[i] = " ";
-  }
-  return out.join("");
+/** Strips a leading "@" and any dotted package prefix, e.g. "@javax.persistence.ManyToOne" -> "ManyToOne". */
+function bareName(annotation: string): string {
+  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
+}
+
+/**
+ * Matches ONE specific, already-AST-confirmed relationship annotation's own argument text
+ * (mappedBy/fetch/cascade). Detection of WHICH relationship annotation (if any) is present
+ * happens via SymbolRecord.annotations, never via this regex -- this only ever runs to
+ * extract an argument list for a name already known to be real. The optional
+ * `(?:[\w.]+\.)?` prefix tolerates a fully-qualified annotation name the same way
+ * bareName() already tolerates one for detection.
+ */
+function relationArgsRegex(name: string): RegExp {
+  return new RegExp(`@(?:[\\w.]+\\.)?${name}\\b(?:\\s*\\(([^)]*)\\))?`);
+}
+
+/** Same qualified-name-tolerant pattern as relationArgsRegex, for the fixed @JoinColumn name. */
+function joinColumnArgsRegex(): RegExp {
+  return /@(?:[\w.]+\.)?JoinColumn\s*\(([^)]*)\)/;
 }
 
 /** Explicit mappedBy/fetch/cascade only (§26-27): anything absent stays absent. */
@@ -56,29 +48,18 @@ function extractEntityRelations(symbols: SymbolRecord[], filePath: string, _sour
   const relations: EnterpriseRelation[] = [];
   const entities = symbols.filter((s) => s.filePath === filePath && s.kind === "class" && s.annotations.includes("@Entity"));
   for (const entity of entities) {
-    const body = memberLevelBody(entity.source);
-    for (const match of body.matchAll(RELATION_RE)) {
-      const rest = body.slice((match.index ?? 0) + match[0].length);
-      // Stacked annotations (@JoinColumn, @OrderBy, ...) belong to the same field.
-      // ponytail: `[^)]*` isn't nested-paren-aware, so a stacked annotation with a
-      // nested-annotation argument (e.g. `@JoinColumn(foreignKey = @ForeignKey(name = "fk_x"))`)
-      // under-consumes at the inner `)`, leaving `decl` misaligned so the field-declaration
-      // regex below fails to match — this silently drops the WHOLE relation for that field
-      // (not just the JoinColumn evidence). Fix if it shows up on a real repo: a depth-counting
-      // scanner like `memberLevelBody`'s own brace walk, not a smarter regex.
-      const lead = rest.match(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?)*/)![0];
-      const decl = rest.slice(lead.length);
-      const end = decl.search(/[;=(]/);
-      if (end === -1 || decl[end] === "(") continue; // annotated getter/method: not handled
-      const bare = decl
-        .slice(0, end)
-        .replace(/\b(?:final|private|protected|public|static|transient|volatile)\b/g, " ")
-        .trim();
-      const field = bare.match(/^([\w$.]+(?:\s*<.*>)?)\s+([\w$]+)$/s);
-      if (!field) continue;
-      const [, typeText, name] = field;
+    const fields = symbols.filter((s) => s.kind === "field" && s.parentId === entity.id);
+    for (const field of fields) {
+      const relationName = field.annotations.map(bareName).find((name) => RELATION_ANNOTATIONS.has(name));
+      if (!relationName) continue;
+
+      const relationMatch = field.source.match(relationArgsRegex(relationName));
+      const typeText = field.metadata?.declaredType ?? "";
       const rawTarget = typeText.match(COLLECTION_RE)?.[1] ?? typeText.replace(/<.*>/s, "").trim();
-      const joinColumn = lead.match(JOIN_COLUMN_RE)?.[1];
+
+      const hasJoinColumn = field.annotations.some((a) => bareName(a) === "JoinColumn");
+      const joinColumn = hasJoinColumn ? field.source.match(joinColumnArgsRegex())?.[1] : undefined;
+
       relations.push({
         kind: "ENTITY_RELATION",
         family: "spring-data-jpa",
@@ -86,8 +67,8 @@ function extractEntityRelations(symbols: SymbolRecord[], filePath: string, _sour
         targetLabel: rawTarget.slice(rawTarget.lastIndexOf(".") + 1),
         confidence: "unresolved", // provisional until resolveEntityRelations runs
         evidence: [
-          `@${match[1]} on field ${name}`,
-          ...explicitAttributes(match[2] ?? ""),
+          `@${relationName} on field ${field.name}`,
+          ...explicitAttributes(relationMatch?.[1] ?? ""),
           ...(joinColumn !== undefined ? [`@JoinColumn(${joinColumn.trim()})`] : []),
         ],
         range: entity.range,

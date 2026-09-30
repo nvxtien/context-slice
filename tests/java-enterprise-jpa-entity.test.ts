@@ -84,3 +84,57 @@ test("@Entity inside a comment produces no relation", () => {
   const { relations } = relationsFor({ "src/main/java/PlainUtil.java": source });
   assert.equal(relations.length, 0);
 });
+
+test("a field's @JoinColumn with a nested-annotation argument no longer drops the whole relation", () => {
+  const visit = `
+@Entity
+class Visit {
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_pet"))
+    private Pet pet;
+}
+`;
+  const pet = `@Entity\nclass Pet {}`;
+  const { symbols, relations } = relationsFor({ "src/main/java/Visit.java": visit, "src/main/java/Pet.java": pet });
+  const visitClass = symbols.find((s) => s.name === "Visit")!;
+  const petClass = symbols.find((s) => s.name === "Pet")!;
+  const rel = relations.find((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === visitClass.id)!;
+  assert.ok(rel, "expected an ENTITY_RELATION despite the nested-paren @JoinColumn argument");
+  assert.equal(rel.targetSymbolId, petClass.id);
+  assert.equal(rel.targetLabel, "Pet");
+});
+
+test("a multi-declarator relationship field produces a relation for each declarator", () => {
+  const owner = `
+@Entity
+class Owner {
+    @OneToMany
+    private java.util.List<Pet> pets, favorites;
+}
+`;
+  const pet = `@Entity\nclass Pet {}`;
+  const { symbols, relations } = relationsFor({ "src/main/java/Owner.java": owner, "src/main/java/Pet.java": pet });
+  const ownerClass = symbols.find((s) => s.name === "Owner")!;
+  const entityRelations = relations.filter((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === ownerClass.id);
+  assert.equal(entityRelations.length, 2, "both pets and favorites must produce their own relation");
+  for (const rel of entityRelations) {
+    assert.equal(rel.targetLabel, "Pet");
+  }
+});
+
+test("a fully-qualified relationship annotation name is still recognized", () => {
+  const order = `
+@Entity
+class Order {
+    @javax.persistence.ManyToOne
+    private Customer customer;
+}
+`;
+  const customer = `@Entity\nclass Customer {}`;
+  const { symbols, relations } = relationsFor({ "src/main/java/Order.java": order, "src/main/java/Customer.java": customer });
+  const orderClass = symbols.find((s) => s.name === "Order")!;
+  const customerClass = symbols.find((s) => s.name === "Customer")!;
+  const rel = relations.find((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === orderClass.id)!;
+  assert.ok(rel, "expected a relation for a fully-qualified @ManyToOne");
+  assert.equal(rel.targetSymbolId, customerClass.id);
+});
