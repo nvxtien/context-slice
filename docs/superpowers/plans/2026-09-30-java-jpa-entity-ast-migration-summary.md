@@ -61,6 +61,16 @@ Result: 434 tests, 428 pass, 6 fail — identical 6 pre-existing failures in `te
 - `entity_relation`: oracle=12, matched=12, falsePositives=0 → recall 100%, precision 100%
 - `repository_linkage`: oracle=26, matched=26, falsePositives=0 → recall 100%, precision 100% (byte-identical to committed, confirming zero unintended effect on the untouched `spring-data.ts` code path)
 
+## Known Limitation: Oracle-Extractor Asymmetry in @JoinColumn Evidence
+
+**The asymmetry:** The oracle's `consumeLeadingAnnotations()` (fixed during Task 2) now correctly captures the full argument text of nested-paren `@JoinColumn` annotations — e.g., `@JoinColumn(foreignKey = @ForeignKey(name = "fk_pet"))` captures the entire `foreignKey = @ForeignKey(name = "fk_pet")` substring. By contrast, the real extractor's `joinColumnArgsRegex()` (`src/languages/java/enterprise/jpa-entity.ts`) continues to use a non-nested-paren-aware `[^)]*` pattern and truncates at the first `)`, producing a shorter evidence string for the same annotation.
+
+**Why it exists:** Phase 4a's non-goals explicitly declined to build a depth-counting scanner for relationship annotation arguments in the extractor. The oracle received a full character-by-character paren-depth counter during its fix (mirroring `memberLevelMask`'s brace-depth logic) but the extractor's simpler regex was left unchanged—a deliberate trade-off documented in the phase's constraints.
+
+**Why it doesn't matter today:** The current benchmark corpus (`spring-petclinic`, `petclinic-rest`) contains only one nested-paren `@JoinColumn` case (`Vet.specialties`), and it appears **nested inside `@JoinTable`**, never as a top-level field annotation. Since the oracle's fix correctly identifies only top-level annotations and the extractor's evidence check succeeds with truncated text for this case, the benchmark scores remain correct (12/12 relations, both with matching evidence).
+
+**For future maintainers:** If a newly-added pinned repository produces a confusing `@JoinColumn` evidence-mismatch benchmark failure (relation detected correctly, but `startsWith("@JoinColumn(") && includes(oe.joinColumn)` check fails), the likely cause is a top-level field annotation with nested parens: `@JoinColumn(foreignKey = @ForeignKey(...))`. This is not a regression—it is this known asymmetry, where the extractor's evidence text is truncated but the relation itself is still correctly detected. To confirm, check the annotation's argument structure in the repository source. A future fix would require applying a depth-counting regex or hand-coded paren-walking logic to `joinColumnArgsRegex()`, aligned with the oracle's approach.
+
 ## Final Roadmap Status
 
 **Phase 4a complete.** Phase 4b (`spring-data.ts`) is the **ABSOLUTE FINAL remaining sub-project** in the entire AST-migration roadmap. After Phase 4b, all five enterprise extractors will have been migrated off regex onto AST-derived symbols, completing the whole "AST-ify enterprise extractors" initiative that began 2026-09-28.
