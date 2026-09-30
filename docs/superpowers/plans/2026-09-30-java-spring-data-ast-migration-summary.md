@@ -29,11 +29,18 @@ code path).
 ## Roadmap status: COMPLETE
 
 This closes the "AST-ify enterprise extractors" roadmap. All five
-enterprise extractors now detect annotations via AST-derived
-`SymbolRecord.annotations` rather than comment-unaware text regexes:
+enterprise extractors now detect their primary relationship annotations
+via AST-derived `SymbolRecord.annotations` rather than comment-unaware
+text regexes:
 
-1. `dependency-injection.ts` (Phase 1)
+1. `dependency-injection.ts` (Phase 1) — field/setter injection
 2. `spring-mvc.ts` (Phase 2)
 3. `transactions.ts` (Phase 3)
 4. `jpa-entity.ts` (Phase 4a)
 5. `spring-data.ts` (Phase 4b)
+
+Note: `dependency-injection.ts`'s constructor-injection path (predating
+this roadmap, from Phase 1) still gates on a text regex over the
+constructor's own source (`@(?:Autowired|Inject)\b...`) rather than
+`.annotations`, flagged by this phase's final review as a residual gap
+outside this roadmap's own scope.
