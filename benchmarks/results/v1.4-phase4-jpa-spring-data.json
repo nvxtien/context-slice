@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-28T11:49:55.344Z",
+  "generatedAt": "2026-09-30T14:33:09.601Z",
   "entity_relation": {
-    "oracleTotal": 10,
-    "matched": 10,
+    "oracleTotal": 12,
+    "matched": 12,
     "falsePositiveCount": 0,
     "recall": 1,
     "precision": 1,
@@ -23,14 +23,14 @@
   },
   "perRepo": {
     "spring-petclinic": {
-      "entityOracleTotal": 3,
-      "entityMatched": 3,
+      "entityOracleTotal": 4,
+      "entityMatched": 4,
       "linkageOracleTotal": 6,
       "linkageMatched": 6
     },
     "petclinic-rest": {
-      "entityOracleTotal": 7,
-      "entityMatched": 7,
+      "entityOracleTotal": 8,
+      "entityMatched": 8,
       "linkageOracleTotal": 20,
       "linkageMatched": 20
     }
