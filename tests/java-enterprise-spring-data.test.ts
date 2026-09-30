@@ -74,6 +74,23 @@ test("@Query captures the raw text verbatim", () => {
   assert.match(rel.evidence.join(" "), /SELECT ptype FROM PetType/);
 });
 
+test("@Query mentioned only in a method body comment produces no relation", () => {
+  const repo = `interface OwnerRepository extends JpaRepository<Owner, Integer> {\n    default void touch(int id) {\n        // @Query("SELECT o FROM Owner o")\n        System.out.println("noop");\n    }\n}`;
+  const owner = `@Entity\nclass Owner {}`;
+  const { symbols, relations } = relationsFor({ "src/main/java/OwnerRepository.java": repo, "src/main/java/Owner.java": owner });
+  const method = symbols.find((s) => s.kind === "method" && s.name === "touch")!;
+  assert.ok(!relations.some((r) => r.sourceSymbolId === method.id), "a @Query mentioned only in a comment must not produce a relation");
+});
+
+test("a fully-qualified @Query annotation still has its text extracted", () => {
+  const repo = `interface PetTypeRepository extends JpaRepository<PetType, Integer> {\n    @org.springframework.data.jpa.repository.Query("SELECT ptype FROM PetType ptype ORDER BY ptype.name")\n    java.util.List<PetType> findPetTypes();\n}`;
+  const petType = `@Entity\nclass PetType {}`;
+  const { symbols, relations } = relationsFor({ "src/main/java/PetTypeRepository.java": repo, "src/main/java/PetType.java": petType });
+  const method = symbols.find((s) => s.kind === "method" && s.name === "findPetTypes")!;
+  const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
+  assert.match(rel.evidence.join(" "), /SELECT ptype FROM PetType/);
+});
+
 test("a plain CRUD-inherited method with no derived-query shape and no @Query produces nothing", () => {
   const repo = `interface X extends JpaRepository<Order, Long> {\n    void save(Order o);\n}`;
   const order = `@Entity\nclass Order {}`;

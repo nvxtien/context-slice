@@ -10,6 +10,11 @@ import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./regis
 const BASE_RE = /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
 const DERIVED_RE = /^(?:find|exists|delete|count)By(?=[A-Z])/;
 
+/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Query" -> "Query". */
+function bareName(annotation: string): string {
+  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
+}
+
 /** Top-level type arguments of the `<...>` opening at `open`, or undefined if unbalanced. */
 function typeArguments(text: string, open: number): { args: string[]; end: number } | undefined {
   const args: string[] = [];
@@ -58,9 +63,17 @@ function derivedProperties(name: string): string[] | undefined {
     .map((seg) => `property: ${seg[0].toLowerCase()}${seg.slice(1)}`);
 }
 
-/** Verbatim @Query(...) argument text (string-literal aware); undefined if absent/unbalanced. */
+/**
+ * Verbatim @Query(...) argument text (string-literal aware); undefined if absent/unbalanced.
+ * Detection of whether @Query is present happens via SymbolRecord.annotations first -- never
+ * via the search regex below on its own, which previously matched inside comments or string
+ * literals anywhere in the method's source (a method body, not just its header, can contain
+ * arbitrary text). The qualified-name-tolerant prefix mirrors every prior phase's fix for a
+ * fully-qualified annotation name.
+ */
 function queryText(method: SymbolRecord): string | undefined {
-  const at = method.source.search(/@Query\s*\(/);
+  if (!method.annotations.some((a) => bareName(a) === "Query")) return undefined;
+  const at = method.source.search(/@(?:[\w.]+\.)?Query\s*\(/);
   if (at === -1) return undefined;
   const open = method.source.indexOf("(", at);
   let depth = 0;
