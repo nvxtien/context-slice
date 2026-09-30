@@ -71,7 +71,6 @@ export type OracleResult = {
 };
 
 const RELATION_RE = /@(OneToOne|OneToMany|ManyToOne|ManyToMany)\b(?:\s*\(([^)]*)\))?/g;
-const JOIN_COLUMN_RE = /@JoinColumn\s*\(([^)]*)\)/;
 const COLLECTION_RE = /\b(?:List|Set|Collection)<\s*([\w.]+)\s*>/;
 const BASE_RE = /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
 const DERIVED_RE = /^(?:find|exists|delete|count)By(?=[A-Z])/;
@@ -184,6 +183,55 @@ function explicitAttributes(args: string): { mappedBy?: string; fetch?: string; 
   return { mappedBy, fetch, cascade };
 }
 
+type LeadAnnotation = { name: string; args?: string };
+
+/** Consumes zero or more leading stacked annotations from the start of `text` (the annotations
+ * between a relation annotation and the field declaration it decorates), paren-depth counting
+ * an annotation's own `(...)` argument list so a nested-annotation argument (e.g.
+ * `@JoinTable(joinColumns = @JoinColumn(...), inverseJoinColumns = @JoinColumn(...))`) doesn't
+ * truncate consumption early at the first `)` -- mirrors memberLevelMask's brace-depth counting,
+ * one level down at paren depth instead of brace depth. Also returns each consumed annotation's
+ * own bare name and (unparsed) argument text, so a caller can tell a genuine top-level stacked
+ * annotation (e.g. a field's own `@JoinColumn`) apart from one merely nested inside another
+ * top-level annotation's argument list (e.g. `@JoinTable`'s `joinColumns = @JoinColumn(...)`). */
+function consumeLeadingAnnotations(text: string): { consumed: string; annotations: LeadAnnotation[] } {
+  let i = 0;
+  const annotations: LeadAnnotation[] = [];
+  for (;;) {
+    let j = i;
+    while (j < text.length && /\s/.test(text[j])) j++;
+    if (text[j] !== "@") break;
+    j++;
+    const nameStart = j;
+    while (j < text.length && /[\w.]/.test(text[j])) j++;
+    const name = text.slice(nameStart, j);
+    let k = j;
+    while (k < text.length && /\s/.test(text[k])) k++;
+    let args: string | undefined;
+    if (text[k] === "(") {
+      let depth = 0;
+      let m = k;
+      const argsStart = k + 1;
+      while (m < text.length) {
+        if (text[m] === "(") depth++;
+        else if (text[m] === ")") {
+          depth--;
+          if (depth === 0) {
+            args = text.slice(argsStart, m);
+            m++;
+            break;
+          }
+        }
+        m++;
+      }
+      j = m;
+    }
+    annotations.push({ name: name.slice(name.lastIndexOf(".") + 1), args });
+    i = j;
+  }
+  return { consumed: text.slice(0, i), annotations };
+}
+
 function scanEntityRelations(source: string, relPath: string, repo: string): EntityRelationEntry[] {
   const entries: EntityRelationEntry[] = [];
   for (const block of topLevelTypeBlocks(source)) {
@@ -192,7 +240,7 @@ function scanEntityRelations(source: string, relPath: string, repo: string): Ent
     const body = memberLevelMask(source, block.bodyOpen, block.bodyClose);
     for (const match of body.matchAll(RELATION_RE)) {
       const rest = body.slice((match.index ?? 0) + match[0].length);
-      const lead = rest.match(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?)*/)![0];
+      const { consumed: lead, annotations: leadAnnotations } = consumeLeadingAnnotations(rest);
       const decl = rest.slice(lead.length);
       const end = decl.search(/[;=(]/);
       if (end === -1 || decl[end] === "(") continue; // annotated getter/method: not a field
@@ -204,7 +252,7 @@ function scanEntityRelations(source: string, relPath: string, repo: string): Ent
       if (!field) continue;
       const [, typeText, fieldName] = field;
       const rawTarget = typeText.match(COLLECTION_RE)?.[1] ?? typeText.replace(/<.*>/s, "").trim();
-      const joinColumn = lead.match(JOIN_COLUMN_RE)?.[1]?.trim();
+      const joinColumn = leadAnnotations.find((a) => a.name === "JoinColumn")?.args?.trim();
       const { mappedBy, fetch, cascade } = explicitAttributes(match[2] ?? "");
       entries.push({
         repo,
