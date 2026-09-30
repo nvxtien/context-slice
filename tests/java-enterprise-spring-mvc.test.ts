@@ -178,3 +178,66 @@ class VisitController {
   assert.equal(route!.targetLabel, "GET /owners/{ownerId}/pets/{petId}/visits/new");
   assert.equal(route!.confidence, "exact");
 });
+
+test("a multi-line mapping annotation argument is not lost", () => {
+  const source = `
+@RestController
+class ReportController {
+    @GetMapping(
+        "/reports/summary"
+    )
+    String summary() { return "ok"; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/ReportController.java");
+  const handler = symbols.find((s) => s.name === "summary")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.equal(route.targetLabel, "GET /reports/summary");
+  assert.equal(route.confidence, "exact");
+});
+
+test("a mapping annotation stacked with an unrelated annotation still extracts the right argument", () => {
+  const source = `
+@RestController
+class AuditedController {
+    @Deprecated
+    @GetMapping("/legacy/list")
+    String legacyList() { return "[]"; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/AuditedController.java");
+  const handler = symbols.find((s) => s.name === "legacyList")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.equal(route.targetLabel, "GET /legacy/list");
+  assert.equal(route.confidence, "exact");
+});
+
+test("a fully-qualified mapping annotation name is still recognized", () => {
+  const source = `
+@RestController
+class QualifiedController {
+    @org.springframework.web.bind.annotation.GetMapping("/qualified")
+    String q() { return "ok"; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/QualifiedController.java");
+  const handler = symbols.find((s) => s.name === "q")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.equal(route.targetLabel, "GET /qualified");
+  assert.equal(route.confidence, "exact");
+});
+
+test("a bare mapping annotation with no arguments produces a probable route with no path", () => {
+  const source = `
+@RestController
+class BareController {
+    @GetMapping
+    String all() { return "[]"; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/BareController.java");
+  const handler = symbols.find((s) => s.name === "all")!;
+  const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
+  assert.equal(route.targetLabel, "GET");
+  assert.equal(route.confidence, "probable");
+});

@@ -19,12 +19,30 @@ const MAPPING_ANNOTATIONS: Record<string, string> = {
   DeleteMapping: "DELETE",
   PatchMapping: "PATCH",
 };
-const MAPPING_NAMES = Object.keys(MAPPING_ANNOTATIONS).join("|");
-// Follows java-parser.ts's own annotationRe/typeRe/methodRe convention: raw regex over
-// already-known symbol source slices, not a tokenizer.
-const MAPPING_RE = new RegExp(`@(${MAPPING_NAMES})(?:\\(([^)]*)\\))?`);
 const CONST_RE_TEMPLATE = (name: string) =>
   new RegExp(`(?:static\\s+final|final\\s+static)\\s+String\\s+${name}\\s*=\\s*"([^"]*)"`);
+
+/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...GetMapping" -> "GetMapping". */
+function bareName(annotation: string): string {
+  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
+}
+
+/**
+ * Matches ONE specific, already-AST-confirmed mapping annotation's own argument text.
+ * Detection of WHICH annotation (if any) is present happens via SymbolRecord.annotations,
+ * never via this regex — this only ever runs to extract an argument list for an annotation
+ * name already known to be real, eliminating the false-positive risk a generic multi-name
+ * scan over raw text would have (e.g. matching annotation-shaped text inside a comment).
+ * The optional `(?:[\w.]+\.)?` prefix tolerates a fully-qualified annotation name (e.g.
+ * "@org.springframework.web.bind.annotation.GetMapping(...)") the same way bareName()
+ * already tolerates one for detection — without it, a qualified annotation would be
+ * correctly DETECTED (via .annotations) but its argument text would never be found,
+ * silently downgrading every qualified-annotation route to a path-less "probable" result
+ * instead of the fully-resolved "exact" one it should get.
+ */
+function mappingArgsRegex(name: string): RegExp {
+  return new RegExp(`@(?:[\\w.]+\\.)?${name}(?:\\(([^)]*)\\))?`);
+}
 
 /**
  * The symbol's own header text (annotations + declaration), stopping before its body's
@@ -45,37 +63,6 @@ function header(symbol: SymbolRecord): string {
     else if (ch === "{" && depth === 0) return text.slice(0, i);
   }
   return text;
-}
-
-/**
- * Guards against a mapping-annotation-shaped match that is itself commented out on its own
- * physical line (e.g. "// example: @RequestMapping(...)") rather than a real annotation.
- *
- * parseJava's own leading-trivia scan absorbs starting from wherever an "@Word(...)"-shaped
- * token first appears, even inside a "//" comment — so a commented-out annotation's "//" prefix
- * is silently stripped OUT of symbol.source itself (confirmed by inspection: for
- * `// example: @RequestMapping("/fake")` the captured source begins at the "@", not the "//").
- * Checking the header text alone can therefore never see that stripped prefix. This instead maps
- * the match's position back to the REAL file (via symbol.range.startLine/startColumn plus the
- * newline count before the match within the header), and checks only THAT one physical source
- * line for a preceding "//" — not the symbol's leading trivia as a whole, since a real handler
- * can have an ordinary explanatory "//" comment on a PREVIOUS line (e.g. VisitController's
- * "// Spring MVC calls method ..." above a genuine @GetMapping) without the annotation itself
- * being "inside" a comment.
- */
-function matchIsInsideLineComment(
-  symbol: SymbolRecord,
-  headerText: string,
-  match: RegExpMatchArray,
-  fullSource: string,
-): boolean {
-  const index = match.index ?? 0;
-  const before = headerText.slice(0, index);
-  const lastNewline = before.lastIndexOf("\n");
-  const lineNumber = symbol.range.startLine + (before.match(/\n/g)?.length ?? 0);
-  const column = lastNewline === -1 ? symbol.range.startColumn + index : index - lastNewline - 1;
-  const fileLine = fullSource.split("\n")[lineNumber - 1] ?? "";
-  return fileLine.slice(0, column).includes("//");
 }
 
 type PathResolution =
@@ -152,32 +139,34 @@ function extractSpringMvcRelations(
 
   for (const method of symbols.filter((s) => s.kind === "method")) {
     const parent = classes.find((c) => c.id === method.parentId);
-    const methodHeader = header(method);
-    const methodMatch = methodHeader.match(MAPPING_RE);
-    if (!methodMatch) continue; // not a handler: no annotation spam for non-mapped methods
-    if (matchIsInsideLineComment(method, methodHeader, methodMatch, source)) continue; // commented-out annotation text, not real
+    const methodAnnotationName = method.annotations
+      .map(bareName)
+      .find((name) => name in MAPPING_ANNOTATIONS);
+    if (!methodAnnotationName) continue; // not a handler: no annotation spam for non-mapped methods
 
-    const httpMethod = MAPPING_ANNOTATIONS[methodMatch[1]];
+    const httpMethod = MAPPING_ANNOTATIONS[methodAnnotationName];
+    const methodMatch = header(method).match(mappingArgsRegex(methodAnnotationName));
     const classSourceForConstants = parent?.source ?? "";
-    const methodResolution = resolvePath(methodMatch[2], classSourceForConstants);
+    const methodResolution = resolvePath(methodMatch?.[1], classSourceForConstants);
 
     const evidence: string[] = [];
-    let classMatch: RegExpMatchArray | null = null;
+    let classAnnotationName: string | undefined;
+    let classRawInside: string | undefined;
     if (parent) {
-      const classHeader = header(parent);
-      const candidate = classHeader.match(MAPPING_RE);
-      if (candidate && !matchIsInsideLineComment(parent, classHeader, candidate, source)) {
-        classMatch = candidate;
-        evidence.push(describeAnnotation(classMatch[1], classMatch[2], "class", parent.name));
+      classAnnotationName = parent.annotations.map(bareName).find((name) => name in MAPPING_ANNOTATIONS);
+      if (classAnnotationName) {
+        const classMatch = header(parent).match(mappingArgsRegex(classAnnotationName));
+        classRawInside = classMatch?.[1];
+        evidence.push(describeAnnotation(classAnnotationName, classRawInside, "class", parent.name));
       }
     }
-    evidence.push(describeAnnotation(methodMatch[1], methodMatch[2], "method", method.name));
+    evidence.push(describeAnnotation(methodAnnotationName, methodMatch?.[1], "method", method.name));
 
     let confidence: EnterpriseRelationConfidence;
     let targetLabel: string | undefined;
 
-    const classResolution: PathResolution = classMatch
-      ? resolvePath(classMatch[2], classSourceForConstants)
+    const classResolution: PathResolution = classAnnotationName
+      ? resolvePath(classRawInside, classSourceForConstants)
       : { kind: "absent" };
 
     if (methodResolution.kind === "unresolved") {
