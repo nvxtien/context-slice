@@ -1,0 +1,29 @@
+[
+  {
+    "id": "pkg-errors",
+    "scale": "small",
+    "url": "https://github.com/pkg/errors.git",
+    "commit": "87f8819acf6dc28bf5d3c14b334268236d686f48",
+    "source": "benchmarks/checkouts/pkg-errors",
+    "scope": "whole repository (single-purpose error-wrapping library)",
+    "kind": "library"
+  },
+  {
+    "id": "cobra",
+    "scale": "medium",
+    "url": "https://github.com/spf13/cobra.git",
+    "commit": "adbc8813901bba65827259daa8e22ff94ec1f30e",
+    "source": "benchmarks/checkouts/cobra",
+    "scope": "whole repository (CLI framework)",
+    "kind": "library"
+  },
+  {
+    "id": "chi",
+    "scale": "large",
+    "url": "https://github.com/go-chi/chi.git",
+    "commit": "167e1e3bd039d060696b99c8da4e876ae04f42c1",
+    "source": "benchmarks/checkouts/chi",
+    "scope": "whole repository (HTTP routing library)",
+    "kind": "library"
+  }
+]

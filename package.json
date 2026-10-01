@@ -43,6 +43,7 @@
     "benchmark:v11": "npm run benchmark:checkouts && tsx benchmarks/v1.1-typescript-support.ts",
     "benchmark:v12": "npm run benchmark:checkouts && tsx benchmarks/v1.2-context-composition.ts",
     "benchmark:v13": "npm run benchmark:checkouts && tsx benchmarks/v1.3-python-support.ts",
+    "benchmark:v16": "npm run benchmark:checkouts && tsx benchmarks/v1.6-go-support.ts",
     "benchmark:v15-phase1": "npm run benchmark:checkouts && tsx benchmarks/v1.5-rust-real-repositories.ts",
     "benchmark:v15-phase3": "npm run benchmark:checkouts && tsx benchmarks/v1.5-rust-tasks.ts",
     "benchmark:v14-phase1": "npm run benchmark:checkouts && tsx benchmarks/v1.4-phase1-spring-mvc.ts",
