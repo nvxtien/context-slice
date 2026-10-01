@@ -67,6 +67,66 @@ function modifiersFor(name: string): string[] {
   return /^[A-Z]/.test(name) ? ["exported"] : [];
 }
 
+/**
+ * A call_expression's callee name and (when the operand is a plain identifier) its
+ * receiver text. selector_expression's "operand"/"field" fields and call_expression's
+ * "function"/"arguments" fields verified empirically against tree-sitter-go@0.23.4.
+ */
+function buildCallEdge(
+  callNode: Node,
+  filePath: string,
+  callerId: string,
+  wrapKind: "go" | "defer" | undefined,
+): CallEdge {
+  const fnNode = field(callNode, "function");
+  const argsNode = field(callNode, "arguments");
+  const argumentCount = argsNode?.namedChildCount ?? 0;
+  const evidence = ["syntactic call"];
+  if (wrapKind === "go") evidence.push("goroutine launch");
+  else if (wrapKind === "defer") evidence.push("deferred call");
+
+  let calleeName = "";
+  let receiverText: string | undefined;
+  if (fnNode?.type === "identifier") {
+    calleeName = fnNode.text;
+  } else if (fnNode?.type === "selector_expression") {
+    calleeName = text(field(fnNode, "field"));
+    const operand = field(fnNode, "operand");
+    if (operand?.type === "identifier") receiverText = operand.text;
+  }
+
+  return {
+    callerId,
+    calleeName,
+    receiverText,
+    argumentCount,
+    filePath,
+    language: LANGUAGE_ID,
+    range: range(callNode),
+    confidence: "unresolved",
+    resolutionKind: "unresolved",
+    evidence,
+  };
+}
+
+/**
+ * Walks every descendant of `node` for call_expressions, attributing each to `ownerId`
+ * regardless of nesting depth (blocks, closures — Go closures have no symbol of their
+ * own in this adapter's model, so their calls attribute to the innermost enclosing
+ * NAMED function/method). Whether a call is the direct target of a go/defer statement
+ * is read off the immediate parent's type during the walk — verified empirically that
+ * this correctly tags only the direct target, never a call nested inside its arguments.
+ */
+function collectCalls(node: Node, ownerId: string, filePath: string, calls: CallEdge[]) {
+  for (const child of node.namedChildren) {
+    if (child.type === "call_expression") {
+      const wrapKind = node.type === "go_statement" ? "go" : node.type === "defer_statement" ? "defer" : undefined;
+      calls.push(buildCallEdge(child, filePath, ownerId, wrapKind));
+    }
+    collectCalls(child, ownerId, filePath, calls);
+  }
+}
+
 export function parseGo(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
   const calls: CallEdge[] = [];
@@ -98,6 +158,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
 
   const structByName = new Map<string, SymbolRecord>();
   const pendingMethods: { node: Node; receiverName: string | undefined }[] = [];
+  const callables: { symbol: SymbolRecord; body: Node | null | undefined }[] = [];
 
   for (const child of tree.rootNode.namedChildren) {
     if (child.type === "function_declaration") {
@@ -105,7 +166,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       if (!name) continue;
       const parameters = text(field(child, "parameters"));
       const id = uniqueId(canonicalId(filePath, "function", name, parameters));
-      symbols.push({
+      const symbol: SymbolRecord = {
         id,
         language: LANGUAGE_ID,
         kind: "function",
@@ -120,7 +181,9 @@ export function parseGo(filePath: string, source: string): ParsedFile {
         modifiers: modifiersFor(name),
         source: child.text,
         body: field(child, "body")?.text,
-      });
+      };
+      symbols.push(symbol);
+      callables.push({ symbol, body: field(child, "body") });
     } else if (child.type === "method_declaration") {
       // Deferred: struct symbols may appear later in this same file's top-level
       // children (Go has no forward-declaration ordering requirement), so method
@@ -296,7 +359,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
     const qualifiedName = receiverName ? `${receiverName}.${name}` : name;
     const id = uniqueId(canonicalId(filePath, "method", qualifiedName, parameters));
     const receiverStruct = receiverName ? structByName.get(receiverName) : undefined;
-    symbols.push({
+    const symbol: SymbolRecord = {
       id,
       language: LANGUAGE_ID,
       kind: "method",
@@ -313,7 +376,13 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       modifiers: modifiersFor(name),
       source: methodNode.text,
       body: field(methodNode, "body")?.text,
-    });
+    };
+    symbols.push(symbol);
+    callables.push({ symbol, body: field(methodNode, "body") });
+  }
+
+  for (const { symbol, body } of callables) {
+    if (body) collectCalls(body, symbol.id, filePath, calls);
   }
 
   return { symbols, calls, imports, exports, parseError };

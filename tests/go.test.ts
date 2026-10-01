@@ -213,3 +213,79 @@ test("a struct's exported and unexported fields are marked independently", () =>
   assert.ok(nameField!.modifiers.includes("exported"));
   assert.equal(secretField!.modifiers.includes("exported"), false);
 });
+
+test("a direct call inside a function body produces an unresolved CallEdge", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc helper() {}\n\nfunc main() {\n\thelper()\n}\n`);
+  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const call = parsed.calls.find((c) => c.calleeName === "helper");
+  assert.ok(call, "expected a call edge for helper");
+  assert.equal(call!.callerId, main.id);
+  assert.equal(call!.confidence, "unresolved");
+  assert.equal(call!.resolutionKind, "unresolved");
+});
+
+test("a selector call with a plain identifier operand carries receiverText", () => {
+  const source = `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n\nfunc main() {\n\tu := &User{}\n\tu.Save()\n}\n`;
+  const parsed = parseGo("main.go", source);
+  const call = parsed.calls.find((c) => c.calleeName === "Save");
+  assert.ok(call, "expected a call edge for Save");
+  assert.equal(call!.receiverText, "u");
+});
+
+test("a selector call with a chained (non-identifier) operand leaves receiverText undefined", () => {
+  const source = `package main\n\nfunc main() {\n\ta.b.Save()\n}\n`;
+  const parsed = parseGo("main.go", source);
+  const call = parsed.calls.find((c) => c.calleeName === "Save");
+  assert.ok(call, "expected a call edge for Save even with a chained operand");
+  assert.equal(call!.receiverText, undefined);
+});
+
+test("a call wrapped in a go statement is tagged as a goroutine launch", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc helper() {}\n\nfunc main() {\n\tgo helper()\n}\n`);
+  const call = parsed.calls.find((c) => c.calleeName === "helper");
+  assert.ok(call!.evidence.includes("goroutine launch"));
+});
+
+test("a call wrapped in a defer statement is tagged as deferred", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc cleanup() {}\n\nfunc main() {\n\tdefer cleanup()\n}\n`);
+  const call = parsed.calls.find((c) => c.calleeName === "cleanup");
+  assert.ok(call!.evidence.includes("deferred call"));
+});
+
+test("a call nested inside a go statement's own call arguments is NOT itself tagged", () => {
+  const source = `package main\n\nfunc inner() int { return 1 }\nfunc outer(n int) {}\n\nfunc main() {\n\tgo outer(inner())\n}\n`;
+  const parsed = parseGo("main.go", source);
+  const outerCall = parsed.calls.find((c) => c.calleeName === "outer");
+  const innerCall = parsed.calls.find((c) => c.calleeName === "inner");
+  assert.ok(outerCall!.evidence.includes("goroutine launch"));
+  assert.ok(!innerCall!.evidence.includes("goroutine launch"), "the nested call must not inherit the goroutine tag");
+});
+
+test("a call inside a nested if block still attributes to the enclosing function", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc helper() {}\n\nfunc main() {\n\tif true {\n\t\thelper()\n\t}\n}\n`);
+  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const call = parsed.calls.find((c) => c.calleeName === "helper");
+  assert.equal(call!.callerId, main.id);
+});
+
+test("a call inside a closure still attributes to the enclosing named function", () => {
+  const source = `package main\n\nfunc closureCall() {}\n\nfunc main() {\n\tfn := func() {\n\t\tclosureCall()\n\t}\n\tfn()\n}\n`;
+  const parsed = parseGo("main.go", source);
+  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const call = parsed.calls.find((c) => c.calleeName === "closureCall");
+  assert.equal(call!.callerId, main.id);
+});
+
+test("a call inside a method body attributes to the method symbol", () => {
+  const source = `package main\n\nfunc helper() {}\n\ntype User struct{}\nfunc (u *User) Save() {\n\thelper()\n}\n`;
+  const parsed = parseGo("main.go", source);
+  const method = parsed.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = parsed.calls.find((c) => c.calleeName === "helper");
+  assert.equal(call!.callerId, method.id);
+});
+
+test("argumentCount is correctly computed for a multi-argument call", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc add(a, b, c int) int { return a + b + c }\n\nfunc main() {\n\tadd(1, 2, 3)\n}\n`);
+  const call = parsed.calls.find((c) => c.calleeName === "add");
+  assert.equal(call!.argumentCount, 3);
+});
