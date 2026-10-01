@@ -103,7 +103,7 @@ function extractDependencyInjection(
     seen.add(key);
     const cls = own.find((s) => s.id === ctor.parentId);
     const stereotyped = cls?.annotations.some((a) => STEREOTYPES.has(bareName(a)));
-    const annotated = new RegExp(`@(?:Autowired|Inject)\\b[\\s\\S]*?\\b${ctor.name}\\s*\\(`).test(ctor.source);
+    const annotated = ctor.annotations.some((a) => bareName(a) === "Autowired" || bareName(a) === "Inject");
     if (!stereotyped && !annotated) continue;
     const params = firstParenGroup(ctor.source);
     if (!params) continue;

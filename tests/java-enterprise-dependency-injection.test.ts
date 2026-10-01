@@ -249,6 +249,50 @@ class Helper {
   assert.equal(relations[0].confidence, "exact");
 });
 
+test("@Autowired mentioned only in a constructor body comment produces no relation", () => {
+  const source = `
+class Bar {}
+class Foo {
+    Foo(Bar b) {
+        // note: @Autowired on Foo(Bar) in subclass requires this constructor to exist
+        this.b = b;
+    }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const ctor = symbols.find((s) => s.kind === "constructor")!;
+  assert.ok(!relations.some((r) => r.sourceSymbolId === ctor.id), "a comment mentioning @Autowired must not trigger constructor injection");
+});
+
+test("a genuinely @Autowired constructor on a plain class still produces a relation", () => {
+  const source = `
+class Bar {}
+class Foo {
+    @Autowired
+    Foo(Bar b) { this.b = b; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const ctor = symbols.find((s) => s.kind === "constructor")!;
+  const rel = relations.find((r) => r.sourceSymbolId === ctor.id)!;
+  assert.ok(rel, "a real @Autowired constructor must still produce a relation");
+  assert.equal(rel.targetLabel, "Bar");
+});
+
+test("a fully-qualified @Autowired constructor is still detected", () => {
+  const source = `
+class Bar {}
+class Foo {
+    @org.springframework.beans.factory.annotation.Autowired
+    Foo(Bar b) { this.b = b; }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const ctor = symbols.find((s) => s.kind === "constructor")!;
+  const rel = relations.find((r) => r.sourceSymbolId === ctor.id)!;
+  assert.ok(rel, "a fully-qualified @Autowired constructor must still produce a relation");
+});
+
 test("a field injected via @Inject resolves the same as @Autowired", () => {
   const source = `
 class PaymentGateway {}
