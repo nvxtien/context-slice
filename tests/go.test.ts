@@ -388,3 +388,64 @@ test("a package-qualified call to an UNEXPORTED name in the imported package doe
   assert.equal(call.confidence, "unresolved");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a package-qualified call to a sibling module sharing a string prefix stays external, not misattributed", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "main.go": `package main\n\nimport "example.com/projfoo/util"\n\nfunc main() {\n\tutil.Helper()\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.confidence, "unresolved");
+  assert.equal(call.externalPackage, "example.com/projfoo/util");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call via a := composite-literal-typed local variable resolves exact", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n\nfunc main() {\n\tu := &User{}\n\tu.Save()\n}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  assert.equal(call.resolutionKind, "same-type");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call via a var-declared local variable resolves exact", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n\nfunc main() {\n\tvar u *User\n\tu.Save()\n}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call via a New*-constructor-typed local variable resolves exact", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype User struct{}\nfunc NewUser() *User { return &User{} }\nfunc (u *User) Save() {}\n\nfunc main() {\n\tu := NewUser()\n\tu.Save()\n}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call using the enclosing method's own receiver variable resolves exact with no body regex needed", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Validate() {\n\tu.other()\n}\nfunc (u *User) other() {}\n`,
+  });
+  const other = index.symbols.find((s) => s.kind === "method" && s.name === "other")!;
+  const call = index.calls.find((c) => c.calleeName === "other")!;
+  assert.equal(call.resolvedTargetId, other.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call via a reassigned/ambiguous local variable stays unresolved", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\ntype Other struct{}\n\nfunc main() {\n\tu := &User{}\n\tu = nil\n\tu.Save()\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});

@@ -22,6 +22,35 @@ function goModulePath(root: string): string | undefined {
   }
 }
 
+/** A method's own receiver variable name, e.g. "u" in "func (u *User) Name(...)" — read directly
+ * off the symbol's own .source text rather than re-deriving it from parse.ts, since Phase 1
+ * already formats every method's signature/source starting with its receiver clause. */
+function receiverVarNameOf(method: SymbolRecord): string | undefined {
+  return method.source.match(/^func\s*\(\s*(\w+)\s+/)?.[1];
+}
+
+/** Narrow, regex-based binding-type inference over a function body — mirrors
+ * src/languages/python/resolve.ts's bindingClass exactly: single unambiguous assignment only,
+ * any reassignment or multiple bindings drop the evidence rather than guessing. */
+function bindingTypeInBody(body: string, receiver: string): string | undefined {
+  const literalOrVar = new RegExp(
+    `(?<![\\w.])${receiver}\\s*:?=\\s*(?:&)?([A-Za-z_]\\w*)\\s*\\{|var\\s+${receiver}\\s+\\*?([A-Za-z_]\\w*)\\b`,
+    "g",
+  );
+  const matches = [...body.matchAll(literalOrVar)];
+  const reassignments = [...body.matchAll(new RegExp(`(?<![\\w.:])${receiver}\\s*=[^=]`, "g"))].length;
+  if (matches.length === 1 && reassignments === 0) {
+    const [, literalType, varType] = matches[0];
+    if (literalType) return literalType;
+    if (varType) return varType;
+  }
+  if (matches.length === 0 && reassignments === 0) {
+    const ctor = body.match(new RegExp(`(?<![\\w.])${receiver}\\s*:=\\s*New([A-Za-z_]\\w*)\\s*\\(`));
+    if (ctor) return ctor[1];
+  }
+  return undefined;
+}
+
 function settle(
   call: CallEdge,
   target: SymbolRecord,
@@ -68,7 +97,7 @@ export function resolveGoCalls(context: ResolveContext): void {
       (r) => importLocalName(r) === call.receiverText,
     );
     if (!record) return false;
-    if (!modulePath || !record.module.startsWith(modulePath)) {
+    if (!modulePath || !(record.module === modulePath || record.module.startsWith(modulePath + "/"))) {
       call.externalPackage = record.module;
       return false;
     }
@@ -83,6 +112,21 @@ export function resolveGoCalls(context: ResolveContext): void {
     return false;
   };
 
+  const resolveMethodCall = (call: CallEdge, caller: SymbolRecord) => {
+    if (!call.receiverText) return;
+    let typeName: string | undefined;
+    if (caller.kind === "method" && caller.supertypes?.[0] && receiverVarNameOf(caller) === call.receiverText) {
+      typeName = caller.supertypes[0];
+    } else {
+      typeName = bindingTypeInBody(caller.body ?? caller.source, call.receiverText);
+    }
+    if (!typeName) return;
+    const method = (byDirectory.get(directoryOf(caller.filePath)) ?? []).find(
+      (s) => s.kind === "method" && s.name === call.calleeName && s.supertypes?.includes(typeName!),
+    );
+    if (method) settle(call, method, "same-type", "receiver-type method call");
+  };
+
   for (const call of context.calls) {
     const caller = symbolsById.get(call.callerId);
     if (!caller) continue;
@@ -90,7 +134,7 @@ export function resolveGoCalls(context: ResolveContext): void {
       resolveDirectCall(call, caller);
       continue;
     }
-    resolveQualifiedCall(call, caller);
-    // Strategy 3 (receiver-type method) is added in Task 3.
+    if (resolveQualifiedCall(call, caller)) continue;
+    resolveMethodCall(call, caller);
   }
 }
