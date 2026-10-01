@@ -13,6 +13,7 @@ type Repository = {
 };
 type OracleSymbol = { name: string; kind: string; exported?: boolean };
 type OracleImport = { module: string; kind: string };
+type OracleCall = { calleeName: string; receiverText?: string };
 
 const repositories: Repository[] = JSON.parse(
   readFileSync(resolve(process.cwd(), "benchmarks/go-repositories.json"), "utf8"),
@@ -107,6 +108,31 @@ const imports: Record<string, OracleImport[]> = {
   ],
 };
 
+// Hand-read from the actual call sites in each repo's real source (Task 2 Step 1),
+// chosen to exercise calleeNames the symbol/import oracles above don't already name —
+// a mix of direct calls, selector/method calls on a local receiver, and package-qualified
+// stdlib calls. Re-verified against pkg-errors' errors.go/stack.go, cobra's command.go,
+// and chi's mux.go during this task's own execution.
+const calls: Record<string, OracleCall[]> = {
+  "pkg-errors": [
+    { calleeName: "Sprintf", receiverText: "fmt" }, // errors.go:114, fmt.Sprintf(format, args...)
+    { calleeName: "WriteString", receiverText: "io" }, // errors.go:131, io.WriteString(s, f.msg)
+    { calleeName: "FuncForPC", receiverText: "runtime" }, // stack.go:24, runtime.FuncForPC(f.pc())
+    { calleeName: "LastIndex", receiverText: "strings" }, // stack.go:173, strings.LastIndex(name, "/")
+  ],
+  cobra: [
+    { calleeName: "getOut", receiverText: "c" }, // command.go:394, c.getOut(os.Stdout)
+    { calleeName: "mergePersistentFlags", receiverText: "c" }, // command.go:678, c.mergePersistentFlags()
+    { calleeName: "HasPrefix", receiverText: "strings" }, // command.go:691, strings.HasPrefix(s, "--")
+  ],
+  chi: [
+    { calleeName: "NotFoundHandler", receiverText: "mx" }, // mux.go:66, mx.NotFoundHandler().ServeHTTP(w, r)
+    { calleeName: "handle", receiverText: "mx" }, // mux.go:116, mx.handle(mALL, pattern, handler)
+    { calleeName: "IndexAny", receiverText: "strings" }, // mux.go:110, strings.IndexAny(pattern, " \t")
+    { calleeName: "TrimLeft", receiverText: "strings" }, // mux.go:111, strings.TrimLeft(pattern[i+1:], " \t")
+  ],
+};
+
 const results: Record<
   string,
   {
@@ -114,6 +140,8 @@ const results: Record<
     symbolsFound: number;
     importsTotal: number;
     importsFound: number;
+    callsTotal: number;
+    callsFound: number;
     missing: string[];
   }
 > = {};
@@ -124,6 +152,7 @@ for (const repo of repositories) {
   index.rebuild();
   const oracle = oracles[repo.id] ?? [];
   const oracleImports = imports[repo.id] ?? [];
+  const oracleCalls = calls[repo.id] ?? [];
   const missing: string[] = [];
 
   let symbolsFound = 0;
@@ -148,14 +177,30 @@ for (const repo of repositories) {
     else missing.push(`import ${expected.module} (${expected.kind})`);
   }
 
+  let callsFound = 0;
+  for (const expected of oracleCalls) {
+    const match = index.calls.some(
+      (c) =>
+        c.calleeName === expected.calleeName &&
+        (expected.receiverText === undefined || c.receiverText === expected.receiverText),
+    );
+    if (match) callsFound++;
+    else
+      missing.push(
+        `call ${expected.receiverText ? `${expected.receiverText}.` : ""}${expected.calleeName}`,
+      );
+  }
+
   results[repo.id] = {
     symbolsTotal: oracle.length,
     symbolsFound,
     importsTotal: oracleImports.length,
     importsFound,
+    callsTotal: oracleCalls.length,
+    callsFound,
     missing,
   };
-  console.log(`${repo.id}: ${symbolsFound}/${oracle.length} symbols found, ${importsFound}/${oracleImports.length} imports found`);
+  console.log(`${repo.id}: ${symbolsFound}/${oracle.length} symbols found, ${importsFound}/${oracleImports.length} imports found, ${callsFound}/${oracleCalls.length} calls found`);
   if (missing.length) console.log(`  missing: ${missing.join(", ")}`);
 }
 
