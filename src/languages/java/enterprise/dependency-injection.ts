@@ -138,7 +138,8 @@ function extractDependencyInjection(
     const bodyText = method.source.replace(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?\s*)*/, "");
     const params = firstParenGroup(bodyText);
     if (params === undefined) continue;
-    const qualifier = method.source.match(QUALIFIER_RE)?.[1];
+    const hasQualifier = method.annotations.some((a) => bareName(a) === "Qualifier");
+    const qualifier = hasQualifier ? method.source.match(QUALIFIER_RE)?.[1] : undefined;
     for (const param of splitTopLevel(params)) {
       const p = parseDeclaration(param);
       if (!p) continue;

@@ -67,6 +67,41 @@ class Alerts {
   assert.match(rel.evidence.join(" "), /setter/);
 });
 
+test("@Qualifier mentioned only in a setter body comment produces no qualifier evidence", () => {
+  const source = `
+class Bar {}
+class Foo {
+    @Autowired
+    public void setBar(Bar bar) {
+        // old wiring used @Qualifier("legacy") here, now removed
+        this.bar = bar;
+    }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const method = symbols.find((s) => s.kind === "method" && s.name === "setBar")!;
+  const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
+  assert.ok(rel, "the real @Autowired setter must still produce a relation");
+  assert.ok(!rel.evidence.some((e) => e.includes("@Qualifier")), "a comment-only @Qualifier must not appear in evidence");
+});
+
+test("a genuinely @Qualifier-annotated setter still has its value extracted", () => {
+  const source = `
+class Bar {}
+class Foo {
+    @Autowired
+    @Qualifier("primary")
+    public void setBar(Bar bar) {
+        this.bar = bar;
+    }
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const method = symbols.find((s) => s.kind === "method" && s.name === "setBar")!;
+  const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
+  assert.ok(rel.evidence.some((e) => e.includes('@Qualifier("primary")')), "a real @Qualifier must still be extracted");
+});
+
 test("a type matching zero project symbols produces no relation", () => {
   const source = `
 class Checkout {
