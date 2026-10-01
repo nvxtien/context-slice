@@ -156,3 +156,60 @@ test("same-named methods on different structs in one file get distinct, receiver
   assert.ok(first!.id.includes("A."), `expected ${first!.id} to reference receiver A`);
   assert.ok(second!.id.includes("B."), `expected ${second!.id} to reference receiver B`);
 });
+
+test("a plain import produces a namespace ImportRecord", () => {
+  const parsed = parseGo("main.go", `package main\n\nimport "fmt"\n\nfunc main() {}\n`);
+  const imp = parsed.imports.find((i) => i.module === "fmt");
+  assert.ok(imp, "expected an import record for fmt");
+  assert.equal(imp!.kind, "namespace");
+});
+
+test("an aliased import carries its alias as localName", () => {
+  const parsed = parseGo("main.go", `package main\n\nimport f "fmt"\n\nfunc main() {}\n`);
+  const imp = parsed.imports.find((i) => i.module === "fmt");
+  assert.equal(imp!.localName, "f");
+});
+
+test("a blank import is a side-effect import", () => {
+  const parsed = parseGo("main.go", `package main\n\nimport _ "net/http/pprof"\n\nfunc main() {}\n`);
+  const imp = parsed.imports.find((i) => i.module === "net/http/pprof");
+  assert.ok(imp, "expected an import record");
+  assert.equal(imp!.kind, "side-effect");
+});
+
+test("a dot import is a wildcard namespace import with no localName", () => {
+  const parsed = parseGo("main.go", `package main\n\nimport . "math"\n\nfunc main() {}\n`);
+  const imp = parsed.imports.find((i) => i.module === "math");
+  assert.ok(imp, "expected an import record");
+  assert.equal(imp!.wildcard, true);
+  assert.equal(imp!.localName, undefined);
+});
+
+test("a grouped import block produces one record per spec", () => {
+  const source = `package main\n\nimport (\n\t"fmt"\n\t"os"\n)\n\nfunc main() {}\n`;
+  const parsed = parseGo("main.go", source);
+  const fmtImp = parsed.imports.find((i) => i.module === "fmt");
+  const osImp = parsed.imports.find((i) => i.module === "os");
+  assert.ok(fmtImp && osImp, "expected both fmt and os as separate import records");
+});
+
+test("an exported function has 'exported' in its modifiers", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`);
+  const fn = parsed.symbols.find((s) => s.name === "Add");
+  assert.ok(fn!.modifiers.includes("exported"));
+});
+
+test("an unexported function does not have 'exported' in its modifiers", () => {
+  const parsed = parseGo("main.go", `package main\n\nfunc add(a, b int) int {\n\treturn a + b\n}\n`);
+  const fn = parsed.symbols.find((s) => s.name === "add");
+  assert.equal(fn!.modifiers.includes("exported"), false);
+});
+
+test("a struct's exported and unexported fields are marked independently", () => {
+  const source = `package main\n\ntype User struct {\n\tName string\n\tsecret string\n}\n`;
+  const parsed = parseGo("user.go", source);
+  const nameField = parsed.symbols.find((s) => s.kind === "field" && s.name === "Name");
+  const secretField = parsed.symbols.find((s) => s.kind === "field" && s.name === "secret");
+  assert.ok(nameField!.modifiers.includes("exported"));
+  assert.equal(secretField!.modifiers.includes("exported"), false);
+});

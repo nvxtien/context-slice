@@ -63,6 +63,10 @@ function canonicalId(filePath: string, kind: SymbolKind, name: string, parameter
   return [filePath, kind, name, parameters].filter(Boolean).join("::");
 }
 
+function modifiersFor(name: string): string[] {
+  return /^[A-Z]/.test(name) ? ["exported"] : [];
+}
+
 export function parseGo(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
   const calls: CallEdge[] = [];
@@ -113,7 +117,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
         range: range(child),
         bodyRange: field(child, "body") ? range(field(child, "body")!) : undefined,
         annotations: [],
-        modifiers: [],
+        modifiers: modifiersFor(name),
         source: child.text,
         body: field(child, "body")?.text,
       });
@@ -142,7 +146,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
             filePath,
             range: range(spec),
             annotations: [],
-            modifiers: [],
+            modifiers: modifiersFor(name),
             source: spec.text,
           };
           symbols.push(symbol);
@@ -169,7 +173,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
               range: range(fieldDecl),
               parentId: id,
               annotations: [],
-              modifiers: [],
+              modifiers: modifiersFor(fieldName),
               source: fieldDecl.text,
             });
           }
@@ -186,7 +190,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
             filePath,
             range: range(spec),
             annotations: [],
-            modifiers: [],
+            modifiers: modifiersFor(name),
             source: spec.text,
           });
         } else {
@@ -202,7 +206,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
             filePath,
             range: range(spec),
             annotations: [],
-            modifiers: [],
+            modifiers: modifiersFor(name),
             source: spec.text,
           });
         }
@@ -230,9 +234,53 @@ export function parseGo(filePath: string, source: string): ParsedFile {
           filePath,
           range: range(spec),
           annotations: [],
-          modifiers: [],
+          modifiers: modifiersFor(name),
           source: spec.text,
         });
+      }
+    } else if (child.type === "import_declaration") {
+      const specs = child.namedChildren.flatMap((c) =>
+        c.type === "import_spec_list"
+          ? c.namedChildren.filter((s) => s.type === "import_spec")
+          : c.type === "import_spec"
+            ? [c]
+            : [],
+      );
+      for (const spec of specs) {
+        const pathNode = field(spec, "path");
+        const module = text(pathNode?.namedChild(0) ?? pathNode).replace(/^["']|["']$/g, "");
+        if (!module) continue;
+        const nameNode = field(spec, "name");
+        if (nameNode?.type === "blank_identifier") {
+          imports.push({
+            filePath,
+            language: LANGUAGE_ID,
+            module,
+            kind: "side-effect",
+            typeOnly: false,
+            range: range(spec),
+          });
+        } else if (nameNode?.type === "dot") {
+          imports.push({
+            filePath,
+            language: LANGUAGE_ID,
+            module,
+            kind: "namespace",
+            typeOnly: false,
+            wildcard: true,
+            range: range(spec),
+          });
+        } else {
+          imports.push({
+            filePath,
+            language: LANGUAGE_ID,
+            module,
+            kind: "namespace",
+            typeOnly: false,
+            localName: nameNode?.type === "package_identifier" ? nameNode.text : undefined,
+            range: range(spec),
+          });
+        }
       }
     }
   }
@@ -262,7 +310,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       parentId: receiverStruct?.id,
       supertypes: receiverName ? [receiverName] : undefined,
       annotations: [],
-      modifiers: [],
+      modifiers: modifiersFor(name),
       source: methodNode.text,
       body: field(methodNode, "body")?.text,
     });
