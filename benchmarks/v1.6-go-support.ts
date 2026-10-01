@@ -11,7 +11,8 @@ type Repository = {
   scope: string;
   kind: string;
 };
-type OracleSymbol = { name: string; kind: string };
+type OracleSymbol = { name: string; kind: string; exported?: boolean };
+type OracleImport = { module: string; kind: string };
 
 const repositories: Repository[] = JSON.parse(
   readFileSync(resolve(process.cwd(), "benchmarks/go-repositories.json"), "utf8"),
@@ -27,74 +28,134 @@ const repositories: Repository[] = JSON.parse(
 // chain.go, mux.go, chi.go) and confirmed to exist exactly as named/kinded.
 const oracles: Record<string, OracleSymbol[]> = {
   "pkg-errors": [
-    { name: "New", kind: "function" },
-    { name: "Errorf", kind: "function" },
-    { name: "fundamental", kind: "class" },
-    { name: "Error", kind: "method" },
-    { name: "WithStack", kind: "function" },
-    { name: "withStack", kind: "class" },
-    { name: "Wrap", kind: "function" },
-    { name: "Wrapf", kind: "function" },
-    { name: "WithMessage", kind: "function" },
-    { name: "withMessage", kind: "class" },
-    { name: "Cause", kind: "function" },
-    { name: "Frame", kind: "type" },
-    { name: "StackTrace", kind: "type" },
-    { name: "Is", kind: "function" },
-    { name: "As", kind: "function" },
-    { name: "Unwrap", kind: "function" },
+    { name: "New", kind: "function", exported: true },
+    { name: "Errorf", kind: "function", exported: true },
+    { name: "fundamental", kind: "class", exported: false },
+    { name: "Error", kind: "method", exported: true },
+    { name: "WithStack", kind: "function", exported: true },
+    { name: "withStack", kind: "class", exported: false },
+    { name: "Wrap", kind: "function", exported: true },
+    { name: "Wrapf", kind: "function", exported: true },
+    { name: "WithMessage", kind: "function", exported: true },
+    { name: "withMessage", kind: "class", exported: false },
+    { name: "Cause", kind: "function", exported: true },
+    { name: "Frame", kind: "type", exported: true },
+    { name: "StackTrace", kind: "type", exported: true },
+    { name: "Is", kind: "function", exported: true },
+    { name: "As", kind: "function", exported: true },
+    { name: "Unwrap", kind: "function", exported: true },
     // withStack embeds `error` and `*stack` (no explicit field name, falls back to the
     // embedded type's own name); withMessage has regular named fields `cause` and `msg`.
-    { name: "error", kind: "field" },
-    { name: "stack", kind: "field" },
-    { name: "cause", kind: "field" },
-    { name: "msg", kind: "field" },
+    { name: "error", kind: "field", exported: false },
+    { name: "stack", kind: "field", exported: false },
+    { name: "cause", kind: "field", exported: false },
+    { name: "msg", kind: "field", exported: false },
+    // callers() in stack.go:163 — real unexported helper used by New/WithStack/Wrap.
+    { name: "callers", kind: "function", exported: false },
   ],
   cobra: [
-    { name: "Group", kind: "class" },
-    { name: "Command", kind: "class" },
-    { name: "Use", kind: "field" },
-    { name: "Context", kind: "method" },
-    { name: "SetArgs", kind: "method" },
-    { name: "SetOut", kind: "method" },
-    { name: "SetErr", kind: "method" },
-    { name: "SetHelpFunc", kind: "method" },
-    { name: "OutOrStdout", kind: "method" },
-    { name: "UsageFunc", kind: "method" },
-    { name: "FParseErrWhitelist", kind: "type" },
+    { name: "Group", kind: "class", exported: true },
+    { name: "Command", kind: "class", exported: true },
+    { name: "Use", kind: "field", exported: true },
+    { name: "Context", kind: "method", exported: true },
+    { name: "SetArgs", kind: "method", exported: true },
+    { name: "SetOut", kind: "method", exported: true },
+    { name: "SetErr", kind: "method", exported: true },
+    { name: "SetHelpFunc", kind: "method", exported: true },
+    { name: "OutOrStdout", kind: "method", exported: true },
+    { name: "UsageFunc", kind: "method", exported: true },
+    { name: "FParseErrWhitelist", kind: "type", exported: true },
+    // stripFlags() in command.go:674 — real unexported helper.
+    { name: "stripFlags", kind: "function", exported: false },
   ],
   chi: [
-    { name: "Chain", kind: "function" },
-    { name: "Handler", kind: "method" },
-    { name: "ChainHandler", kind: "class" },
-    { name: "ServeHTTP", kind: "method" },
-    { name: "Mux", kind: "class" },
-    { name: "NewMux", kind: "function" },
-    { name: "Use", kind: "method" },
-    { name: "Handle", kind: "method" },
-    { name: "Get", kind: "method" },
-    { name: "Post", kind: "method" },
-    { name: "Router", kind: "interface" },
-    { name: "Routes", kind: "interface" },
+    { name: "Chain", kind: "function", exported: true },
+    { name: "Handler", kind: "method", exported: true },
+    { name: "ChainHandler", kind: "class", exported: true },
+    { name: "ServeHTTP", kind: "method", exported: true },
+    { name: "Mux", kind: "class", exported: true },
+    { name: "NewMux", kind: "function", exported: true },
+    { name: "Use", kind: "method", exported: true },
+    { name: "Handle", kind: "method", exported: true },
+    { name: "Get", kind: "method", exported: true },
+    { name: "Post", kind: "method", exported: true },
+    { name: "Router", kind: "interface", exported: true },
+    { name: "Routes", kind: "interface", exported: true },
+    // chain() in chain.go:36 — real unexported helper behind the exported Chain().
+    { name: "chain", kind: "function", exported: false },
   ],
 };
 
-const results: Record<string, { total: number; found: number; missing: string[] }> = {};
+// Hand-verified against each repo's actual import statements (Step 1 of Task 2):
+// pkg-errors/errors.go imports "fmt" and "io"; cobra/command.go imports "context",
+// "errors", "os"; chi/chi.go imports "net/http" and chi/mux.go imports "context", "sync".
+// All are plain package imports, so the Go adapter emits kind "namespace" for each.
+const imports: Record<string, OracleImport[]> = {
+  "pkg-errors": [
+    { module: "fmt", kind: "namespace" },
+    { module: "io", kind: "namespace" },
+  ],
+  cobra: [
+    { module: "context", kind: "namespace" },
+    { module: "errors", kind: "namespace" },
+    { module: "os", kind: "namespace" },
+  ],
+  chi: [
+    { module: "net/http", kind: "namespace" },
+    { module: "context", kind: "namespace" },
+    { module: "sync", kind: "namespace" },
+  ],
+};
+
+const results: Record<
+  string,
+  {
+    symbolsTotal: number;
+    symbolsFound: number;
+    importsTotal: number;
+    importsFound: number;
+    missing: string[];
+  }
+> = {};
 
 for (const repo of repositories) {
   const root = resolve(process.cwd(), repo.source);
   const index = new ProjectIndex(root);
   index.rebuild();
   const oracle = oracles[repo.id] ?? [];
+  const oracleImports = imports[repo.id] ?? [];
   const missing: string[] = [];
-  let found = 0;
+
+  let symbolsFound = 0;
   for (const expected of oracle) {
-    const match = index.symbols.some((s) => s.name === expected.name && s.kind === expected.kind);
-    if (match) found++;
-    else missing.push(`${expected.kind} ${expected.name}`);
+    const match = index.symbols.some(
+      (s) =>
+        s.name === expected.name &&
+        s.kind === expected.kind &&
+        (expected.exported === undefined ||
+          s.modifiers?.includes("exported") === expected.exported),
+    );
+    if (match) symbolsFound++;
+    else missing.push(`${expected.kind} ${expected.name}${expected.exported === false ? " (unexported)" : ""}`);
   }
-  results[repo.id] = { total: oracle.length, found, missing };
-  console.log(`${repo.id}: ${found}/${oracle.length} symbols found`);
+
+  let importsFound = 0;
+  for (const expected of oracleImports) {
+    const match = index.imports.some(
+      (i) => i.module === expected.module && i.kind === expected.kind,
+    );
+    if (match) importsFound++;
+    else missing.push(`import ${expected.module} (${expected.kind})`);
+  }
+
+  results[repo.id] = {
+    symbolsTotal: oracle.length,
+    symbolsFound,
+    importsTotal: oracleImports.length,
+    importsFound,
+    missing,
+  };
+  console.log(`${repo.id}: ${symbolsFound}/${oracle.length} symbols found, ${importsFound}/${oracleImports.length} imports found`);
   if (missing.length) console.log(`  missing: ${missing.join(", ")}`);
 }
 

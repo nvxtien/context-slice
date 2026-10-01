@@ -1,19 +1,25 @@
 {
-  "generatedAt": "2026-10-01T15:46:36.034Z",
+  "generatedAt": "2026-10-01T17:21:11.497Z",
   "results": {
     "pkg-errors": {
-      "total": 20,
-      "found": 20,
+      "symbolsTotal": 21,
+      "symbolsFound": 21,
+      "importsTotal": 2,
+      "importsFound": 2,
       "missing": []
     },
     "cobra": {
-      "total": 11,
-      "found": 11,
+      "symbolsTotal": 12,
+      "symbolsFound": 12,
+      "importsTotal": 3,
+      "importsFound": 3,
       "missing": []
     },
     "chi": {
-      "total": 12,
-      "found": 12,
+      "symbolsTotal": 13,
+      "symbolsFound": 13,
+      "importsTotal": 3,
+      "importsFound": 3,
       "missing": []
     }
   }
