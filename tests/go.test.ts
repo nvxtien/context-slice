@@ -1,8 +1,35 @@
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import test from "node:test";
 import { parseGo } from "../src/languages/go/parse.js";
 import { adapterFor } from "../src/languages/adapter.js";
+import { ProjectIndex } from "../src/indexer/index.js";
 import "../src/languages/go/index.js";
+
+type Files = Record<string, string>;
+/** Mirrors tests/rust-call-resolution.test.ts's `withRepo`: resolution is inherently
+ * cross-file, so these tests need real multi-file `ProjectIndex` fixtures on disk. */
+function withGoRepo<T>(files: Files, run: (dir: string) => T): T {
+  const dir = mkdtempSync(join(tmpdir(), "cs-go-res-"));
+  try {
+    for (const [name, body] of Object.entries(files)) {
+      mkdirSync(dirname(join(dir, name)), { recursive: true });
+      writeFileSync(join(dir, name), body);
+    }
+    return run(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+function indexedGoProject(files: Files) {
+  return withGoRepo(files, (root) => {
+    const index = new ProjectIndex(root);
+    index.rebuild();
+    return index;
+  });
+}
 
 test("a package-level function produces a 'function' symbol", () => {
   const parsed = parseGo("main.go", `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`);
@@ -299,4 +326,34 @@ test("an immediately-invoked anonymous function launched as a goroutine produces
   const helperCall = parsed.calls.find((c) => c.calleeName === "helper");
   assert.ok(helperCall, "expected a call edge for helper nested inside the closure");
   assert.equal(helperCall!.callerId, main.id);
+});
+
+test("a direct call resolves to a function in another file in the SAME directory", () => {
+  const index = indexedGoProject({
+    "a.go": `package main\n\nfunc main() {\n\thelper()\n}\n`,
+    "b.go": `package main\n\nfunc helper() {}\n`,
+  });
+  const helper = index.symbols.find((s) => s.name === "helper")!;
+  const call = index.calls.find((c) => c.calleeName === "helper")!;
+  assert.equal(call.resolvedTargetId, helper.id);
+  assert.equal(call.confidence, "exact");
+  assert.equal(call.resolutionKind, "same-file");
+});
+
+test("a direct call does NOT resolve to a function in a DIFFERENT directory, even same package name", () => {
+  const index = indexedGoProject({
+    "a/a.go": `package main\n\nfunc main() {\n\thelper()\n}\n`,
+    "b/b.go": `package main\n\nfunc helper() {}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "helper")!;
+  assert.equal(call.resolvedTargetId, undefined);
+  assert.equal(call.confidence, "unresolved");
+});
+
+test("an unresolvable direct call (e.g. a stdlib builtin) stays unresolved", () => {
+  const index = indexedGoProject({
+    "a.go": `package main\n\nfunc main() {\n\tlen("x")\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "len")!;
+  assert.equal(call.confidence, "unresolved");
 });

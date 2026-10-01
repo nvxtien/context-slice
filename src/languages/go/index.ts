@@ -1,5 +1,6 @@
 import { registerLanguage, type LanguageAdapter } from "../adapter.js";
 import { LANGUAGE_ID, parseGo } from "./parse.js";
+import { resolveGoCalls } from "./resolve.js";
 
 export const goAdapter: LanguageAdapter = {
   id: LANGUAGE_ID,
@@ -7,7 +8,9 @@ export const goAdapter: LanguageAdapter = {
   extensions: [".go"],
   ignoredDirectories: ["vendor"],
   parse: parseGo,
-  resolveCalls: () => {}, // Phase 3 concern; no calls are produced yet.
+  resolveCalls: (context) => {
+    resolveGoCalls(context);
+  },
 };
 
 registerLanguage(goAdapter);
