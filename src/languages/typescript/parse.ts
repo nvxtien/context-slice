@@ -4,6 +4,7 @@ import type {
   CallEdge,
   ExportRecord,
   ImportRecord,
+  LanguageId,
   SourceRange,
   SymbolKind,
   SymbolMetadata,
@@ -14,13 +15,21 @@ import type { ParsedFile } from "../adapter.js";
 type Node = Parser.SyntaxNode;
 
 export const LANGUAGE_ID = "typescript";
-const tsx = (filePath: string) => filePath.toLowerCase().endsWith(".tsx");
+export const JAVASCRIPT_LANGUAGE_ID = "javascript";
+// tree-sitter-typescript's "typescript" grammar can't parse JSX (ambiguous with type
+// assertions), so a .jsx/.js-with-jsx file needs the "tsx" grammar regardless of language id.
+const jsxDialect = (filePath: string) =>
+  [".tsx", ".jsx"].some((ext) => filePath.toLowerCase().endsWith(ext));
+const isJavaScriptFile = (filePath: string) =>
+  [".jsx", ".mjs", ".cjs", ".js"].some((ext) =>
+    filePath.toLowerCase().endsWith(ext),
+  );
 export const isDeclarationFile = (filePath: string) =>
   filePath.toLowerCase().endsWith(".d.ts");
 
 const parsers = new Map<string, Parser>();
 function parserFor(filePath: string) {
-  const dialect = tsx(filePath) ? "tsx" : "typescript";
+  const dialect = jsxDialect(filePath) ? "tsx" : "typescript";
   let parser = parsers.get(dialect);
   if (!parser) {
     parser = new Parser();
@@ -82,7 +91,7 @@ function returnType(node: Node) {
 }
 
 const looksLikeComponent = (name: string, node: Node, filePath: string) =>
-  tsx(filePath) && /^[A-Z]/.test(name) && containsJsx(node);
+  jsxDialect(filePath) && /^[A-Z]/.test(name) && containsJsx(node);
 
 function containsJsx(node: Node): boolean {
   const stack = [node];
@@ -109,6 +118,9 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   const calls: CallEdge[] = [];
   const imports: ImportRecord[] = [];
   const exports: ExportRecord[] = [];
+  const languageId: LanguageId = isJavaScriptFile(filePath)
+    ? JAVASCRIPT_LANGUAGE_ID
+    : LANGUAGE_ID;
   const declarationOnly = isDeclarationFile(filePath);
   let parseError = false;
   let tree: Parser.Tree;
@@ -142,7 +154,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
       const name = filePath;
       moduleSymbol = {
         id: `${filePath}::module::${name}`,
-        language: LANGUAGE_ID,
+        language: languageId,
         kind: "namespace",
         name,
         qualifiedName: name,
@@ -178,7 +190,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
     const body = options.bodyNode ?? undefined;
     const symbol: SymbolRecord = {
       id,
-      language: LANGUAGE_ID,
+      language: languageId,
       kind,
       name,
       qualifiedName: [...chain, name].join("."),
@@ -211,7 +223,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
     const typeOnly = node.text.startsWith("import type");
     const base = {
       filePath,
-      language: LANGUAGE_ID,
+      language: languageId,
       module,
       typeOnly,
       range: range(node),
@@ -272,7 +284,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
     const typeOnly = node.text.startsWith("export type");
     const base = {
       filePath,
-      language: LANGUAGE_ID,
+      language: languageId,
       typeOnly,
       range: range(node),
     };
@@ -347,7 +359,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
       callerId: owner.id,
       argumentCount,
       filePath,
-      language: LANGUAGE_ID,
+      language: languageId,
       range: range(node),
       confidence: "unresolved" as const,
       evidence: [] as string[],
@@ -400,7 +412,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
       calleeName: constructor.text,
       argumentCount: argumentsNode ? argumentsNode.namedChildren.length : 0,
       filePath,
-      language: LANGUAGE_ID,
+      language: languageId,
       range: range(node),
       confidence: "unresolved",
       resolutionKind: "constructor",
@@ -415,7 +427,7 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
       callerId: owner.id,
       calleeName: name.text,
       filePath,
-      language: LANGUAGE_ID,
+      language: languageId,
       range: range(node),
       confidence: "unresolved",
       resolutionKind: "jsx-reference",

@@ -27,6 +27,7 @@ import {
 } from "../languages/java/enterprise/registry.js";
 import "../languages/java.js";
 import "../languages/typescript/index.js";
+import "../languages/javascript/index.js";
 import "../languages/python/index.js";
 import "../languages/rust/index.js";
 import "../languages/java/enterprise/spring-mvc.js";
