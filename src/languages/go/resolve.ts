@@ -3,8 +3,6 @@ import { dirname, join } from "node:path";
 import type { CallEdge, ImportRecord, SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
 
-const CALLABLE_KINDS = new Set(["function", "method"]);
-
 /** Go's package boundary is per-directory, never by matching package-clause name strings. */
 function directoryOf(filePath: string): string {
   const dir = dirname(filePath);
@@ -83,7 +81,7 @@ export function resolveGoCalls(context: ResolveContext): void {
 
   const resolveDirectCall = (call: CallEdge, caller: SymbolRecord) => {
     const candidates = (byDirectory.get(directoryOf(caller.filePath)) ?? []).filter(
-      (s) => CALLABLE_KINDS.has(s.kind) && s.name === call.calleeName,
+      (s) => s.kind === "function" && s.name === call.calleeName,
     );
     if (candidates.length === 1) settle(call, candidates[0], "same-file", "same-package direct call");
   };
@@ -107,7 +105,7 @@ export function resolveGoCalls(context: ResolveContext): void {
     }
     const relative = record.module.slice(modulePath.length).replace(/^\//, "");
     const candidates = (byDirectory.get(relative) ?? []).filter(
-      (s) => CALLABLE_KINDS.has(s.kind) && s.name === call.calleeName && s.modifiers.includes("exported"),
+      (s) => s.kind === "function" && s.name === call.calleeName && s.modifiers.includes("exported"),
     );
     if (candidates.length === 1) {
       settle(call, candidates[0], "imported", "package-qualified import call");

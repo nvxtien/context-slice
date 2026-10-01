@@ -19,7 +19,7 @@ simple (regex-based binding inference, mirroring Python's own
 
 Go's package membership is PER-DIRECTORY (every `.go` file in one
 directory belongs to the same package and can call each other's
-functions/methods with no import, regardless of the files'
+functions with no import, regardless of the files'
 `package`-clause name matching — two different directories with the
 SAME declared package name are still two different packages). `Symbol
 Record.packageName` is never set by this adapter (confirmed: Phase
@@ -27,18 +27,23 @@ Record.packageName` is never set by this adapter (confirmed: Phase
 the correct, simpler mechanism, needing no retrofit to Phases 1-3a.
 
 For a direct call (`receiverText` undefined), resolve against every
-function/method symbol sharing the caller's own directory:
+FUNCTION symbol (never a method — Go methods always require an
+explicit receiver expression, so a bare call can never reach one)
+sharing the caller's own directory:
 
-- Exactly one same-directory match by name → `confidence: "exact"`,
-  `resolutionKind: "same-file"` (reusing the existing `ResolutionKind`
-  value — "same-file" already means "same compilation unit" in this
-  project's model; a Go package spanning multiple files is the closest
-  existing fit, not worth adding a new `ResolutionKind` for).
-- Multiple same-directory matches (shouldn't happen for exported Go
-  names within one package — Go forbids duplicate top-level names in a
-  package — but an adapter dedup/edge case, e.g. test-file build tags
-  this project doesn't model, could theoretically produce one) →
-  `confidence: "unresolved"`, never guessed.
+- Exactly one same-directory function match by name → `confidence:
+  "exact"`, `resolutionKind: "same-file"` (reusing the existing
+  `ResolutionKind` value — "same-file" already means "same compilation
+  unit" in this project's model; a Go package spanning multiple files
+  is the closest existing fit, not worth adding a new `ResolutionKind`
+  for). A same-named method in the same directory is not a competing
+  candidate and does not create ambiguity, since it can never be the
+  real target of a receiver-less call.
+- Multiple same-directory function matches (shouldn't happen for
+  exported Go names within one package — Go forbids duplicate
+  top-level names in a package — but an adapter dedup/edge case, e.g.
+  test-file build tags this project doesn't model, could theoretically
+  produce one) → `confidence: "unresolved"`, never guessed.
 - Zero same-directory matches → left `"unresolved"` (falls through to
   strategy 3, or truly unresolved — e.g. a stdlib builtin like
   `len`/`make`/`append`, or a function genuinely outside the indexed
@@ -65,7 +70,9 @@ directory:
   same precedent as every other adapter's handling of a call into code
   outside the indexed repository.
 - For an internal import, look up EXPORTED (per Phase 2's `"exported"`
-  modifier) function/method/type symbols in that resolved directory,
+  modifier) FUNCTION symbols only (never a method — a package-qualified
+  call like `pkg.Save()` has no receiver and so, like the direct-call
+  case above, can never reach a method) in that resolved directory,
   matching the selector's `field` name:
   - Exactly one match → `confidence: "exact"`, `resolutionKind:
     "imported"` (existing value, already means "resolved via an

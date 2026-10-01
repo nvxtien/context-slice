@@ -354,6 +354,34 @@ test("an unresolvable direct call (e.g. a stdlib builtin) stays unresolved", () 
   rmSync(root, { recursive: true, force: true });
 });
 
+test("a bare call to a name that only exists as a method (not a function) does NOT resolve", () => {
+  // Go methods always require an explicit receiver (u.Save()); a bare Save() can never
+  // reach a method, even when it's the only same-named symbol in the directory.
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\nfunc main() {\n\tSave()\n}\n`,
+    "b.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Save" && !c.receiverText)!;
+  assert.equal(call.resolvedTargetId, undefined);
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a bare call resolves exact to the function when a same-named method also exists in the directory", () => {
+  // A function and a method sharing a name is not a real ambiguity for a receiver-less call:
+  // the method can never be the target, so the bare call must resolve unambiguously to the function.
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\nfunc Close() {}\n\nfunc main() {\n\tClose()\n}\n`,
+    "b.go": `package main\n\ntype Conn struct{}\nfunc (c *Conn) Close() {}\n`,
+  });
+  const fn = index.symbols.find((s) => s.kind === "function" && s.name === "Close")!;
+  const call = index.calls.find((c) => c.calleeName === "Close" && !c.receiverText)!;
+  assert.equal(call.resolvedTargetId, fn.id);
+  assert.equal(call.confidence, "exact");
+  assert.equal(call.resolutionKind, "same-file");
+  rmSync(root, { recursive: true, force: true });
+});
+
 test("a package-qualified call to an internal project import resolves exact", () => {
   const { root, index } = indexedGoProject({
     "go.mod": `module example.com/proj\n\ngo 1.21\n`,
