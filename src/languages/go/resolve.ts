@@ -59,12 +59,38 @@ export function resolveGoCalls(context: ResolveContext): void {
     if (candidates.length === 1) settle(call, candidates[0], "same-file", "same-package direct call");
   };
 
+  const importLocalName = (record: ImportRecord): string | undefined =>
+    record.localName ?? record.module.split("/").pop();
+
+  const resolveQualifiedCall = (call: CallEdge, caller: SymbolRecord): boolean => {
+    if (!call.receiverText || !/^[A-Z]/.test(call.calleeName)) return false; // unexported: never a package-qualified target
+    const record = (importsByFile.get(caller.filePath) ?? []).find(
+      (r) => importLocalName(r) === call.receiverText,
+    );
+    if (!record) return false;
+    if (!modulePath || !record.module.startsWith(modulePath)) {
+      call.externalPackage = record.module;
+      return false;
+    }
+    const relative = record.module.slice(modulePath.length).replace(/^\//, "");
+    const candidates = (byDirectory.get(relative) ?? []).filter(
+      (s) => CALLABLE_KINDS.has(s.kind) && s.name === call.calleeName && s.modifiers.includes("exported"),
+    );
+    if (candidates.length === 1) {
+      settle(call, candidates[0], "imported", "package-qualified import call");
+      return true;
+    }
+    return false;
+  };
+
   for (const call of context.calls) {
     const caller = symbolsById.get(call.callerId);
     if (!caller) continue;
     if (!call.receiverText) {
       resolveDirectCall(call, caller);
+      continue;
     }
-    // Strategies 2 (import-qualified) and 3 (receiver-type method) are added in Tasks 2-3.
+    resolveQualifiedCall(call, caller);
+    // Strategy 3 (receiver-type method) is added in Task 3.
   }
 }

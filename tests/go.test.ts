@@ -10,25 +10,18 @@ import "../src/languages/go/index.js";
 
 type Files = Record<string, string>;
 /** Mirrors tests/rust-call-resolution.test.ts's `withRepo`: resolution is inherently
- * cross-file, so these tests need real multi-file `ProjectIndex` fixtures on disk. */
-function withGoRepo<T>(files: Files, run: (dir: string) => T): T {
+ * cross-file, so these tests need real multi-file `ProjectIndex` fixtures on disk.
+ * Returns both the index and its root dir so tests needing import resolution (which
+ * reads go.mod from disk) can defer cleanup until after their assertions. */
+function indexedGoProject(files: Files): { root: string; index: ProjectIndex } {
   const dir = mkdtempSync(join(tmpdir(), "cs-go-res-"));
-  try {
-    for (const [name, body] of Object.entries(files)) {
-      mkdirSync(dirname(join(dir, name)), { recursive: true });
-      writeFileSync(join(dir, name), body);
-    }
-    return run(dir);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
+  for (const [name, body] of Object.entries(files)) {
+    mkdirSync(dirname(join(dir, name)), { recursive: true });
+    writeFileSync(join(dir, name), body);
   }
-}
-function indexedGoProject(files: Files) {
-  return withGoRepo(files, (root) => {
-    const index = new ProjectIndex(root);
-    index.rebuild();
-    return index;
-  });
+  const index = new ProjectIndex(dir);
+  index.rebuild();
+  return { root: dir, index };
 }
 
 test("a package-level function produces a 'function' symbol", () => {
@@ -329,7 +322,7 @@ test("an immediately-invoked anonymous function launched as a goroutine produces
 });
 
 test("a direct call resolves to a function in another file in the SAME directory", () => {
-  const index = indexedGoProject({
+  const { root, index } = indexedGoProject({
     "a.go": `package main\n\nfunc main() {\n\thelper()\n}\n`,
     "b.go": `package main\n\nfunc helper() {}\n`,
   });
@@ -338,22 +331,60 @@ test("a direct call resolves to a function in another file in the SAME directory
   assert.equal(call.resolvedTargetId, helper.id);
   assert.equal(call.confidence, "exact");
   assert.equal(call.resolutionKind, "same-file");
+  rmSync(root, { recursive: true, force: true });
 });
 
 test("a direct call does NOT resolve to a function in a DIFFERENT directory, even same package name", () => {
-  const index = indexedGoProject({
+  const { root, index } = indexedGoProject({
     "a/a.go": `package main\n\nfunc main() {\n\thelper()\n}\n`,
     "b/b.go": `package main\n\nfunc helper() {}\n`,
   });
   const call = index.calls.find((c) => c.calleeName === "helper")!;
   assert.equal(call.resolvedTargetId, undefined);
   assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
 });
 
 test("an unresolvable direct call (e.g. a stdlib builtin) stays unresolved", () => {
-  const index = indexedGoProject({
+  const { root, index } = indexedGoProject({
     "a.go": `package main\n\nfunc main() {\n\tlen("x")\n}\n`,
   });
   const call = index.calls.find((c) => c.calleeName === "len")!;
   assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a package-qualified call to an internal project import resolves exact", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "main.go": `package main\n\nimport "example.com/proj/util"\n\nfunc main() {\n\tutil.Helper()\n}\n`,
+    "util/util.go": `package util\n\nfunc Helper() {}\n`,
+  });
+  const helper = index.symbols.find((s) => s.name === "Helper")!;
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.resolvedTargetId, helper.id);
+  assert.equal(call.resolutionKind, "imported");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a package-qualified call to an external (non-project) import stays unresolved with externalPackage set", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "main.go": `package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("x")\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Println")!;
+  assert.equal(call.confidence, "unresolved");
+  assert.equal(call.externalPackage, "fmt");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a package-qualified call to an UNEXPORTED name in the imported package does not resolve", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "main.go": `package main\n\nimport "example.com/proj/util"\n\nfunc main() {\n\tutil.helper()\n}\n`,
+    "util/util.go": `package util\n\nfunc helper() {}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "helper")!;
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
 });
