@@ -33,18 +33,27 @@ to it.
    of scope** — no AST alternative exists, and the risk is theoretical,
    not demonstrated.
 
-2. **Field loop (line 125), matched against `field.source`.** Verified
-   directly: `field.source` for a field declaration does NOT include a
-   trailing same-line comment or any body (fields have no body). Repro
-   attempted:
+2. **Field loop (line 125), matched against `field.source`.** Initially
+   verified only for a trailing same-line comment: `field.source` for a
+   field declaration does NOT include a trailing same-line comment or any
+   body (fields have no body), confirmed via `parseJava` on
    ```java
    @Autowired
    private Bar bar; // was @Qualifier("legacy") before refactor
    ```
-   confirmed via `parseJava` that `field.source` is exactly
-   `"@Autowired\n    private Bar bar;"` — the trailing comment is not
-   included, so `QUALIFIER_RE` cannot match it. **Out of scope** — no bug
-   found, confirmed empirically, not assumed.
+   where `field.source` is exactly `"@Autowired\n    private Bar bar;"`.
+   That check did not cover every comment position, though: a comment
+   placed BETWEEN the annotation and the declaration is still inside the
+   `field_declaration` node's source range. Reproduced:
+   ```java
+   @Autowired
+   // @Qualifier("legacy")
+   private Bar bar;
+   ```
+   produces evidence `["@Autowired field Bar bar", "@Qualifier(\"legacy\")"]`
+   with no real `@Qualifier` annotation present. **In scope — a second
+   real, confirmed bug, same class as the method loop's, fixed alongside
+   it in this same branch.**
 
 3. **Method loop (line 141), matched against `method.source`.** Methods'
    `.source` includes the full body (same fact that caused the bug Phase
@@ -68,21 +77,25 @@ to it.
   contains a bare `"Qualifier"` name. If the method has no real
   `@Qualifier` annotation, no regex match is attempted at all, so no body
   comment can produce a false qualifier value.
+- The field loop's qualifier extraction gains the same AST gate: only
+  attempt `QUALIFIER_RE` against `field.source` if `field.annotations`
+  actually contains a bare `"Qualifier"` name. This closes the
+  between-annotation-and-declaration comment gap found in the
+  investigation above.
 - Once gated, the existing `QUALIFIER_RE` and its match logic are
-  unchanged — a genuinely-annotated method's qualifier value extraction
-  doesn't need to change (the annotation always precedes the body in
-  source order, so an unconditional regex match already finds the real
-  annotation's value correctly when one exists; the bug is only that it
-  ALSO matches when none exists).
+  unchanged for both loops — a genuinely-annotated method or field's
+  qualifier value extraction doesn't need to change (the annotation
+  always precedes the body/declaration in source order, so an
+  unconditional regex match already finds the real annotation's value
+  correctly when one exists; the bug is only that it ALSO matches when
+  none exists).
 - `bareName()` (already defined in this file) is reused for the
-  `"Qualifier"` check — no new helper needed.
+  `"Qualifier"` check in both loops — no new helper needed.
 
 ## Non-goals
 
 - The constructor-parameter call site (line 57) — no `SymbolRecord` exists
   per-parameter to gate against; risk is theoretical, not demonstrated.
-- The field call site (line 125) — confirmed safe by direct repro; no bug
-  to fix.
 - Any change to `QUALIFIER_RE`'s own pattern, `STEREOTYPES`,
   `INJECT_ANNOTATIONS`, the constructor-injection `annotated` check (fixed
   in the prior gap-closure branch), `firstParenGroup()`, `splitTopLevel()`,
@@ -111,6 +124,19 @@ const qualifier = hasQualifier ? method.source.match(QUALIFIER_RE)?.[1] : undefi
 Everything else in the loop — how `qualifier` is subsequently used
 (`p.qualifier ??= qualifier;`) — stays unchanged.
 
+The field-injection loop gets the mirrored fix. The line:
+
+```ts
+decl.qualifier ??= field.source.match(QUALIFIER_RE)?.[1];
+```
+
+becomes:
+
+```ts
+const hasQualifier = field.annotations.some((a) => bareName(a) === "Qualifier");
+decl.qualifier ??= hasQualifier ? field.source.match(QUALIFIER_RE)?.[1] : undefined;
+```
+
 ## Testing
 
 Existing test file `tests/java-enterprise-dependency-injection.test.ts`
@@ -125,6 +151,12 @@ New tests to add:
   (proving the fix doesn't also suppress real detection).
 - A genuinely `@Qualifier("x")`-annotated setter still has `"x"` correctly
   extracted into its evidence — regression pin for the true-positive path.
+- The field-loop repro (`@Qualifier("legacy")` in a comment between
+  `@Autowired` and the field declaration, no real `@Qualifier` annotation
+  on the field), asserting the relation's evidence does NOT contain a
+  `@Qualifier(...)` entry, while the relation itself still exists.
+- A genuinely `@Qualifier("x")`-annotated field still has `"x"` correctly
+  extracted — regression pin for the true-positive path.
 
 ## Acceptance / Definition of Done
 

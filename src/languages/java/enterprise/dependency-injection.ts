@@ -122,7 +122,8 @@ function extractDependencyInjection(
     if (!cls) continue;
     const decl = parseDeclaration(`${field.metadata?.declaredType ?? ""} ${field.name}`);
     if (!decl) continue;
-    decl.qualifier ??= field.source.match(QUALIFIER_RE)?.[1];
+    const hasQualifier = field.annotations.some((a) => bareName(a) === "Qualifier");
+    decl.qualifier ??= hasQualifier ? field.source.match(QUALIFIER_RE)?.[1] : undefined;
     relations.push(
       relation(cls, filePath, decl, `@${bareName(annotation)} field ${decl.type} ${field.name}`),
     );

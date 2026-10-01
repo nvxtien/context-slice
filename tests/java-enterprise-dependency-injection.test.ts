@@ -102,6 +102,37 @@ class Foo {
   assert.ok(rel.evidence.some((e) => e.includes('@Qualifier("primary")')), "a real @Qualifier must still be extracted");
 });
 
+test("@Qualifier in a comment between an @Autowired annotation and a field produces no qualifier evidence", () => {
+  const source = `
+class Bar {}
+class Foo {
+    @Autowired
+    // @Qualifier("legacy")
+    private Bar bar;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const cls = symbols.find((s) => s.kind === "class" && s.name === "Foo")!;
+  const rel = relations.find((r) => r.sourceSymbolId === cls.id)!;
+  assert.ok(rel, "the real @Autowired field must still produce a relation");
+  assert.ok(!rel.evidence.some((e) => e.includes("@Qualifier")), "a comment-only @Qualifier must not appear in evidence");
+});
+
+test("a genuinely @Qualifier-annotated field still has its value extracted", () => {
+  const source = `
+class Bar {}
+class Foo {
+    @Autowired
+    @Qualifier("primary")
+    private Bar bar;
+}
+`;
+  const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
+  const cls = symbols.find((s) => s.kind === "class" && s.name === "Foo")!;
+  const rel = relations.find((r) => r.sourceSymbolId === cls.id)!;
+  assert.ok(rel.evidence.some((e) => e.includes('@Qualifier("primary")')), "a real @Qualifier must still be extracted");
+});
+
 test("a type matching zero project symbols produces no relation", () => {
   const source = `
 class Checkout {
