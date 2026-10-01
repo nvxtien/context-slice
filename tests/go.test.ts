@@ -127,3 +127,32 @@ test("a package-level var produces a 'variable' symbol", () => {
   assert.ok(sym, "expected a symbol for DefaultTimeout");
   assert.equal(sym!.kind, "variable");
 });
+
+test("a type alias (with '=') produces a 'type' symbol", () => {
+  const parsed = parseGo("alias.go", `package main\n\ntype Alias = int\n`);
+  const alias = parsed.symbols.find((s) => s.name === "Alias");
+  assert.ok(alias, "expected a symbol for Alias");
+  assert.equal(alias!.kind, "type");
+});
+
+test("a pointer-receiver method on a generic struct resolves parentId and supertypes", () => {
+  const source = `package main\n\ntype Stack[T any] struct {\n\titems []T\n}\n\nfunc (s *Stack[T]) Push(v T) {}\n`;
+  const parsed = parseGo("stack.go", source);
+  const struct = parsed.symbols.find((s) => s.name === "Stack");
+  const method = parsed.symbols.find((s) => s.name === "Push");
+  assert.ok(struct, "expected a symbol for Stack");
+  assert.ok(method, "expected a symbol for Push");
+  assert.deepEqual(method!.supertypes, ["Stack"]);
+  assert.equal(method!.parentId, struct!.id);
+});
+
+test("same-named methods on different structs in one file get distinct, receiver-qualified ids", () => {
+  const source = `package main\n\ntype A struct {}\n\nfunc (a A) String() string {\n\treturn "a"\n}\n\ntype B struct {}\n\nfunc (b B) String() string {\n\treturn "b"\n}\n`;
+  const parsed = parseGo("stringers.go", source);
+  const methods = parsed.symbols.filter((s) => s.kind === "method" && s.name === "String");
+  assert.equal(methods.length, 2, "expected two String() methods");
+  const [first, second] = methods;
+  assert.notEqual(first!.id, second!.id);
+  assert.ok(first!.id.includes("A."), `expected ${first!.id} to reference receiver A`);
+  assert.ok(second!.id.includes("B."), `expected ${second!.id} to reference receiver B`);
+});

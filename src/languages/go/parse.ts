@@ -32,20 +32,28 @@ const field = (node: Node, name: string) => node.childForFieldName(name);
 const text = (node: Node | null | undefined) => node?.text ?? "";
 
 /**
- * A method's receiver type as written, e.g. "*User" or "User" (verified: the
+ * A method's receiver base type name, e.g. "User" for "*User"/"User", or
+ * "Stack" for a generic receiver "*Stack[T]"/"Stack[T]" (verified: the
  * receiver's own parameter_declaration has a "type" field that is either a
- * pointer_type node (whose own namedChild(0) is the base type_identifier) or
- * a type_identifier node directly for a value receiver).
+ * pointer_type node (whose own namedChild(0) is the base type_identifier or
+ * a generic_type), a generic_type node directly, or a type_identifier node
+ * directly for a plain value receiver. generic_type's base identifier is
+ * reachable via its own "type" field, verified empirically — not a "name"
+ * field as one might guess).
  */
 function receiverBaseTypeName(methodNode: Node): string | undefined {
   const receiverList = field(methodNode, "receiver");
   const paramDecl = receiverList?.namedChildren.find(
     (c) => c.type === "parameter_declaration",
   );
-  const typeNode = paramDecl ? field(paramDecl, "type") : undefined;
+  let typeNode = paramDecl ? field(paramDecl, "type") : undefined;
   if (!typeNode) return undefined;
   if (typeNode.type === "pointer_type") {
-    const base = typeNode.namedChild(0);
+    typeNode = typeNode.namedChild(0) ?? undefined;
+  }
+  if (!typeNode) return undefined;
+  if (typeNode.type === "generic_type") {
+    const base = field(typeNode, "type");
     return base?.type === "type_identifier" ? base.text : undefined;
   }
   return typeNode.type === "type_identifier" ? typeNode.text : undefined;
@@ -115,7 +123,9 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       // linkage runs in a second pass below once every struct in this file is known.
       pendingMethods.push({ node: child, receiverName: receiverBaseTypeName(child) });
     } else if (child.type === "type_declaration") {
-      for (const spec of child.namedChildren.filter((c) => c.type === "type_spec")) {
+      for (const spec of child.namedChildren.filter(
+        (c) => c.type === "type_spec" || c.type === "type_alias",
+      )) {
         const name = text(field(spec, "name"));
         const typeNode = field(spec, "type");
         if (!name || !typeNode) continue;
@@ -235,14 +245,15 @@ export function parseGo(filePath: string, source: string): ParsedFile {
     const name = text(field(methodNode, "name"));
     if (!name) continue;
     const parameters = text(field(methodNode, "parameters"));
-    const id = uniqueId(canonicalId(filePath, "method", name, parameters));
+    const qualifiedName = receiverName ? `${receiverName}.${name}` : name;
+    const id = uniqueId(canonicalId(filePath, "method", qualifiedName, parameters));
     const receiverStruct = receiverName ? structByName.get(receiverName) : undefined;
     symbols.push({
       id,
       language: LANGUAGE_ID,
       kind: "method",
       name,
-      qualifiedName: receiverName ? `${receiverName}.${name}` : name,
+      qualifiedName,
       canonicalIdentity: id,
       signature: `func (${receiverName ?? ""}) ${name}${parameters}`,
       filePath,
