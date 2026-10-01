@@ -43,10 +43,17 @@ const oracles: Record<string, OracleSymbol[]> = {
     { name: "Is", kind: "function" },
     { name: "As", kind: "function" },
     { name: "Unwrap", kind: "function" },
+    // withStack embeds `error` and `*stack` (no explicit field name, falls back to the
+    // embedded type's own name); withMessage has regular named fields `cause` and `msg`.
+    { name: "error", kind: "field" },
+    { name: "stack", kind: "field" },
+    { name: "cause", kind: "field" },
+    { name: "msg", kind: "field" },
   ],
   cobra: [
     { name: "Group", kind: "class" },
     { name: "Command", kind: "class" },
+    { name: "Use", kind: "field" },
     { name: "Context", kind: "method" },
     { name: "SetArgs", kind: "method" },
     { name: "SetOut", kind: "method" },

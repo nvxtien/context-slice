@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-01T15:43:22.085Z",
+  "generatedAt": "2026-10-01T15:46:36.034Z",
   "results": {
     "pkg-errors": {
-      "total": 16,
-      "found": 16,
+      "total": 20,
+      "found": 20,
       "missing": []
     },
     "cobra": {
-      "total": 10,
-      "found": 10,
+      "total": 11,
+      "found": 11,
       "missing": []
     },
     "chi": {
