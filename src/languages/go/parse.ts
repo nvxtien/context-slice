@@ -121,7 +121,11 @@ function collectCalls(node: Node, ownerId: string, filePath: string, calls: Call
   for (const child of node.namedChildren) {
     if (child.type === "call_expression") {
       const wrapKind = node.type === "go_statement" ? "go" : node.type === "defer_statement" ? "defer" : undefined;
-      calls.push(buildCallEdge(child, filePath, ownerId, wrapKind));
+      const edge = buildCallEdge(child, filePath, ownerId, wrapKind);
+      // Skip edges whose callee couldn't be named (e.g. `go func(){ ... }()`,
+      // `getHandler()()`, `(g)()`) rather than emitting a garbage calleeName: "" edge.
+      // Still recurse below so calls nested inside the callee/args are found.
+      if (edge.calleeName !== "") calls.push(edge);
     }
     collectCalls(child, ownerId, filePath, calls);
   }

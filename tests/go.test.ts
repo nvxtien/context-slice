@@ -289,3 +289,14 @@ test("argumentCount is correctly computed for a multi-argument call", () => {
   const call = parsed.calls.find((c) => c.calleeName === "add");
   assert.equal(call!.argumentCount, 3);
 });
+
+test("an immediately-invoked anonymous function launched as a goroutine produces no garbage edge, but its nested call is still found", () => {
+  const source = `package main\n\nfunc helper() {}\n\nfunc main() {\n\tgo func() {\n\t\thelper()\n\t}()\n}\n`;
+  const parsed = parseGo("main.go", source);
+  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const emptyNameCall = parsed.calls.find((c) => c.calleeName === "");
+  assert.equal(emptyNameCall, undefined, "no call edge should be emitted for the unnamed IIFE invocation");
+  const helperCall = parsed.calls.find((c) => c.calleeName === "helper");
+  assert.ok(helperCall, "expected a call edge for helper nested inside the closure");
+  assert.equal(helperCall!.callerId, main.id);
+});
