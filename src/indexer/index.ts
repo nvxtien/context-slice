@@ -30,6 +30,7 @@ import "../languages/typescript/index.js";
 import "../languages/javascript/index.js";
 import "../languages/python/index.js";
 import "../languages/rust/index.js";
+import "../languages/go/index.js";
 import "../languages/java/enterprise/spring-mvc.js";
 import "../languages/java/enterprise/dependency-injection.js";
 import "../languages/java/enterprise/transactions.js";

@@ -5,6 +5,7 @@ import "../languages/java.js";
 import "../languages/typescript/index.js";
 import "../languages/javascript/index.js";
 import "../languages/python/index.js";
+import "../languages/go/index.js";
 import { WorkflowError } from "./errors.js";
 
 const ignored = new Set([
