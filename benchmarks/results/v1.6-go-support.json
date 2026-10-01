@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T20:03:58.758Z",
+  "generatedAt": "2026-10-01T20:07:36.769Z",
   "results": {
     "pkg-errors": {
       "symbolsTotal": 21,
@@ -31,10 +31,8 @@
       "callsTotal": 5,
       "callsFound": 5,
       "resolutionsTotal": 6,
-      "resolutionsMatched": 5,
-      "missing": [
-        "resolution chi.RouteContext (middleware/clean_path.go:14): expected imported, got unresolved"
-      ]
+      "resolutionsMatched": 6,
+      "missing": []
     }
   }
 }

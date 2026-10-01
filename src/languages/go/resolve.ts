@@ -88,8 +88,12 @@ export function resolveGoCalls(context: ResolveContext): void {
     if (candidates.length === 1) settle(call, candidates[0], "same-file", "same-package direct call");
   };
 
+  // Go modules convention: a module path at major version >=2 ends in "/vN" (go.dev/ref/mod#major-version-suffixes),
+  // but the package's own declared name is unaffected, e.g. "github.com/go-chi/chi/v5" is still used as "chi.Foo(...)".
+  // Strip that suffix before taking the last path segment for the unaliased case. Known limitation: a package whose
+  // real (unversioned) last segment happens to look like "vN" itself is not handled — rare enough not to special-case.
   const importLocalName = (record: ImportRecord): string | undefined =>
-    record.localName ?? record.module.split("/").pop();
+    record.localName ?? record.module.replace(/\/v\d+$/, "").split("/").pop();
 
   const resolveQualifiedCall = (call: CallEdge, caller: SymbolRecord): boolean => {
     if (!call.receiverText || !/^[A-Z]/.test(call.calleeName)) return false; // unexported: never a package-qualified target

@@ -367,6 +367,22 @@ test("a package-qualified call to an internal project import resolves exact", ()
   rmSync(root, { recursive: true, force: true });
 });
 
+test("a package-qualified call through an unaliased, major-version-suffixed internal import resolves exact", () => {
+  // Go modules convention (go.dev/ref/mod#major-version-suffixes): the module path itself carries a
+  // "/v2"+ suffix at major version >=2, but the package's own declared name does not change — here the
+  // import path "example.com/proj/v2" is still referred to, unaliased, as "proj" (not "v2").
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj/v2\n\ngo 1.21\n`,
+    "proj.go": `package proj\n\nfunc Helper() {}\n`,
+    "cmd/main.go": `package main\n\nimport "example.com/proj/v2"\n\nfunc main() {\n\tproj.Helper()\n}\n`,
+  });
+  const helper = index.symbols.find((s) => s.name === "Helper")!;
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.resolvedTargetId, helper.id);
+  assert.equal(call.resolutionKind, "imported");
+  rmSync(root, { recursive: true, force: true });
+});
+
 test("a package-qualified call to an external (non-project) import stays unresolved with externalPackage set", () => {
   const { root, index } = indexedGoProject({
     "go.mod": `module example.com/proj\n\ngo 1.21\n`,
