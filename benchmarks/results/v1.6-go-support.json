@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-01T19:25:10.316Z",
+  "generatedAt": "2026-10-01T19:28:02.763Z",
   "results": {
     "pkg-errors": {
       "symbolsTotal": 21,
       "symbolsFound": 21,
       "importsTotal": 2,
       "importsFound": 2,
-      "callsTotal": 4,
-      "callsFound": 4,
+      "callsTotal": 5,
+      "callsFound": 5,
       "missing": []
     },
     "cobra": {
@@ -15,8 +15,8 @@
       "symbolsFound": 12,
       "importsTotal": 3,
       "importsFound": 3,
-      "callsTotal": 3,
-      "callsFound": 3,
+      "callsTotal": 4,
+      "callsFound": 4,
       "missing": []
     },
     "chi": {
@@ -24,8 +24,8 @@
       "symbolsFound": 13,
       "importsTotal": 3,
       "importsFound": 3,
-      "callsTotal": 4,
-      "callsFound": 4,
+      "callsTotal": 5,
+      "callsFound": 5,
       "missing": []
     }
   }

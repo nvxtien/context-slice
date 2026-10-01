@@ -119,17 +119,20 @@ const calls: Record<string, OracleCall[]> = {
     { calleeName: "WriteString", receiverText: "io" }, // errors.go:131, io.WriteString(s, f.msg)
     { calleeName: "FuncForPC", receiverText: "runtime" }, // stack.go:24, runtime.FuncForPC(f.pc())
     { calleeName: "LastIndex", receiverText: "strings" }, // stack.go:173, strings.LastIndex(name, "/")
+    { calleeName: "callers" }, // errors.go:105, direct call callers() inside New
   ],
   cobra: [
     { calleeName: "getOut", receiverText: "c" }, // command.go:394, c.getOut(os.Stdout)
     { calleeName: "mergePersistentFlags", receiverText: "c" }, // command.go:678, c.mergePersistentFlags()
     { calleeName: "HasPrefix", receiverText: "strings" }, // command.go:691, strings.HasPrefix(s, "--")
+    { calleeName: "stripFlags" }, // command.go:761, direct call stripFlags(innerArgs, c)
   ],
   chi: [
     { calleeName: "NotFoundHandler", receiverText: "mx" }, // mux.go:66, mx.NotFoundHandler().ServeHTTP(w, r)
     { calleeName: "handle", receiverText: "mx" }, // mux.go:116, mx.handle(mALL, pattern, handler)
     { calleeName: "IndexAny", receiverText: "strings" }, // mux.go:110, strings.IndexAny(pattern, " \t")
     { calleeName: "TrimLeft", receiverText: "strings" }, // mux.go:111, strings.TrimLeft(pattern[i+1:], " \t")
+    { calleeName: "chain" }, // mux.go:526, direct call chain(mx.middlewares, http.HandlerFunc(mx.routeHTTP))
   ],
 };
 
