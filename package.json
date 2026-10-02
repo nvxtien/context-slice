@@ -16,6 +16,9 @@
   "files": [
     "dist/src",
     "queries",
+    "skills",
+    "plugin.json",
+    "mcp.json",
     "README.md",
     "LICENSE"
   ],

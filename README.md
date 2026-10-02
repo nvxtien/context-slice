@@ -90,8 +90,9 @@ One repository can hold all of them. See [docs/typescript-support.md](docs/types
 
 ### Codex plugin (GitHub marketplace)
 
-This repository includes a portable Codex plugin manifest and MCP configuration.
-After adding the marketplace, install `context-slice` from `/plugins`:
+This repository includes a portable Codex plugin manifest and a separate
+Codex marketplace entry backed by the npm runtime package. After publishing
+the package, add the marketplace and install `context-slice` from `/plugins`:
 
 ```sh
 codex plugin marketplace add nvxtien/context-slice

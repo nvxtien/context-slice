@@ -20,6 +20,9 @@ test("package metadata describes an intentional publish-ready runtime", () => {
   assert.deepEqual(packageJson.files, [
     "dist/src",
     "queries",
+    "skills",
+    "plugin.json",
+    "mcp.json",
     "README.md",
     "LICENSE",
   ]);

@@ -1,0 +1,22 @@
+{
+  "name": "context-slice-marketplace",
+  "interface": {
+    "displayName": "Context Slice Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "context-slice",
+      "source": {
+        "source": "npm",
+        "package": "context-slice",
+        "version": "1.8.0",
+        "registry": "https://registry.npmjs.org"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
