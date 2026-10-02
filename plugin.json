@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "context-slice",
+  "version": "1.8.0",
+  "description": "Structural code-context slicing for Java, TypeScript/TSX, JavaScript, Python, Rust, and Go. Serves a budget-bounded, relevance-ranked slice of a repository instead of whole files.",
+  "author": {
+    "name": "tien.nguyen"
+  },
+  "homepage": "https://github.com/nvxtien/context-slice",
+  "repository": "https://github.com/nvxtien/context-slice",
+  "license": "MIT",
+  "keywords": ["context", "code-search", "mcp", "tree-sitter", "context-window"]
+}

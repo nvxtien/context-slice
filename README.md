@@ -34,6 +34,19 @@ The plugin provides a skill that tells Claude Code to request a focused
 ContextSlice preview before reading source files. The MCP server then targets
 the project Claude Code has open.
 
+### Codex plugin
+
+Add the GitHub marketplace to Codex:
+
+```sh
+codex plugin marketplace add nvxtien/context-slice
+codex plugin marketplace list
+```
+
+Then open `/plugins`, choose `Context Slice Marketplace`, and install
+`context-slice`. The plugin includes the same ContextSlice skill and stdio MCP
+server for the project Codex has open.
+
 ### CLI and MCP
 
 ```sh
@@ -74,6 +87,18 @@ One repository can hold all of them. See [docs/typescript-support.md](docs/types
 - Validated on macOS arm64 with Node 20 and Node 22. Other platforms are expected to work but are unverified.
 
 ## Installation
+
+### Codex plugin (GitHub marketplace)
+
+This repository includes a portable Codex plugin manifest and MCP configuration.
+After adding the marketplace, install `context-slice` from `/plugins`:
+
+```sh
+codex plugin marketplace add nvxtien/context-slice
+```
+
+Restart Codex after changing the plugin or marketplace files so it refreshes
+the local marketplace snapshot.
 
 ### Claude Code plugin (GitHub marketplace)
 
