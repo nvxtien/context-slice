@@ -699,3 +699,40 @@ test("without a go.work file, single-module go.mod resolution still works (no re
   assert.equal(call.resolvedTargetId, helper.id);
   rmSync(root, { recursive: true, force: true });
 });
+
+test("interface satisfaction requires matching method SIGNATURES, not just names", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Greeter interface {\n\tGreet(name string) string\n}\n\ntype Mismatch struct{}\nfunc (m *Mismatch) Greet(id int) string { return "" }\n`,
+  });
+  const mismatch = index.symbols.find((s) => s.kind === "class" && s.name === "Mismatch")!;
+  assert.equal(mismatch.supertypes?.includes("Greeter") ?? false, false);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("interface satisfaction accepts a matching method signature with different parameter names", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Greeter interface {\n\tGreet(name string) string\n}\n\ntype Impl struct{}\nfunc (i *Impl) Greet(whom string) string { return "" }\n`,
+  });
+  const impl = index.symbols.find((s) => s.kind === "class" && s.name === "Impl")!;
+  assert.ok(impl.supertypes?.includes("Greeter"));
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("interface satisfaction rejects a method matching only on return type, not parameters", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Adder interface {\n\tAdd(a, b int) int\n}\n\ntype Wrong struct{}\nfunc (w *Wrong) Add(a int) int { return a }\n`,
+  });
+  const wrong = index.symbols.find((s) => s.kind === "class" && s.name === "Wrong")!;
+  assert.equal(wrong.supertypes?.includes("Adder") ?? false, false);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call via a New*-constructor-typed local variable resolves exact even when the constructor's name does not match its real return type", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Bar struct{}\nfunc (b *Bar) Save() {}\nfunc NewFoo() *Bar { return &Bar{} }\n\nfunc main() {\n\tx := NewFoo()\n\tx.Save()\n}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  rmSync(root, { recursive: true, force: true });
+});

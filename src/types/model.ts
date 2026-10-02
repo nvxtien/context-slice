@@ -70,6 +70,12 @@ export interface SymbolMetadata {
   embedded?: boolean;
   /** Go: an interface's own declared method names (excludes embedded interfaces' names). */
   interfaceMethods?: string[];
+  /** Go: interfaceMethods' name -> normalized "(types)result" signature, for exact-signature interface satisfaction. */
+  interfaceMethodSignatures?: Record<string, string>;
+  /** Go: a method's own normalized "(types)result" signature, compared against interfaceMethodSignatures. */
+  methodSignature?: string;
+  /** Go: a function's declared return type (bare, pointer-stripped; first value of a multi-return) — used to resolve "x := NewFoo()" to its real constructed type instead of guessing from the function's name. */
+  returnType?: string;
 }
 export interface SymbolRecord {
   id: string;

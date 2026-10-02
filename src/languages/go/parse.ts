@@ -67,6 +67,53 @@ function modifiersFor(name: string): string[] {
   return /^[A-Z]/.test(name) ? ["exported"] : [];
 }
 
+/** Ordered, name-stripped parameter TYPES only, e.g. "(a, b string, c int)" -> "string,string,int"
+ * — used only to compare two signatures for interface satisfaction, never displayed. A grouped
+ * declaration ("a, b string") is one parameter_declaration node whose namedChildren are every name
+ * identifier followed by the shared type; the type is duplicated once per name. A declaration with
+ * no name (just a type, legal in both interface methods and func types) has exactly one named
+ * child, which is the type. Anything else (e.g. a variadic_parameter_declaration) falls back to its
+ * own full text as one opaque "type" — consistent as long as it's compared against itself. */
+function paramTypesOf(parameters: Node | null | undefined): string {
+  if (!parameters) return "";
+  const types: string[] = [];
+  for (const decl of parameters.namedChildren) {
+    if (decl.type === "parameter_declaration") {
+      const children = decl.namedChildren;
+      const type = children.at(-1)?.text ?? "";
+      const count = Math.max(1, children.length - 1);
+      for (let i = 0; i < count; i++) types.push(type);
+    } else {
+      types.push(decl.text);
+    }
+  }
+  return types.join(",");
+}
+
+function resultTypesOf(result: Node | null | undefined): string {
+  if (!result) return "";
+  return result.type === "parameter_list" ? paramTypesOf(result) : result.text;
+}
+
+/** A normalized "(types)result" signature for a function/method/interface-method node — comparable
+ * by exact string equality regardless of the declared parameter NAMES, which Go's own rules never
+ * require to match for interface satisfaction. */
+function methodSignatureOf(node: Node): string {
+  return `(${paramTypesOf(field(node, "parameters"))})${resultTypesOf(field(node, "result"))}`;
+}
+
+/** A constructor-style function's own declared return type, bare pointer-stripped (e.g. "*Bar" ->
+ * "Bar"), used to look up what a "x := NewFoo()" binding actually constructs instead of assuming
+ * the type from the function's own name. A multi-value return ("(*Bar, error)") takes the first
+ * value, matching Go's constructor convention of returning the created value first. */
+function primaryReturnType(result: Node | null | undefined): string | undefined {
+  if (!result) return undefined;
+  const first = result.type === "parameter_list" ? result.namedChildren[0] : result;
+  if (!first) return undefined;
+  const typeNode = first.type === "parameter_declaration" ? (first.namedChildren.at(-1) ?? first) : first;
+  return typeNode.text.replace(/^\*/, "");
+}
+
 /**
  * A call_expression's callee name and (when the operand is a plain identifier) its
  * receiver text. selector_expression's "operand"/"field" fields and call_expression's
@@ -170,6 +217,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       if (!name) continue;
       const parameters = text(field(child, "parameters"));
       const id = uniqueId(canonicalId(filePath, "function", name, parameters));
+      const returnType = primaryReturnType(field(child, "result"));
       const symbol: SymbolRecord = {
         id,
         language: LANGUAGE_ID,
@@ -183,6 +231,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
         bodyRange: field(child, "body") ? range(field(child, "body")!) : undefined,
         annotations: [],
         modifiers: modifiersFor(name),
+        metadata: returnType ? { returnType } : undefined,
         source: child.text,
         body: field(child, "body")?.text,
       };
@@ -248,10 +297,13 @@ export function parseGo(filePath: string, source: string): ParsedFile {
           }
         } else if (typeNode.type === "interface_type") {
           const id = uniqueId(canonicalId(filePath, "interface", name));
-          const interfaceMethods = typeNode.namedChildren
-            .filter((c) => c.type === "method_elem")
-            .map((m) => text(m.namedChild(0)))
-            .filter(Boolean);
+          const methodElems = typeNode.namedChildren.filter((c) => c.type === "method_elem");
+          const interfaceMethods = methodElems.map((m) => text(m.namedChild(0))).filter(Boolean);
+          const interfaceMethodSignatures: Record<string, string> = {};
+          for (const m of methodElems) {
+            const methodName = text(m.namedChild(0));
+            if (methodName) interfaceMethodSignatures[methodName] = methodSignatureOf(m);
+          }
           symbols.push({
             id,
             language: LANGUAGE_ID,
@@ -264,7 +316,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
             range: range(spec),
             annotations: [],
             modifiers: modifiersFor(name),
-            metadata: { interfaceMethods },
+            metadata: { interfaceMethods, interfaceMethodSignatures },
             source: spec.text,
           });
         } else {
@@ -385,6 +437,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       supertypes: receiverName ? [receiverName] : undefined,
       annotations: [],
       modifiers: modifiersFor(name),
+      metadata: { methodSignature: methodSignatureOf(methodNode) },
       source: methodNode.text,
       body: field(methodNode, "body")?.text,
     };
