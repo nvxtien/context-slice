@@ -7,10 +7,9 @@
     {
       "name": "context-slice",
       "source": {
-        "source": "npm",
-        "package": "context-slice",
-        "version": "1.8.1",
-        "registry": "https://registry.npmjs.org"
+        "source": "url",
+        "url": "https://github.com/nvxtien/context-slice.git",
+        "ref": "main"
       },
       "policy": {
         "installation": "AVAILABLE",
