@@ -49,6 +49,50 @@ function bindingTypeInBody(body: string, receiver: string): string | undefined {
   return undefined;
 }
 
+/** A struct's own embedded field TYPES (not all fields) — same-directory lookup only, cycle-safe. */
+function embeddedTypesOf(
+  struct: SymbolRecord,
+  byDirectory: Map<string, SymbolRecord[]>,
+  visited: Set<string>,
+): SymbolRecord[] {
+  const dir = directoryOf(struct.filePath);
+  const siblings = byDirectory.get(dir) ?? [];
+  const types: SymbolRecord[] = [];
+  for (const f of siblings) {
+    if (f.kind !== "field" || f.parentId !== struct.id || !f.metadata?.embedded) continue;
+    const embeddedType = siblings.find((s) => s.kind === "class" && s.name === f.name);
+    if (embeddedType && !visited.has(embeddedType.id)) {
+      visited.add(embeddedType.id);
+      types.push(embeddedType);
+    }
+  }
+  return types;
+}
+
+/** BFS one promotion-depth level at a time; a match at a shallower depth shadows deeper ones;
+ * multiple matches at the SAME depth are ambiguous (Go itself rejects this at compile time). */
+function findPromotedMethod(
+  struct: SymbolRecord,
+  methodName: string,
+  byDirectory: Map<string, SymbolRecord[]>,
+): SymbolRecord | "ambiguous" | undefined {
+  const visited = new Set([struct.id]);
+  let frontier = embeddedTypesOf(struct, byDirectory, visited);
+  while (frontier.length) {
+    const matches = frontier
+      .map((t) => (byDirectory.get(directoryOf(t.filePath)) ?? []).find(
+        (s) => s.kind === "method" && s.name === methodName && s.supertypes?.includes(t.name),
+      ))
+      .filter((m): m is SymbolRecord => Boolean(m));
+    if (matches.length === 1) return matches[0];
+    if (matches.length > 1) return "ambiguous";
+    const next: SymbolRecord[] = [];
+    for (const t of frontier) next.push(...embeddedTypesOf(t, byDirectory, visited));
+    frontier = next;
+  }
+  return undefined;
+}
+
 function settle(
   call: CallEdge,
   target: SymbolRecord,
@@ -123,10 +167,20 @@ export function resolveGoCalls(context: ResolveContext): void {
       typeName = bindingTypeInBody(caller.body ?? caller.source, call.receiverText);
     }
     if (!typeName) return;
-    const method = (byDirectory.get(directoryOf(caller.filePath)) ?? []).find(
+    const dir = directoryOf(caller.filePath);
+    const directMethod = (byDirectory.get(dir) ?? []).find(
       (s) => s.kind === "method" && s.name === call.calleeName && s.supertypes?.includes(typeName!),
     );
-    if (method) settle(call, method, "same-type", "receiver-type method call");
+    if (directMethod) {
+      settle(call, directMethod, "same-type", "receiver-type method call");
+      return;
+    }
+    const struct = (byDirectory.get(dir) ?? []).find((s) => s.kind === "class" && s.name === typeName);
+    if (!struct) return;
+    const promoted = findPromotedMethod(struct, call.calleeName, byDirectory);
+    if (promoted && promoted !== "ambiguous") {
+      settle(call, promoted, "same-type", "struct embedding method promotion");
+    }
   };
 
   for (const call of context.calls) {

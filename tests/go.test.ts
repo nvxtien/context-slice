@@ -507,3 +507,42 @@ test("a method call via a reassigned/ambiguous local variable stays unresolved",
   assert.equal(call.confidence, "unresolved");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a method call resolves to an embedded type's method when the outer struct has none of its own", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Base struct{}\nfunc (b *Base) Greet() {}\n\ntype Derived struct {\n\tBase\n}\n\nfunc main() {\n\td := &Derived{}\n\td.Greet()\n}\n`,
+  });
+  const greet = index.symbols.find((s) => s.kind === "method" && s.name === "Greet")!;
+  const call = index.calls.find((c) => c.calleeName === "Greet")!;
+  assert.equal(call.resolvedTargetId, greet.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method defined on both the outer struct and an embedded type resolves to the outer struct's own method", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Base struct{}\nfunc (b *Base) Greet() {}\n\ntype Derived struct {\n\tBase\n}\nfunc (d *Derived) Greet() {}\n\nfunc main() {\n\td := &Derived{}\n\td.Greet()\n}\n`,
+  });
+  const derivedGreet = index.symbols.find((s) => s.kind === "method" && s.name === "Greet" && s.supertypes?.includes("Derived"))!;
+  const call = index.calls.find((c) => c.calleeName === "Greet")!;
+  assert.equal(call.resolvedTargetId, derivedGreet.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("two embedded fields at the same depth with the same method name leave the call unresolved", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype A struct{}\nfunc (a *A) Greet() {}\ntype B struct{}\nfunc (b *B) Greet() {}\n\ntype Derived struct {\n\tA\n\tB\n}\n\nfunc main() {\n\td := &Derived{}\n\td.Greet()\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Greet")!;
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a multi-level embedding chain resolves through two promotion levels", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype C struct{}\nfunc (c *C) Deep() {}\ntype B struct {\n\tC\n}\ntype A struct {\n\tB\n}\n\nfunc main() {\n\ta := &A{}\n\ta.Deep()\n}\n`,
+  });
+  const deep = index.symbols.find((s) => s.kind === "method" && s.name === "Deep")!;
+  const call = index.calls.find((c) => c.calleeName === "Deep")!;
+  assert.equal(call.resolvedTargetId, deep.id);
+  rmSync(root, { recursive: true, force: true });
+});
