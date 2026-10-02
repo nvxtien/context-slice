@@ -117,24 +117,25 @@ function methodSetOf(struct: SymbolRecord, byDirectory: Map<string, SymbolRecord
 }
 
 function resolveInterfaceSatisfaction(symbols: SymbolRecord[], byDirectory: Map<string, SymbolRecord[]>) {
-  for (const [, siblings] of byDirectory) {
-    const interfaces = siblings.filter((s) => s.kind === "interface" && s.metadata?.interfaceMethods);
-    const structs = siblings.filter((s) => s.kind === "class");
-    for (const struct of structs) {
-      const methods = methodSetOf(struct, byDirectory);
-      // Recomputed from scratch every pass, not appended to: struct.supertypes is owned entirely
-      // by this resolver (parse.ts never sets it on struct symbols), and ProjectIndex.rebuild()
-      // reuses persisted symbols across incremental rebuilds, so appending would duplicate entries
-      // on every rebuild and never drop a stale one.
-      const satisfied: string[] = [];
-      for (const iface of interfaces) {
-        const required = iface.metadata!.interfaceMethods!;
-        if (required.length > 0 && required.every((name) => methods.has(name))) {
-          satisfied.push(iface.name);
-        }
+  // Go's interface satisfaction is structural and project-wide, not package-scoped: a struct in
+  // package "impl" can satisfy an interface declared in package "contract" with no import between
+  // them. Interfaces and structs are therefore collected across every directory, not grouped by one.
+  const interfaces = symbols.filter((s) => s.kind === "interface" && s.metadata?.interfaceMethods);
+  const structs = symbols.filter((s) => s.kind === "class");
+  for (const struct of structs) {
+    const methods = methodSetOf(struct, byDirectory);
+    // Recomputed from scratch every pass, not appended to: struct.supertypes is owned entirely
+    // by this resolver (parse.ts never sets it on struct symbols), and ProjectIndex.rebuild()
+    // reuses persisted symbols across incremental rebuilds, so appending would duplicate entries
+    // on every rebuild and never drop a stale one.
+    const satisfied: string[] = [];
+    for (const iface of interfaces) {
+      const required = iface.metadata!.interfaceMethods!;
+      if (required.length > 0 && required.every((name) => methods.has(name))) {
+        satisfied.push(iface.name);
       }
-      struct.supertypes = satisfied;
     }
+    struct.supertypes = satisfied;
   }
 }
 

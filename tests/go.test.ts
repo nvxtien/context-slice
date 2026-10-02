@@ -574,3 +574,13 @@ test("rebuilding an unchanged project twice does not duplicate supertypes entrie
   assert.equal(struct.supertypes?.filter((name) => name === "Greeter").length, 1);
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a struct in one package satisfies an interface declared in a different package (structural typing, no import needed)", () => {
+  const { root, index } = indexedGoProject({
+    "contract/contract.go": `package contract\n\ntype Greeter interface {\n\tGreet() string\n}\n`,
+    "impl/impl.go": `package impl\n\ntype Mock struct{}\nfunc (m *Mock) Greet() string { return "" }\n`,
+  });
+  const mock = index.symbols.find((s) => s.kind === "class" && s.name === "Mock")!;
+  assert.ok(mock.supertypes?.includes("Greeter"));
+  rmSync(root, { recursive: true, force: true });
+});
