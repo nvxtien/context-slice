@@ -27,24 +27,33 @@ function receiverVarNameOf(method: SymbolRecord): string | undefined {
   return method.source.match(/^func\s*\(\s*(\w+)\s+/)?.[1];
 }
 
+/** A local variable's inferred type, split into an optional package qualifier (e.g. "store" in
+ * "store.Store{}") and the bare type name — the qualifier tells resolveMethodCall which
+ * package's directory to search instead of the caller's own. */
+type BoundType = { pkg?: string; type: string };
+
 /** Narrow, regex-based binding-type inference over a function body — mirrors
  * src/languages/python/resolve.ts's bindingClass exactly: single unambiguous assignment only,
- * any reassignment or multiple bindings drop the evidence rather than guessing. */
-function bindingTypeInBody(body: string, receiver: string): string | undefined {
+ * any reassignment or multiple bindings drop the evidence rather than guessing. Captures an
+ * optional package-qualified form ("pkg.Type") alongside the bare form ("Type"). */
+function bindingTypeInBody(body: string, receiver: string): BoundType | undefined {
   const literalOrVar = new RegExp(
-    `(?<![\\w.])${receiver}\\s*:?=\\s*(?:&)?([A-Za-z_]\\w*)\\s*\\{|var\\s+${receiver}\\s+\\*?([A-Za-z_]\\w*)\\b`,
+    `(?<![\\w.])${receiver}\\s*:?=\\s*(?:&)?(?:([A-Za-z_]\\w*)\\.)?([A-Za-z_]\\w*)\\s*\\{` +
+      `|var\\s+${receiver}\\s+\\*?(?:([A-Za-z_]\\w*)\\.)?([A-Za-z_]\\w*)\\b`,
     "g",
   );
   const matches = [...body.matchAll(literalOrVar)];
   const reassignments = [...body.matchAll(new RegExp(`(?<![\\w.:])${receiver}\\s*=[^=]`, "g"))].length;
   if (matches.length === 1 && reassignments === 0) {
-    const [, literalType, varType] = matches[0];
-    if (literalType) return literalType;
-    if (varType) return varType;
+    const [, literalPkg, literalType, varPkg, varType] = matches[0];
+    if (literalType) return { pkg: literalPkg, type: literalType };
+    if (varType) return { pkg: varPkg, type: varType };
   }
   if (matches.length === 0 && reassignments === 0) {
-    const ctor = body.match(new RegExp(`(?<![\\w.])${receiver}\\s*:=\\s*New([A-Za-z_]\\w*)\\s*\\(`));
-    if (ctor) return ctor[1];
+    const ctor = body.match(
+      new RegExp(`(?<![\\w.])${receiver}\\s*:=\\s*(?:([A-Za-z_]\\w*)\\.)?New([A-Za-z_]\\w*)\\s*\\(`),
+    );
+    if (ctor) return { pkg: ctor[1], type: ctor[2] };
   }
   return undefined;
 }
@@ -183,17 +192,28 @@ export function resolveGoCalls(context: ResolveContext): void {
   const importLocalName = (record: ImportRecord): string | undefined =>
     record.localName ?? record.module.replace(/\/v\d+$/, "").split("/").pop();
 
+  // Shared by resolveQualifiedCall (pkg.Func()) and resolveMethodCall (x.Method() where x's type
+  // is pkg.Type): maps an import alias, as used in the caller's file, to that package's directory
+  // within THIS module. undefined means the alias is unresolvable or names an external package.
+  const resolveImportDirectory = (alias: string, callerFilePath: string): string | undefined => {
+    const record = (importsByFile.get(callerFilePath) ?? []).find((r) => importLocalName(r) === alias);
+    if (!record || !modulePath || !(record.module === modulePath || record.module.startsWith(modulePath + "/"))) {
+      return undefined;
+    }
+    return record.module.slice(modulePath.length).replace(/^\//, "");
+  };
+
   const resolveQualifiedCall = (call: CallEdge, caller: SymbolRecord): boolean => {
     if (!call.receiverText || !/^[A-Z]/.test(call.calleeName)) return false; // unexported: never a package-qualified target
     const record = (importsByFile.get(caller.filePath) ?? []).find(
       (r) => importLocalName(r) === call.receiverText,
     );
     if (!record) return false;
-    if (!modulePath || !(record.module === modulePath || record.module.startsWith(modulePath + "/"))) {
+    const relative = resolveImportDirectory(call.receiverText, caller.filePath);
+    if (relative === undefined) {
       call.externalPackage = record.module;
       return false;
     }
-    const relative = record.module.slice(modulePath.length).replace(/^\//, "");
     const candidates = (byDirectory.get(relative) ?? []).filter(
       (s) => s.kind === "function" && s.name === call.calleeName && s.modifiers.includes("exported"),
     );
@@ -207,15 +227,33 @@ export function resolveGoCalls(context: ResolveContext): void {
   const resolveMethodCall = (call: CallEdge, caller: SymbolRecord) => {
     if (!call.receiverText) return;
     let typeName: string | undefined;
+    let pkgAlias: string | undefined;
     if (caller.kind === "method" && caller.supertypes?.[0] && receiverVarNameOf(caller) === call.receiverText) {
       typeName = caller.supertypes[0];
     } else {
-      typeName = bindingTypeInBody(caller.body ?? caller.source, call.receiverText);
+      const bound = bindingTypeInBody(caller.body ?? caller.source, call.receiverText);
+      typeName = bound?.type;
+      pkgAlias = bound?.pkg;
     }
     if (!typeName) return;
-    const dir = directoryOf(caller.filePath);
+    let dir: string;
+    if (pkgAlias) {
+      if (!/^[A-Z]/.test(call.calleeName)) return; // unexported: never callable from another package
+      const resolved = resolveImportDirectory(pkgAlias, caller.filePath);
+      if (resolved === undefined) return; // external or unresolvable package alias
+      dir = resolved;
+    } else {
+      dir = directoryOf(caller.filePath);
+    }
+    // A cross-package match must itself be exported; a same-package match needs no such check,
+    // since it's reached the same way an unexported method is legitimately called in Go.
+    const requireExported = Boolean(pkgAlias);
     const directMethod = (byDirectory.get(dir) ?? []).find(
-      (s) => s.kind === "method" && s.name === call.calleeName && s.supertypes?.includes(typeName!),
+      (s) =>
+        s.kind === "method" &&
+        s.name === call.calleeName &&
+        s.supertypes?.includes(typeName!) &&
+        (!requireExported || s.modifiers.includes("exported")),
     );
     if (directMethod) {
       settle(call, directMethod, "same-type", "receiver-type method call");
@@ -224,7 +262,7 @@ export function resolveGoCalls(context: ResolveContext): void {
     const struct = (byDirectory.get(dir) ?? []).find((s) => s.kind === "class" && s.name === typeName);
     if (!struct) return;
     const promoted = findPromotedMethod(struct, call.calleeName, byDirectory);
-    if (promoted && promoted !== "ambiguous") {
+    if (promoted && promoted !== "ambiguous" && (!requireExported || promoted.modifiers.includes("exported"))) {
       settle(call, promoted, "same-type", "struct embedding method promotion");
     }
   };

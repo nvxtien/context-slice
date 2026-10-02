@@ -584,3 +584,50 @@ test("a struct in one package satisfies an interface declared in a different pac
   assert.ok(mock.supertypes?.includes("Greeter"));
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a method call via a package-qualified composite-literal-typed local variable resolves exact across packages", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) Save() {}\n`,
+    "main.go": `package main\n\nimport "example.com/proj/store"\n\nfunc main() {\n\ts := &store.Store{}\n\ts.Save()\n}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  assert.equal(call.resolutionKind, "same-type");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a method call via a package-qualified var-declared local variable resolves exact across packages", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) Save() {}\n`,
+    "main.go": `package main\n\nimport "example.com/proj/store"\n\nfunc main() {\n\tvar s *store.Store\n\ts.Save()\n}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a package-qualified local variable whose package is external (non-project) stays unresolved", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "main.go": `package main\n\nimport "bytes"\n\nfunc main() {\n\tb := &bytes.Buffer{}\n\tb.String()\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "String")!;
+  assert.equal(call.resolvedTargetId, undefined);
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a package-qualified local variable's unexported method does not resolve across packages", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) save() {}\n`,
+    "main.go": `package main\n\nimport "example.com/proj/store"\n\nfunc main() {\n\ts := &store.Store{}\n\ts.save()\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "save")!;
+  assert.equal(call.resolvedTargetId, undefined);
+  rmSync(root, { recursive: true, force: true });
+});
