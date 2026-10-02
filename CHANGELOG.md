@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **Go: cross-package resolution.** Interface satisfaction is now project-wide, not same-directory-only (a struct in one package can satisfy an interface declared in another, matching Go's own structural typing). Method calls through a package-qualified local variable (`x := &store.Store{}`) now resolve across packages in the same module. `go.work` multi-module workspaces are supported (both the block and single-line `use` forms).
+- **Go: exact-signature interface satisfaction.** A method of the same name but a different parameter/result shape no longer falsely satisfies an interface.
+- **Go: constructor-typed bindings resolve by real return type.** `x := NewFoo()` now resolves `x`'s type from what `NewFoo` actually returns, instead of assuming it from the constructor's own name — fixes the case where the name and the concrete return type disagree.
+- **Rust: Cargo workspace crate resolution.** `Cargo.toml` (`[package]` and `[workspace].members`, including simple `dir/*` globs) is now read; a `use` path naming a sibling workspace crate resolves into that crate's own files instead of being reported external. Each crate now gets its own module index, which also fixes two crates' root files (both `src/lib.rs`) colliding as "ambiguous" under the old single project-wide index.
+
+The superseded "Known limitations" lines in the 1.5.0 and 1.6.0 entries below describe the state at time of release, not the current state.
+
 ## 1.7.0 — JavaScript support (unpublished)
 
 - **JavaScript adapter.** `.js`, `.jsx`, `.mjs`, `.cjs` reuse the TypeScript adapter as-is (JS is a syntactic subset of TS): the same symbol extraction, import/export extraction, and call extraction/resolution run unchanged, with the language id and JSX-vs-plain grammar derived per file extension (`.jsx` uses the `tsx` grammar; `.js`/`.mjs`/`.cjs` use `typescript`).
