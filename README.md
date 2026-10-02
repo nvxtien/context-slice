@@ -31,6 +31,44 @@ One repository can hold all of them. See [docs/typescript-support.md](docs/types
 
 ## Installation
 
+## Claude Code plugin (GitHub marketplace)
+
+This repository is also a Claude Code plugin. It bundles the MCP server
+(`.mcp.json`) and a skill (`skills/context-slice/`) that tells Claude to prefer
+the MCP tools over reading whole files for implementation and explanation
+tasks. It is distributed from GitHub; npm publish is not required for the
+plugin.
+
+Inside Claude Code, add the GitHub repository as a marketplace and install the
+plugin:
+
+```text
+/plugin marketplace add nvxtien/context-slice
+/plugin install context-slice@context-slice-marketplace
+```
+
+For local development or a local checkout, use the path form instead:
+
+```sh
+git clone https://github.com/nvxtien/context-slice.git
+cd context-slice
+npm ci
+npm run build
+```
+
+```text
+/plugin marketplace add /absolute/path/to/context-slice
+/plugin install context-slice@context-slice-marketplace
+```
+
+The current plugin runs the compiled `dist/` output, so a local checkout must
+run `npm ci` and `npm run build` before first use. Re-run `npm run build` after
+pulling updates. The plugin's MCP server targets whichever project Claude
+Code has open (`${CLAUDE_PROJECT_DIR}`), not the plugin repository itself.
+
+Once built, it works in any Java/TypeScript/JavaScript/Python/Rust/Go project
+you open.
+
 ### Local development
 
 ContextSlice is not published to npm yet. From this checkout, install and link the local executable:
@@ -184,44 +222,6 @@ claude mcp list
 ```
 
 Verify command syntax against `claude mcp --help` in the installed Claude Code version before sharing configuration. ContextSlice itself speaks standard stdio MCP; this repository does not claim to have exercised every Claude Code release.
-
-## Claude Code plugin (GitHub marketplace)
-
-This repository is also a Claude Code plugin. It bundles the MCP server
-(`.mcp.json`) and a skill (`skills/context-slice/`) that tells Claude to prefer
-the MCP tools over reading whole files for implementation and explanation
-tasks. It is distributed from GitHub; npm publish is not required for the
-plugin.
-
-Inside Claude Code, add the GitHub repository as a marketplace and install the
-plugin:
-
-```text
-/plugin marketplace add nvxtien/context-slice
-/plugin install context-slice@context-slice-marketplace
-```
-
-For local development or a local checkout, use the path form instead:
-
-```sh
-git clone https://github.com/nvxtien/context-slice.git
-cd context-slice
-npm ci
-npm run build
-```
-
-```text
-/plugin marketplace add /absolute/path/to/context-slice
-/plugin install context-slice@context-slice-marketplace
-```
-
-The current plugin runs the compiled `dist/` output, so a local checkout must
-run `npm ci` and `npm run build` before first use. Re-run `npm run build` after
-pulling updates. The plugin's MCP server targets whichever project Claude
-Code has open (`${CLAUDE_PROJECT_DIR}`), not the plugin repository itself.
-
-Once built, it works in any Java/TypeScript/JavaScript/Python/Rust/Go project
-you open.
 
 ## How it works
 
