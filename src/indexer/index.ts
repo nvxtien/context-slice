@@ -272,9 +272,11 @@ export class ProjectIndex {
     );
   }
   callers(target: SymbolRecord) {
-    const ids = new Set([target.id]);
+    // A cfg-gated call (spec §40) carries every alternative in runtimeTargetIds, not just the
+    // resolvedTargetId it settled on — a non-first alternative must still be reachable as a
+    // caller/dependency edge, or context composition can never include it (see docs/rust-support.md).
     return this.calls
-      .filter((call) => call.resolvedTargetId && ids.has(call.resolvedTargetId))
+      .filter((call) => (call.runtimeTargetIds ?? [call.resolvedTargetId]).includes(target.id))
       .map((call) => this.symbols.find((s) => s.id === call.callerId))
       .filter((s): s is SymbolRecord => Boolean(s));
   }
@@ -293,11 +295,8 @@ export class ProjectIndex {
   dependencies(target: SymbolRecord) {
     return this.calls
       .filter((call) => call.callerId === target.id)
-      .map((call) =>
-        call.resolvedTargetId
-          ? this.symbols.find((s) => s.id === call.resolvedTargetId)
-          : undefined,
-      )
+      .flatMap((call) => call.runtimeTargetIds ?? (call.resolvedTargetId ? [call.resolvedTargetId] : []))
+      .map((id) => this.symbols.find((s) => s.id === id))
       .filter((s): s is SymbolRecord => Boolean(s));
   }
   dependenciesAtDepth(target: SymbolRecord, depth: number) {

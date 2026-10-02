@@ -350,6 +350,25 @@ test("cfg-gated duplicate fns with the same name are probable, never exact (spec
   );
 });
 
+test("cfg-gated duplicate fns: context composition reaches every alternative, not just the first", () => {
+  withRepo(
+    { "src/lib.rs": "#[cfg(unix)]\nfn f() { }\n#[cfg(not(unix))]\nfn f() { }\nfn t() { f(); }\n" },
+    (dir) => {
+      const index = new ProjectIndex(dir);
+      index.rebuild();
+      const caller = index.symbols.find((s) => s.kind === "function" && s.name === "t")!;
+      const deps = index.dependencies(caller);
+      assert.equal(deps.length, 2, JSON.stringify(deps.map((s) => s.range.startLine)));
+      assert.deepEqual(
+        deps.map((s) => s.range.startLine).sort(),
+        [2, 4],
+      );
+      const unixVariant = deps.find((s) => s.range.startLine === 2)!;
+      assert.ok(index.callers(unixVariant).some((s) => s.name === "t"));
+    },
+  );
+});
+
 test("glob-import name collision is ambiguous; a single glob provider resolves", () => {
   withRepo(
     {

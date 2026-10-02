@@ -349,12 +349,17 @@ export function callEdge(node: Node, filePath: string, callerId: string): CallEd
 // dummy fn so ordinary expressions inside it (`tokio::select!` branches, `stream!` bodies) yield call nodes.
 // DENYLIST, for precision: format / print / write / assert / panic / vec style macros and logging macros (a
 // `log::` or `tracing::` path, or the bare log-level names) are never looked into; their arguments are
-// format strings and values, not control flow a developer navigates.
-// Not denylisted (yet): anyhow!/bail!/ensure!/dbg!/matches!; acceptable because recovered calls are capped at
-// `probable`, candidates for future tightening.
+// format strings and values, not control flow a developer navigates. anyhow!/bail! are the same
+// format-string-plus-values shape (error construction), so they join this group. matches! is denylisted for
+// a different, sharper reason: its second argument is a PATTERN, not an expression — a tuple-variant
+// pattern like `Opt::Foo(_)` re-parses as a call_expression to `Foo`, a confirmed false positive, not a
+// style call. ensure!/dbg! stay off the denylist: ensure!'s first argument is a genuine boolean condition
+// (real control flow) and dbg!'s sole argument is the real expression being inspected — both verified to
+// recover only real, correctly-named calls, with no pattern-confusion risk.
 const OPAQUE_MACROS = new Set([
   "println", "print", "eprintln", "eprint", "format", "format_args", "write", "writeln", "vec", "panic",
   "unreachable", "todo", "unimplemented", "trace", "debug", "info", "warn", "error", "log", "event", "span",
+  "anyhow", "bail", "matches",
 ]);
 const OPAQUE_ROOTS = new Set(["log", "tracing", "std", "core", "alloc"]);
 const MACRO_PREFIX = "fn __m() {";

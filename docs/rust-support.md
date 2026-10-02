@@ -49,8 +49,8 @@ Structs (including tuple structs), enums, traits, and inherent/trait impl blocks
 Conservative, honestly-labelled rules layered on top of typed-receiver resolution:
 
 - **Match-arm receiver typing.** A receiver bound by a `match` arm pattern is typed from the arm, not left unknown.
-- **Macro-argument call recovery.** Calls written inside selected macro arguments are recovered on a best-effort basis; macros not on the denylist are attempted, format/log/assert-style macros are denylisted (see Limitations).
-- **cfg-duplicate handling.** When `#[cfg(...)]` produces multiple candidate definitions of the same symbol, all candidates are attached as `probable` targets. See Limitations for how far this reaches.
+- **Macro-argument call recovery.** Calls written inside selected macro arguments are recovered on a best-effort basis; macros not on the denylist are attempted, format/log/assert-style macros (plus `anyhow!`/`bail!`/`matches!`) are denylisted (see What stays unresolved).
+- **cfg-duplicate handling.** When `#[cfg(...)]` produces multiple candidate definitions of the same symbol, all candidates are attached as `probable` targets AND are all reachable via caller/callee context composition (`runtimeTargetIds`), not just the first-listed alternative.
 
 Trait dispatch and any receiver whose type needs more than one unambiguous local binding are resolved as `probable` at best, or left unresolved. A variable reassigned within its scope loses receiver-type evidence (the same single-binding rule as Python).
 
@@ -59,20 +59,19 @@ Trait dispatch and any receiver whose type needs more than one unambiguous local
 By design, and reported rather than guessed:
 
 - receivers whose type needs inference beyond a single local binding, `getattr`-style dynamism does not apply to Rust, but shadowed/reassigned bindings do lose evidence the same way
-- calls inside macro arguments for macros on the denylist (`anyhow!`, `bail!`, `ensure!`, `dbg!`, `matches!`), or any macro invocation itself (macros are structural only — no expansion)
+- calls inside macro arguments for macros on the denylist (`anyhow!`, `bail!`, `matches!`, plus the format/print/write/assert/panic/vec/logging group), or any macro invocation itself (macros are structural only — no expansion). `ensure!` and `dbg!` are deliberately NOT denylisted: `ensure!`'s first argument is a real boolean condition and `dbg!`'s sole argument is the real expression being inspected, both genuine control flow, not format-string values.
 - crate-name imports of a repository's own library crate from `tests/`, `src/bin/*` or `examples/*` (classified external; needs Cargo.toml-derived crate identity, not yet implemented)
-- non-first `#[cfg(...)]` alternatives in context composition (see Limitations)
 - imports that leave the checked-out source
 
 ## Cargo workspace handling
 
-`Cargo.toml` is **not read** by the Rust adapter. Crate roots and module paths are inferred purely from directory layout (`src/lib.rs`, `src/main.rs`, and each file-backed `mod` declaration). This means:
+`Cargo.toml` is now read for workspace crate identity: a root `[package]` name and every `[workspace].members` entry's own `[package]` name (including a simple trailing `dir/*` glob) are mapped to that crate's directory, each with its own, separate module index. A `use` path whose first segment names a sibling workspace crate resolves into that crate's files instead of being reported external, and two crates' own root files (both `src/lib.rs`) no longer collide into one "ambiguous" module-path key the way a single project-wide index would.
+
+Still inferred purely from directory layout, not from Cargo.toml, within a single crate:
 
 - `src/bin/*.rs`, `tests/*.rs`, `examples/*.rs`, and `build.rs` are each their own Cargo-recognized crate root, but the adapter paths them as if nested under `src/` (e.g. `src/bin/cli.rs` gets module path `[bin, cli]` instead of `[]`).
-- Crate-name imports of a repository's own library (`use my_crate::...` from outside `src/`) are not mapped back to the local crate and are classified external.
-- Cargo workspace member boundaries, `[[bin]]`/`[lib] path` overrides, and dependency renames are not read.
-
-This is not yet supported. It caused no measured task failure in the Phase 3 benchmark (none of the 15 tasks needed crate-name or workspace-path resolution — the pinned repositories are single-crate or a sparse single-subsystem checkout), so it is untested rather than ruled out; see the Phase 3→4 recommendation below.
+- Crate-name imports of a repository's own library from one of those (`use my_crate::...` from `tests/`, not inside a `[workspace]`) are not mapped back to the local crate and are classified external — this needs `[[bin]]`/`[lib] path` override awareness, not yet implemented.
+- `[[bin]]`/`[lib] path` overrides and dependency renames (`package = "..."` in `[dependencies]`) are not read.
 
 ## Why no rust-analyzer
 
@@ -80,7 +79,4 @@ The Phase 3→4 recommendation's §75 decision gate requires all four conditions
 
 ## Limitations
 
-- `#[cfg(...)]` alternatives are all attached as `probable` call targets, but caller/callee graph traversal in context composition only follows the first-listed alternative in source order — non-first cfg alternatives (e.g. a Windows-only variant listed second) are not reachable via context composition yet.
-- The macro-argument call-recovery denylist does not yet include `anyhow!`, `bail!`, `ensure!`, `dbg!`, `matches!` (capped to `probable`, so the precision cost is low).
-- No Cargo/workspace crate-name resolution (see Cargo workspace handling, above).
 - The module-import-context composer's scope is caller and callee files only, not the target's own file — it recovers an import line's context from the files it composes around the target, not from the target's own module header.

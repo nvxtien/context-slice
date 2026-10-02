@@ -83,6 +83,34 @@ test("macros: no descent into token trees", () => {
   assert.deepEqual(m.ev, ["macro:foo"]);
 });
 
+test("macro-argument call recovery: anyhow!/bail! are denylisted (format-string style, like panic!/format!)", () => {
+  assert.deepEqual(calls('anyhow::anyhow!("bad: {}", fetch());'), [
+    { name: "anyhow", recv: "anyhow", args: 0, ev: ["macro:anyhow"] },
+  ]);
+  assert.deepEqual(calls('bail!("bad: {}", fetch());'), [
+    { name: "bail", recv: undefined, args: 0, ev: ["macro:bail"] },
+  ]);
+});
+
+test("macro-argument call recovery: ensure!'s condition is real control flow, not denylisted", () => {
+  const list = calls('ensure!(check(x), "invalid: {}", fetch());');
+  assert.deepEqual(
+    list.map((c) => c.name),
+    ["ensure", "check", "fetch"],
+  );
+});
+
+test("macro-argument call recovery: dbg! wraps a single real expression, not denylisted", () => {
+  const list = calls("dbg!(fetch());");
+  assert.deepEqual(list.map((c) => c.name), ["dbg", "fetch"]);
+});
+
+test("macro-argument call recovery: matches! is denylisted — its pattern argument is not an expression and a tuple-variant pattern (e.g. Opt::Foo(_)) would otherwise misparse as a spurious call", () => {
+  assert.deepEqual(calls("matches!(x, Opt::Foo(_));"), [
+    { name: "matches", recv: undefined, args: 0, ev: ["macro:matches"] },
+  ]);
+});
+
 test("struct literals are not calls; consts are ignored", () => {
   assert.deepEqual(calls("let s = Foo { a: 1 };"), []);
   const p = parseRust("src/lib.rs", "const X: u8 = f();\nstatic Y: u8 = g();\n");
