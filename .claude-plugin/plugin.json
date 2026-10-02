@@ -1,7 +1,7 @@
 {
   "name": "context-slice",
   "displayName": "Context Slice",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Structural code-context slicing for Java, TypeScript/TSX, JavaScript, Python, Rust, and Go. Serves a budget-bounded, relevance-ranked slice of a repository (target symbol plus ranked callers/callees) instead of whole files, so a task needs far less context window.",
   "author": {
     "name": "tien.nguyen"

@@ -11,7 +11,7 @@
     {
       "name": "context-slice",
       "description": "Structural code-context slicing: a budget-bounded, relevance-ranked repository slice instead of whole-file reads.",
-      "version": "1.8.1",
+      "version": "1.8.2",
       "source": "./",
       "policy": {
         "installation": "AVAILABLE",
