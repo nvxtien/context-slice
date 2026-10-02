@@ -1,7 +1,71 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { ImportRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
 import { leaveUnresolvedOnError, resolveCallsA } from "./calls-resolve.js";
 import { modulePathFor } from "./parse.js";
+
+/** A crate known to this project: its Cargo.toml package name, and its directory
+ * relative to context.root ("" for a crate whose Cargo.toml sits at the project root). */
+type CrateInfo = { name: string; dir: string };
+
+function cargoPackageName(tomlText: string): string | undefined {
+  const section = tomlText.match(/\[package\]([\s\S]*?)(?:\n\[|$)/);
+  const body = section ? section[1] : tomlText;
+  return body.match(/^\s*name\s*=\s*"([^"]+)"/m)?.[1];
+}
+
+function cargoWorkspaceMembers(tomlText: string): string[] {
+  const section = tomlText.match(/\[workspace\]([\s\S]*?)(?:\n\[|$)/);
+  if (!section) return [];
+  const members = section[1].match(/members\s*=\s*\[([\s\S]*?)\]/);
+  if (!members) return [];
+  return [...members[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+}
+
+/** Only the simple "dir/*" trailing-glob form is supported — real Cargo globs (nested
+ * wildcards, exclude patterns) are rare enough in practice not to special-case here. */
+function expandMemberPattern(root: string, pattern: string): string[] {
+  const clean = pattern.replace(/\/$/, "");
+  if (!clean.endsWith("/*")) return [clean];
+  const base = clean.slice(0, -2);
+  try {
+    return readdirSync(join(root, base), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `${base}/${entry.name}`);
+  } catch {
+    return [];
+  }
+}
+
+/** Every crate this project can resolve `use` paths into: a root Cargo.toml's own
+ * `[package]` (if any) plus every `[workspace]` member's own `[package]`. No Cargo.toml
+ * means no known crates — callers fall back to treating the whole project as one crate,
+ * which is the project's existing, correct single-crate behavior. */
+function discoverCrates(root: string): CrateInfo[] {
+  let rootToml: string;
+  try {
+    rootToml = readFileSync(join(root, "Cargo.toml"), "utf8");
+  } catch {
+    return [];
+  }
+  const crates: CrateInfo[] = [];
+  const rootName = cargoPackageName(rootToml);
+  if (rootName) crates.push({ name: rootName, dir: "" });
+  for (const pattern of cargoWorkspaceMembers(rootToml)) {
+    for (const memberDir of expandMemberPattern(root, pattern)) {
+      let memberToml: string;
+      try {
+        memberToml = readFileSync(join(root, memberDir, "Cargo.toml"), "utf8");
+      } catch {
+        continue;
+      }
+      const name = cargoPackageName(memberToml);
+      if (name) crates.push({ name, dir: memberDir });
+    }
+  }
+  return crates;
+}
 
 /**
  * Map every indexed .rs file to its crate-relative module path, and back.
@@ -57,6 +121,10 @@ export function resolveRustModule(
   index: ReturnType<typeof rustModuleIndex>,
   /** Names bound in `fromFile` (declared items, imports). A non-anchored path starting with one is not an external crate. */
   boundNames?: ReadonlySet<string>,
+  /** Other crates in this workspace, by Cargo.toml package name — lets a non-anchored path
+   * whose first segment names a sibling crate resolve into THAT crate's own module index,
+   * instead of being reported as an external (non-workspace) package. */
+  otherCrates?: ReadonlyMap<string, ReturnType<typeof rustModuleIndex>>,
 ): { file?: string; externalPackage?: string } {
   const [anchor, ...rest] = segments;
   const anchored = anchor === "crate" || anchor === "self" || anchor === "super";
@@ -82,6 +150,15 @@ export function resolveRustModule(
   }
   if (anchored) return {};
   if (anchor && boundNames?.has(anchor)) return {}; // bound locally: unresolved, not external
+  const sibling = anchor ? otherCrates?.get(anchor) : undefined;
+  if (sibling) {
+    for (const path of [rest, rest.slice(0, -1)]) {
+      const key = path.join("::");
+      if (sibling.ambiguous.has(key)) return {};
+      const file = sibling.byModule.get(key);
+      if (file) return { file };
+    }
+  }
   return { externalPackage: anchor };
 }
 
@@ -94,7 +171,36 @@ export function resolveRustCalls(context: ResolveContext) {
   const files = [...new Set(context.symbols.map((symbol) => symbol.filePath))];
   for (const record of [...context.imports, ...context.exports])
     files.push(record.filePath);
-  const index = rustModuleIndex([...new Set(files)]);
+  const allFiles = [...new Set(files)];
+
+  // Partition files by crate (longest directory-prefix match) and build one module index per
+  // crate, so two crates' own src/lib.rs (both module path []) never collide into one "ambiguous"
+  // key the way a single project-wide index would. No Cargo.toml, or a Cargo.toml with no
+  // crates discovered, falls back to exactly one crate covering the whole project — the
+  // project's prior, unpartitioned behavior.
+  const discovered = discoverCrates(context.root);
+  const crateDirs = discovered.length ? discovered : [{ name: "", dir: "" }];
+  if (!crateDirs.some((c) => c.dir === "")) crateDirs.push({ name: "", dir: "" });
+  const dirsByLengthDesc = [...crateDirs].sort((a, b) => b.dir.length - a.dir.length);
+  const crateFor = (file: string): CrateInfo =>
+    dirsByLengthDesc.find((c) => c.dir === "" || file === c.dir || file.startsWith(c.dir + "/")) ??
+    dirsByLengthDesc[dirsByLengthDesc.length - 1];
+
+  const filesByCrateDir = new Map<string, string[]>();
+  for (const file of allFiles) {
+    const dir = crateFor(file).dir;
+    const list = filesByCrateDir.get(dir) ?? [];
+    list.push(file);
+    filesByCrateDir.set(dir, list);
+  }
+  const indexByCrateDir = new Map<string, ReturnType<typeof rustModuleIndex>>();
+  const indexByCrateName = new Map<string, ReturnType<typeof rustModuleIndex>>();
+  for (const crate of crateDirs) {
+    const crateIndex = rustModuleIndex(filesByCrateDir.get(crate.dir) ?? []);
+    indexByCrateDir.set(crate.dir, crateIndex);
+    if (crate.name) indexByCrateName.set(crate.name, crateIndex);
+  }
+  const indexFor = (file: string) => indexByCrateDir.get(crateFor(file).dir)!;
 
   // Per-file bound names: declared items at any nesting + names bound by imports.
   // A bare unaliased `use foo;` binds the crate name itself, so it does not count.
@@ -119,8 +225,9 @@ export function resolveRustCalls(context: ResolveContext) {
     const resolved = resolveRustModule(
       record.module.split("::"),
       record.filePath,
-      index,
+      indexFor(record.filePath),
       boundByFile.get(record.filePath),
+      indexByCrateName,
     );
     record.resolvedFile = resolved.file;
     record.externalPackage = resolved.externalPackage;
@@ -132,7 +239,9 @@ export function resolveRustCalls(context: ResolveContext) {
       record.resolvedFile = resolveRustModule(
         record.fromModule.split("::"),
         record.filePath,
-        index,
+        indexFor(record.filePath),
+        undefined,
+        indexByCrateName,
       ).file;
     }
     const list = exportsByFile.get(record.filePath) ?? [];
@@ -180,7 +289,13 @@ export function resolveRustCalls(context: ResolveContext) {
   try {
     resolveCallsA(context, {
       moduleOf: (segments, fromFile) =>
-        resolveRustModule([...segments, "\u0000"], fromFile, index, boundByFile.get(fromFile)),
+        resolveRustModule(
+          [...segments, "\u0000"],
+          fromFile,
+          indexFor(fromFile),
+          boundByFile.get(fromFile),
+          indexByCrateName,
+        ),
     });
   } catch {
     // A throw outside the per-edge guard (impl pre-pass): no Rust edge is trusted, the rebuild continues.
