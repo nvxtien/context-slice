@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7.0 — JavaScript support (unpublished)
+
+- **JavaScript adapter.** `.js`, `.jsx`, `.mjs`, `.cjs` reuse the TypeScript adapter as-is (JS is a syntactic subset of TS): the same symbol extraction, import/export extraction, and call extraction/resolution run unchanged, with the language id and JSX-vs-plain grammar derived per file extension (`.jsx` uses the `tsx` grammar; `.js`/`.mjs`/`.cjs` use `typescript`).
+- **Benchmark (2 pinned repositories: express, chalk).** Chosen to cover both JS module systems. express (CommonJS): 3/3 symbols, 3/3 calls found. chalk (ESM): 4/4 symbols, 3/3 imports, 2/2 exports, 1/1 calls found. See `benchmarks/results/v1.7-javascript-support.md`.
+- **Known limitation: CommonJS is invisible to import/export resolution.** `require('./foo')` and `module.exports = x` are ordinary call/assignment expressions to this grammar, not special import/export forms — confirmed zero `ImportRecord`/`ExportRecord`s are ever produced for CommonJS-style code (express's own `0/0` import/export oracle is the correct, expected result, not a gap). Symbol and call extraction are unaffected by module system.
+- **Known limitation: property-assigned function expressions aren't extracted as symbols.** The common CommonJS-era pattern `obj.method = function method() {...}` produces no symbol of its own — only top-level `function NAME(...)` declarations and `var`/`let`/`const` declarations are. Pre-existing TypeScript-adapter behavior, inherited as-is.
+
+Not published to npm. No Git tag or GitHub Release was created.
+
+## 1.6.0 — Go support (unpublished)
+
+- **Go adapter.** `.go` files indexed with Tree-sitter: functions (including generic type parameters), methods (including generic receivers, with correct pointer/value-receiver and same-file cross-file linkage), structs (with fields, including embedded-field promotion), interfaces, type aliases (`type X Y` and `type X = Y`), package-level const/var, and import declarations (plain, aliased, blank `_`, dot `.`, and grouped forms). Export visibility follows Go's own capitalization convention.
+- **Call resolution.** Same-package direct calls, import-qualified calls (resolved via `go.mod`'s module path, including Go's major-version-suffix convention, e.g. `.../v5`), and receiver-typed method calls (composite-literal, `var`, and constructor-naming-convention binding inference), plus struct-embedding method promotion (correct depth-based shadowing; same-depth ambiguity stays unresolved) and interface satisfaction (recorded as `supertypes` on the implementing struct).
+- **Benchmark (3 pinned repositories: pkg/errors, cobra, chi).** Symbol extraction 46/46, imports 8/8, call extraction 14/14, call resolution 19/19, interface satisfaction 3/3 — all **100%**. See `benchmarks/results/v1.6-go-support.md`.
+- **Known limitations.** Interface satisfaction matches method names only, not signatures. A local variable's type inferred from a constructor call (`x := NewFoo()`) is not tracked when the constructor's name doesn't match its concrete return type. Struct embedding and interface satisfaction are same-directory (same-package) only. No `go.work` multi-module workspace support, no Cargo-equivalent cross-package type resolution. See `benchmarks/results/v1.6-go-support.md`.
+- Nine real bugs were found and fixed during development via adversarial final-branch review and real-repo benchmarking (not synthetic tests alone), including a struct-`supertypes` duplication bug that only surfaced across incremental re-indexing of an unchanged project.
+
+Not published to npm. No Git tag or GitHub Release was created.
+
 ## 1.5.0 — Rust support (unpublished)
 
 - **Rust adapter.** `.rs` files indexed with Tree-sitter: functions (including `async` and trait default/signature methods), structs (including tuple structs), enums, traits, inherent and trait impl blocks, file-backed and inline modules, consts, statics, and type aliases.
