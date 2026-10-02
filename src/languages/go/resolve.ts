@@ -122,12 +122,18 @@ function resolveInterfaceSatisfaction(symbols: SymbolRecord[], byDirectory: Map<
     const structs = siblings.filter((s) => s.kind === "class");
     for (const struct of structs) {
       const methods = methodSetOf(struct, byDirectory);
+      // Recomputed from scratch every pass, not appended to: struct.supertypes is owned entirely
+      // by this resolver (parse.ts never sets it on struct symbols), and ProjectIndex.rebuild()
+      // reuses persisted symbols across incremental rebuilds, so appending would duplicate entries
+      // on every rebuild and never drop a stale one.
+      const satisfied: string[] = [];
       for (const iface of interfaces) {
         const required = iface.metadata!.interfaceMethods!;
         if (required.length > 0 && required.every((name) => methods.has(name))) {
-          struct.supertypes = [...(struct.supertypes ?? []), iface.name];
+          satisfied.push(iface.name);
         }
       }
+      struct.supertypes = satisfied;
     }
   }
 }

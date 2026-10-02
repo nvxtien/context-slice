@@ -39,6 +39,15 @@ correct results on all tested real-world code. One example surfaced during bench
 the adapter correctly identifies the method-name overlap but does not type-check the signatures,
 producing a technically-incorrect-but-documented result in that single edge case.
 
+An interface that embeds another interface has its embedded interface's required methods
+silently dropped: only `method_elem` is counted when collecting `interfaceMethods`, so e.g.
+`type RC interface { Reader; Close() error }` is treated as requiring only `Close()`, and any
+type defining just `Close()` is wrongly reported as satisfying `RC`.
+
+Interface satisfaction only considers same-directory `kind === "class"` (struct) types: named
+non-struct types (e.g. `type MyInt int` with methods) and cross-package interface satisfaction
+are out of scope by design, matching the spec.
+
 ## Roadmap status: COMPLETE
 
 This closes the ENTIRE "add Go language support" roadmap. No further

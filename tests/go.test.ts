@@ -564,3 +564,13 @@ test("a struct missing one of an interface's methods does NOT get it in supertyp
   assert.equal(partial.supertypes?.includes("Greeter") ?? false, false);
   rmSync(root, { recursive: true, force: true });
 });
+
+test("rebuilding an unchanged project twice does not duplicate supertypes entries", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Greeter interface {\n\tGreet() string\n}\n\ntype Greet1 struct{}\nfunc (g *Greet1) Greet() string { return "" }\n`,
+  });
+  index.rebuild();
+  const struct = index.symbols.find((s) => s.kind === "class" && s.name === "Greet1")!;
+  assert.equal(struct.supertypes?.filter((name) => name === "Greeter").length, 1);
+  rmSync(root, { recursive: true, force: true });
+});
