@@ -1,12 +1,50 @@
 # ContextSlice
 
-ContextSlice is a local, read-only developer tool for Java, TypeScript, TSX, JavaScript, Python, Rust and Go that builds a small, task-specific code context before it is sent to a coding assistant. Instead of opening and pasting whole files, ask for the method, its callers, callees, and explicit omissions that matter to the task.
+> Give your coding assistant the smallest useful slice of your codebase.
 
-It indexes source with Tree-sitter, keeps a local SQLite cache, and exposes the same workflow through a CLI and stdio MCP server. It does not edit the target repository.
+You just joined a codebase with hundreds of files. Where do you start without
+feeding an entire repository to an AI assistant?
+
+ContextSlice builds a small, task-specific context from Java, TypeScript, TSX,
+JavaScript, Python, Rust, and Go source. It finds the target symbol, follows
+relevant callers and callees, and reports what was included or left out.
+
+It is local, read-only, and deterministic: Tree-sitter performs the structural
+analysis, SQLite stores the index, and no source code is sent to a hosted
+service by ContextSlice.
+
+## Quick start
+
+### Claude Code plugin
+
+Install it directly from the GitHub marketplace:
+
+```text
+/plugin marketplace add nvxtien/context-slice
+/plugin install context-slice@context-slice-marketplace
+```
+
+The plugin provides a skill that tells Claude Code to request a focused
+ContextSlice preview before reading source files. The MCP server then targets
+the project Claude Code has open.
+
+### CLI and MCP
+
+```sh
+context-slice init
+context-slice preview "explain the payment retry flow" --explain
+```
+
+For a new checkout, see [Installation](#installation) for the local build and
+MCP setup.
 
 ## Why use it
 
-Large context windows still waste attention when they contain unrelated files. ContextSlice makes the context package inspectable: it reports the target, estimated token budget, included symbols, omissions caused by budget, unresolved calls, and cache freshness.
+- Whole files contain too much unrelated code.
+- Task names are often enough to locate the relevant symbol, callers, and callees.
+- Strict budgets make omissions visible instead of silently overflowing context.
+- Unresolved dynamic dispatch stays unresolved rather than being guessed.
+- The target repository is never edited; only `.context-slice/` is written locally.
 
 ## Supported languages
 
@@ -31,23 +69,10 @@ One repository can hold all of them. See [docs/typescript-support.md](docs/types
 
 ## Installation
 
-## Claude Code plugin (GitHub marketplace)
+### Claude Code plugin (GitHub marketplace)
 
-This repository is also a Claude Code plugin. It bundles the MCP server
-(`.mcp.json`) and a skill (`skills/context-slice/`) that tells Claude to prefer
-the MCP tools over reading whole files for implementation and explanation
-tasks. It is distributed from GitHub; npm publish is not required for the
-plugin.
-
-Inside Claude Code, add the GitHub repository as a marketplace and install the
-plugin:
-
-```text
-/plugin marketplace add nvxtien/context-slice
-/plugin install context-slice@context-slice-marketplace
-```
-
-For local development or a local checkout, use the path form instead:
+This repository is also a Claude Code plugin. For local development or a local
+checkout, use the path form instead:
 
 ```sh
 git clone https://github.com/nvxtien/context-slice.git
@@ -63,11 +88,8 @@ npm run build
 
 The current plugin runs the compiled `dist/` output, so a local checkout must
 run `npm ci` and `npm run build` before first use. Re-run `npm run build` after
-pulling updates. The plugin's MCP server targets whichever project Claude
-Code has open (`${CLAUDE_PROJECT_DIR}`), not the plugin repository itself.
-
-Once built, it works in any Java/TypeScript/JavaScript/Python/Rust/Go project
-you open.
+pulling updates. Its MCP server targets `${CLAUDE_PROJECT_DIR}`, not the plugin
+repository itself.
 
 ### Local development
 
@@ -100,7 +122,7 @@ npm run benchmark:v08
 
 Registry installation (`npm install -g context-slice`) and `npx context-slice` remain publication-dependent and are not claimed as supported yet.
 
-### Quick start
+### CLI examples
 
 Then, in a Java repository:
 
