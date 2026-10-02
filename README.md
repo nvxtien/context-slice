@@ -1,6 +1,12 @@
 # ContextSlice
 
+> Less context. Unchanged signal.
+>
 > Give your coding assistant the smallest useful slice of your codebase.
+
+<p align="center">
+  <img src="assets/context-slice-hero.png" alt="Source files converging into a focused ContextSlice context" width="100%" />
+</p>
 
 You just joined a codebase with hundreds of files. Where do you start without
 feeding an entire repository to an AI assistant?
