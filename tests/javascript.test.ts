@@ -38,6 +38,61 @@ test(".mjs and .cjs files are both tagged 'javascript'", () => {
   }
 });
 
+test("a property-assigned function expression at module level produces a function symbol", () => {
+  const parsed = parseTypeScript(
+    "legacy.js",
+    "Widget.helper = function helper(x) { return x; };",
+  );
+  const fn = parsed.symbols.find((symbol) => symbol.name === "helper");
+  assert.ok(fn, "expected a symbol for the property-assigned function");
+  assert.equal(fn!.kind, "function");
+  assert.equal(fn!.qualifiedName, "Widget.helper");
+});
+
+test("a property-assigned arrow function at module level produces a function symbol, named from the property even when anonymous", () => {
+  const parsed = parseTypeScript("legacy.js", "Widget.run = (x) => x + 1;");
+  const fn = parsed.symbols.find((symbol) => symbol.qualifiedName === "Widget.run");
+  assert.ok(fn, "expected a symbol for the property-assigned arrow function");
+  assert.equal(fn!.kind, "function");
+});
+
+test("a nested property-assigned function (prototype pattern) produces a function symbol with the full chain", () => {
+  const parsed = parseTypeScript(
+    "legacy.js",
+    "Foo.prototype.method = function method() {};",
+  );
+  const fn = parsed.symbols.find((symbol) => symbol.name === "method");
+  assert.ok(fn, "expected a symbol for the prototype-assigned function");
+  assert.equal(fn!.qualifiedName, "Foo.prototype.method");
+});
+
+test("calls inside a property-assigned function body are attributed to it", () => {
+  const parsed = parseTypeScript(
+    "legacy.js",
+    "function helper() {}\nWidget.run = function run() { helper(); };",
+  );
+  const fn = parsed.symbols.find((symbol) => symbol.qualifiedName === "Widget.run")!;
+  const call = parsed.calls.find((c) => c.calleeName === "helper")!;
+  assert.equal(call.callerId, fn.id);
+});
+
+test("a property-assigned function inside a function body (not module level) stays unextracted, matching local lexical-declaration handling", () => {
+  const parsed = parseTypeScript(
+    "legacy.js",
+    "function outer() { const obj = {}; obj.x = function x() {}; }",
+  );
+  assert.equal(parsed.symbols.find((s) => s.name === "x"), undefined);
+});
+
+test("module.exports / exports property assignment is left untouched (CommonJS, out of scope)", () => {
+  const parsed = parseTypeScript(
+    "legacy.js",
+    "module.exports.helper = function helper() {};\nexports.other = function other() {};",
+  );
+  assert.equal(parsed.symbols.find((s) => s.name === "helper"), undefined);
+  assert.equal(parsed.symbols.find((s) => s.name === "other"), undefined);
+});
+
 test("the language registry routes .js/.jsx/.mjs/.cjs files to the javascript adapter", () => {
   for (const filePath of ["math.js", "widget.jsx", "module.mjs", "module.cjs"]) {
     const adapter = adapterFor(filePath);

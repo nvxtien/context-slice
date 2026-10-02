@@ -8,8 +8,9 @@
 - **Rust: Cargo workspace crate resolution.** `Cargo.toml` (`[package]` and `[workspace].members`, including simple `dir/*` globs) is now read; a `use` path naming a sibling workspace crate resolves into that crate's own files instead of being reported external. Each crate now gets its own module index, which also fixes two crates' root files (both `src/lib.rs`) colliding as "ambiguous" under the old single project-wide index.
 - **Rust: cfg-gated alternatives are reachable in context composition.** `callers()`/`dependencies()` now follow every `#[cfg(...)]` alternative recorded in a call's `runtimeTargetIds`, not just the first-listed one — a Windows-only variant listed second, for example, is now included.
 - **Rust: macro-argument call-recovery denylist tightened.** `anyhow!`/`bail!` joined the format-string-style denylist (same category as `panic!`/`format!`). `matches!` was added for a sharper reason: its pattern argument is not an expression, and a tuple-variant pattern like `Opt::Foo(_)` was re-parsing as a spurious call to `Foo`. `ensure!`/`dbg!` were evaluated and deliberately left off the denylist — their arguments are genuine expressions (a real condition, a real inspected value), and recovery was already correct with no false positives.
+- **JS/TS: property-assigned function expressions are now extracted as symbols.** `Widget.helper = function helper(x) {...}` and `Foo.prototype.method = () => {...}` at module level now produce a `function` symbol (qualified name `Widget.helper` / `Foo.prototype.method`), with calls inside their bodies correctly attributed. `module.exports`/`exports` targets are deliberately left alone — that's CommonJS module semantics, a separate, untouched limitation.
 
-The superseded "Known limitations" lines in the 1.5.0 and 1.6.0 entries below describe the state at time of release, not the current state.
+The superseded "Known limitations" lines in the 1.5.0, 1.6.0, and 1.7.0 entries below describe the state at time of release, not the current state.
 
 ## 1.7.0 — JavaScript support (unpublished)
 

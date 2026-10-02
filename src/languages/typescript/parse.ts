@@ -737,6 +737,50 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
         scopes.pop();
         return;
       }
+      case "assignment_expression": {
+        // `obj.method = function(){}` / `Foo.prototype.method = () => {}` at module level:
+        // mirrors the lexical_declaration callable case below, keyed off the property name
+        // instead of a binding name. `module.exports`/`exports` targets are deliberately left
+        // alone — that's CommonJS module semantics, a separate, untouched limitation.
+        const left = field(node, "left");
+        const right = field(node, "right");
+        const objectText = left?.type === "member_expression" ? text(field(left, "object")) : undefined;
+        const propertyName = left?.type === "member_expression" ? text(field(left, "property")) : undefined;
+        if (
+          chain.length === 0 &&
+          owner === undefined &&
+          objectText &&
+          propertyName &&
+          isCallable(right) &&
+          !/^(module\.exports|exports)(\.|$)/.test(objectText)
+        ) {
+          const parameters = parameterSignature(field(right!, "parameters"));
+          const body = field(right!, "body");
+          const symbol = addSymbol(node, "function", propertyName, [...chain, objectText], {
+            parameters,
+            signature: `${propertyName}(${parameters})${returnType(right!) ? `: ${returnType(right!)}` : ""}`,
+            bodyNode: body,
+            metadata: {
+              async: right!.text.startsWith("async "),
+              reactComponent: looksLikeComponent(propertyName, right!, filePath),
+            },
+          });
+          scopes.push({ types: new Map() });
+          for (const parameter of field(right!, "parameters")?.namedChildren ?? [])
+            noteBinding(
+              text(field(parameter, "pattern") ?? parameter.namedChild(0)),
+              text(field(parameter, "type"))
+                .replace(/^:\s*/, "")
+                .replace(/<.*$/s, "")
+                .trim() || undefined,
+            );
+          if (body) walk(body, symbol, [...chain, objectText, propertyName]);
+          scopes.pop();
+          return;
+        }
+        walk(node, owner, chain);
+        return;
+      }
       case "lexical_declaration":
       case "variable_declaration": {
         for (const declarator of node.namedChildren.filter(
