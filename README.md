@@ -185,6 +185,33 @@ claude mcp list
 
 Verify command syntax against `claude mcp --help` in the installed Claude Code version before sharing configuration. ContextSlice itself speaks standard stdio MCP; this repository does not claim to have exercised every Claude Code release.
 
+## Claude Code plugin (local, no npm registry)
+
+This repository is itself an installable Claude Code plugin — no npm publish
+required. It bundles the MCP server (`.mcp.json`) and a skill
+(`skills/context-slice/`) that tells Claude to prefer the MCP tools over
+reading whole files for implementation/explanation tasks.
+
+```sh
+git clone https://github.com/nvxtien/context-slice.git
+cd context-slice
+npm install
+npm run build
+```
+
+Then, inside Claude Code:
+
+```text
+/plugin marketplace add /absolute/path/to/context-slice
+/plugin install context-slice@context-slice-marketplace
+```
+
+The bundled MCP server always targets whichever project Claude Code has open
+(`${CLAUDE_PROJECT_DIR}`), not this repository — so once installed, it works
+the same way in any Java/TypeScript/JavaScript/Python/Rust/Go project you
+open. Re-run `npm run build` after pulling updates to this repository; the
+plugin runs the compiled `dist/` output, not the TypeScript source directly.
+
 ## How it works
 
 1. Discover a Java repository and scan source while ignoring common generated/build directories.

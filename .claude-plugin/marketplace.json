@@ -1,0 +1,18 @@
+{
+  "name": "context-slice-marketplace",
+  "description": "Local marketplace for the context-slice plugin (structural code-context slicing for Java, TypeScript/TSX, JavaScript, Python, Rust, and Go)",
+  "owner": {
+    "name": "tien.nguyen"
+  },
+  "plugins": [
+    {
+      "name": "context-slice",
+      "description": "Structural code-context slicing: a budget-bounded, relevance-ranked repository slice instead of whole-file reads.",
+      "version": "1.8.0",
+      "source": "./",
+      "author": {
+        "name": "tien.nguyen"
+      }
+    }
+  ]
+}
