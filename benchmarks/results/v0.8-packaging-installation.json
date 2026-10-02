@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "generatedAt": "2026-10-02T16:42:30.150Z",
+  "generatedAt": "2026-10-02T16:56:19.910Z",
   "environment": {
     "node": "v22.12.0",
     "npm": "11.7.0",
@@ -8,13 +8,13 @@
   },
   "package": {
     "name": "context-slice",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "license": "MIT",
     "repository": "git+https://github.com/nvxtien/context-slice.git"
   },
   "tarball": {
-    "name": "context-slice-1.7.0.tgz",
-    "bytes": 95388,
+    "name": "context-slice-1.8.0.tgz",
+    "bytes": 95625,
     "fileCount": 44,
     "files": [
       "package/LICENSE",
@@ -85,12 +85,12 @@
   },
   "install": {
     "isolatedPrefix": true,
-    "packageRoot": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-Q11ahi/npm prefix/node_modules/context-slice",
+    "packageRoot": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ip6dTF/npm prefix/node_modules/context-slice",
     "packageDirectoryReadOnly": "deferred",
     "npx": "publication-dependent"
   },
   "cli": {
-    "version": "1.7.0",
+    "version": "1.8.0",
     "help": true,
     "init": true,
     "status": "CURRENT",
@@ -139,11 +139,11 @@
   },
   "pathWithSpaces": {
     "passed": true,
-    "path": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-Q11ahi/context slice repo-Yi2Bgu"
+    "path": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ip6dTF/context slice repo-5TBvLf"
   },
   "nestedCwd": {
     "passed": true,
-    "cwd": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-Q11ahi/context slice repo-Yi2Bgu/src/main/java"
+    "cwd": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ip6dTF/context slice repo-5TBvLf/src/main/java"
   },
   "publishDryRun": {
     "status": "pass",

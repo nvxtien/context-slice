@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.8.0 — Cross-language resolution fixes (unpublished)
 
 - **Go: cross-package resolution.** Interface satisfaction is now project-wide, not same-directory-only (a struct in one package can satisfy an interface declared in another, matching Go's own structural typing). Method calls through a package-qualified local variable (`x := &store.Store{}`) now resolve across packages in the same module. `go.work` multi-module workspaces are supported (both the block and single-line `use` forms).
 - **Go: exact-signature interface satisfaction.** A method of the same name but a different parameter/result shape no longer falsely satisfies an interface.
@@ -11,6 +11,8 @@
 - **JS/TS: property-assigned function expressions are now extracted as symbols.** `Widget.helper = function helper(x) {...}` and `Foo.prototype.method = () => {...}` at module level now produce a `function` symbol (qualified name `Widget.helper` / `Foo.prototype.method`), with calls inside their bodies correctly attributed. `module.exports`/`exports` targets are deliberately left alone — that's CommonJS module semantics, a separate, untouched limitation.
 
 The superseded "Known limitations" lines in the 1.5.0, 1.6.0, and 1.7.0 entries below describe the state at time of release, not the current state.
+
+Not published to npm. No Git tag or GitHub Release was created.
 
 ## 1.7.0 — JavaScript support (unpublished)
 
