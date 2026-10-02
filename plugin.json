@@ -3,6 +3,8 @@
   "name": "context-slice",
   "version": "1.8.1",
   "description": "Structural code-context slicing for Java, TypeScript/TSX, JavaScript, Python, Rust, and Go. Serves a budget-bounded, relevance-ranked slice of a repository instead of whole files.",
+  "skills": "./skills/",
+  "mcpServers": "./mcp.json",
   "author": {
     "name": "tien.nguyen"
   },
