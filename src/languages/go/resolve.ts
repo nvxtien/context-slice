@@ -93,6 +93,45 @@ function findPromotedMethod(
   return undefined;
 }
 
+/** All method names reachable from a struct: its own direct methods, plus every method
+ * reachable via embedding at any depth (ambiguity doesn't matter here — for satisfaction we
+ * only need "is this name reachable at all", unlike call resolution's shallowest-wins rule). */
+function methodSetOf(struct: SymbolRecord, byDirectory: Map<string, SymbolRecord[]>): Set<string> {
+  const names = new Set<string>();
+  const collectDirect = (type: SymbolRecord) => {
+    for (const s of byDirectory.get(directoryOf(type.filePath)) ?? [])
+      if (s.kind === "method" && s.supertypes?.includes(type.name)) names.add(s.name);
+  };
+  collectDirect(struct);
+  const visited = new Set([struct.id]);
+  let frontier = embeddedTypesOf(struct, byDirectory, visited);
+  while (frontier.length) {
+    const next: SymbolRecord[] = [];
+    for (const t of frontier) {
+      collectDirect(t);
+      next.push(...embeddedTypesOf(t, byDirectory, visited));
+    }
+    frontier = next;
+  }
+  return names;
+}
+
+function resolveInterfaceSatisfaction(symbols: SymbolRecord[], byDirectory: Map<string, SymbolRecord[]>) {
+  for (const [, siblings] of byDirectory) {
+    const interfaces = siblings.filter((s) => s.kind === "interface" && s.metadata?.interfaceMethods);
+    const structs = siblings.filter((s) => s.kind === "class");
+    for (const struct of structs) {
+      const methods = methodSetOf(struct, byDirectory);
+      for (const iface of interfaces) {
+        const required = iface.metadata!.interfaceMethods!;
+        if (required.length > 0 && required.every((name) => methods.has(name))) {
+          struct.supertypes = [...(struct.supertypes ?? []), iface.name];
+        }
+      }
+    }
+  }
+}
+
 function settle(
   call: CallEdge,
   target: SymbolRecord,
@@ -193,4 +232,6 @@ export function resolveGoCalls(context: ResolveContext): void {
     if (resolveQualifiedCall(call, caller)) continue;
     resolveMethodCall(call, caller);
   }
+
+  resolveInterfaceSatisfaction(context.symbols, byDirectory);
 }

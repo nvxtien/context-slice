@@ -546,3 +546,21 @@ test("a multi-level embedding chain resolves through two promotion levels", () =
   assert.equal(call.resolvedTargetId, deep.id);
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a struct whose method set (including promoted methods) satisfies an interface gets it in supertypes", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Base struct{}\nfunc (b *Base) Greet() string { return "" }\n\ntype Greeter interface {\n\tGreet() string\n}\n\ntype Derived struct {\n\tBase\n}\n`,
+  });
+  const derived = index.symbols.find((s) => s.kind === "class" && s.name === "Derived")!;
+  assert.ok(derived.supertypes?.includes("Greeter"));
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a struct missing one of an interface's methods does NOT get it in supertypes", () => {
+  const { root, index } = indexedGoProject({
+    "a.go": `package main\n\ntype Greeter interface {\n\tGreet() string\n\tFarewell() string\n}\n\ntype Partial struct{}\nfunc (p *Partial) Greet() string { return "" }\n`,
+  });
+  const partial = index.symbols.find((s) => s.kind === "class" && s.name === "Partial")!;
+  assert.equal(partial.supertypes?.includes("Greeter") ?? false, false);
+  rmSync(root, { recursive: true, force: true });
+});
