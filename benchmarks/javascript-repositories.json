@@ -1,0 +1,20 @@
+[
+  {
+    "id": "express",
+    "scale": "medium",
+    "url": "https://github.com/expressjs/express.git",
+    "commit": "7ef98448f8b38099ab1ded55e458538ad47a51e7",
+    "source": "benchmarks/checkouts/express",
+    "scope": "whole repository (CommonJS: require()/module.exports throughout, no ES imports)",
+    "kind": "backend"
+  },
+  {
+    "id": "chalk",
+    "scale": "small",
+    "url": "https://github.com/sindresorhus/chalk.git",
+    "commit": "47fc05abd46171b235e24174cd2dba83d25bf037",
+    "source": "benchmarks/checkouts/chalk",
+    "scope": "whole repository (modern ESM: import/export throughout)",
+    "kind": "library"
+  }
+]

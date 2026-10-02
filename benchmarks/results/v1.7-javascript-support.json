@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-10-02T08:32:32.883Z",
+  "results": {
+    "express": {
+      "symbolsTotal": 3,
+      "symbolsFound": 3,
+      "importsTotal": 0,
+      "importsFound": 0,
+      "exportsTotal": 0,
+      "exportsFound": 0,
+      "callsTotal": 3,
+      "callsFound": 3,
+      "missing": []
+    },
+    "chalk": {
+      "symbolsTotal": 4,
+      "symbolsFound": 4,
+      "importsTotal": 3,
+      "importsFound": 3,
+      "exportsTotal": 2,
+      "exportsFound": 2,
+      "callsTotal": 1,
+      "callsFound": 1,
+      "missing": []
+    }
+  }
+}
