@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T20:19:11.145Z",
+  "generatedAt": "2026-10-02T07:16:49.487Z",
   "results": {
     "pkg-errors": {
       "symbolsTotal": 21,
@@ -10,6 +10,8 @@
       "callsFound": 5,
       "resolutionsTotal": 5,
       "resolutionsMatched": 5,
+      "supertypesTotal": 0,
+      "supertypesMatched": 0,
       "missing": []
     },
     "cobra": {
@@ -21,6 +23,8 @@
       "callsFound": 4,
       "resolutionsTotal": 5,
       "resolutionsMatched": 5,
+      "supertypesTotal": 0,
+      "supertypesMatched": 0,
       "missing": []
     },
     "chi": {
@@ -30,8 +34,10 @@
       "importsFound": 3,
       "callsTotal": 5,
       "callsFound": 5,
-      "resolutionsTotal": 6,
-      "resolutionsMatched": 6,
+      "resolutionsTotal": 9,
+      "resolutionsMatched": 9,
+      "supertypesTotal": 3,
+      "supertypesMatched": 3,
       "missing": []
     }
   }
