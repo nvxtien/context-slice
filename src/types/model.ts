@@ -66,6 +66,10 @@ export interface SymbolMetadata {
   implTrait?: string;
   /** Rust struct: field name (tuple index as string) -> type text; fn: parameter name -> type text, plus `self` -> "&self" | "&mut self" | "self". */
   declaredTypes?: Record<string, string>;
+  /** Go: this field has no explicit name — it IS the embedded type, not a coincidentally same-named one. */
+  embedded?: boolean;
+  /** Go: an interface's own declared method names (excludes embedded interfaces' names). */
+  interfaceMethods?: string[];
 }
 export interface SymbolRecord {
   id: string;

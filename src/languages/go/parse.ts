@@ -225,7 +225,8 @@ export function parseGo(filePath: string, source: string): ParsedFile {
           for (const fieldDecl of fieldList?.namedChildren.filter((c) => c.type === "field_declaration") ?? []) {
             // An embedded field (e.g. plain "Base") has no "name" field, only "type" —
             // verified empirically: field_declaration's name field is absent for embeds.
-            const fieldName = text(field(fieldDecl, "name")) || text(field(fieldDecl, "type"));
+            const explicitName = text(field(fieldDecl, "name"));
+            const fieldName = explicitName || text(field(fieldDecl, "type"));
             if (!fieldName) continue;
             const fieldId = uniqueId(canonicalId(filePath, "field", `${name}.${fieldName}`));
             symbols.push({
@@ -241,11 +242,16 @@ export function parseGo(filePath: string, source: string): ParsedFile {
               parentId: id,
               annotations: [],
               modifiers: modifiersFor(fieldName),
+              metadata: explicitName ? undefined : { embedded: true },
               source: fieldDecl.text,
             });
           }
         } else if (typeNode.type === "interface_type") {
           const id = uniqueId(canonicalId(filePath, "interface", name));
+          const interfaceMethods = typeNode.namedChildren
+            .filter((c) => c.type === "method_elem")
+            .map((m) => text(m.namedChild(0)))
+            .filter(Boolean);
           symbols.push({
             id,
             language: LANGUAGE_ID,
@@ -258,6 +264,7 @@ export function parseGo(filePath: string, source: string): ParsedFile {
             range: range(spec),
             annotations: [],
             modifiers: modifiersFor(name),
+            metadata: { interfaceMethods },
             source: spec.text,
           });
         } else {

@@ -24,6 +24,20 @@ function indexedGoProject(files: Files): { root: string; index: ProjectIndex } {
   return { root: dir, index };
 }
 
+test("an embedded field is marked metadata.embedded; a coincidentally same-named explicit field is not", () => {
+  const parsed = parseGo("a.go", `package main\n\ntype Base struct{}\ntype Derived struct {\n\tBase\n}\ntype Other struct {\n\tBase Base\n}\n`);
+  const embedded = parsed.symbols.find((s) => s.kind === "field" && s.name === "Base" && s.parentId === parsed.symbols.find((p) => p.name === "Derived")!.id)!;
+  const explicit = parsed.symbols.find((s) => s.kind === "field" && s.name === "Base" && s.parentId === parsed.symbols.find((p) => p.name === "Other")!.id)!;
+  assert.equal(embedded.metadata?.embedded, true);
+  assert.equal(explicit.metadata?.embedded, undefined);
+});
+
+test("interface method names are recorded, excluding an embedded interface", () => {
+  const parsed = parseGo("a.go", `package main\n\nimport "io"\n\ntype Greeter interface {\n\tGreet() string\n\tio.Reader\n}\n`);
+  const iface = parsed.symbols.find((s) => s.kind === "interface" && s.name === "Greeter")!;
+  assert.deepEqual(iface.metadata?.interfaceMethods, ["Greet"]);
+});
+
 test("a package-level function produces a 'function' symbol", () => {
   const parsed = parseGo("main.go", `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`);
   const fn = parsed.symbols.find((s) => s.name === "Add");
