@@ -13,7 +13,10 @@ by having its methods, with no `implements` keyword).
 
 ## Scope
 
-### Part A: Mark embedded fields explicitly (small `parse.ts` addition)
+### Part A: Mark embedded fields, and record interface method names (small `parse.ts` additions)
+
+Two small additions to `parse.ts`, both following the same justification
+(directly needed for THIS phase's own correctness, not scope creep):
 
 Phase 1's field extraction already handles an embedded field's NAME
 correctly (falls back to the type name when no explicit field name
@@ -27,10 +30,21 @@ makes Part B possible, following the established pattern of per-field
 metadata flags already in `SymbolMetadata` (`classMethod`,
 `staticMethod`, `implSelfType`, etc.).
 
-This is the one change to `src/languages/go/parse.ts` this phase makes;
-every other phase's "don't touch parse.ts" discipline was scoped to
-THEIR OWN unrelated work, not a permanent freeze — this is a small,
-directly-justified addition for Phase 4's own correctness requirement.
+Second, Phase 1's `interface_type` handling builds exactly ONE symbol
+for the whole interface — the method elements INSIDE it
+(`method_elem` nodes, each with the method's own name as its first
+named child, confirmed via the same grammar-exploration technique
+every prior phase used) are never extracted anywhere. Part C (below)
+needs the interface's own required method NAMES to check satisfaction
+— add `metadata.interfaceMethods: string[]` to the interface symbol,
+collected from `typeNode.namedChildren.filter(c => c.type ===
+"method_elem").map(m => text(m.namedChild(0)))`.
+
+These are the only two changes to `src/languages/go/parse.ts` this
+phase makes; every other phase's "don't touch parse.ts" discipline was
+scoped to THEIR OWN unrelated work, not a permanent freeze — both are
+small, directly-justified additions for Phase 4's own correctness
+requirements.
 
 ### Part B: Struct embedding — method promotion in call resolution
 
