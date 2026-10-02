@@ -9,15 +9,60 @@ function directoryOf(filePath: string): string {
   return dir === "." ? "" : dir;
 }
 
-/** This project's own go.mod module path, or undefined if none/unreadable — a missing go.mod
- * means every import is treated as external, the correct safe fallback, not a special case. */
-function goModulePath(root: string): string | undefined {
+/** A single module known to this project: its declared module path, and its directory relative
+ * to context.root ("" for a module whose go.mod sits at the project root). */
+type ModuleInfo = { path: string; dir: string };
+
+function readModulePath(goModDir: string): string | undefined {
   try {
-    const text = readFileSync(join(root, "go.mod"), "utf8");
+    const text = readFileSync(join(goModDir, "go.mod"), "utf8");
     return text.match(/^module\s+(\S+)/m)?.[1];
   } catch {
     return undefined;
   }
+}
+
+/** The directories a go.work file lists under `use`, supporting both the block form
+ * ("use (\n\t./a\n\t./b\n)") and repeated single-line directives ("use ./a\nuse ./b"). */
+function parseGoWorkUseDirs(text: string): string[] {
+  const dirs: string[] = [];
+  const block = text.match(/use\s*\(([^)]*)\)/s);
+  if (block) {
+    for (const line of block[1].split("\n")) {
+      const dir = line.trim().split(/\s+/)[0];
+      if (dir) dirs.push(dir);
+    }
+  }
+  for (const m of text.matchAll(/^use\s+(\.\S+)/gm)) dirs.push(m[1]);
+  return dirs;
+}
+
+function normalizeWorkspaceDir(relDir: string): string {
+  return relDir.replace(/^\.\//, "").replace(/\/$/, "").replace(/^\.$/, "");
+}
+
+/** Every module this project can resolve imports into: the modules a go.work file lists under
+ * `use` (a multi-module workspace), or else the single module at this project's own go.mod (the
+ * common case). No go.work and no go.mod means no imports resolve to project code — the correct
+ * safe fallback, not a special case. */
+function discoverModules(root: string): ModuleInfo[] {
+  let workText: string | undefined;
+  try {
+    workText = readFileSync(join(root, "go.work"), "utf8");
+  } catch {
+    workText = undefined;
+  }
+  if (workText !== undefined) {
+    const modules: ModuleInfo[] = [];
+    for (const relDir of parseGoWorkUseDirs(workText)) {
+      const dir = normalizeWorkspaceDir(relDir);
+      const path = readModulePath(join(root, dir));
+      if (path) modules.push({ path, dir });
+    }
+    return modules;
+  }
+  const rootPath = readModulePath(root);
+  return rootPath ? [{ path: rootPath, dir: "" }] : [];
 }
 
 /** A method's own receiver variable name, e.g. "u" in "func (u *User) Name(...)" — read directly
@@ -169,7 +214,7 @@ export function resolveGoCalls(context: ResolveContext): void {
     list.push(symbol);
     byDirectory.set(dir, list);
   }
-  const modulePath = goModulePath(context.root);
+  const modules = discoverModules(context.root);
 
   const importsByFile = new Map<string, ImportRecord[]>();
   for (const record of context.imports) {
@@ -197,10 +242,14 @@ export function resolveGoCalls(context: ResolveContext): void {
   // within THIS module. undefined means the alias is unresolvable or names an external package.
   const resolveImportDirectory = (alias: string, callerFilePath: string): string | undefined => {
     const record = (importsByFile.get(callerFilePath) ?? []).find((r) => importLocalName(r) === alias);
-    if (!record || !modulePath || !(record.module === modulePath || record.module.startsWith(modulePath + "/"))) {
-      return undefined;
+    if (!record) return undefined;
+    for (const mod of modules) {
+      if (record.module === mod.path || record.module.startsWith(mod.path + "/")) {
+        const withinModule = record.module.slice(mod.path.length).replace(/^\//, "");
+        return [mod.dir, withinModule].filter(Boolean).join("/");
+      }
     }
-    return record.module.slice(modulePath.length).replace(/^\//, "");
+    return undefined;
   };
 
   const resolveQualifiedCall = (call: CallEdge, caller: SymbolRecord): boolean => {

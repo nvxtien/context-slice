@@ -631,3 +631,71 @@ test("a package-qualified local variable's unexported method does not resolve ac
   assert.equal(call.resolvedTargetId, undefined);
   rmSync(root, { recursive: true, force: true });
 });
+
+test("go.work: a package-qualified call resolves into a SEPARATE module listed in a block 'use' directive", () => {
+  const { root, index } = indexedGoProject({
+    "go.work": `go 1.21\n\nuse (\n\t./api\n\t./lib\n)\n`,
+    "api/go.mod": `module example.com/api\n\ngo 1.21\n`,
+    "api/main.go": `package main\n\nimport "example.com/lib/util"\n\nfunc main() {\n\tutil.Helper()\n}\n`,
+    "lib/go.mod": `module example.com/lib\n\ngo 1.21\n`,
+    "lib/util/util.go": `package util\n\nfunc Helper() {}\n`,
+  });
+  const helper = index.symbols.find((s) => s.name === "Helper")!;
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.resolvedTargetId, helper.id);
+  assert.equal(call.resolutionKind, "imported");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("go.work: a package-qualified call resolves into a module listed via single-line 'use' directives", () => {
+  const { root, index } = indexedGoProject({
+    "go.work": `go 1.21\n\nuse ./api\nuse ./lib\n`,
+    "api/go.mod": `module example.com/api\n\ngo 1.21\n`,
+    "api/main.go": `package main\n\nimport "example.com/lib/util"\n\nfunc main() {\n\tutil.Helper()\n}\n`,
+    "lib/go.mod": `module example.com/lib\n\ngo 1.21\n`,
+    "lib/util/util.go": `package util\n\nfunc Helper() {}\n`,
+  });
+  const helper = index.symbols.find((s) => s.name === "Helper")!;
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.resolvedTargetId, helper.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("go.work: a method call via a package-qualified variable resolves across workspace modules", () => {
+  const { root, index } = indexedGoProject({
+    "go.work": `go 1.21\n\nuse (\n\t./api\n\t./lib\n)\n`,
+    "api/go.mod": `module example.com/api\n\ngo 1.21\n`,
+    "api/main.go": `package main\n\nimport "example.com/lib/store"\n\nfunc main() {\n\ts := &store.Store{}\n\ts.Save()\n}\n`,
+    "lib/go.mod": `module example.com/lib\n\ngo 1.21\n`,
+    "lib/store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) Save() {}\n`,
+  });
+  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const call = index.calls.find((c) => c.calleeName === "Save")!;
+  assert.equal(call.resolvedTargetId, save.id);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("go.work: an import matching a go.mod directory NOT listed in 'use' stays unresolved", () => {
+  const { root, index } = indexedGoProject({
+    "go.work": `go 1.21\n\nuse ./api\n`,
+    "api/go.mod": `module example.com/api\n\ngo 1.21\n`,
+    "api/main.go": `package main\n\nimport "example.com/lib/util"\n\nfunc main() {\n\tutil.Helper()\n}\n`,
+    "lib/go.mod": `module example.com/lib\n\ngo 1.21\n`,
+    "lib/util/util.go": `package util\n\nfunc Helper() {}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.resolvedTargetId, undefined);
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("without a go.work file, single-module go.mod resolution still works (no regression)", () => {
+  const { root, index } = indexedGoProject({
+    "go.mod": `module example.com/proj\n\ngo 1.21\n`,
+    "main.go": `package main\n\nimport "example.com/proj/util"\n\nfunc main() {\n\tutil.Helper()\n}\n`,
+    "util/util.go": `package util\n\nfunc Helper() {}\n`,
+  });
+  const helper = index.symbols.find((s) => s.name === "Helper")!;
+  const call = index.calls.find((c) => c.calleeName === "Helper")!;
+  assert.equal(call.resolvedTargetId, helper.id);
+  rmSync(root, { recursive: true, force: true });
+});
