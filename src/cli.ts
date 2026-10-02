@@ -118,10 +118,16 @@ function renderPreview(
   preview: ReturnType<typeof buildPreview>,
   explain: boolean,
 ) {
-  const lines = [
-    `Target: ${preview.target.qualifiedName ?? preview.target.name}`,
+  const lines = [`Target: ${preview.target.qualifiedName ?? preview.target.name}`];
+  if (preview.baseline.wholeFileTokens > 0)
+    lines.push(
+      `Saved ${Math.round(preview.baseline.reduction * 100)}% context ` +
+        `(${preview.estimatedTokens} vs ${preview.baseline.wholeFileTokens} tokens, ` +
+        `${plural(preview.baseline.files, "file")} read in full instead of sliced)`,
+    );
+  lines.push(
     `Context: ${preview.estimatedTokens}/${preview.budget} tokens; ${plural(preview.included.length, "item")} included`,
-  ];
+  );
   if (explain) {
     lines.push(
       "",

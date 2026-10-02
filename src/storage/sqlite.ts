@@ -82,7 +82,17 @@ export class IndexStorage {
         this.db.prepare(`SELECT payload FROM ${table}`).all() as Array<{
           payload: string;
         }>
-      ).map((row) => JSON.parse(row.payload) as T);
+      ).map((row) => {
+        try {
+          return JSON.parse(row.payload) as T;
+        } catch (error) {
+          throw new WorkflowError(
+            "INDEX_CORRUPT",
+            `Unreadable index cache payload in ${table}: ${error instanceof Error ? error.message : String(error)}`,
+            "Delete the cache and rebuild it: rm -rf .context-slice && context-slice init",
+          );
+        }
+      });
     return {
       files,
       symbols: rows<SymbolRecord>("symbols"),

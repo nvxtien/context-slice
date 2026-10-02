@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { gitDiffArgs } from "../src/server/mcp-server.js";
 
 const workspace = process.cwd();
 const tsx = join(workspace, "node_modules/.bin/tsx");
@@ -123,3 +124,10 @@ test(
     }
   },
 );
+
+test("context.diff uses the working tree when only base is supplied", () => {
+  assert.deepEqual(gitDiffArgs(), ["HEAD"]);
+  assert.deepEqual(gitDiffArgs("main"), ["main"]);
+  assert.deepEqual(gitDiffArgs(undefined, "feature"), ["HEAD", "feature"]);
+  assert.deepEqual(gitDiffArgs("main", "feature"), ["main", "feature"]);
+});

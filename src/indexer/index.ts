@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
-import { extname, join, relative, resolve } from "node:path";
+import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type {
   CallEdge,
   ExportRecord,
@@ -405,7 +405,8 @@ export class ProjectIndex {
   }
   sourceFor(symbol: SymbolRecord) {
     const full = resolve(this.root, symbol.filePath);
-    if (!full.startsWith(this.root + "/") && full !== this.root)
+    const fromRoot = relative(this.root, full);
+    if (fromRoot === ".." || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot))
       throw new Error("Path nằm ngoài repository root");
     return readFileSync(full, "utf8");
   }

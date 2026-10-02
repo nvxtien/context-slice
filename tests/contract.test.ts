@@ -5,7 +5,8 @@ import { join } from "node:path";
 import Database from "better-sqlite3";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
-import { INDEX_VERSION } from "../src/storage/sqlite.js";
+import { INDEX_VERSION, IndexStorage } from "../src/storage/sqlite.js";
+import { WorkflowError } from "../src/workflow/errors.js";
 
 test("caller depth expands transitively", () => {
   const index = new ProjectIndex(join(process.cwd(), "test-fixtures/java"));
@@ -33,4 +34,22 @@ test("file records use the current index version", () => {
     .get("PaymentService.java") as { indexing_version: string };
   assert.equal(row.indexing_version, INDEX_VERSION);
   db.close();
+});
+
+test("corrupt cached JSON raises an actionable index error", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-corrupt-payload-"));
+  const storage = new IndexStorage(root);
+  storage.save(new Map(), [], [], [], []);
+  storage.close();
+
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  db.prepare("INSERT INTO symbols(id, file_path, language, payload) VALUES (?, ?, ?, ?)")
+    .run("broken", "Broken.java", "java", "not json");
+  db.close();
+
+  assert.throws(
+    () => new IndexStorage(root).load(),
+    (error: unknown) =>
+      error instanceof WorkflowError && error.code === "INDEX_CORRUPT",
+  );
 });

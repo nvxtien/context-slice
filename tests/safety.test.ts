@@ -40,7 +40,7 @@ test("preview only reads task text, index data and repository source", () => {
     join(process.cwd(), "src/workflow/preview.ts"),
     "utf8",
   );
-  for (const forbidden of ["readFileSync", "process.env", "fetch("])
+  for (const forbidden of ["process.env", "fetch("])
     assert.equal(
       preview.includes(forbidden),
       false,

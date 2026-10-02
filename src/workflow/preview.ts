@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { ProjectIndex } from "../indexer/index.js";
 import { estimateTokens } from "../planner/budget.js";
 import { rankSymbol } from "../planner/rank.js";
@@ -20,6 +22,7 @@ export type PreviewReason =
 export interface PreviewOptions {
   budget?: number;
   depth?: number;
+  intent?: string;
   /** Set false to slice without the enclosing-type skeleton. */
   composition?: boolean;
 }
@@ -58,6 +61,15 @@ export interface UnresolvedPreviewCall {
   evidence: string[];
 }
 
+/** The cost of reading the slice's own related files in full, for comparison — never the
+ * whole repository, only the files the included items actually came from. */
+export interface PreviewBaseline {
+  files: number;
+  wholeFileTokens: number;
+  /** 1 - estimatedTokens / wholeFileTokens, clamped to [0, 1]; 0 when wholeFileTokens is 0. */
+  reduction: number;
+}
+
 export interface PreviewResult {
   task: string;
   target: SymbolRecord;
@@ -70,6 +82,29 @@ export interface PreviewResult {
   confidence: "high" | "mixed";
   freshness: ReturnType<ProjectIndex["inspect"]>;
   composition: Record<PreviewReason, number>;
+  baseline: PreviewBaseline;
+}
+
+/** Reads each distinct included file once, in full, as the "without context-slice" cost.
+ * A file that can't be read (renamed/deleted since indexing) is skipped rather than guessed —
+ * the resulting reduction then understates savings, never overstates them. */
+function wholeFileBaseline(
+  index: ProjectIndex,
+  included: PreviewItem[],
+  estimatedTokens: number,
+): PreviewBaseline {
+  const filePaths = new Set(included.map((item) => item.filePath));
+  let wholeFileTokens = 0;
+  for (const filePath of filePaths) {
+    try {
+      wholeFileTokens += estimateTokens(readFileSync(join(index.root, filePath), "utf8"));
+    } catch {
+      // Excluded, not guessed — see doc comment above.
+    }
+  }
+  const reduction =
+    wholeFileTokens > 0 ? Math.min(1, Math.max(0, 1 - estimatedTokens / wholeFileTokens)) : 0;
+  return { files: filePaths.size, wholeFileTokens, reduction };
 }
 
 function parameterCount(symbol: SymbolRecord) {
@@ -244,7 +279,12 @@ export function buildPreview(
         relation: "Direct callee",
       }),
     ),
-  ];
+  ].sort(
+    (a, b) =>
+      rankSymbol(b.symbol, task, options.intent ?? "") -
+        rankSymbol(a.symbol, task, options.intent ?? "") ||
+      a.symbol.id.localeCompare(b.symbol.id),
+  );
   const includedIds = new Set([target.id]);
   for (const item of related) {
     if (includedIds.has(item.symbol.id)) continue;
@@ -342,5 +382,6 @@ export function buildPreview(
     confidence: unresolved.length ? "mixed" : "high",
     freshness: index.inspect(),
     composition,
+    baseline: wholeFileBaseline(index, included, estimatedTokens),
   };
 }

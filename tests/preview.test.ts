@@ -27,6 +27,22 @@ test("preview selects a task target and explains every included item", () => {
   assert.ok(preview.estimatedTokens <= preview.budget);
 });
 
+test("preview intent ranks related symbols for a symbol slice", () => {
+  const index = indexedFixture();
+  const target = index.resolveSymbol("PaymentService.retryPayment")[0];
+  assert.ok(target);
+
+  const preview = buildPreview(index, target.id, { intent: "audit" });
+
+  const audit = preview.included.findIndex(
+    (item) => item.symbol === "demo.PaymentService.audit",
+  );
+  const controller = preview.included.findIndex(
+    (item) => item.symbol === "demo.PaymentController.retry",
+  );
+  assert.ok(audit >= 0 && controller >= 0 && audit < controller);
+});
+
 test("preview stays within a strict budget and explains omissions", () => {
   const index = indexedFixture();
   const target = index
@@ -56,6 +72,32 @@ test("preview rejects a budget that cannot hold the target source", () => {
     (error: unknown) =>
       error instanceof WorkflowError && error.code === "BUDGET_TOO_SMALL",
   );
+});
+
+test("preview reports a baseline (whole-file cost) and the reduction the slice achieves", () => {
+  const index = indexedFixture();
+  const preview = buildPreview(index, "explain retryPayment behavior");
+
+  const filePaths = new Set(preview.included.map((item) => item.filePath));
+  const expectedWholeFileTokens = [...filePaths].reduce(
+    (sum, filePath) =>
+      sum + estimateTokens(readFileSync(join(index.root, filePath), "utf8")),
+    0,
+  );
+
+  assert.equal(preview.baseline.files, filePaths.size);
+  assert.equal(preview.baseline.wholeFileTokens, expectedWholeFileTokens);
+  assert.ok(preview.baseline.wholeFileTokens > preview.estimatedTokens);
+  assert.ok(preview.baseline.reduction > 0 && preview.baseline.reduction < 1);
+  assert.equal(
+    preview.baseline.reduction,
+    1 - preview.estimatedTokens / preview.baseline.wholeFileTokens,
+  );
+});
+
+test("baseline reduction is clamped to [0, 1] and never divides by zero for an empty baseline", () => {
+  const preview = buildPreview(indexedFixture(), "explain retryPayment behavior");
+  assert.ok(preview.baseline.reduction >= 0 && preview.baseline.reduction <= 1);
 });
 
 test("preview keeps benchmark implementations out of the developer context path", () => {

@@ -14,6 +14,10 @@ const result = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
 });
 
+export function gitDiffArgs(base?: string, head?: string) {
+  return base || head ? [base ?? "HEAD", ...(head ? [head] : [])] : ["HEAD"];
+}
+
 export async function startMcpServer(
   root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd(),
 ) {
@@ -134,7 +138,7 @@ export async function startMcpServer(
       const target = one(symbol);
       return result({
         refresh: refreshed,
-        ...buildPreview(index, target.id, { budget, depth }),
+        ...buildPreview(index, target.id, { budget, depth, intent }),
         intent,
       });
     },
@@ -149,7 +153,7 @@ export async function startMcpServer(
     },
     async ({ base, head, budget }) => {
       const refreshed = refresh();
-      const args = base || head ? [base ?? "HEAD", head ?? "HEAD"] : ["HEAD"];
+      const args = gitDiffArgs(base, head);
       let diff = "";
       try {
         diff = execFileSync("git", ["diff", ...args], {
