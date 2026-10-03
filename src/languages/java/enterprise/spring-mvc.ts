@@ -20,7 +20,9 @@ const MAPPING_ANNOTATIONS: Record<string, string> = {
   PatchMapping: "PATCH",
 };
 const CONST_RE_TEMPLATE = (name: string) =>
-  new RegExp(`(?:static\\s+final|final\\s+static)\\s+String\\s+${name}\\s*=\\s*"([^"]*)"`);
+  new RegExp(
+    `(?:static\\s+final|final\\s+static)\\s+String\\s+${name}\\s*=\\s*"([^"]*)"`,
+  );
 
 /** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...GetMapping" -> "GetMapping". */
 function bareName(annotation: string): string {
@@ -84,14 +86,20 @@ type PathResolution =
  * - Anything else (a call, a qualified constant, a placeholder) is unresolved;
  *   the raw expression is kept for evidence/targetLabel, never guessed into a path.
  */
-function resolvePath(rawInside: string | undefined, classSource: string): PathResolution {
+function resolvePath(
+  rawInside: string | undefined,
+  classSource: string,
+): PathResolution {
   if (rawInside === undefined) return { kind: "absent" };
   let text = rawInside.trim();
   if (text === "") return { kind: "absent" };
 
   // produces=/consumes=/a bare method= attribute (no value=/path= alongside it) isn't a
   // path argument at all — treat it the same as no path, never as a fabricated route.
-  if (/^(?:produces|consumes|method)\s*=/.test(text) && !/\b(?:value|path)\s*=/.test(text)) {
+  if (
+    /^(?:produces|consumes|method)\s*=/.test(text) &&
+    !/\b(?:value|path)\s*=/.test(text)
+  ) {
     return { kind: "absent" };
   }
 
@@ -124,7 +132,12 @@ function joinPaths(a: string, b: string): string {
   return `${a.replace(/\/+$/, "")}/${b.replace(/^\/+/, "")}`;
 }
 
-function describeAnnotation(name: string, rawInside: string | undefined, kind: string, symbolName: string): string {
+function describeAnnotation(
+  name: string,
+  rawInside: string | undefined,
+  kind: string,
+  symbolName: string,
+): string {
   const args = rawInside !== undefined ? `(${rawInside.trim()})` : "";
   return `@${name}${args} on ${kind} ${symbolName}`;
 }
@@ -145,22 +158,45 @@ function extractSpringMvcRelations(
     if (!methodAnnotationName) continue; // not a handler: no annotation spam for non-mapped methods
 
     const httpMethod = MAPPING_ANNOTATIONS[methodAnnotationName];
-    const methodMatch = header(method).match(mappingArgsRegex(methodAnnotationName));
+    const methodMatch = header(method).match(
+      mappingArgsRegex(methodAnnotationName),
+    );
     const classSourceForConstants = parent?.source ?? "";
-    const methodResolution = resolvePath(methodMatch?.[1], classSourceForConstants);
+    const methodResolution = resolvePath(
+      methodMatch?.[1],
+      classSourceForConstants,
+    );
 
     const evidence: string[] = [];
     let classAnnotationName: string | undefined;
     let classRawInside: string | undefined;
     if (parent) {
-      classAnnotationName = parent.annotations.map(bareName).find((name) => name in MAPPING_ANNOTATIONS);
+      classAnnotationName = parent.annotations
+        .map(bareName)
+        .find((name) => name in MAPPING_ANNOTATIONS);
       if (classAnnotationName) {
-        const classMatch = header(parent).match(mappingArgsRegex(classAnnotationName));
+        const classMatch = header(parent).match(
+          mappingArgsRegex(classAnnotationName),
+        );
         classRawInside = classMatch?.[1];
-        evidence.push(describeAnnotation(classAnnotationName, classRawInside, "class", parent.name));
+        evidence.push(
+          describeAnnotation(
+            classAnnotationName,
+            classRawInside,
+            "class",
+            parent.name,
+          ),
+        );
       }
     }
-    evidence.push(describeAnnotation(methodAnnotationName, methodMatch?.[1], "method", method.name));
+    evidence.push(
+      describeAnnotation(
+        methodAnnotationName,
+        methodMatch?.[1],
+        "method",
+        method.name,
+      ),
+    );
 
     let confidence: EnterpriseRelationConfidence;
     let targetLabel: string | undefined;
@@ -176,8 +212,10 @@ function extractSpringMvcRelations(
       confidence = "unresolved";
       targetLabel = classResolution.raw;
     } else {
-      const classPath = classResolution.kind === "absent" ? "" : classResolution.value;
-      const methodPath = methodResolution.kind === "absent" ? "" : methodResolution.value;
+      const classPath =
+        classResolution.kind === "absent" ? "" : classResolution.value;
+      const methodPath =
+        methodResolution.kind === "absent" ? "" : methodResolution.value;
       const usedConstOrArrayHop =
         classResolution.kind === "const" ||
         methodResolution.kind === "const" ||
@@ -187,7 +225,8 @@ function extractSpringMvcRelations(
       // never claim "exact" for a route that has no actual path evidence behind it.
       const noPathAtAll = classPath === "" && methodPath === "";
       confidence = usedConstOrArrayHop || noPathAtAll ? "probable" : "exact";
-      targetLabel = `${httpMethod} ${joinPaths(classPath, methodPath)}`.trimEnd();
+      targetLabel =
+        `${httpMethod} ${joinPaths(classPath, methodPath)}`.trimEnd();
     }
 
     relations.push({

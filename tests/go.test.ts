@@ -25,21 +25,42 @@ function indexedGoProject(files: Files): { root: string; index: ProjectIndex } {
 }
 
 test("an embedded field is marked metadata.embedded; a coincidentally same-named explicit field is not", () => {
-  const parsed = parseGo("a.go", `package main\n\ntype Base struct{}\ntype Derived struct {\n\tBase\n}\ntype Other struct {\n\tBase Base\n}\n`);
-  const embedded = parsed.symbols.find((s) => s.kind === "field" && s.name === "Base" && s.parentId === parsed.symbols.find((p) => p.name === "Derived")!.id)!;
-  const explicit = parsed.symbols.find((s) => s.kind === "field" && s.name === "Base" && s.parentId === parsed.symbols.find((p) => p.name === "Other")!.id)!;
+  const parsed = parseGo(
+    "a.go",
+    `package main\n\ntype Base struct{}\ntype Derived struct {\n\tBase\n}\ntype Other struct {\n\tBase Base\n}\n`,
+  );
+  const embedded = parsed.symbols.find(
+    (s) =>
+      s.kind === "field" &&
+      s.name === "Base" &&
+      s.parentId === parsed.symbols.find((p) => p.name === "Derived")!.id,
+  )!;
+  const explicit = parsed.symbols.find(
+    (s) =>
+      s.kind === "field" &&
+      s.name === "Base" &&
+      s.parentId === parsed.symbols.find((p) => p.name === "Other")!.id,
+  )!;
   assert.equal(embedded.metadata?.embedded, true);
   assert.equal(explicit.metadata?.embedded, undefined);
 });
 
 test("interface method names are recorded, excluding an embedded interface", () => {
-  const parsed = parseGo("a.go", `package main\n\nimport "io"\n\ntype Greeter interface {\n\tGreet() string\n\tio.Reader\n}\n`);
-  const iface = parsed.symbols.find((s) => s.kind === "interface" && s.name === "Greeter")!;
+  const parsed = parseGo(
+    "a.go",
+    `package main\n\nimport "io"\n\ntype Greeter interface {\n\tGreet() string\n\tio.Reader\n}\n`,
+  );
+  const iface = parsed.symbols.find(
+    (s) => s.kind === "interface" && s.name === "Greeter",
+  )!;
   assert.deepEqual(iface.metadata?.interfaceMethods, ["Greet"]);
 });
 
 test("a package-level function produces a 'function' symbol", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`,
+  );
   const fn = parsed.symbols.find((s) => s.name === "Add");
   assert.ok(fn, "expected a symbol for Add");
   assert.equal(fn!.kind, "function");
@@ -71,13 +92,19 @@ test("a method whose receiver struct is in another file keeps supertypes but has
   const source = `package main\n\nfunc (u *User) Validate() error {\n\treturn nil\n}\n`;
   const parsed = parseGo("user_methods.go", source);
   const method = parsed.symbols.find((s) => s.name === "Validate");
-  assert.ok(method, "expected a symbol for Validate even without the struct in this file");
+  assert.ok(
+    method,
+    "expected a symbol for Validate even without the struct in this file",
+  );
   assert.deepEqual(method!.supertypes, ["User"]);
   assert.equal(method!.parentId, undefined);
 });
 
 test("a generic function still produces a correctly kinded function symbol", () => {
-  const parsed = parseGo("generic.go", `package main\n\nfunc Add[T any](a, b T) T {\n\treturn a\n}\n`);
+  const parsed = parseGo(
+    "generic.go",
+    `package main\n\nfunc Add[T any](a, b T) T {\n\treturn a\n}\n`,
+  );
   const fn = parsed.symbols.find((s) => s.name === "Add");
   assert.ok(fn, "expected a symbol for the generic function Add");
   assert.equal(fn!.kind, "function");
@@ -99,8 +126,12 @@ test("a struct's fields each produce their own 'field' symbol", () => {
   const source = `package main\n\ntype User struct {\n\tName string\n\tAge  int\n}\n`;
   const parsed = parseGo("user.go", source);
   const struct = parsed.symbols.find((s) => s.name === "User");
-  const nameField = parsed.symbols.find((s) => s.kind === "field" && s.name === "Name");
-  const ageField = parsed.symbols.find((s) => s.kind === "field" && s.name === "Age");
+  const nameField = parsed.symbols.find(
+    (s) => s.kind === "field" && s.name === "Name",
+  );
+  const ageField = parsed.symbols.find(
+    (s) => s.kind === "field" && s.name === "Age",
+  );
   assert.ok(nameField && ageField, "expected both fields as symbols");
   assert.equal(nameField!.parentId, struct!.id);
   assert.equal(ageField!.parentId, struct!.id);
@@ -111,13 +142,17 @@ test("an embedded field (no explicit name) uses its type name as the field name"
   const parsed = parseGo("derived.go", source);
   const derived = parsed.symbols.find((s) => s.name === "Derived");
   const embedded = parsed.symbols.find(
-    (s) => s.kind === "field" && s.name === "Base" && s.parentId === derived!.id,
+    (s) =>
+      s.kind === "field" && s.name === "Base" && s.parentId === derived!.id,
   );
   assert.ok(embedded, "expected an embedded 'Base' field on Derived");
 });
 
 test("an interface type produces an 'interface' symbol", () => {
-  const parsed = parseGo("greeter.go", `package main\n\ntype Greeter interface {\n\tGreet() string\n}\n`);
+  const parsed = parseGo(
+    "greeter.go",
+    `package main\n\ntype Greeter interface {\n\tGreet() string\n}\n`,
+  );
   const iface = parsed.symbols.find((s) => s.name === "Greeter");
   assert.ok(iface, "expected a symbol for Greeter");
   assert.equal(iface!.kind, "interface");
@@ -183,36 +218,56 @@ test("a pointer-receiver method on a generic struct resolves parentId and supert
 test("same-named methods on different structs in one file get distinct, receiver-qualified ids", () => {
   const source = `package main\n\ntype A struct {}\n\nfunc (a A) String() string {\n\treturn "a"\n}\n\ntype B struct {}\n\nfunc (b B) String() string {\n\treturn "b"\n}\n`;
   const parsed = parseGo("stringers.go", source);
-  const methods = parsed.symbols.filter((s) => s.kind === "method" && s.name === "String");
+  const methods = parsed.symbols.filter(
+    (s) => s.kind === "method" && s.name === "String",
+  );
   assert.equal(methods.length, 2, "expected two String() methods");
   const [first, second] = methods;
   assert.notEqual(first!.id, second!.id);
-  assert.ok(first!.id.includes("A."), `expected ${first!.id} to reference receiver A`);
-  assert.ok(second!.id.includes("B."), `expected ${second!.id} to reference receiver B`);
+  assert.ok(
+    first!.id.includes("A."),
+    `expected ${first!.id} to reference receiver A`,
+  );
+  assert.ok(
+    second!.id.includes("B."),
+    `expected ${second!.id} to reference receiver B`,
+  );
 });
 
 test("a plain import produces a namespace ImportRecord", () => {
-  const parsed = parseGo("main.go", `package main\n\nimport "fmt"\n\nfunc main() {}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nimport "fmt"\n\nfunc main() {}\n`,
+  );
   const imp = parsed.imports.find((i) => i.module === "fmt");
   assert.ok(imp, "expected an import record for fmt");
   assert.equal(imp!.kind, "namespace");
 });
 
 test("an aliased import carries its alias as localName", () => {
-  const parsed = parseGo("main.go", `package main\n\nimport f "fmt"\n\nfunc main() {}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nimport f "fmt"\n\nfunc main() {}\n`,
+  );
   const imp = parsed.imports.find((i) => i.module === "fmt");
   assert.equal(imp!.localName, "f");
 });
 
 test("a blank import is a side-effect import", () => {
-  const parsed = parseGo("main.go", `package main\n\nimport _ "net/http/pprof"\n\nfunc main() {}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nimport _ "net/http/pprof"\n\nfunc main() {}\n`,
+  );
   const imp = parsed.imports.find((i) => i.module === "net/http/pprof");
   assert.ok(imp, "expected an import record");
   assert.equal(imp!.kind, "side-effect");
 });
 
 test("a dot import is a wildcard namespace import with no localName", () => {
-  const parsed = parseGo("main.go", `package main\n\nimport . "math"\n\nfunc main() {}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nimport . "math"\n\nfunc main() {}\n`,
+  );
   const imp = parsed.imports.find((i) => i.module === "math");
   assert.ok(imp, "expected an import record");
   assert.equal(imp!.wildcard, true);
@@ -224,17 +279,26 @@ test("a grouped import block produces one record per spec", () => {
   const parsed = parseGo("main.go", source);
   const fmtImp = parsed.imports.find((i) => i.module === "fmt");
   const osImp = parsed.imports.find((i) => i.module === "os");
-  assert.ok(fmtImp && osImp, "expected both fmt and os as separate import records");
+  assert.ok(
+    fmtImp && osImp,
+    "expected both fmt and os as separate import records",
+  );
 });
 
 test("an exported function has 'exported' in its modifiers", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n`,
+  );
   const fn = parsed.symbols.find((s) => s.name === "Add");
   assert.ok(fn!.modifiers.includes("exported"));
 });
 
 test("an unexported function does not have 'exported' in its modifiers", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc add(a, b int) int {\n\treturn a + b\n}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc add(a, b int) int {\n\treturn a + b\n}\n`,
+  );
   const fn = parsed.symbols.find((s) => s.name === "add");
   assert.equal(fn!.modifiers.includes("exported"), false);
 });
@@ -242,15 +306,24 @@ test("an unexported function does not have 'exported' in its modifiers", () => {
 test("a struct's exported and unexported fields are marked independently", () => {
   const source = `package main\n\ntype User struct {\n\tName string\n\tsecret string\n}\n`;
   const parsed = parseGo("user.go", source);
-  const nameField = parsed.symbols.find((s) => s.kind === "field" && s.name === "Name");
-  const secretField = parsed.symbols.find((s) => s.kind === "field" && s.name === "secret");
+  const nameField = parsed.symbols.find(
+    (s) => s.kind === "field" && s.name === "Name",
+  );
+  const secretField = parsed.symbols.find(
+    (s) => s.kind === "field" && s.name === "secret",
+  );
   assert.ok(nameField!.modifiers.includes("exported"));
   assert.equal(secretField!.modifiers.includes("exported"), false);
 });
 
 test("a direct call inside a function body produces an unresolved CallEdge", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc helper() {}\n\nfunc main() {\n\thelper()\n}\n`);
-  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc helper() {}\n\nfunc main() {\n\thelper()\n}\n`,
+  );
+  const main = parsed.symbols.find(
+    (s) => s.name === "main" && s.kind === "function",
+  )!;
   const call = parsed.calls.find((c) => c.calleeName === "helper");
   assert.ok(call, "expected a call edge for helper");
   assert.equal(call!.callerId, main.id);
@@ -275,13 +348,19 @@ test("a selector call with a chained (non-identifier) operand leaves receiverTex
 });
 
 test("a call wrapped in a go statement is tagged as a goroutine launch", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc helper() {}\n\nfunc main() {\n\tgo helper()\n}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc helper() {}\n\nfunc main() {\n\tgo helper()\n}\n`,
+  );
   const call = parsed.calls.find((c) => c.calleeName === "helper");
   assert.ok(call!.evidence.includes("goroutine launch"));
 });
 
 test("a call wrapped in a defer statement is tagged as deferred", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc cleanup() {}\n\nfunc main() {\n\tdefer cleanup()\n}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc cleanup() {}\n\nfunc main() {\n\tdefer cleanup()\n}\n`,
+  );
   const call = parsed.calls.find((c) => c.calleeName === "cleanup");
   assert.ok(call!.evidence.includes("deferred call"));
 });
@@ -292,12 +371,20 @@ test("a call nested inside a go statement's own call arguments is NOT itself tag
   const outerCall = parsed.calls.find((c) => c.calleeName === "outer");
   const innerCall = parsed.calls.find((c) => c.calleeName === "inner");
   assert.ok(outerCall!.evidence.includes("goroutine launch"));
-  assert.ok(!innerCall!.evidence.includes("goroutine launch"), "the nested call must not inherit the goroutine tag");
+  assert.ok(
+    !innerCall!.evidence.includes("goroutine launch"),
+    "the nested call must not inherit the goroutine tag",
+  );
 });
 
 test("a call inside a nested if block still attributes to the enclosing function", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc helper() {}\n\nfunc main() {\n\tif true {\n\t\thelper()\n\t}\n}\n`);
-  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc helper() {}\n\nfunc main() {\n\tif true {\n\t\thelper()\n\t}\n}\n`,
+  );
+  const main = parsed.symbols.find(
+    (s) => s.name === "main" && s.kind === "function",
+  )!;
   const call = parsed.calls.find((c) => c.calleeName === "helper");
   assert.equal(call!.callerId, main.id);
 });
@@ -305,7 +392,9 @@ test("a call inside a nested if block still attributes to the enclosing function
 test("a call inside a closure still attributes to the enclosing named function", () => {
   const source = `package main\n\nfunc closureCall() {}\n\nfunc main() {\n\tfn := func() {\n\t\tclosureCall()\n\t}\n\tfn()\n}\n`;
   const parsed = parseGo("main.go", source);
-  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const main = parsed.symbols.find(
+    (s) => s.name === "main" && s.kind === "function",
+  )!;
   const call = parsed.calls.find((c) => c.calleeName === "closureCall");
   assert.equal(call!.callerId, main.id);
 });
@@ -313,13 +402,18 @@ test("a call inside a closure still attributes to the enclosing named function",
 test("a call inside a method body attributes to the method symbol", () => {
   const source = `package main\n\nfunc helper() {}\n\ntype User struct{}\nfunc (u *User) Save() {\n\thelper()\n}\n`;
   const parsed = parseGo("main.go", source);
-  const method = parsed.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const method = parsed.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = parsed.calls.find((c) => c.calleeName === "helper");
   assert.equal(call!.callerId, method.id);
 });
 
 test("argumentCount is correctly computed for a multi-argument call", () => {
-  const parsed = parseGo("main.go", `package main\n\nfunc add(a, b, c int) int { return a + b + c }\n\nfunc main() {\n\tadd(1, 2, 3)\n}\n`);
+  const parsed = parseGo(
+    "main.go",
+    `package main\n\nfunc add(a, b, c int) int { return a + b + c }\n\nfunc main() {\n\tadd(1, 2, 3)\n}\n`,
+  );
   const call = parsed.calls.find((c) => c.calleeName === "add");
   assert.equal(call!.argumentCount, 3);
 });
@@ -327,11 +421,20 @@ test("argumentCount is correctly computed for a multi-argument call", () => {
 test("an immediately-invoked anonymous function launched as a goroutine produces no garbage edge, but its nested call is still found", () => {
   const source = `package main\n\nfunc helper() {}\n\nfunc main() {\n\tgo func() {\n\t\thelper()\n\t}()\n}\n`;
   const parsed = parseGo("main.go", source);
-  const main = parsed.symbols.find((s) => s.name === "main" && s.kind === "function")!;
+  const main = parsed.symbols.find(
+    (s) => s.name === "main" && s.kind === "function",
+  )!;
   const emptyNameCall = parsed.calls.find((c) => c.calleeName === "");
-  assert.equal(emptyNameCall, undefined, "no call edge should be emitted for the unnamed IIFE invocation");
+  assert.equal(
+    emptyNameCall,
+    undefined,
+    "no call edge should be emitted for the unnamed IIFE invocation",
+  );
   const helperCall = parsed.calls.find((c) => c.calleeName === "helper");
-  assert.ok(helperCall, "expected a call edge for helper nested inside the closure");
+  assert.ok(
+    helperCall,
+    "expected a call edge for helper nested inside the closure",
+  );
   assert.equal(helperCall!.callerId, main.id);
 });
 
@@ -375,7 +478,9 @@ test("a bare call to a name that only exists as a method (not a function) does N
     "a.go": `package main\n\nfunc main() {\n\tSave()\n}\n`,
     "b.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n`,
   });
-  const call = index.calls.find((c) => c.calleeName === "Save" && !c.receiverText)!;
+  const call = index.calls.find(
+    (c) => c.calleeName === "Save" && !c.receiverText,
+  )!;
   assert.equal(call.resolvedTargetId, undefined);
   assert.equal(call.confidence, "unresolved");
   rmSync(root, { recursive: true, force: true });
@@ -388,8 +493,12 @@ test("a bare call resolves exact to the function when a same-named method also e
     "a.go": `package main\n\nfunc Close() {}\n\nfunc main() {\n\tClose()\n}\n`,
     "b.go": `package main\n\ntype Conn struct{}\nfunc (c *Conn) Close() {}\n`,
   });
-  const fn = index.symbols.find((s) => s.kind === "function" && s.name === "Close")!;
-  const call = index.calls.find((c) => c.calleeName === "Close" && !c.receiverText)!;
+  const fn = index.symbols.find(
+    (s) => s.kind === "function" && s.name === "Close",
+  )!;
+  const call = index.calls.find(
+    (c) => c.calleeName === "Close" && !c.receiverText,
+  )!;
   assert.equal(call.resolvedTargetId, fn.id);
   assert.equal(call.confidence, "exact");
   assert.equal(call.resolutionKind, "same-file");
@@ -462,7 +571,9 @@ test("a method call via a := composite-literal-typed local variable resolves exa
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n\nfunc main() {\n\tu := &User{}\n\tu.Save()\n}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   assert.equal(call.resolutionKind, "same-type");
@@ -473,7 +584,9 @@ test("a method call via a var-declared local variable resolves exact", () => {
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Save() {}\n\nfunc main() {\n\tvar u *User\n\tu.Save()\n}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   rmSync(root, { recursive: true, force: true });
@@ -483,7 +596,9 @@ test("a method call via a New*-constructor-typed local variable resolves exact",
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype User struct{}\nfunc NewUser() *User { return &User{} }\nfunc (u *User) Save() {}\n\nfunc main() {\n\tu := NewUser()\n\tu.Save()\n}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   rmSync(root, { recursive: true, force: true });
@@ -493,7 +608,9 @@ test("a method call using the enclosing method's own receiver variable resolves 
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype User struct{}\nfunc (u *User) Validate() {\n\tu.other()\n}\nfunc (u *User) other() {}\n`,
   });
-  const other = index.symbols.find((s) => s.kind === "method" && s.name === "other")!;
+  const other = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "other",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "other")!;
   assert.equal(call.resolvedTargetId, other.id);
   rmSync(root, { recursive: true, force: true });
@@ -512,7 +629,9 @@ test("a method call resolves to an embedded type's method when the outer struct 
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Base struct{}\nfunc (b *Base) Greet() {}\n\ntype Derived struct {\n\tBase\n}\n\nfunc main() {\n\td := &Derived{}\n\td.Greet()\n}\n`,
   });
-  const greet = index.symbols.find((s) => s.kind === "method" && s.name === "Greet")!;
+  const greet = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Greet",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Greet")!;
   assert.equal(call.resolvedTargetId, greet.id);
   rmSync(root, { recursive: true, force: true });
@@ -522,7 +641,12 @@ test("a method defined on both the outer struct and an embedded type resolves to
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Base struct{}\nfunc (b *Base) Greet() {}\n\ntype Derived struct {\n\tBase\n}\nfunc (d *Derived) Greet() {}\n\nfunc main() {\n\td := &Derived{}\n\td.Greet()\n}\n`,
   });
-  const derivedGreet = index.symbols.find((s) => s.kind === "method" && s.name === "Greet" && s.supertypes?.includes("Derived"))!;
+  const derivedGreet = index.symbols.find(
+    (s) =>
+      s.kind === "method" &&
+      s.name === "Greet" &&
+      s.supertypes?.includes("Derived"),
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Greet")!;
   assert.equal(call.resolvedTargetId, derivedGreet.id);
   rmSync(root, { recursive: true, force: true });
@@ -541,7 +665,9 @@ test("a multi-level embedding chain resolves through two promotion levels", () =
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype C struct{}\nfunc (c *C) Deep() {}\ntype B struct {\n\tC\n}\ntype A struct {\n\tB\n}\n\nfunc main() {\n\ta := &A{}\n\ta.Deep()\n}\n`,
   });
-  const deep = index.symbols.find((s) => s.kind === "method" && s.name === "Deep")!;
+  const deep = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Deep",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Deep")!;
   assert.equal(call.resolvedTargetId, deep.id);
   rmSync(root, { recursive: true, force: true });
@@ -551,7 +677,9 @@ test("a struct whose method set (including promoted methods) satisfies an interf
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Base struct{}\nfunc (b *Base) Greet() string { return "" }\n\ntype Greeter interface {\n\tGreet() string\n}\n\ntype Derived struct {\n\tBase\n}\n`,
   });
-  const derived = index.symbols.find((s) => s.kind === "class" && s.name === "Derived")!;
+  const derived = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Derived",
+  )!;
   assert.ok(derived.supertypes?.includes("Greeter"));
   rmSync(root, { recursive: true, force: true });
 });
@@ -560,7 +688,9 @@ test("a struct missing one of an interface's methods does NOT get it in supertyp
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Greeter interface {\n\tGreet() string\n\tFarewell() string\n}\n\ntype Partial struct{}\nfunc (p *Partial) Greet() string { return "" }\n`,
   });
-  const partial = index.symbols.find((s) => s.kind === "class" && s.name === "Partial")!;
+  const partial = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Partial",
+  )!;
   assert.equal(partial.supertypes?.includes("Greeter") ?? false, false);
   rmSync(root, { recursive: true, force: true });
 });
@@ -570,8 +700,13 @@ test("rebuilding an unchanged project twice does not duplicate supertypes entrie
     "a.go": `package main\n\ntype Greeter interface {\n\tGreet() string\n}\n\ntype Greet1 struct{}\nfunc (g *Greet1) Greet() string { return "" }\n`,
   });
   index.rebuild();
-  const struct = index.symbols.find((s) => s.kind === "class" && s.name === "Greet1")!;
-  assert.equal(struct.supertypes?.filter((name) => name === "Greeter").length, 1);
+  const struct = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Greet1",
+  )!;
+  assert.equal(
+    struct.supertypes?.filter((name) => name === "Greeter").length,
+    1,
+  );
   rmSync(root, { recursive: true, force: true });
 });
 
@@ -580,7 +715,9 @@ test("a struct in one package satisfies an interface declared in a different pac
     "contract/contract.go": `package contract\n\ntype Greeter interface {\n\tGreet() string\n}\n`,
     "impl/impl.go": `package impl\n\ntype Mock struct{}\nfunc (m *Mock) Greet() string { return "" }\n`,
   });
-  const mock = index.symbols.find((s) => s.kind === "class" && s.name === "Mock")!;
+  const mock = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Mock",
+  )!;
   assert.ok(mock.supertypes?.includes("Greeter"));
   rmSync(root, { recursive: true, force: true });
 });
@@ -591,7 +728,9 @@ test("a method call via a package-qualified composite-literal-typed local variab
     "store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) Save() {}\n`,
     "main.go": `package main\n\nimport "example.com/proj/store"\n\nfunc main() {\n\ts := &store.Store{}\n\ts.Save()\n}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   assert.equal(call.resolutionKind, "same-type");
@@ -604,7 +743,9 @@ test("a method call via a package-qualified var-declared local variable resolves
     "store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) Save() {}\n`,
     "main.go": `package main\n\nimport "example.com/proj/store"\n\nfunc main() {\n\tvar s *store.Store\n\ts.Save()\n}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   rmSync(root, { recursive: true, force: true });
@@ -669,7 +810,9 @@ test("go.work: a method call via a package-qualified variable resolves across wo
     "lib/go.mod": `module example.com/lib\n\ngo 1.21\n`,
     "lib/store/store.go": `package store\n\ntype Store struct{}\nfunc (s *Store) Save() {}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   rmSync(root, { recursive: true, force: true });
@@ -704,7 +847,9 @@ test("interface satisfaction requires matching method SIGNATURES, not just names
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Greeter interface {\n\tGreet(name string) string\n}\n\ntype Mismatch struct{}\nfunc (m *Mismatch) Greet(id int) string { return "" }\n`,
   });
-  const mismatch = index.symbols.find((s) => s.kind === "class" && s.name === "Mismatch")!;
+  const mismatch = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Mismatch",
+  )!;
   assert.equal(mismatch.supertypes?.includes("Greeter") ?? false, false);
   rmSync(root, { recursive: true, force: true });
 });
@@ -713,7 +858,9 @@ test("interface satisfaction accepts a matching method signature with different 
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Greeter interface {\n\tGreet(name string) string\n}\n\ntype Impl struct{}\nfunc (i *Impl) Greet(whom string) string { return "" }\n`,
   });
-  const impl = index.symbols.find((s) => s.kind === "class" && s.name === "Impl")!;
+  const impl = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Impl",
+  )!;
   assert.ok(impl.supertypes?.includes("Greeter"));
   rmSync(root, { recursive: true, force: true });
 });
@@ -722,7 +869,9 @@ test("interface satisfaction rejects a method matching only on return type, not 
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Adder interface {\n\tAdd(a, b int) int\n}\n\ntype Wrong struct{}\nfunc (w *Wrong) Add(a int) int { return a }\n`,
   });
-  const wrong = index.symbols.find((s) => s.kind === "class" && s.name === "Wrong")!;
+  const wrong = index.symbols.find(
+    (s) => s.kind === "class" && s.name === "Wrong",
+  )!;
   assert.equal(wrong.supertypes?.includes("Adder") ?? false, false);
   rmSync(root, { recursive: true, force: true });
 });
@@ -731,7 +880,9 @@ test("a method call via a New*-constructor-typed local variable resolves exact e
   const { root, index } = indexedGoProject({
     "a.go": `package main\n\ntype Bar struct{}\nfunc (b *Bar) Save() {}\nfunc NewFoo() *Bar { return &Bar{} }\n\nfunc main() {\n\tx := NewFoo()\n\tx.Save()\n}\n`,
   });
-  const save = index.symbols.find((s) => s.kind === "method" && s.name === "Save")!;
+  const save = index.symbols.find(
+    (s) => s.kind === "method" && s.name === "Save",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "Save")!;
   assert.equal(call.resolvedTargetId, save.id);
   rmSync(root, { recursive: true, force: true });

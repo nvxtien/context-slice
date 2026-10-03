@@ -9,14 +9,22 @@ import { ProjectIndex } from "../src/indexer/index.js";
 const workspace = process.cwd();
 const tsx = join(workspace, "node_modules/.bin/tsx");
 const cli = join(workspace, "src/cli.ts");
-const gitEnv = { GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.com", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.com" };
+const gitEnv = {
+  GIT_AUTHOR_NAME: "t",
+  GIT_AUTHOR_EMAIL: "t@example.com",
+  GIT_COMMITTER_NAME: "t",
+  GIT_COMMITTER_EMAIL: "t@example.com",
+};
 
 function rustRepository() {
   const root = mkdtempSync(join(tmpdir(), "cs-rust-product-"));
   cpSync(join(workspace, "tests/fixtures/rust"), root, { recursive: true });
   spawnSync("git", ["init", "-q"], { cwd: root });
   spawnSync("git", ["add", "-A"], { cwd: root });
-  spawnSync("git", ["commit", "-q", "-m", "init"], { cwd: root, env: { ...process.env, ...gitEnv } });
+  spawnSync("git", ["commit", "-q", "-m", "init"], {
+    cwd: root,
+    env: { ...process.env, ...gitEnv },
+  });
   return root;
 }
 
@@ -27,8 +35,14 @@ function run(args: string[], cwd: string) {
 test("Rust and Python sources coexist without id collisions", () => {
   const root = mkdtempSync(join(tmpdir(), "cs-mixed-"));
   const skip = (s: string) => !s.includes(".context-slice");
-  cpSync(join(workspace, "tests/fixtures/rust"), join(root, "rs"), { recursive: true, filter: skip });
-  cpSync(join(workspace, "tests/fixtures/python"), join(root, "py"), { recursive: true, filter: skip });
+  cpSync(join(workspace, "tests/fixtures/rust"), join(root, "rs"), {
+    recursive: true,
+    filter: skip,
+  });
+  cpSync(join(workspace, "tests/fixtures/python"), join(root, "py"), {
+    recursive: true,
+    filter: skip,
+  });
   const index = new ProjectIndex(root);
   index.rebuild();
   const ids = index.symbols.map((s) => s.id);
@@ -59,13 +73,19 @@ test("preview returns Rust context and leaves git status clean apart from the ca
   const root = rustRepository();
   assert.equal(run(["init"], root).status, 0);
 
-  const preview = run(["preview", "explain create_order behavior", "--explain"], root);
+  const preview = run(
+    ["preview", "explain create_order behavior", "--explain"],
+    root,
+  );
 
   assert.equal(preview.status, 0, preview.stderr);
   assert.match(preview.stdout, /Target: functions::create_order/);
   assert.match(preview.stdout, /pub fn create_order/);
 
-  const status = spawnSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8" });
+  const status = spawnSync("git", ["status", "--porcelain"], {
+    cwd: root,
+    encoding: "utf8",
+  });
   assert.equal(status.stdout.trim(), "");
 });
 
@@ -159,13 +179,17 @@ test(
       const callersBody = JSON.parse(callers.result.content[0].text);
       assert.ok(callersBody.callers.length >= 1);
       assert.ok(
-        callersBody.callers.every((c: any) => c.filePath === "snapshot_calls.rs"),
+        callersBody.callers.every(
+          (c: any) => c.filePath === "snapshot_calls.rs",
+        ),
       );
 
       assert.equal(mcp.invalidStdout.length, 0, mcp.invalidStdout.join("\n"));
     } finally {
       mcp.child.kill("SIGTERM");
-      await new Promise<void>((resolve) => mcp.child.once("exit", () => resolve()));
+      await new Promise<void>((resolve) =>
+        mcp.child.once("exit", () => resolve()),
+      );
     }
   },
 );
@@ -175,7 +199,8 @@ test("a >40KB Rust file with a syntax error gets parseError without aborting sib
   cpSync(join(workspace, "tests/fixtures/rust"), root, { recursive: true });
 
   let big = "";
-  for (let i = 0; i < 2000; i++) big += `pub fn f${i}(x: u32) -> u32 { x + ${i} }\n`;
+  for (let i = 0; i < 2000; i++)
+    big += `pub fn f${i}(x: u32) -> u32 { x + ${i} }\n`;
   big += "pub fn broken(x: u32) -> u32 { x +\n"; // deliberately unclosed
   assert.ok(Buffer.byteLength(big) > 40_000);
   writeFileSync(join(root, "big.rs"), big);
@@ -185,5 +210,7 @@ test("a >40KB Rust file with a syntax error gets parseError without aborting sib
 
   assert.equal(summary.parseErrors, 1);
   assert.ok(index.symbols.some((s) => s.filePath === "functions.rs"));
-  assert.ok(index.symbols.some((s) => s.filePath === "big.rs" && s.name === "f0"));
+  assert.ok(
+    index.symbols.some((s) => s.filePath === "big.rs" && s.name === "f0"),
+  );
 });

@@ -1,13 +1,17 @@
 import type { SymbolRecord } from "../../../types/model.js";
 import type { EnterpriseRelation } from "../../../types/enterprise.js";
-import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./registry.js";
+import {
+  registerEnterpriseExtractor,
+  registerEnterpriseResolver,
+} from "./registry.js";
 
 // Two-phase like jpa-entity.ts: provisional PERSISTS_ENTITY carries the raw entity simple
 // name in targetLabel; this file's own resolver (separate from jpa-entity's, each file
 // self-contained) applies the unique-simple-name rule. REPOSITORY_QUERY is a structural
 // fact about the method itself, so it is emitted "exact" and never touched by the resolver.
 
-const BASE_RE = /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
+const BASE_RE =
+  /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
 const DERIVED_RE = /^(?:find|exists|delete|count)By(?=[A-Z])/;
 
 /** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Query" -> "Query". */
@@ -16,7 +20,10 @@ function bareName(annotation: string): string {
 }
 
 /** Top-level type arguments of the `<...>` opening at `open`, or undefined if unbalanced. */
-function typeArguments(text: string, open: number): { args: string[]; end: number } | undefined {
+function typeArguments(
+  text: string,
+  open: number,
+): { args: string[]; end: number } | undefined {
   const args: string[] = [];
   let depth = 0;
   let start = open + 1;
@@ -35,8 +42,13 @@ function typeArguments(text: string, open: number): { args: string[]; end: numbe
 }
 
 /** First known base-repository supertype with exactly two plain type arguments. */
-function repositoryShape(iface: SymbolRecord): { matched: string; entity: string; id: string } | undefined {
-  const header = iface.source.slice(0, iface.source.includes("{") ? iface.source.indexOf("{") : undefined);
+function repositoryShape(
+  iface: SymbolRecord,
+): { matched: string; entity: string; id: string } | undefined {
+  const header = iface.source.slice(
+    0,
+    iface.source.includes("{") ? iface.source.indexOf("{") : undefined,
+  );
   for (const m of header.matchAll(BASE_RE)) {
     const open = (m.index ?? 0) + m[0].length - 1;
     const parsed = typeArguments(header, open);
@@ -72,7 +84,8 @@ function derivedProperties(name: string): string[] | undefined {
  * fully-qualified annotation name.
  */
 function queryText(method: SymbolRecord): string | undefined {
-  if (!method.annotations.some((a) => bareName(a) === "Query")) return undefined;
+  if (!method.annotations.some((a) => bareName(a) === "Query"))
+    return undefined;
   const at = method.source.search(/@(?:[\w.]+\.)?Query\s*\(/);
   if (at === -1) return undefined;
   const open = method.source.indexOf("(", at);
@@ -83,12 +96,17 @@ function queryText(method: SymbolRecord): string | undefined {
     if (ch === '"' && method.source[i - 1] !== "\\") inString = !inString;
     if (inString) continue;
     if (ch === "(") depth++;
-    else if (ch === ")" && --depth === 0) return method.source.slice(open + 1, i).trim();
+    else if (ch === ")" && --depth === 0)
+      return method.source.slice(open + 1, i).trim();
   }
   return undefined;
 }
 
-function extractSpringData(symbols: SymbolRecord[], filePath: string, _source: string): EnterpriseRelation[] {
+function extractSpringData(
+  symbols: SymbolRecord[],
+  filePath: string,
+  _source: string,
+): EnterpriseRelation[] {
   const relations: EnterpriseRelation[] = [];
   const repositories = new Set<string>();
   for (const iface of symbols) {
@@ -108,7 +126,12 @@ function extractSpringData(symbols: SymbolRecord[], filePath: string, _source: s
     });
   }
   for (const method of symbols) {
-    if (method.kind !== "method" || !method.parentId || !repositories.has(method.parentId)) continue;
+    if (
+      method.kind !== "method" ||
+      !method.parentId ||
+      !repositories.has(method.parentId)
+    )
+      continue;
     const properties = derivedProperties(method.name);
     const query = queryText(method);
     if (!properties && query === undefined) continue;
@@ -116,9 +139,14 @@ function extractSpringData(symbols: SymbolRecord[], filePath: string, _source: s
       kind: "REPOSITORY_QUERY",
       family: "spring-data-jpa",
       sourceSymbolId: method.id,
-      targetLabel: properties ? `${method.name.match(DERIVED_RE)![0]}: ${properties.map((p) => p.slice(10)).join(", ")}` : "query",
+      targetLabel: properties
+        ? `${method.name.match(DERIVED_RE)![0]}: ${properties.map((p) => p.slice(10)).join(", ")}`
+        : "query",
       confidence: "exact",
-      evidence: [...(properties ?? []), ...(query !== undefined ? [query] : [])],
+      evidence: [
+        ...(properties ?? []),
+        ...(query !== undefined ? [query] : []),
+      ],
       range: method.range,
       filePath,
     });
@@ -127,15 +155,28 @@ function extractSpringData(symbols: SymbolRecord[], filePath: string, _source: s
 }
 
 /** Same rule as DI bean identity: 1 match exact, 0 dropped, 2+ unresolved (never guessed). */
-function resolvePersistsEntity(relations: EnterpriseRelation[], allSymbols: SymbolRecord[]): EnterpriseRelation[] {
-  const projectTypes = allSymbols.filter((s) => s.kind === "class" || s.kind === "interface");
+function resolvePersistsEntity(
+  relations: EnterpriseRelation[],
+  allSymbols: SymbolRecord[],
+): EnterpriseRelation[] {
+  const projectTypes = allSymbols.filter(
+    (s) => s.kind === "class" || s.kind === "interface",
+  );
   return relations.flatMap((r) => {
-    if (r.kind !== "PERSISTS_ENTITY" || r.family !== "spring-data-jpa") return [r];
+    if (r.kind !== "PERSISTS_ENTITY" || r.family !== "spring-data-jpa")
+      return [r];
     const candidates = projectTypes.filter((s) => s.name === r.targetLabel);
     if (candidates.length === 0) return [];
     const { targetSymbolId: _stale, ...rest } = r;
-    if (candidates.length > 1) return [{ ...rest, confidence: "unresolved" as const }];
-    return [{ ...rest, confidence: "exact" as const, targetSymbolId: candidates[0].id }];
+    if (candidates.length > 1)
+      return [{ ...rest, confidence: "unresolved" as const }];
+    return [
+      {
+        ...rest,
+        confidence: "exact" as const,
+        targetSymbolId: candidates[0].id,
+      },
+    ];
   });
 }
 
@@ -164,10 +205,17 @@ function resolvePersistsEntity(relations: EnterpriseRelation[], allSymbols: Symb
  * real repository is found with the generic-first ordering, the parser's supertypes regex needs
  * fixing (shared file — full shared-file discipline applies), not this resolver.
  */
-function resolveRepositoryQueryPropagation(relations: EnterpriseRelation[], allSymbols: SymbolRecord[]): EnterpriseRelation[] {
+function resolveRepositoryQueryPropagation(
+  relations: EnterpriseRelation[],
+  allSymbols: SymbolRecord[],
+): EnterpriseRelation[] {
   const persistsByInterface = new Map<string, EnterpriseRelation>();
   for (const r of relations) {
-    if (r.kind === "PERSISTS_ENTITY" && r.family === "spring-data-jpa" && r.confidence === "exact") {
+    if (
+      r.kind === "PERSISTS_ENTITY" &&
+      r.family === "spring-data-jpa" &&
+      r.confidence === "exact"
+    ) {
       persistsByInterface.set(r.sourceSymbolId, r);
     }
   }
@@ -184,7 +232,11 @@ function resolveRepositoryQueryPropagation(relations: EnterpriseRelation[], allS
   }
 
   const existingQuerySources = new Set(
-    relations.filter((r) => r.kind === "REPOSITORY_QUERY" && r.family === "spring-data-jpa").map((r) => r.sourceSymbolId),
+    relations
+      .filter(
+        (r) => r.kind === "REPOSITORY_QUERY" && r.family === "spring-data-jpa",
+      )
+      .map((r) => r.sourceSymbolId),
   );
 
   const added: EnterpriseRelation[] = [];
@@ -204,7 +256,8 @@ function resolveRepositoryQueryPropagation(relations: EnterpriseRelation[], allS
       if (persistsByInterface.has(supIface.id)) continue; // has its own generic: already extracted directly
 
       for (const method of allSymbols) {
-        if (method.kind !== "method" || method.parentId !== supIface.id) continue;
+        if (method.kind !== "method" || method.parentId !== supIface.id)
+          continue;
         if (existingQuerySources.has(method.id)) continue;
         const properties = derivedProperties(method.name);
         const query = queryText(method);
@@ -213,9 +266,15 @@ function resolveRepositoryQueryPropagation(relations: EnterpriseRelation[], allS
           kind: "REPOSITORY_QUERY",
           family: "spring-data-jpa",
           sourceSymbolId: method.id,
-          targetLabel: properties ? `${method.name.match(DERIVED_RE)![0]}: ${properties.map((p) => p.slice(10)).join(", ")}` : "query",
+          targetLabel: properties
+            ? `${method.name.match(DERIVED_RE)![0]}: ${properties.map((p) => p.slice(10)).join(", ")}`
+            : "query",
           confidence: "exact",
-          evidence: [...(properties ?? []), ...(query !== undefined ? [query] : []), `propagated from ${supIface.name} via ${iface.name}`],
+          evidence: [
+            ...(properties ?? []),
+            ...(query !== undefined ? [query] : []),
+            `propagated from ${supIface.name} via ${iface.name}`,
+          ],
           range: method.range,
           filePath: method.filePath,
         });

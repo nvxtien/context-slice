@@ -10,9 +10,7 @@
     "category": "local-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "DirEntryExt::ino"
-    ]
+    "traitMethods": ["DirEntryExt::ino"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -25,9 +23,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -40,9 +36,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -55,9 +49,7 @@
     "category": "local-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -70,9 +62,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -85,9 +75,7 @@
     "category": "field-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitor::visit"
-    ]
+    "traitMethods": ["ParallelVisitor::visit"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -100,9 +88,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -115,9 +101,7 @@
     "category": "chained-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -130,9 +114,7 @@
     "category": "local-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -145,9 +127,7 @@
     "category": "chained-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -160,9 +140,7 @@
     "category": "field-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitor::visit"
-    ]
+    "traitMethods": ["ParallelVisitor::visit"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -175,9 +153,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   },
   {
     "repo": "ripgrep-ignore",
@@ -190,8 +166,6 @@
     "category": "local-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ]
+    "traitMethods": ["ParallelVisitorBuilder::build"]
   }
 ]

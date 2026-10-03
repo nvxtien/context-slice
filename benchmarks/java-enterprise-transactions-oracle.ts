@@ -77,7 +77,11 @@ function matchingBrace(text: string, openIndex: number): number {
  * declarations (fields, method signatures up to their own opening `{` or `;`) remain, keeping
  * newlines so line numbers stay accurate. Re-derived from java-enterprise-di-oracle.ts's
  * memberLevelMask (each oracle is self-contained per convention, not shared). */
-function memberLevelMask(text: string, bodyOpen: number, bodyClose: number): string {
+function memberLevelMask(
+  text: string,
+  bodyOpen: number,
+  bodyClose: number,
+): string {
   const out = text.split("");
   let depth = 0;
   let inString = false;
@@ -92,7 +96,8 @@ function memberLevelMask(text: string, bodyOpen: number, bodyClose: number): str
     if (!keep && out[i] !== "\n") out[i] = " ";
   }
   for (let i = 0; i < bodyOpen; i++) if (out[i] !== "\n") out[i] = " ";
-  for (let i = bodyClose + 1; i < out.length; i++) if (out[i] !== "\n") out[i] = " ";
+  for (let i = bodyClose + 1; i < out.length; i++)
+    if (out[i] !== "\n") out[i] = " ";
   return out.join("");
 }
 
@@ -100,8 +105,11 @@ function memberLevelMask(text: string, bodyOpen: number, bodyClose: number): str
  * intentionally out of scope (documented limitation, matches the DI/route oracles' own
  * top-level-only convention) — no `@Transactional` on a nested/inner type was found in either
  * pinned repo. */
-function topLevelTypeBlocks(source: string): Array<{ name: string; bodyOpen: number; bodyClose: number }> {
-  const blocks: Array<{ name: string; bodyOpen: number; bodyClose: number }> = [];
+function topLevelTypeBlocks(
+  source: string,
+): Array<{ name: string; bodyOpen: number; bodyClose: number }> {
+  const blocks: Array<{ name: string; bodyOpen: number; bodyClose: number }> =
+    [];
   let depth = 0;
   let lastBoundary = 0;
   for (let i = 0; i < source.length; i++) {
@@ -109,7 +117,9 @@ function topLevelTypeBlocks(source: string): Array<{ name: string; bodyOpen: num
     if (ch === "{") {
       if (depth === 0) {
         const preamble = source.slice(lastBoundary, i);
-        const classMatch = [...preamble.matchAll(new RegExp(CLASS_DECL_RE, "g"))].pop();
+        const classMatch = [
+          ...preamble.matchAll(new RegExp(CLASS_DECL_RE, "g")),
+        ].pop();
         if (classMatch) {
           const close = matchingBrace(source, i);
           const bodyClose = close === -1 ? source.length - 1 : close;
@@ -147,7 +157,11 @@ function splitTopLevel(text: string): string[] {
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 
-function scanFile(absPath: string, relPath: string, repo: string): OracleEntry[] {
+function scanFile(
+  absPath: string,
+  relPath: string,
+  repo: string,
+): OracleEntry[] {
   const raw = readFileSync(absPath, "utf8");
   const source = stripComments(raw);
   const entries: OracleEntry[] = [];
@@ -163,7 +177,10 @@ function scanFile(absPath: string, relPath: string, repo: string): OracleEntry[]
       for (const pair of splitTopLevel(rawArgs)) {
         const eq = pair.indexOf("=");
         if (eq === -1) continue;
-        attributes.push({ name: pair.slice(0, eq).trim(), value: pair.slice(eq + 1).trim() });
+        attributes.push({
+          name: pair.slice(0, eq).trim(),
+          value: pair.slice(eq + 1).trim(),
+        });
       }
       if (attributes.length === 0) continue;
 
@@ -208,25 +225,40 @@ function listJavaFiles(dir: string): string[] {
   });
 }
 
-export function extractOracleTransactions(repoRoot: string, repoId: string, scopeDir = "src/main/java"): OracleEntry[] {
+export function extractOracleTransactions(
+  repoRoot: string,
+  repoId: string,
+  scopeDir = "src/main/java",
+): OracleEntry[] {
   const dir = join(repoRoot, scopeDir);
   const files = listJavaFiles(dir);
-  return files.flatMap((absPath) => scanFile(absPath, absPath.slice(repoRoot.length + 1), repoId));
+  return files.flatMap((absPath) =>
+    scanFile(absPath, absPath.slice(repoRoot.length + 1), repoId),
+  );
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const root = process.cwd();
-  const repositories = JSON.parse(readFileSync(join(root, "benchmarks/repositories.json"), "utf8")) as Array<{
+  const repositories = JSON.parse(
+    readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
+  ) as Array<{
     id: string;
     source: string;
   }>;
-  const targets = repositories.filter((r) => r.id === "spring-petclinic" || r.id === "petclinic-rest");
+  const targets = repositories.filter(
+    (r) => r.id === "spring-petclinic" || r.id === "petclinic-rest",
+  );
   const outDir = join(root, "benchmarks/results");
   mkdirSync(outDir, { recursive: true });
   for (const repo of targets) {
     const entries = extractOracleTransactions(join(root, repo.source), repo.id);
-    const outFile = join(outDir, `java-enterprise-transactions-oracle.${repo.id}.json`);
+    const outFile = join(
+      outDir,
+      `java-enterprise-transactions-oracle.${repo.id}.json`,
+    );
     writeFileSync(outFile, JSON.stringify(entries, null, 2) + "\n");
-    console.log(`${repo.id}: ${entries.length} oracle transaction-boundary entries -> ${outFile}`);
+    console.log(
+      `${repo.id}: ${entries.length} oracle transaction-boundary entries -> ${outFile}`,
+    );
   }
 }

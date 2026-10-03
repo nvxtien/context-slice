@@ -28,22 +28,41 @@ type FailureCategory =
   | "GROUND_TRUTH"
   | "UNKNOWN";
 
-type Miss = { repo: string; oracle: OracleEntry; expectedBean: "unique" | "ambiguous" | "external"; category: FailureCategory; detail: string };
-type FalsePositive = { repo: string; filePath: string; targetLabel: string | undefined; detail: string };
+type Miss = {
+  repo: string;
+  oracle: OracleEntry;
+  expectedBean: "unique" | "ambiguous" | "external";
+  category: FailureCategory;
+  detail: string;
+};
+type FalsePositive = {
+  repo: string;
+  filePath: string;
+  targetLabel: string | undefined;
+  detail: string;
+};
 
 const root = process.cwd();
 const outDir = join(root, "benchmarks/results");
 mkdirSync(outDir, { recursive: true });
 
-const repositories = JSON.parse(readFileSync(join(root, "benchmarks/repositories.json"), "utf8")) as Repository[];
-const targets = repositories.filter((r) => r.id === "spring-petclinic" || r.id === "petclinic-rest");
+const repositories = JSON.parse(
+  readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
+) as Repository[];
+const targets = repositories.filter(
+  (r) => r.id === "spring-petclinic" || r.id === "petclinic-rest",
+);
 
 let oracleBeanTotal = 0; // only entries whose type is a genuine, uniquely-resolvable project bean
 let matched = 0;
 let falsePositiveCount = 0;
 const misses: Miss[] = [];
 const falsePositives: FalsePositive[] = [];
-type KindCounts = { oracleTotal: number; oracleBeanTotal: number; matched: number };
+type KindCounts = {
+  oracleTotal: number;
+  oracleBeanTotal: number;
+  matched: number;
+};
 type RepoStats = {
   oracleTotal: number;
   oracleBeanTotal: number;
@@ -51,7 +70,10 @@ type RepoStats = {
   falsePositives: number;
   byKind: Record<"constructor" | "field" | "setter", KindCounts>;
 };
-function emptyKindCounts(): Record<"constructor" | "field" | "setter", KindCounts> {
+function emptyKindCounts(): Record<
+  "constructor" | "field" | "setter",
+  KindCounts
+> {
   return {
     constructor: { oracleTotal: 0, oracleBeanTotal: 0, matched: 0 },
     field: { oracleTotal: 0, oracleBeanTotal: 0, matched: 0 },
@@ -64,8 +86,15 @@ for (const repo of targets) {
   const repoRoot = join(root, repo.source);
   const oracleEntries = extractOracleDependencyInjection(repoRoot, repo.id);
   const typeNameCounts = projectTypeNameCounts(repoRoot);
-  perRepo[repo.id] = { oracleTotal: oracleEntries.length, oracleBeanTotal: 0, matched: 0, falsePositives: 0, byKind: emptyKindCounts() };
-  for (const e of oracleEntries) perRepo[repo.id].byKind[e.injectionKind].oracleTotal++;
+  perRepo[repo.id] = {
+    oracleTotal: oracleEntries.length,
+    oracleBeanTotal: 0,
+    matched: 0,
+    falsePositives: 0,
+    byKind: emptyKindCounts(),
+  };
+  for (const e of oracleEntries)
+    perRepo[repo.id].byKind[e.injectionKind].oracleTotal++;
 
   const index = new ProjectIndex(repoRoot);
   index.rebuild();
@@ -74,14 +103,17 @@ for (const repo of targets) {
   // would count genuine extractor hits as spurious false positives (an oracle-scope mismatch,
   // not an extractor defect).
   const diRelations = index.enterpriseRelations.filter(
-    (r) => r.kind === "INJECTS_DEPENDENCY" && r.filePath.startsWith("src/main/java/"),
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" &&
+      r.filePath.startsWith("src/main/java/"),
   );
 
-  const claimedRelations = new Set<typeof diRelations[number]>();
+  const claimedRelations = new Set<(typeof diRelations)[number]>();
 
   for (const oracle of oracleEntries) {
     const count = typeNameCounts.get(oracle.typeName) ?? 0;
-    const expectedBean: "unique" | "ambiguous" | "external" = count === 1 ? "unique" : count > 1 ? "ambiguous" : "external";
+    const expectedBean: "unique" | "ambiguous" | "external" =
+      count === 1 ? "unique" : count > 1 ? "ambiguous" : "external";
 
     // Find the source symbol this oracle entry should be attributed to: the class (field/setter
     // container) for field/setter kinds is resolved differently per the product's own documented
@@ -96,18 +128,34 @@ for (const repo of targets) {
           s.range.startLine <= oracle.startLine &&
           oracle.startLine <= s.range.endLine,
       );
-      candidateRelations = ctor ? diRelations.filter((r) => r.sourceSymbolId === ctor.id) : [];
+      candidateRelations = ctor
+        ? diRelations.filter((r) => r.sourceSymbolId === ctor.id)
+        : [];
     } else if (oracle.injectionKind === "field") {
-      const cls = index.symbols.find((s) => s.filePath === oracle.file && s.kind === "class" && s.name === oracle.className);
-      candidateRelations = cls ? diRelations.filter((r) => r.sourceSymbolId === cls.id) : [];
+      const cls = index.symbols.find(
+        (s) =>
+          s.filePath === oracle.file &&
+          s.kind === "class" &&
+          s.name === oracle.className,
+      );
+      candidateRelations = cls
+        ? diRelations.filter((r) => r.sourceSymbolId === cls.id)
+        : [];
     } else {
       const setter = index.symbols.find(
-        (s) => s.filePath === oracle.file && s.kind === "method" && s.name === oracle.memberName,
+        (s) =>
+          s.filePath === oracle.file &&
+          s.kind === "method" &&
+          s.name === oracle.memberName,
       );
-      candidateRelations = setter ? diRelations.filter((r) => r.sourceSymbolId === setter.id) : [];
+      candidateRelations = setter
+        ? diRelations.filter((r) => r.sourceSymbolId === setter.id)
+        : [];
     }
 
-    const relation = candidateRelations.find((r) => r.targetLabel === oracle.typeName);
+    const relation = candidateRelations.find(
+      (r) => r.targetLabel === oracle.typeName,
+    );
 
     if (expectedBean === "unique") {
       oracleBeanTotal++;
@@ -118,7 +166,10 @@ for (const repo of targets) {
           repo: repo.id,
           oracle,
           expectedBean,
-          category: candidateRelations.length === 0 ? "ANNOTATION_EXTRACTION" : "DI_RESOLUTION",
+          category:
+            candidateRelations.length === 0
+              ? "ANNOTATION_EXTRACTION"
+              : "DI_RESOLUTION",
           detail:
             candidateRelations.length === 0
               ? "Extractor produced no INJECTS_DEPENDENCY relation for this injection point at all."
@@ -172,7 +223,8 @@ for (const repo of targets) {
       repo: repo.id,
       filePath: relation.filePath,
       targetLabel: relation.targetLabel,
-      detail: "Extractor emitted an \"exact\" INJECTS_DEPENDENCY relation the oracle has no corresponding injection point for.",
+      detail:
+        'Extractor emitted an "exact" INJECTS_DEPENDENCY relation the oracle has no corresponding injection point for.',
     });
   }
 }
@@ -180,8 +232,11 @@ for (const repo of targets) {
 falsePositiveCount = falsePositives.length;
 for (const fp of falsePositives) perRepo[fp.repo].falsePositives++;
 
-const dependency_linkage_recall = oracleBeanTotal ? matched / oracleBeanTotal : 1;
-const dependency_linkage_precision = matched + falsePositiveCount ? matched / (matched + falsePositiveCount) : 1;
+const dependency_linkage_recall = oracleBeanTotal
+  ? matched / oracleBeanTotal
+  : 1;
+const dependency_linkage_precision =
+  matched + falsePositiveCount ? matched / (matched + falsePositiveCount) : 1;
 
 const failureAttribution: Record<FailureCategory, number> = {
   ANNOTATION_EXTRACTION: 0,
@@ -206,11 +261,20 @@ const results = {
   falsePositives,
 };
 
-writeFileSync(join(outDir, "v1.4-phase2-dependency-injection.json"), JSON.stringify(results, null, 2) + "\n");
+writeFileSync(
+  join(outDir, "v1.4-phase2-dependency-injection.json"),
+  JSON.stringify(results, null, 2) + "\n",
+);
 
-console.log(`Oracle bean total: ${oracleBeanTotal}, matched: ${matched}, false positives: ${falsePositiveCount}`);
-console.log(`dependency_linkage_recall: ${(dependency_linkage_recall * 100).toFixed(1)}%`);
-console.log(`dependency_linkage_precision: ${(dependency_linkage_precision * 100).toFixed(1)}%`);
+console.log(
+  `Oracle bean total: ${oracleBeanTotal}, matched: ${matched}, false positives: ${falsePositiveCount}`,
+);
+console.log(
+  `dependency_linkage_recall: ${(dependency_linkage_recall * 100).toFixed(1)}%`,
+);
+console.log(
+  `dependency_linkage_precision: ${(dependency_linkage_precision * 100).toFixed(1)}%`,
+);
 console.log("Failure attribution:", failureAttribution);
 for (const [repoId, stats] of Object.entries(perRepo)) {
   console.log(

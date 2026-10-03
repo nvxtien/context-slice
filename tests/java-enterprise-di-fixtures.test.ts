@@ -7,14 +7,17 @@ import { ProjectIndex } from "../src/indexer/index.js";
 import "../src/languages/java/enterprise/dependency-injection.js"; // side-effect: registers the extractor
 
 const root = mkdtempSync(join(tmpdir(), "context-slice-java-enterprise-di-"));
-cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, { recursive: true });
+cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, {
+  recursive: true,
+});
 const index = new ProjectIndex(root);
 index.rebuild();
 
 const injectionsFor = (fileName: string) =>
   index.enterpriseRelations.filter(
     (relation) =>
-      relation.kind === "INJECTS_DEPENDENCY" && relation.filePath.split("/").pop() === fileName,
+      relation.kind === "INJECTS_DEPENDENCY" &&
+      relation.filePath.split("/").pop() === fileName,
   );
 
 test("constructor-injection: a Spring-stereotyped service resolves its repository as exact", () => {

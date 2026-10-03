@@ -91,8 +91,8 @@ function supertypesOf(node: Node): string[] {
         ? [stripGenericArgs(superclass.text.replace(/^extends\s+/, ""))]
         : []),
       ...(interfaces
-        ? interfaces
-            .text.replace(/^implements\s+/, "")
+        ? interfaces.text
+            .replace(/^implements\s+/, "")
             .split(/\s*,\s*/)
             .map(stripGenericArgs)
         : []),
@@ -141,7 +141,16 @@ function walkTypes(
   for (const child of node.namedChildren) {
     const kind = TYPE_DECL_NODE_TYPES[child.type];
     if (!kind) {
-      walkTypes(child, parent, chain, filePath, source, packageName, symbols, types);
+      walkTypes(
+        child,
+        parent,
+        chain,
+        filePath,
+        source,
+        packageName,
+        symbols,
+        types,
+      );
       continue;
     }
     const name = child.childForFieldName("name")!.text;
@@ -187,19 +196,52 @@ function walkTypes(
       for (const member of memberNodesOf(bodyNode)) {
         if (member.type === "method_declaration") {
           symbols.push(
-            methodSymbol(member, symbol, typeChain, filePath, source, packageName),
+            methodSymbol(
+              member,
+              symbol,
+              typeChain,
+              filePath,
+              source,
+              packageName,
+            ),
           );
         } else if (member.type === "constructor_declaration") {
           symbols.push(
-            constructorSymbol(member, symbol, typeChain, filePath, source, packageName),
+            constructorSymbol(
+              member,
+              symbol,
+              typeChain,
+              filePath,
+              source,
+              packageName,
+            ),
           );
-        } else if (member.type === "field_declaration" || member.type === "constant_declaration") {
+        } else if (
+          member.type === "field_declaration" ||
+          member.type === "constant_declaration"
+        ) {
           symbols.push(
-            ...fieldSymbols(member, symbol, typeChain, filePath, source, packageName),
+            ...fieldSymbols(
+              member,
+              symbol,
+              typeChain,
+              filePath,
+              source,
+              packageName,
+            ),
           );
         }
       }
-      walkTypes(bodyNode, symbol, typeChain, filePath, source, packageName, symbols, types);
+      walkTypes(
+        bodyNode,
+        symbol,
+        typeChain,
+        filePath,
+        source,
+        packageName,
+        symbols,
+        types,
+      );
     }
   }
 }
@@ -207,9 +249,7 @@ function walkTypes(
 /** `formal_parameters` node text includes its own parens; parameterSignature() expects the bare inner text (matching the old regex's capture group, which never included the parens). */
 function parametersText(parametersNode: Node): string {
   const text = parametersNode.text;
-  return text.startsWith("(") && text.endsWith(")")
-    ? text.slice(1, -1)
-    : text;
+  return text.startsWith("(") && text.endsWith(")") ? text.slice(1, -1) : text;
 }
 
 function methodSymbol(
@@ -254,7 +294,9 @@ function methodSymbol(
     annotations,
     modifiers,
     source: source.slice(node.startIndex, node.endIndex),
-    body: bodyNode ? source.slice(bodyNode.startIndex, bodyNode.endIndex) : undefined,
+    body: bodyNode
+      ? source.slice(bodyNode.startIndex, bodyNode.endIndex)
+      : undefined,
   };
 }
 
@@ -321,13 +363,21 @@ function fieldSymbols(
   const declaredType = node.childForFieldName("type")!.text;
   const modifiersNode = node.namedChildren.find((c) => c.type === "modifiers");
   const { annotations, modifiers } = modifiersNodeParts(modifiersNode);
-  const declarators = node.namedChildren.filter((c) => c.type === "variable_declarator");
+  const declarators = node.namedChildren.filter(
+    (c) => c.type === "variable_declarator",
+  );
   const single = declarators.length === 1;
   return declarators.map((declarator) => {
     const name = declarator.childForFieldName("name")!.text;
     const start = single ? node.startIndex : declarator.startIndex;
     const end = single ? node.endIndex : declarator.endIndex;
-    const canonicalIdentity = canonicalId(filePath, packageName, typeChain, "field", name);
+    const canonicalIdentity = canonicalId(
+      filePath,
+      packageName,
+      typeChain,
+      "field",
+      name,
+    );
     return {
       id: canonicalIdentity,
       language: "java",
@@ -403,7 +453,16 @@ export function parseJava(filePath: string, source: string) {
   );
   const packageName = packageDecl?.namedChildren[0]?.text ?? "";
   if (tree)
-    walkTypes(tree.rootNode, undefined, [], filePath, source, packageName, symbols, types);
+    walkTypes(
+      tree.rootNode,
+      undefined,
+      [],
+      filePath,
+      source,
+      packageName,
+      symbols,
+      types,
+    );
   assignDedupIds(symbols, types);
   const calls: CallEdge[] = [];
   const callable = symbols.filter(

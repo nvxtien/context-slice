@@ -2,7 +2,14 @@ import type { SymbolRecord } from "../../../types/model.js";
 import type { EnterpriseRelation } from "../../../types/enterprise.js";
 import { registerEnterpriseExtractor } from "./registry.js";
 
-const KEPT_ATTRS = new Set(["readOnly", "propagation", "isolation", "rollbackFor", "noRollbackFor", "timeout"]);
+const KEPT_ATTRS = new Set([
+  "readOnly",
+  "propagation",
+  "isolation",
+  "rollbackFor",
+  "noRollbackFor",
+  "timeout",
+]);
 
 /** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Transactional" -> "Transactional". */
 function bareName(annotation: string): string {
@@ -73,7 +80,9 @@ function extractTransactionRelations(
   const relations: EnterpriseRelation[] = [];
 
   for (const method of symbols.filter((s) => s.kind === "method")) {
-    const hasTransactional = method.annotations.some((a) => bareName(a) === "Transactional");
+    const hasTransactional = method.annotations.some(
+      (a) => bareName(a) === "Transactional",
+    );
     if (!hasTransactional) continue;
 
     const match = header(method).match(transactionalArgsRegex());

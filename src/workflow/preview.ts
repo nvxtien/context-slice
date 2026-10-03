@@ -97,13 +97,17 @@ function wholeFileBaseline(
   let wholeFileTokens = 0;
   for (const filePath of filePaths) {
     try {
-      wholeFileTokens += estimateTokens(readFileSync(join(index.root, filePath), "utf8"));
+      wholeFileTokens += estimateTokens(
+        readFileSync(join(index.root, filePath), "utf8"),
+      );
     } catch {
       // Excluded, not guessed — see doc comment above.
     }
   }
   const reduction =
-    wholeFileTokens > 0 ? Math.min(1, Math.max(0, 1 - estimatedTokens / wholeFileTokens)) : 0;
+    wholeFileTokens > 0
+      ? Math.min(1, Math.max(0, 1 - estimatedTokens / wholeFileTokens))
+      : 0;
   return { files: filePaths.size, wholeFileTokens, reduction };
 }
 
@@ -300,7 +304,9 @@ export function buildPreview(
   const relatedFiles = new Set(
     [...includedIds]
       .map((id) => index.symbols.find((s) => s.id === id)?.filePath)
-      .filter((file): file is string => Boolean(file) && file !== target.filePath),
+      .filter(
+        (file): file is string => Boolean(file) && file !== target.filePath,
+      ),
   );
 
   // Same-enclosing-type and import-context composition run after callers and
@@ -315,9 +321,7 @@ export function buildPreview(
     options.composition === false
       ? []
       : composeImportContext(index, target, relatedFiles, includedIds);
-  const relatedIds = new Set(
-    [...includedIds].filter((id) => id !== target.id),
-  );
+  const relatedIds = new Set([...includedIds].filter((id) => id !== target.id));
   const routeCandidates =
     options.composition === false
       ? []

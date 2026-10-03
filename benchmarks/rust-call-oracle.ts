@@ -78,16 +78,26 @@ function collectParams(fn: Node): Set<string> {
   return out;
 }
 
-type Ctx = { mods: string[]; container?: string; fnPath: string[]; params?: Set<string>; lets?: Set<string> };
+type Ctx = {
+  mods: string[];
+  container?: string;
+  fnPath: string[];
+  params?: Set<string>;
+  lets?: Set<string>;
+};
 
 function typeName(t: Node | null): string {
   if (!t) return "";
-  if (t.type === "generic_type") return t.childForFieldName("type")?.text ?? t.text;
+  if (t.type === "generic_type")
+    return t.childForFieldName("type")?.text ?? t.text;
   return t.text;
 }
 
 /** Position + name of the callee token (unique per call even for `a().b()` and `f()()`). */
-function calleeInfo(fnNode: Node, argsNode: Node | null): { name: string; at: Node } {
+function calleeInfo(
+  fnNode: Node,
+  argsNode: Node | null,
+): { name: string; at: Node } {
   switch (fnNode.type) {
     case "field_expression": {
       const f = fnNode.childForFieldName("field")!;
@@ -110,7 +120,8 @@ function receiverKind(value: Node, ctx: Ctx): Category {
   if (value.type === "self") return "self-method";
   if (value.type === "field_expression") {
     let base: Node = value;
-    while (base.type === "field_expression") base = base.childForFieldName("value")!;
+    while (base.type === "field_expression")
+      base = base.childForFieldName("value")!;
     if (base.type === "self") return "field-method";
     return "chained-method";
   }
@@ -128,14 +139,18 @@ function classifyCall(call: Node, ctx: Ctx): Category {
     generic = true;
     fnNode = fnNode.childForFieldName("function")!;
   }
-  if (fnNode.type === "field_expression") return receiverKind(fnNode.childForFieldName("value")!, ctx);
+  if (fnNode.type === "field_expression")
+    return receiverKind(fnNode.childForFieldName("value")!, ctx);
   if (fnNode.type === "scoped_identifier") {
     const path = fnNode.childForFieldName("path");
     const name = fnNode.childForFieldName("name")!.text;
     if (path?.type === "bracketed_type") return "qualified-trait"; // beats path-generic
     if (generic || path?.type === "generic_type") return "path-generic";
     if (isUpper(name)) return "bare-closure-or-ctor"; // Enum::Variant(..) / Tuple::Struct(..)
-    const last = path?.type === "scoped_identifier" ? path.childForFieldName("name")!.text : (path?.text ?? "");
+    const last =
+      path?.type === "scoped_identifier"
+        ? path.childForFieldName("name")!.text
+        : (path?.text ?? "");
     if (last === "Self") return "assoc-Self";
     if (isUpper(last)) return "assoc-Type";
     return "path-module";
@@ -183,9 +198,17 @@ export function enumerateCallSites(
         const name = c.childForFieldName("name")?.text ?? "";
         next = { mods: [...ctx.mods, name], fnPath: [] };
       } else if (c.type === "impl_item") {
-        next = { mods: ctx.mods, container: typeName(c.childForFieldName("type")), fnPath: [] };
+        next = {
+          mods: ctx.mods,
+          container: typeName(c.childForFieldName("type")),
+          fnPath: [],
+        };
       } else if (c.type === "trait_item") {
-        next = { mods: ctx.mods, container: c.childForFieldName("name")?.text, fnPath: [] };
+        next = {
+          mods: ctx.mods,
+          container: c.childForFieldName("name")?.text,
+          fnPath: [],
+        };
       } else if (c.type === "function_item") {
         const lets = new Set<string>();
         const body = c.childForFieldName("body");
@@ -199,13 +222,20 @@ export function enumerateCallSites(
         };
       } else if (ctx.params && c.type === "call_expression") {
         const fnNode = c.childForFieldName("function")!;
-        const { name, at } = calleeInfo(fnNode, c.childForFieldName("arguments"));
+        const { name, at } = calleeInfo(
+          fnNode,
+          c.childForFieldName("arguments"),
+        );
         sites.push(record(c, at, name, classifyCall(c, ctx), ctx));
       } else if (ctx.params && c.type === "macro_invocation") {
         const m = c.childForFieldName("macro") ?? c.firstNamedChild!;
-        const name = m.type === "scoped_identifier" ? m.childForFieldName("name")!.text : m.text;
+        const name =
+          m.type === "scoped_identifier"
+            ? m.childForFieldName("name")!.text
+            : m.text;
         sites.push(record(c, m, name, "macro-invocation", ctx));
-        for (const tt of c.namedChildren) if (tt.type === "token_tree") hidden += countHidden(tt);
+        for (const tt of c.namedChildren)
+          if (tt.type === "token_tree") hidden += countHidden(tt);
         continue; // never descend into the token_tree
       } else if (c.type === "token_tree") {
         if (ctx.params) hidden += countHidden(c);
@@ -214,12 +244,22 @@ export function enumerateCallSites(
       visit(c, next);
     }
   };
-  const record = (c: Node, at: Node, name: string, category: Category, ctx: Ctx): CallSite => ({
+  const record = (
+    c: Node,
+    at: Node,
+    name: string,
+    category: Category,
+    ctx: Ctx,
+  ): CallSite => ({
     repo,
     file,
     line: at.startPosition.row + 1,
     col: at.startPosition.column,
-    callerQualifiedName: [...ctx.mods, ...(ctx.container ? [ctx.container] : []), ...ctx.fnPath].join("::"),
+    callerQualifiedName: [
+      ...ctx.mods,
+      ...(ctx.container ? [ctx.container] : []),
+      ...ctx.fnPath,
+    ].join("::"),
     callText: oneLine(c.text),
     calleeName: name,
     category,
@@ -229,7 +269,12 @@ export function enumerateCallSites(
 }
 
 /** `dev` when the first 4 hex digits of sha1("<repo>:<file>:<line>:<col>") as an integer % 10 < 6. */
-export function splitFor(repo: string, file: string, line: number, col: number): "dev" | "held-out" {
+export function splitFor(
+  repo: string,
+  file: string,
+  line: number,
+  col: number,
+): "dev" | "held-out" {
   const n = parseInt(sha1(`${repo}:${file}:${line}:${col}`).slice(0, 4), 16);
   return n % 10 < 6 ? "dev" : "held-out";
 }
@@ -275,7 +320,10 @@ export function collectTraitMethods(source: string): string[] {
   return out;
 }
 
-export type TraitEntry = SampleEntry & { supplement: "trait-candidate"; traitMethods: string[] };
+export type TraitEntry = SampleEntry & {
+  supplement: "trait-candidate";
+  traitMethods: string[];
+};
 const SUPPLEMENT_CAP = 12;
 
 /** One repo: sites whose callee name is a trait method name, minus macros and already-sampled `file:line:col` keys. */
@@ -290,8 +338,15 @@ export function selectTraitSupplement(
     const name = tm.slice(tm.lastIndexOf("::") + 2);
     byName.set(name, [...(byName.get(name) ?? []), tm]);
   }
-  const cand = sites.filter((s) => s.repo === repo && s.category !== "macro-invocation" && byName.has(s.calleeName));
-  const fresh = cand.filter((s) => !mainKeys.has(`${s.file}:${s.line}:${s.col}`));
+  const cand = sites.filter(
+    (s) =>
+      s.repo === repo &&
+      s.category !== "macro-invocation" &&
+      byName.has(s.calleeName),
+  );
+  const fresh = cand.filter(
+    (s) => !mainKeys.has(`${s.file}:${s.line}:${s.col}`),
+  );
   const entries = fresh
     .map((s) => ({ s, h: sha1(`${s.repo}:${s.file}:${s.line}:${s.col}`) }))
     .sort((a, b) => (a.h < b.h ? -1 : a.h > b.h ? 1 : 0))
@@ -302,13 +357,17 @@ export function selectTraitSupplement(
       supplement: "trait-candidate" as const,
       traitMethods: byName.get(s.calleeName)!,
     }));
-  return { candidates: cand.length, dropped: cand.length - fresh.length, entries };
+  return {
+    candidates: cand.length,
+    dropped: cand.length - fresh.length,
+    entries,
+  };
 }
 
 function rustFiles(dir: string, rel = ""): string[] {
   const out: string[] = [];
-  const entries = readdirSync(join(dir, rel), { withFileTypes: true }).sort((a, b) =>
-    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+  const entries = readdirSync(join(dir, rel), { withFileTypes: true }).sort(
+    (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
   );
   for (const e of entries) {
     if (e.name === ".git" || e.name === "target") continue;
@@ -325,25 +384,41 @@ function main() {
     readFileSync(join(root, "benchmarks/rust-repositories.json"), "utf8"),
   );
   const supplement = process.argv.includes("--supplement");
-  if (supplement && process.argv[process.argv.indexOf("--supplement") + 1] !== "trait-candidates")
+  if (
+    supplement &&
+    process.argv[process.argv.indexOf("--supplement") + 1] !==
+      "trait-candidates"
+  )
     throw new Error("usage: --supplement trait-candidates");
   const all: CallSite[] = [];
   const traitByRepo: Record<string, string[]> = {};
-  const counts: Record<string, Record<string, number> & { total: number; hiddenInMacro: number }> = {};
+  const counts: Record<
+    string,
+    Record<string, number> & { total: number; hiddenInMacro: number }
+  > = {};
   for (const r of repos) {
     const dir = join(root, r.source);
     let hidden = 0;
     const mine: CallSite[] = [];
     for (const file of rustFiles(dir)) {
-      const res = enumerateCallSites(readFileSync(join(dir, file), "utf8"), file, r.id);
+      const res = enumerateCallSites(
+        readFileSync(join(dir, file), "utf8"),
+        file,
+        r.id,
+      );
       mine.push(...res.sites);
-      if (supplement) (traitByRepo[r.id] ??= []).push(...collectTraitMethods(readFileSync(join(dir, file), "utf8")));
+      if (supplement)
+        (traitByRepo[r.id] ??= []).push(
+          ...collectTraitMethods(readFileSync(join(dir, file), "utf8")),
+        );
       hidden += res.hiddenInMacro;
     }
     const keys = new Set(mine.map((s) => `${s.file}:${s.line}:${s.col}`));
-    if (keys.size !== mine.length) throw new Error(`${r.id}: duplicate call-site positions`);
+    if (keys.size !== mine.length)
+      throw new Error(`${r.id}: duplicate call-site positions`);
     const c: any = { total: mine.length, hiddenInMacro: hidden };
-    for (const cat of CATEGORIES) c[cat] = mine.filter((s) => s.category === cat).length;
+    for (const cat of CATEGORIES)
+      c[cat] = mine.filter((s) => s.category === cat).length;
     if (CATEGORIES.reduce((n, cat) => n + c[cat], 0) !== c.total)
       throw new Error(`${r.id}: categories do not partition the sites`);
     counts[r.id] = c;
@@ -352,8 +427,12 @@ function main() {
   const outDir = join(root, "benchmarks/rust-semantic-calls");
   mkdirSync(outDir, { recursive: true });
   if (supplement) {
-    const main = JSON.parse(readFileSync(join(outDir, "sample.json"), "utf8")) as CallSite[];
-    const mainKeys = new Set(main.map((s) => `${s.repo}:${s.file}:${s.line}:${s.col}`));
+    const main = JSON.parse(
+      readFileSync(join(outDir, "sample.json"), "utf8"),
+    ) as CallSite[];
+    const mainKeys = new Set(
+      main.map((s) => `${s.repo}:${s.file}:${s.line}:${s.col}`),
+    );
     const out: TraitEntry[] = [];
     for (const r of repos) {
       const tm = traitByRepo[r.id] ?? [];
@@ -361,7 +440,11 @@ function main() {
         r.id,
         all,
         tm,
-        new Set([...mainKeys].filter((k) => k.startsWith(`${r.id}:`)).map((k) => k.slice(r.id.length + 1))),
+        new Set(
+          [...mainKeys]
+            .filter((k) => k.startsWith(`${r.id}:`))
+            .map((k) => k.slice(r.id.length + 1)),
+        ),
       );
       const dev = res.entries.filter((e) => e.split === "dev").length;
       console.log(
@@ -370,11 +453,22 @@ function main() {
       out.push(...res.entries);
     }
     const rows = out.map((s) => ({
-      repo: s.repo, file: s.file, line: s.line, col: s.col, callerQualifiedName: s.callerQualifiedName,
-      callText: s.callText, calleeName: s.calleeName, category: s.category, split: s.split,
-      supplement: s.supplement, traitMethods: s.traitMethods,
+      repo: s.repo,
+      file: s.file,
+      line: s.line,
+      col: s.col,
+      callerQualifiedName: s.callerQualifiedName,
+      callText: s.callText,
+      calleeName: s.calleeName,
+      category: s.category,
+      split: s.split,
+      supplement: s.supplement,
+      traitMethods: s.traitMethods,
     }));
-    writeFileSync(join(outDir, "sample-trait.json"), JSON.stringify(rows, null, 2) + "\n");
+    writeFileSync(
+      join(outDir, "sample-trait.json"),
+      JSON.stringify(rows, null, 2) + "\n",
+    );
     return;
   }
   const sample = selectSample(all).map((s) => ({
@@ -388,10 +482,20 @@ function main() {
     category: s.category,
     split: s.split,
   }));
-  writeFileSync(join(outDir, "sample.json"), JSON.stringify(sample, null, 2) + "\n");
-  writeFileSync(join(outDir, "counts.json"), JSON.stringify(counts, null, 2) + "\n");
+  writeFileSync(
+    join(outDir, "sample.json"),
+    JSON.stringify(sample, null, 2) + "\n",
+  );
+  writeFileSync(
+    join(outDir, "counts.json"),
+    JSON.stringify(counts, null, 2) + "\n",
+  );
   console.log(JSON.stringify(counts, null, 2));
   console.log(`sample: ${sample.length}`);
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+)
+  main();

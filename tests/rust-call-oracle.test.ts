@@ -14,7 +14,9 @@ import {
 
 const sites = (src: string) => enumerateCallSites(src, "src/lib.rs");
 const cat = (body: string) =>
-  sites(`fn f(p: u8) { let l = 1; ${body} }`).sites.map((s) => `${s.calleeName}:${s.category}`);
+  sites(`fn f(p: u8) { let l = 1; ${body} }`).sites.map(
+    (s) => `${s.calleeName}:${s.category}`,
+  );
 
 test("every category is produced", () => {
   const src = `
@@ -84,7 +86,10 @@ test("tie-breaks", () => {
 
 test("macro token_tree contents are hidden, not enumerated", () => {
   const r = sites('fn f() { println!("{}", g(1)); vec![h(2), 3]; }');
-  assert.deepEqual(r.sites.map((s) => s.calleeName), ["println", "vec"]);
+  assert.deepEqual(
+    r.sites.map((s) => s.calleeName),
+    ["println", "vec"],
+  );
   assert.equal(r.hiddenInMacro, 2);
 });
 
@@ -104,11 +109,23 @@ test("large sources parse", () => {
 
 test("split rule: sha1 first 4 hex % 10 < 6", () => {
   for (let i = 0; i < 40; i++) {
-    const n = parseInt(createHash("sha1").update(`walkdir:src/lib.rs:${i}:4`).digest("hex").slice(0, 4), 16);
-    assert.equal(splitFor("walkdir", "src/lib.rs", i, 4), n % 10 < 6 ? "dev" : "held-out");
+    const n = parseInt(
+      createHash("sha1")
+        .update(`walkdir:src/lib.rs:${i}:4`)
+        .digest("hex")
+        .slice(0, 4),
+      16,
+    );
+    assert.equal(
+      splitFor("walkdir", "src/lib.rs", i, 4),
+      n % 10 < 6 ? "dev" : "held-out",
+    );
   }
   // known hash inputs: sha1("a:b:1:2") starts with 4 hex digits parsed as an integer
-  const k = parseInt(createHash("sha1").update("a:b.rs:1:2").digest("hex").slice(0, 4), 16);
+  const k = parseInt(
+    createHash("sha1").update("a:b.rs:1:2").digest("hex").slice(0, 4),
+    16,
+  );
   assert.equal(splitFor("a", "b.rs", 1, 2), k % 10 < 6 ? "dev" : "held-out");
   const seen = new Set<string>();
   for (let i = 0; i < 40; i++) seen.add(splitFor("r", "f.rs", i, 0));
@@ -116,7 +133,16 @@ test("split rule: sha1 first 4 hex % 10 < 6", () => {
 });
 
 const mk = (category: string, line: number) =>
-  ({ repo: "r", file: "a.rs", line, col: 0, callerQualifiedName: "f", callText: "", calleeName: "x", category }) as CallSite;
+  ({
+    repo: "r",
+    file: "a.rs",
+    line,
+    col: 0,
+    callerQualifiedName: "f",
+    callText: "",
+    calleeName: "x",
+    category,
+  }) as CallSite;
 
 test("quota: <=3 takes all, else proportional clamp 1..5", () => {
   assert.equal(quotaFor(3, 300), 3);
@@ -135,36 +161,64 @@ test("selectSample: per category, ordered by sha1 ascending, all when <=3", () =
   assert.equal(out.filter((s) => s.category === "qualified-trait").length, 3);
   const bare = out.filter((s) => s.category === "bare-fn");
   assert.ok(bare.length >= 1 && bare.length <= 5);
-  const h = (s: CallSite) => createHash("sha1").update(`r:a.rs:${s.line}:0`).digest("hex");
+  const h = (s: CallSite) =>
+    createHash("sha1").update(`r:a.rs:${s.line}:0`).digest("hex");
   const expected = all
     .filter((s) => s.category === "bare-fn")
     .sort((a, b) => (h(a) < h(b) ? -1 : 1))
     .slice(0, bare.length);
-  assert.deepEqual(bare.map((s) => s.line), expected.map((s) => s.line));
+  assert.deepEqual(
+    bare.map((s) => s.line),
+    expected.map((s) => s.line),
+  );
   assert.ok(out.every((s) => s.split === "dev" || s.split === "held-out"));
   assert.deepEqual(selectSample(all), out);
 });
 
 test("categories partition: counts sum to total", () => {
   const r = sites("fn f(p: u8) { a(); p.b(); x!(1); Foo::c(); S(1); }");
-  const sum = CATEGORIES.reduce((n, c) => n + r.sites.filter((s) => s.category === c).length, 0);
+  const sum = CATEGORIES.reduce(
+    (n, c) => n + r.sites.filter((s) => s.category === c).length,
+    0,
+  );
   assert.equal(sum, r.sites.length);
 });
 
 // ---- trait-candidate supplement ----
 test("collectTraitMethods: signature and default methods as Trait::method", () => {
-  const src = "pub trait Tr { fn sig(&self); fn dflt(&self) { } const C: u8 = 1; }\nstruct S; impl S { fn inh(&self) {} }";
+  const src =
+    "pub trait Tr { fn sig(&self); fn dflt(&self) { } const C: u8 = 1; }\nstruct S; impl S { fn inh(&self) {} }";
   assert.deepEqual(collectTraitMethods(src).sort(), ["Tr::dflt", "Tr::sig"]);
   assert.deepEqual(collectTraitMethods("fn f() {}"), []);
 });
 
 const tsite = (line: number, name = "sig"): CallSite =>
-  ({ repo: "r", file: "a.rs", line, col: 0, callerQualifiedName: "f", callText: `x.${name}()`, calleeName: name, category: "local-method" }) as CallSite;
-const hk = (line: number) => createHash("sha1").update(`r:a.rs:${line}:0`).digest("hex");
+  ({
+    repo: "r",
+    file: "a.rs",
+    line,
+    col: 0,
+    callerQualifiedName: "f",
+    callText: `x.${name}()`,
+    calleeName: name,
+    category: "local-method",
+  }) as CallSite;
+const hk = (line: number) =>
+  createHash("sha1").update(`r:a.rs:${line}:0`).digest("hex");
 
 test("supplement: matches by callee name, drops already-sampled, skips macros, lists traitMethods", () => {
-  const all = [tsite(1), tsite(2), tsite(3, "other"), { ...tsite(4), category: "macro-invocation" } as CallSite];
-  const r = selectTraitSupplement("r", all, ["Tr::sig", "Other::sig"], new Set(["a.rs:1:0"]));
+  const all = [
+    tsite(1),
+    tsite(2),
+    tsite(3, "other"),
+    { ...tsite(4), category: "macro-invocation" } as CallSite,
+  ];
+  const r = selectTraitSupplement(
+    "r",
+    all,
+    ["Tr::sig", "Other::sig"],
+    new Set(["a.rs:1:0"]),
+  );
   assert.equal(r.candidates, 2); // sites 1 and 2 (macro excluded), before dropping
   assert.equal(r.dropped, 1);
   assert.equal(r.entries.length, 1);
@@ -180,8 +234,22 @@ test("supplement: cap at 12 by sha1 ascending; <=12 takes all; no traits -> empt
   const r = selectTraitSupplement("r", all, ["Tr::sig"], new Set());
   assert.equal(r.candidates, 15);
   assert.equal(r.entries.length, 12);
-  const want = all.map((s) => s.line).sort((a, b) => (hk(a) < hk(b) ? -1 : 1)).slice(0, 12);
-  assert.deepEqual(r.entries.map((e) => e.line), want);
-  assert.equal(selectTraitSupplement("r", all.slice(0, 12), ["Tr::sig"], new Set()).entries.length, 12);
-  assert.deepEqual(selectTraitSupplement("r", all, [], new Set()), { candidates: 0, dropped: 0, entries: [] });
+  const want = all
+    .map((s) => s.line)
+    .sort((a, b) => (hk(a) < hk(b) ? -1 : 1))
+    .slice(0, 12);
+  assert.deepEqual(
+    r.entries.map((e) => e.line),
+    want,
+  );
+  assert.equal(
+    selectTraitSupplement("r", all.slice(0, 12), ["Tr::sig"], new Set()).entries
+      .length,
+    12,
+  );
+  assert.deepEqual(selectTraitSupplement("r", all, [], new Set()), {
+    candidates: 0,
+    dropped: 0,
+    entries: [],
+  });
 });

@@ -558,9 +558,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -584,9 +582,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -610,9 +606,7 @@
     "category": "local-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -636,9 +630,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "external",
       "confidence": "exact",
@@ -656,9 +648,7 @@
     "category": "field-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitor::visit"
-    ],
+    "traitMethods": ["ParallelVisitor::visit"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -682,9 +672,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -708,9 +696,7 @@
     "category": "chained-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "external",
       "confidence": "exact",
@@ -728,9 +714,7 @@
     "category": "local-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -754,9 +738,7 @@
     "category": "chained-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -780,9 +762,7 @@
     "category": "field-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitor::visit"
-    ],
+    "traitMethods": ["ParallelVisitor::visit"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -806,9 +786,7 @@
     "category": "chained-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {
@@ -832,9 +810,7 @@
     "category": "local-method",
     "split": "held-out",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "ParallelVisitorBuilder::build"
-    ],
+    "traitMethods": ["ParallelVisitorBuilder::build"],
     "expected": {
       "kind": "resolved",
       "target": {

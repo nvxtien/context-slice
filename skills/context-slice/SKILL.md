@@ -22,7 +22,7 @@ For any other language, or a question with no clear target symbol (e.g.
    task: `{ task: "<the task in the user's own words>" }`. It returns a
    selected target symbol, its rendered body, ranked direct callers/callees
    included under the token budget, inclusion/omission explanations, and any
-   unresolved calls. Read the explanations — they say *why* each piece was
+   unresolved calls. Read the explanations — they say _why_ each piece was
    included, and what was left out and why.
 2. **Do not assume an unresolved call has a concrete implementation.**
    Tree-sitter analysis cannot prove runtime dispatch (reflection, DI

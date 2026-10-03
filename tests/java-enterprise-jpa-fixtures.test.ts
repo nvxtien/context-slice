@@ -8,15 +8,21 @@ import "../src/languages/java/enterprise/jpa-entity.js"; // side-effect: registe
 import "../src/languages/java/enterprise/spring-data.js"; // side-effect: registers extractor + resolver
 
 const root = mkdtempSync(join(tmpdir(), "context-slice-java-enterprise-jpa-"));
-cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, { recursive: true });
+cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, {
+  recursive: true,
+});
 const index = new ProjectIndex(root);
 index.rebuild();
 
 const relationsFor = (fileName: string) =>
-  index.enterpriseRelations.filter((relation) => relation.filePath.split("/").pop() === fileName);
+  index.enterpriseRelations.filter(
+    (relation) => relation.filePath.split("/").pop() === fileName,
+  );
 
 test("JpaEntityWithRelations: collection @OneToMany and bare @ManyToOne both resolve exact", () => {
-  const relations = relationsFor("JpaEntityWithRelations.java").filter((r) => r.kind === "ENTITY_RELATION");
+  const relations = relationsFor("JpaEntityWithRelations.java").filter(
+    (r) => r.kind === "ENTITY_RELATION",
+  );
   assert.equal(relations.length, 2);
 
   const toLines = relations.find((r) => r.targetLabel === "WorkOrderLine")!;
@@ -26,13 +32,19 @@ test("JpaEntityWithRelations: collection @OneToMany and bare @ManyToOne both res
   assert.match(toLines.evidence.join(" "), /OneToMany.*lines/);
   assert.match(toLines.evidence.join(" "), /fetch = FetchType.LAZY/);
   assert.match(toLines.evidence.join(" "), /cascade = CascadeType.ALL/);
-  assert.match(toLines.evidence.join(" "), /@JoinColumn\(name = "work_order_id"\)/);
+  assert.match(
+    toLines.evidence.join(" "),
+    /@JoinColumn\(name = "work_order_id"\)/,
+  );
 
   const toTechnician = relations.find((r) => r.targetLabel === "Technician")!;
   assert.ok(toTechnician, "expected an ENTITY_RELATION targeting Technician");
   assert.equal(toTechnician.confidence, "exact");
   assert.ok(toTechnician.targetSymbolId);
-  assert.match(toTechnician.evidence.join(" "), /ManyToOne.*assignedTechnician/);
+  assert.match(
+    toTechnician.evidence.join(" "),
+    /ManyToOne.*assignedTechnician/,
+  );
   // Bare @ManyToOne: no explicit fetch/cascade/mappedBy anywhere in its evidence.
   const bareEvidence = toTechnician.evidence.join(" ");
   assert.ok(!bareEvidence.includes("fetch"));
@@ -41,17 +53,24 @@ test("JpaEntityWithRelations: collection @OneToMany and bare @ManyToOne both res
 });
 
 test("JpaEntityBidirectional + InvoicePayment: mappedBy on the inverse side, @JoinColumn on the owning side", () => {
-  const inverse = relationsFor("JpaEntityBidirectional.java").filter((r) => r.kind === "ENTITY_RELATION");
+  const inverse = relationsFor("JpaEntityBidirectional.java").filter(
+    (r) => r.kind === "ENTITY_RELATION",
+  );
   assert.equal(inverse.length, 1);
   assert.equal(inverse[0].targetLabel, "InvoicePayment");
   assert.equal(inverse[0].confidence, "exact");
   assert.match(inverse[0].evidence.join(" "), /mappedBy = "invoice"/);
 
-  const owning = relationsFor("InvoicePayment.java").filter((r) => r.kind === "ENTITY_RELATION");
+  const owning = relationsFor("InvoicePayment.java").filter(
+    (r) => r.kind === "ENTITY_RELATION",
+  );
   assert.equal(owning.length, 1);
   assert.equal(owning[0].targetLabel, "Invoice");
   assert.equal(owning[0].confidence, "exact");
-  assert.match(owning[0].evidence.join(" "), /@JoinColumn\(name = "invoice_id"\)/);
+  assert.match(
+    owning[0].evidence.join(" "),
+    /@JoinColumn\(name = "invoice_id"\)/,
+  );
   assert.ok(!owning[0].evidence.join(" ").includes("mappedBy"));
 });
 
@@ -62,7 +81,10 @@ test("JpaRepositoryInterface: extends JpaRepository<WorkOrder, Long> with one de
   assert.equal(persists.targetLabel, "WorkOrder");
   assert.equal(persists.confidence, "exact");
   assert.ok(persists.targetSymbolId);
-  assert.match(persists.evidence.join(" "), /extends JpaRepository<WorkOrder, Long>/);
+  assert.match(
+    persists.evidence.join(" "),
+    /extends JpaRepository<WorkOrder, Long>/,
+  );
 
   const query = relations.find((r) => r.kind === "REPOSITORY_QUERY")!;
   assert.ok(query);
@@ -91,12 +113,18 @@ test("JpaRepositoryWithQuery: @Query text captured verbatim, no derived-query pr
   const query = relations.find((r) => r.kind === "REPOSITORY_QUERY")!;
   assert.ok(query);
   assert.equal(query.confidence, "exact");
-  assert.ok(query.evidence.some((e) => e.includes("SELECT t FROM Technician t WHERE t.active = true")));
+  assert.ok(
+    query.evidence.some((e) =>
+      e.includes("SELECT t FROM Technician t WHERE t.active = true"),
+    ),
+  );
   assert.ok(!query.evidence.some((e) => e.startsWith("property:")));
 });
 
 test("AmbiguousJpaRelationEntity: two same-simple-name Status entities never guess a winner", () => {
-  const relations = relationsFor("AmbiguousJpaRelationEntity.java").filter((r) => r.kind === "ENTITY_RELATION");
+  const relations = relationsFor("AmbiguousJpaRelationEntity.java").filter(
+    (r) => r.kind === "ENTITY_RELATION",
+  );
   assert.equal(relations.length, 1);
   assert.equal(relations[0].targetLabel, "Status");
   assert.equal(relations[0].confidence, "unresolved");

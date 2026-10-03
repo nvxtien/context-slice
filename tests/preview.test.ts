@@ -96,7 +96,10 @@ test("preview reports a baseline (whole-file cost) and the reduction the slice a
 });
 
 test("baseline reduction is clamped to [0, 1] and never divides by zero for an empty baseline", () => {
-  const preview = buildPreview(indexedFixture(), "explain retryPayment behavior");
+  const preview = buildPreview(
+    indexedFixture(),
+    "explain retryPayment behavior",
+  );
   assert.ok(preview.baseline.reduction >= 0 && preview.baseline.reduction <= 1);
 });
 

@@ -33,8 +33,15 @@ class VetController {
   const { symbols } = parseJava("VetController.java", source);
   const method = symbols.find((s) => s.name === "showResourcesVetList")!;
   assert.ok(method, "expected the method to be captured at all");
-  assert.match(method.source, /^\s*@GetMapping/, "source must include the leading mapping annotation");
-  assert.ok(method.source.includes("public"), "source must include the access modifier");
+  assert.match(
+    method.source,
+    /^\s*@GetMapping/,
+    "source must include the leading mapping annotation",
+  );
+  assert.ok(
+    method.source.includes("public"),
+    "source must include the access modifier",
+  );
   assert.deepEqual(method.annotations, ["@GetMapping", "@ResponseBody"]);
   assert.deepEqual(method.modifiers, ["public"]);
 });

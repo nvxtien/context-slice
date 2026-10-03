@@ -24,7 +24,8 @@ const MAPPING_TO_VERB: Record<string, string> = {
   DeleteMapping: "DELETE",
   PatchMapping: "PATCH",
 };
-const MAPPING_RE = /@(RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)\b(?:\(([^)]*)\))?/;
+const MAPPING_RE =
+  /@(RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)\b(?:\(([^)]*)\))?/;
 const STEREOTYPE_RE = /@(RestController|Controller)\b/;
 const CLASS_RE = /^(?:public\s+|private\s+)?(?:final\s+)?class\s+(\w+)/;
 const INLINE_ANNOTATION_RE = /@\w+(?:\([^)]*\))?/g;
@@ -67,7 +68,11 @@ function listJavaFiles(dir: string): string[] {
  * handler annotations are only honored at that top level, per plan Review Focus #5 (no false
  * positives from non-handler contexts).
  */
-function scanFile(absPath: string, relPath: string, repo: string): OracleEntry[] {
+function scanFile(
+  absPath: string,
+  relPath: string,
+  repo: string,
+): OracleEntry[] {
   const source = readFileSync(absPath, "utf8");
   const lines = source.split("\n");
   const entries: OracleEntry[] = [];
@@ -83,7 +88,10 @@ function scanFile(absPath: string, relPath: string, repo: string): OracleEntry[]
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
     const trimmed = raw.trim();
-    const isComment = trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*");
+    const isComment =
+      trimmed.startsWith("//") ||
+      trimmed.startsWith("*") ||
+      trimmed.startsWith("/*");
 
     if (!isComment && trimmed.startsWith("@")) {
       pending.push(trimmed);
@@ -91,7 +99,9 @@ function scanFile(absPath: string, relPath: string, repo: string): OracleEntry[]
       const classMatch = trimmed.match(CLASS_RE);
       if (classMatch) {
         pendingIsController = pending.some((l) => STEREOTYPE_RE.test(l));
-        const classMapping = pending.map((l) => l.match(MAPPING_RE)).find((m): m is RegExpMatchArray => !!m);
+        const classMapping = pending
+          .map((l) => l.match(MAPPING_RE))
+          .find((m): m is RegExpMatchArray => !!m);
         pendingClassPath = classMapping ? literalPath(classMapping[2]) : "";
         awaitingClassBrace = true;
         pending = [];
@@ -143,25 +153,40 @@ function scanFile(absPath: string, relPath: string, repo: string): OracleEntry[]
   return entries;
 }
 
-export function extractOracleRoutes(repoRoot: string, repoId: string, scopeDir = "src/main/java"): OracleEntry[] {
+export function extractOracleRoutes(
+  repoRoot: string,
+  repoId: string,
+  scopeDir = "src/main/java",
+): OracleEntry[] {
   const dir = join(repoRoot, scopeDir);
   const files = listJavaFiles(dir);
-  return files.flatMap((absPath) => scanFile(absPath, absPath.slice(repoRoot.length + 1), repoId));
+  return files.flatMap((absPath) =>
+    scanFile(absPath, absPath.slice(repoRoot.length + 1), repoId),
+  );
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const root = process.cwd();
-  const repositories = JSON.parse(readFileSync(join(root, "benchmarks/repositories.json"), "utf8")) as Array<{
+  const repositories = JSON.parse(
+    readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
+  ) as Array<{
     id: string;
     source: string;
   }>;
-  const targets = repositories.filter((r) => r.id === "spring-petclinic" || r.id === "petclinic-rest");
+  const targets = repositories.filter(
+    (r) => r.id === "spring-petclinic" || r.id === "petclinic-rest",
+  );
   const outDir = join(root, "benchmarks/results");
   mkdirSync(outDir, { recursive: true });
   for (const repo of targets) {
     const entries = extractOracleRoutes(join(root, repo.source), repo.id);
-    const outFile = join(outDir, `java-enterprise-route-oracle.${repo.id}.json`);
+    const outFile = join(
+      outDir,
+      `java-enterprise-route-oracle.${repo.id}.json`,
+    );
     writeFileSync(outFile, JSON.stringify(entries, null, 2) + "\n");
-    console.log(`${repo.id}: ${entries.length} oracle route entries -> ${outFile}`);
+    console.log(
+      `${repo.id}: ${entries.length} oracle route entries -> ${outFile}`,
+    );
   }
 }

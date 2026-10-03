@@ -118,7 +118,9 @@ function renderPreview(
   preview: ReturnType<typeof buildPreview>,
   explain: boolean,
 ) {
-  const lines = [`Target: ${preview.target.qualifiedName ?? preview.target.name}`];
+  const lines = [
+    `Target: ${preview.target.qualifiedName ?? preview.target.name}`,
+  ];
   if (preview.baseline.wholeFileTokens > 0)
     lines.push(
       `Saved ${Math.round(preview.baseline.reduction * 100)}% context ` +

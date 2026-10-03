@@ -67,14 +67,14 @@ MCP setup.
 
 ## Supported languages
 
-| Language   | Extensions                     | Notes                                                                     |
-| ---------- | ------------------------------ | ------------------------------------------------------------------------- |
-| Java       | `.java`                        | Classes, interfaces, records, enums, methods, constructors                |
-| TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts` | Imports, re-exports and barrels, overloads, arrow functions               |
-| TSX        | `.tsx`                         | React components, handlers, JSX component references                      |
-| JavaScript | `.js`, `.jsx`, `.mjs`, `.cjs`   | Same adapter as TypeScript (JS is parsed as untyped TS); CommonJS (`require`/`module.exports`) is not recognized as imports/exports — see Known limitations below |
-| Python     | `.py`, `.pyi`                  | Packages and `__init__` re-exports, decorators, `self`/`cls`, dataclasses |
-| Rust       | `.rs`                          | Functions, structs, enums, traits, impls, modules; `use`/re-export resolution; self/associated/trait call resolution |
+| Language   | Extensions                     | Notes                                                                                                                                                                             |
+| ---------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Java       | `.java`                        | Classes, interfaces, records, enums, methods, constructors                                                                                                                        |
+| TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts` | Imports, re-exports and barrels, overloads, arrow functions                                                                                                                       |
+| TSX        | `.tsx`                         | React components, handlers, JSX component references                                                                                                                              |
+| JavaScript | `.js`, `.jsx`, `.mjs`, `.cjs`  | Same adapter as TypeScript (JS is parsed as untyped TS); CommonJS (`require`/`module.exports`) is not recognized as imports/exports — see Known limitations below                 |
+| Python     | `.py`, `.pyi`                  | Packages and `__init__` re-exports, decorators, `self`/`cls`, dataclasses                                                                                                         |
+| Rust       | `.rs`                          | Functions, structs, enums, traits, impls, modules; `use`/re-export resolution; self/associated/trait call resolution                                                              |
 | Go         | `.go`                          | Functions, methods (incl. generic receivers), structs, interfaces, struct embedding and interface satisfaction; same-package, import-qualified and receiver-typed call resolution |
 
 One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md), [docs/python-support.md](docs/python-support.md) and [docs/rust-support.md](docs/rust-support.md) for what each language's resolution does and does not cover.

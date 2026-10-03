@@ -25,5 +25,7 @@ test("aggregates relations from every registered extractor", () => {
   };
   registerEnterpriseExtractor(() => [relation]);
   registerEnterpriseExtractor(() => []);
-  assert.deepEqual(extractEnterpriseRelations([], "A.java", "class A {}"), [relation]);
+  assert.deepEqual(extractEnterpriseRelations([], "A.java", "class A {}"), [
+    relation,
+  ]);
 });

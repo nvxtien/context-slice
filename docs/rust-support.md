@@ -36,15 +36,15 @@ Structs (including tuple structs), enums, traits, and inherent/trait impl blocks
 
 ## Call resolution
 
-| Kind | Example | Confidence |
-| --- | --- | --- |
-| same-file / bare-fn | `helper()` declared in the same file | exact |
-| self-method | `self.validate()` | exact |
-| field-method / param-method | `self.repo.save()`, a typed parameter's method | exact, when the receiver's type is known |
-| local-method | a local variable's method, single unambiguous binding | exact, when the receiver's type is known from one binding |
-| associated (`Type::f()`) | `WalkDir::new()` | exact |
-| trait dispatch | a call through `Box<dyn Trait>` or a trait-typed receiver | `probable` |
-| external | std or a declared Cargo dependency | unresolved, package recorded |
+| Kind                        | Example                                                   | Confidence                                                |
+| --------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
+| same-file / bare-fn         | `helper()` declared in the same file                      | exact                                                     |
+| self-method                 | `self.validate()`                                         | exact                                                     |
+| field-method / param-method | `self.repo.save()`, a typed parameter's method            | exact, when the receiver's type is known                  |
+| local-method                | a local variable's method, single unambiguous binding     | exact, when the receiver's type is known from one binding |
+| associated (`Type::f()`)    | `WalkDir::new()`                                          | exact                                                     |
+| trait dispatch              | a call through `Box<dyn Trait>` or a trait-typed receiver | `probable`                                                |
+| external                    | std or a declared Cargo dependency                        | unresolved, package recorded                              |
 
 Conservative, honestly-labelled rules layered on top of typed-receiver resolution:
 

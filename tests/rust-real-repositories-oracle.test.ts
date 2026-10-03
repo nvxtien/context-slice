@@ -33,16 +33,28 @@ test("expectedModuleFile: lib.rs/main.rs/mod.rs declare into their own directory
 
 test("expectedModuleFile: a plain foo.rs declares into foo/", () => {
   const exists = rel({ "src/foo/bar.rs": "", "src/foo/baz/mod.rs": "" });
-  assert.equal(expectedModuleFile("src/foo.rs", "bar", exists), "src/foo/bar.rs");
-  assert.equal(expectedModuleFile("src/foo.rs", "baz", exists), "src/foo/baz/mod.rs");
+  assert.equal(
+    expectedModuleFile("src/foo.rs", "bar", exists),
+    "src/foo/bar.rs",
+  );
+  assert.equal(
+    expectedModuleFile("src/foo.rs", "baz", exists),
+    "src/foo/baz/mod.rs",
+  );
   assert.equal(expectedModuleFile("src/foo.rs", "nope", exists), undefined);
   // foo.rs must NOT look beside itself
-  assert.equal(expectedModuleFile("src/foo.rs", "x", rel({ "src/x.rs": "" })), undefined);
+  assert.equal(
+    expectedModuleFile("src/foo.rs", "x", rel({ "src/x.rs": "" })),
+    undefined,
+  );
 });
 
 test("expectedModuleFile: inline mod chain extends the directory", () => {
   const exists = rel({ "src/a/b.rs": "" });
-  assert.equal(expectedModuleFile("src/lib.rs", "b", exists, ["a"]), "src/a/b.rs");
+  assert.equal(
+    expectedModuleFile("src/lib.rs", "b", exists, ["a"]),
+    "src/a/b.rs",
+  );
 });
 
 test("expectedModuleFile works against a real temp tree", () => {
@@ -62,7 +74,13 @@ mod inline { mod inner; }
 mod body_only { fn f() {} }
 `);
   const by = Object.fromEntries(decls.map((d) => [d.name, d]));
-  assert.deepEqual(Object.keys(by).sort(), ["inner", "moved", "plain", "publ", "tests"]);
+  assert.deepEqual(Object.keys(by).sort(), [
+    "inner",
+    "moved",
+    "plain",
+    "publ",
+    "tests",
+  ]);
   assert.equal(by.tests.cfg, true);
   assert.equal(by.plain.cfg, false);
   assert.equal(by.moved.pathAttribute, "elsewhere.rs");
@@ -79,7 +97,12 @@ test("classifyUse: anchored vs non-anchored", () => {
 });
 
 test("targetContainsName: symbol, export, submodule, enum variant, miss", () => {
-  const sym = (filePath: string, name: string, kind = "function", source = "") => ({
+  const sym = (
+    filePath: string,
+    name: string,
+    kind = "function",
+    source = "",
+  ) => ({
     filePath,
     name,
     kind,

@@ -4,10 +4,7 @@ import test from "node:test";
 import { parseRust } from "../src/languages/rust/parse.js";
 
 test("parses a simple crate-anchored use", () => {
-  const { imports } = parseRust(
-    "a.rs",
-    "use crate::service::create_order;\n",
-  );
+  const { imports } = parseRust("a.rs", "use crate::service::create_order;\n");
   assert.equal(imports.length, 1);
   assert.equal(imports[0].module, "crate::service");
   assert.equal(imports[0].importedName, "create_order");
@@ -32,10 +29,10 @@ test("parses a grouped use into one record per item", () => {
     "use crate::service::{create_order, cancel_order};\n",
   );
   assert.equal(imports.length, 2);
-  assert.deepEqual(
-    imports.map((i) => i.importedName).sort(),
-    ["cancel_order", "create_order"],
-  );
+  assert.deepEqual(imports.map((i) => i.importedName).sort(), [
+    "cancel_order",
+    "create_order",
+  ]);
   for (const record of imports) assert.equal(record.module, "crate::service");
 });
 
@@ -73,7 +70,8 @@ test("a bare single-segment use imports the module/crate name itself", () => {
 // --- general use-tree parsing (D2) ---
 const shape = (src: string) =>
   parseRust("a.rs", src).imports.map(
-    (i) => `${i.module}|${i.importedName ?? ""}|${i.localName ?? ""}|${i.wildcard ? "*" : ""}`,
+    (i) =>
+      `${i.module}|${i.importedName ?? ""}|${i.localName ?? ""}|${i.wildcard ? "*" : ""}`,
   );
 
 test("top-level use list becomes one import per leaf", () => {
@@ -90,8 +88,15 @@ test("self in a group imports the module itself", () => {
 });
 
 test("nested groups recurse with the extended prefix", () => {
-  assert.deepEqual(shape("use a::{b::{c, d}, e};\n"), ["a::b|c|c|", "a::b|d|d|", "a|e|e|"]);
-  assert.deepEqual(shape("use std::{fmt, io::Write};\n"), ["std|fmt|fmt|", "std::io|Write|Write|"]);
+  assert.deepEqual(shape("use a::{b::{c, d}, e};\n"), [
+    "a::b|c|c|",
+    "a::b|d|d|",
+    "a|e|e|",
+  ]);
+  assert.deepEqual(shape("use std::{fmt, io::Write};\n"), [
+    "std|fmt|fmt|",
+    "std::io|Write|Write|",
+  ]);
 });
 
 test("wildcards inside groups", () => {
@@ -103,7 +108,10 @@ test("aliased paths, self:: anchor, leading ::", () => {
   assert.deepEqual(shape("use a::b as c;\n"), ["a|b|c|"]);
   assert.deepEqual(shape("use self::x;\n"), ["self|x|x|"]);
   assert.deepEqual(shape("use ::std::x;\n"), ["std|x|x|"]);
-  assert.deepEqual(shape("use crate::{a, super::b};\n"), ["crate|a|a|", "crate::super|b|b|"]);
+  assert.deepEqual(shape("use crate::{a, super::b};\n"), [
+    "crate|a|a|",
+    "crate::super|b|b|",
+  ]);
 });
 
 test("degenerate shapes emit nothing", () => {
@@ -112,9 +120,15 @@ test("degenerate shapes emit nothing", () => {
 });
 
 test("pub use of nested / self / wildcard groups yields matching exports", () => {
-  const { exports } = parseRust("a.rs", "pub use a::{self, b::{c as d, *}, e::f};\n");
+  const { exports } = parseRust(
+    "a.rs",
+    "pub use a::{self, b::{c as d, *}, e::f};\n",
+  );
   assert.deepEqual(
-    exports.map((e) => `${e.fromModule}|${e.sourceName ?? ""}|${e.exportedName}|${e.wildcard ? "*" : ""}`),
+    exports.map(
+      (e) =>
+        `${e.fromModule}|${e.sourceName ?? ""}|${e.exportedName}|${e.wildcard ? "*" : ""}`,
+    ),
     ["a|a|a|", "a::b|c|d|", "a::b|||*", "a::e|f|f|"],
   );
 });

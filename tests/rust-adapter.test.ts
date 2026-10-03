@@ -7,10 +7,15 @@ import { ProjectIndex } from "../src/indexer/index.js";
 
 test("ProjectIndex indexes a .rs file via the Rust adapter", () => {
   const dir = mkdtempSync(join(tmpdir(), "cs-rust-"));
-  writeFileSync(join(dir, "lib.rs"), "pub fn add(a: u32, b: u32) -> u32 { a + b }\n");
+  writeFileSync(
+    join(dir, "lib.rs"),
+    "pub fn add(a: u32, b: u32) -> u32 { a + b }\n",
+  );
   const index = new ProjectIndex(dir);
   index.rebuild();
-  const add = index.symbols.find((s) => s.name === "add" && s.language === "rust");
+  const add = index.symbols.find(
+    (s) => s.name === "add" && s.language === "rust",
+  );
   assert.ok(add, "Rust function 'add' was not indexed");
   rmSync(dir, { recursive: true, force: true });
 });
@@ -19,11 +24,17 @@ test("target/ directory is ignored", () => {
   const dir = mkdtempSync(join(tmpdir(), "cs-rust-"));
   writeFileSync(join(dir, "lib.rs"), "pub fn kept() {}\n");
   mkdirSync(join(dir, "target"), { recursive: true });
-  writeFileSync(join(dir, "target", "generated.rs"), "pub fn should_be_ignored() {}\n");
+  writeFileSync(
+    join(dir, "target", "generated.rs"),
+    "pub fn should_be_ignored() {}\n",
+  );
   const index = new ProjectIndex(dir);
   index.rebuild();
   assert.ok(index.symbols.some((s) => s.name === "kept"));
-  assert.equal(index.symbols.some((s) => s.name === "should_be_ignored"), false);
+  assert.equal(
+    index.symbols.some((s) => s.name === "should_be_ignored"),
+    false,
+  );
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -39,7 +50,11 @@ test("duplicate impl blocks for the same type do not crash indexing", () => {
   const b = index.symbols.find((s) => s.name === "b" && s.language === "rust");
   assert.ok(a, "method 'a' was not indexed");
   assert.ok(b, "method 'b' was not indexed");
-  assert.notEqual(a!.id, b!.id, "methods from distinct impl blocks got the same id");
+  assert.notEqual(
+    a!.id,
+    b!.id,
+    "methods from distinct impl blocks got the same id",
+  );
   assert.notEqual(
     a!.parentId,
     b!.parentId,

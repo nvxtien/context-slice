@@ -3,7 +3,11 @@ import { join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { estimateTokens } from "../src/planner/budget.js";
 
-type Fact = { id: string; description: string; verification: { patterns: string[] } };
+type Fact = {
+  id: string;
+  description: string;
+  verification: { patterns: string[] };
+};
 type Task = {
   id: string;
   repository: string;
@@ -60,7 +64,9 @@ const files = [
   .join("\n");
 function recall(text: string, facts: Fact[]) {
   return facts
-    .filter((fact) => fact.verification.patterns.every((pattern) => text.includes(pattern)))
+    .filter((fact) =>
+      fact.verification.patterns.every((pattern) => text.includes(pattern)),
+    )
     .map((fact) => fact.id);
 }
 function sliceFor(targetSymbol: string, budget: number) {

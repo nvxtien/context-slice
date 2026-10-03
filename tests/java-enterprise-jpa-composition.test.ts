@@ -38,28 +38,50 @@ test("a member of an entity class surfaces its class's relationship relation whe
   const index = fixture();
   const target = index.symbols.find((s) => s.name === "addPet")!;
   const getName = index.symbols.find((s) => s.name === "getName")!;
-  const candidates = composeJpaContext(index, target, new Set([getName.id]), new Set([target.id]));
+  const candidates = composeJpaContext(
+    index,
+    target,
+    new Set([getName.id]),
+    new Set([target.id]),
+  );
   assert.ok(candidates.some((c) => c.rendered.includes("Pet")));
 });
 
 test("a class relationship relation is not surfaced when its target entity is not relevant (no spam)", () => {
   const index = fixture();
   const target = index.symbols.find((s) => s.name === "addPet")!;
-  const candidates = composeJpaContext(index, target, new Set(), new Set([target.id]));
-  assert.ok(!candidates.some((c) => c.rendered.includes("// Entity relationship")));
+  const candidates = composeJpaContext(
+    index,
+    target,
+    new Set(),
+    new Set([target.id]),
+  );
+  assert.ok(
+    !candidates.some((c) => c.rendered.includes("// Entity relationship")),
+  );
 });
 
 test("a repository interface target surfaces its own PERSISTS_ENTITY relation", () => {
   const index = fixture();
   const target = index.symbols.find((s) => s.name === "OwnerRepository")!;
-  const candidates = composeJpaContext(index, target, new Set(), new Set([target.id]));
+  const candidates = composeJpaContext(
+    index,
+    target,
+    new Set(),
+    new Set([target.id]),
+  );
   assert.ok(candidates.some((c) => c.rendered.includes("Owner")));
 });
 
 test("a derived-query method target surfaces its own REPOSITORY_QUERY relation", () => {
   const index = fixture();
   const target = index.symbols.find((s) => s.name === "findByLastName")!;
-  const candidates = composeJpaContext(index, target, new Set(), new Set([target.id]));
+  const candidates = composeJpaContext(
+    index,
+    target,
+    new Set(),
+    new Set([target.id]),
+  );
   assert.ok(candidates.some((c) => c.rendered.includes("lastName")));
 });
 
@@ -67,13 +89,18 @@ test("composeJpaContext is a no-op for non-Java targets", () => {
   const index = fixture();
   const target = index.symbols.find((s) => s.name === "addPet")!;
   const fakeRustTarget = { ...target, language: "rust" as const };
-  assert.deepEqual(composeJpaContext(index, fakeRustTarget, new Set(), new Set()), []);
+  assert.deepEqual(
+    composeJpaContext(index, fakeRustTarget, new Set(), new Set()),
+    [],
+  );
 });
 
 test("buildPreview surfaces JPA context end to end", () => {
   const index = fixture();
   const preview = buildPreview(index, "explain addPet");
-  assert.ok(preview.included.some((item) => item.reason === "enterprise relation"));
+  assert.ok(
+    preview.included.some((item) => item.reason === "enterprise relation"),
+  );
 });
 
 function multiRelationFixture() {
@@ -92,8 +119,14 @@ function multiRelationFixture() {
       "}",
     ].join("\n"),
   );
-  writeFileSync(join(root, "src/main/java/Customer.java"), "@Entity\nclass Customer {\n    long getId() { return 0; }\n}");
-  writeFileSync(join(root, "src/main/java/Vet.java"), "@Entity\nclass Vet {\n    String getName() { return null; }\n}");
+  writeFileSync(
+    join(root, "src/main/java/Customer.java"),
+    "@Entity\nclass Customer {\n    long getId() { return 0; }\n}",
+  );
+  writeFileSync(
+    join(root, "src/main/java/Vet.java"),
+    "@Entity\nclass Vet {\n    String getName() { return null; }\n}",
+  );
   const index = new ProjectIndex(root);
   index.rebuild();
   return index;
@@ -103,8 +136,15 @@ test("only the relationship whose target owns a related symbol surfaces (no full
   const index = multiRelationFixture();
   const target = index.symbols.find((s) => s.name === "place")!;
   const getId = index.symbols.find((s) => s.name === "getId")!;
-  const candidates = composeJpaContext(index, target, new Set([getId.id]), new Set([target.id]));
-  const entityRelationCandidates = candidates.filter((c) => c.rendered.includes("// Entity relationship"));
+  const candidates = composeJpaContext(
+    index,
+    target,
+    new Set([getId.id]),
+    new Set([target.id]),
+  );
+  const entityRelationCandidates = candidates.filter((c) =>
+    c.rendered.includes("// Entity relationship"),
+  );
   assert.equal(entityRelationCandidates.length, 1);
   assert.ok(entityRelationCandidates[0].rendered.includes("Customer"));
   assert.ok(!entityRelationCandidates.some((c) => c.rendered.includes("Vet")));
@@ -126,7 +166,10 @@ function sameTargetFixture() {
       "}",
     ].join("\n"),
   );
-  writeFileSync(join(root, "src/main/java/Address.java"), "@Entity\nclass Address {\n    String format() { return null; }\n}");
+  writeFileSync(
+    join(root, "src/main/java/Address.java"),
+    "@Entity\nclass Address {\n    String format() { return null; }\n}",
+  );
   const index = new ProjectIndex(root);
   index.rebuild();
   return index;
@@ -136,24 +179,41 @@ test("two same-kind relations to the same target type both surface as distinct c
   const index = sameTargetFixture();
   const target = index.symbols.find((s) => s.name === "ship")!;
   const format = index.symbols.find((s) => s.name === "format")!;
-  const candidates = composeJpaContext(index, target, new Set([format.id]), new Set([target.id]));
-  const entityRelationCandidates = candidates.filter((c) => c.rendered.includes("// Entity relationship"));
+  const candidates = composeJpaContext(
+    index,
+    target,
+    new Set([format.id]),
+    new Set([target.id]),
+  );
+  const entityRelationCandidates = candidates.filter((c) =>
+    c.rendered.includes("// Entity relationship"),
+  );
   assert.equal(entityRelationCandidates.length, 2);
-  assert.ok(entityRelationCandidates.some((c) => c.rendered.includes("billingAddress")));
-  assert.ok(entityRelationCandidates.some((c) => c.rendered.includes("shippingAddress")));
+  assert.ok(
+    entityRelationCandidates.some((c) => c.rendered.includes("billingAddress")),
+  );
+  assert.ok(
+    entityRelationCandidates.some((c) =>
+      c.rendered.includes("shippingAddress"),
+    ),
+  );
 });
 
 test("buildPreview on a Rust target never produces a JPA-sourced composition item", () => {
   const root = mkdtempSync(join(tmpdir(), "cs-rust-jpa-guard-"));
   mkdirSync(join(root, "src"), { recursive: true });
-  writeFileSync(join(root, "Cargo.toml"), '[package]\nname = "f"\nversion = "0.1.0"\n');
+  writeFileSync(
+    join(root, "Cargo.toml"),
+    '[package]\nname = "f"\nversion = "0.1.0"\n',
+  );
   writeFileSync(join(root, "src/lib.rs"), "pub fn target() {}\n");
   const index = new ProjectIndex(root);
   index.rebuild();
   const preview = buildPreview(index, "target");
   assert.ok(
     preview.included.every(
-      (item) => !item.rendered.includes("// Entity relationship") &&
+      (item) =>
+        !item.rendered.includes("// Entity relationship") &&
         !item.rendered.includes("// Repository") &&
         !item.rendered.includes("// Query"),
     ),

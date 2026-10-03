@@ -106,7 +106,9 @@ export function hasSyntaxError(source: string): boolean {
   return parseSource(source).rootNode.hasError;
 }
 
-export function classifyUse(record: { module: string }): "anchored" | "non-anchored" {
+export function classifyUse(record: {
+  module: string;
+}): "anchored" | "non-anchored" {
   const first = record.module.split("::")[0];
   return first === "crate" || first === "self" || first === "super"
     ? "anchored"
@@ -114,7 +116,12 @@ export function classifyUse(record: { module: string }): "anchored" | "non-ancho
 }
 
 type NameIndex = {
-  symbols: Array<{ filePath: string; name: string; kind: string; source?: string }>;
+  symbols: Array<{
+    filePath: string;
+    name: string;
+    kind: string;
+    source?: string;
+  }>;
   exports: Array<{ filePath: string; exportedName: string }>;
 };
 
@@ -129,15 +136,26 @@ export function targetContainsName(
   resolvedFile: string,
   importedName: string,
 ): boolean | "unverifiable" {
-  if (index.symbols.some((s) => s.filePath === resolvedFile && s.name === importedName))
+  if (
+    index.symbols.some(
+      (s) => s.filePath === resolvedFile && s.name === importedName,
+    )
+  )
     return true;
-  if (index.exports.some((e) => e.filePath === resolvedFile && e.exportedName === importedName))
+  if (
+    index.exports.some(
+      (e) => e.filePath === resolvedFile && e.exportedName === importedName,
+    )
+  )
     return true;
   const word = new RegExp(`\\b${importedName.replace(/[^\w]/g, "")}\\b`);
   if (
     /^[A-Z]/.test(importedName) &&
     index.symbols.some(
-      (s) => s.filePath === resolvedFile && s.kind === "enum" && word.test(s.source ?? ""),
+      (s) =>
+        s.filePath === resolvedFile &&
+        s.kind === "enum" &&
+        word.test(s.source ?? ""),
     )
   )
     return "unverifiable";

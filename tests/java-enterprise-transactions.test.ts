@@ -1,12 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { parseJava } from "../src/parser/java-parser.js";
-import { extractEnterpriseRelations, __resetEnterpriseExtractorsForTests } from "../src/languages/java/enterprise/registry.js";
+import {
+  extractEnterpriseRelations,
+  __resetEnterpriseExtractorsForTests,
+} from "../src/languages/java/enterprise/registry.js";
 import "../src/languages/java/enterprise/transactions.js"; // side-effect: registers the extractor
 
-function relationsFor(source: string, filePath = "src/main/java/PaymentService.java") {
+function relationsFor(
+  source: string,
+  filePath = "src/main/java/PaymentService.java",
+) {
   const { symbols } = parseJava(filePath, source);
-  return { symbols, relations: extractEnterpriseRelations(symbols, filePath, source) };
+  return {
+    symbols,
+    relations: extractEnterpriseRelations(symbols, filePath, source),
+  };
 }
 
 test("a bare @Transactional produces no relation", () => {
@@ -38,9 +47,14 @@ class ClinicService {
     Owner findOwner(long id) { return null; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/ClinicService.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/ClinicService.java",
+  );
   const method = symbols.find((s) => s.name === "findOwner")!;
-  const rel = relations.find((r) => r.kind === "TRANSACTION_BOUNDARY" && r.sourceSymbolId === method.id)!;
+  const rel = relations.find(
+    (r) => r.kind === "TRANSACTION_BOUNDARY" && r.sourceSymbolId === method.id,
+  )!;
   assert.ok(rel, "expected a TRANSACTION_BOUNDARY relation");
   assert.equal(rel.confidence, "exact");
   assert.equal(rel.targetLabel, "readOnly=true");
@@ -54,7 +68,10 @@ class OrderService {
     void place(String id) {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/OrderService.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/OrderService.java",
+  );
   const method = symbols.find((s) => s.name === "place")!;
   const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
   assert.equal(rel.evidence.length, 3);
@@ -70,7 +87,10 @@ class RiskyService {
     void run() {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/RiskyService.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/RiskyService.java",
+  );
   const method = symbols.find((s) => s.name === "run")!;
   const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
   assert.equal(rel.evidence.length, 2);
@@ -83,7 +103,10 @@ class LedgerService {
     void post() {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/LedgerService.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/LedgerService.java",
+  );
   const method = symbols.find((s) => s.name === "post")!;
   const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
   assert.equal(rel.evidence.length, 1);

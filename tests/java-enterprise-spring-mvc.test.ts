@@ -1,12 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { parseJava } from "../src/parser/java-parser.js";
-import { extractEnterpriseRelations, __resetEnterpriseExtractorsForTests } from "../src/languages/java/enterprise/registry.js";
+import {
+  extractEnterpriseRelations,
+  __resetEnterpriseExtractorsForTests,
+} from "../src/languages/java/enterprise/registry.js";
 import "../src/languages/java/enterprise/spring-mvc.js"; // side-effect: registers the extractor
 
-function relationsFor(source: string, filePath = "src/main/java/OrderController.java") {
+function relationsFor(
+  source: string,
+  filePath = "src/main/java/OrderController.java",
+) {
   const { symbols } = parseJava(filePath, source); // parseJava(filePath, source) — confirmed 2-arg signature, src/parser/java-parser.ts:73
-  return { symbols, relations: extractEnterpriseRelations(symbols, filePath, source) };
+  return {
+    symbols,
+    relations: extractEnterpriseRelations(symbols, filePath, source),
+  };
 }
 
 test("composes class-level and method-level literal paths into one exact route", () => {
@@ -21,8 +30,12 @@ class OrderController {
 }
 `;
   const { symbols, relations } = relationsFor(source);
-  const handler = symbols.find((s) => s.name === "update" && s.kind === "method")!;
-  const route = relations.find((r) => r.kind === "ROUTE_TO_HANDLER" && r.sourceSymbolId === handler.id);
+  const handler = symbols.find(
+    (s) => s.name === "update" && s.kind === "method",
+  )!;
+  const route = relations.find(
+    (r) => r.kind === "ROUTE_TO_HANDLER" && r.sourceSymbolId === handler.id,
+  );
   assert.ok(route, "expected a ROUTE_TO_HANDLER relation for update()");
   assert.equal(route!.targetLabel, "POST /orders/{id}");
   assert.equal(route!.confidence, "exact");
@@ -39,7 +52,10 @@ class HealthController {
     String health() { return "ok"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/HealthController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/HealthController.java",
+  );
   const handler = symbols.find((s) => s.name === "health")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.targetLabel, "GET /health");
@@ -56,8 +72,13 @@ class PetController {
     void update(Long id, boolean vaccinate) {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/PetController.java");
-  const [first, second] = symbols.filter((s) => s.name === "update" && s.kind === "method");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/PetController.java",
+  );
+  const [first, second] = symbols.filter(
+    (s) => s.name === "update" && s.kind === "method",
+  );
   const r1 = relations.find((r) => r.sourceSymbolId === first.id)!;
   const r2 = relations.find((r) => r.sourceSymbolId === second.id)!;
   assert.equal(r1.targetLabel, "PUT /pets/{id}");
@@ -73,11 +94,17 @@ class DynamicController {
     void x() {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/DynamicController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/DynamicController.java",
+  );
   const handler = symbols.find((s) => s.name === "x")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.confidence, "unresolved");
-  assert.ok(!route.targetLabel || route.targetLabel.includes("SomeConfig.BASE_PATH"), "must not fabricate a path");
+  assert.ok(
+    !route.targetLabel || route.targetLabel.includes("SomeConfig.BASE_PATH"),
+    "must not fabricate a path",
+  );
 });
 
 test("a same-class static final String constant resolves through one hop", () => {
@@ -90,7 +117,10 @@ class ConstController {
     void ping() {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/ConstController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/ConstController.java",
+  );
   const handler = symbols.find((s) => s.name === "ping")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.targetLabel, "GET /api/v2/ping");
@@ -116,7 +146,10 @@ class MediaController {
     String list() { return "[]"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/MediaController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/MediaController.java",
+  );
   const handler = symbols.find((s) => s.name === "list")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.notEqual(route.confidence, "exact");
@@ -134,11 +167,17 @@ class ConcatController {
     void x() {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/ConcatController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/ConcatController.java",
+  );
   const handler = symbols.find((s) => s.name === "x")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.confidence, "unresolved");
-  assert.ok(!route.targetLabel || !route.targetLabel.includes("GET /x"), "must not treat concatenation as a literal");
+  assert.ok(
+    !route.targetLabel || !route.targetLabel.includes("GET /x"),
+    "must not treat concatenation as a literal",
+  );
 });
 
 test("an array-literal mapping value is never resolved to an exact single route", () => {
@@ -149,7 +188,10 @@ class MultiPathController {
     void both() {}
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/MultiPathController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/MultiPathController.java",
+  );
   const handler = symbols.find((s) => s.name === "both")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.notEqual(route.confidence, "exact");
@@ -171,11 +213,24 @@ class VisitController {
     String initNewVisitForm() { return "pets/createOrUpdateVisitForm"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/VisitController.java");
-  const handler = symbols.find((s) => s.name === "initNewVisitForm" && s.kind === "method")!;
-  const route = relations.find((r) => r.kind === "ROUTE_TO_HANDLER" && r.sourceSymbolId === handler.id);
-  assert.ok(route, "expected a ROUTE_TO_HANDLER relation despite the preceding comment lines");
-  assert.equal(route!.targetLabel, "GET /owners/{ownerId}/pets/{petId}/visits/new");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/VisitController.java",
+  );
+  const handler = symbols.find(
+    (s) => s.name === "initNewVisitForm" && s.kind === "method",
+  )!;
+  const route = relations.find(
+    (r) => r.kind === "ROUTE_TO_HANDLER" && r.sourceSymbolId === handler.id,
+  );
+  assert.ok(
+    route,
+    "expected a ROUTE_TO_HANDLER relation despite the preceding comment lines",
+  );
+  assert.equal(
+    route!.targetLabel,
+    "GET /owners/{ownerId}/pets/{petId}/visits/new",
+  );
   assert.equal(route!.confidence, "exact");
 });
 
@@ -189,7 +244,10 @@ class ReportController {
     String summary() { return "ok"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/ReportController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/ReportController.java",
+  );
   const handler = symbols.find((s) => s.name === "summary")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.targetLabel, "GET /reports/summary");
@@ -205,7 +263,10 @@ class AuditedController {
     String legacyList() { return "[]"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/AuditedController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/AuditedController.java",
+  );
   const handler = symbols.find((s) => s.name === "legacyList")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.targetLabel, "GET /legacy/list");
@@ -220,7 +281,10 @@ class QualifiedController {
     String q() { return "ok"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/QualifiedController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/QualifiedController.java",
+  );
   const handler = symbols.find((s) => s.name === "q")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.targetLabel, "GET /qualified");
@@ -235,7 +299,10 @@ class BareController {
     String all() { return "[]"; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/BareController.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/BareController.java",
+  );
   const handler = symbols.find((s) => s.name === "all")!;
   const route = relations.find((r) => r.sourceSymbolId === handler.id)!;
   assert.equal(route.targetLabel, "GET");

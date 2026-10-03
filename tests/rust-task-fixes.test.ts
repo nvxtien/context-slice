@@ -17,7 +17,8 @@ function edges(files: Record<string, string>, callee: string) {
     const index = new ProjectIndex(dir);
     index.rebuild();
     const byId = new Map(index.symbols.map((s) => [s.id, s]));
-    const line = (id?: string) => (id ? byId.get(id)?.range.startLine : undefined);
+    const line = (id?: string) =>
+      id ? byId.get(id)?.range.startLine : undefined;
     return index.calls
       .filter((c) => c.calleeName === callee)
       .map((c) => ({
@@ -66,15 +67,28 @@ pub fn unknown(c: Option<u8>) {
 
 test("(a) match-arm binding takes the enum variant's payload type", () => {
   const got = edges({ "src/lib.rs": MATCH }, "apply");
-  const at = (caller: string) => got.filter((e) => e.caller === caller).map((e) => [e.target, e.conf]);
+  const at = (caller: string) =>
+    got.filter((e) => e.caller === caller).map((e) => [e.target, e.conf]);
   // run(): Get(cmd) -> Get::apply (line 4), Set(cmd) -> Set::apply (line 5), Pair(a, b) -> Get / Set.
-  assert.deepEqual(at("run"), [[4, "exact"], [5, "exact"], [4, "exact"], [5, "exact"]], JSON.stringify(got));
+  assert.deepEqual(
+    at("run"),
+    [
+      [4, "exact"],
+      [5, "exact"],
+      [4, "exact"],
+      [5, "exact"],
+    ],
+    JSON.stringify(got),
+  );
   assert.deepEqual(at("free"), [[5, "exact"]], JSON.stringify(got));
   // Scrutinee is an external Option: payload unknown, stays unresolved with no-type evidence.
   const u = got.filter((e) => e.caller === "unknown");
   assert.equal(u.length, 1);
   assert.equal(u[0].conf, "unresolved");
-  assert.ok(u[0].ev.some((x) => x.startsWith("no-type:")), JSON.stringify(u));
+  assert.ok(
+    u[0].ev.some((x) => x.startsWith("no-type:")),
+    JSON.stringify(u),
+  );
 });
 
 // Cause (b) calls inside macro token trees: `tokio::select! { res = self.conn.read_frame() => .. }` produced
@@ -108,9 +122,16 @@ test("(b) calls inside non-format macros are recovered as probable with macro ev
     assert.ok(e.ev.includes("macro:arg select"), JSON.stringify(e));
   }
   const flush = edges({ "src/lib.rs": MACRO }, "flush");
-  assert.deepEqual(flush.map((e) => [e.target, e.conf]), [[3, "probable"]], JSON.stringify(flush));
+  assert.deepEqual(
+    flush.map((e) => [e.target, e.conf]),
+    [[3, "probable"]],
+    JSON.stringify(flush),
+  );
   // The macro edge itself is unchanged.
-  assert.deepEqual(edges({ "src/lib.rs": MACRO }, "select").map((e) => [e.conf, e.ev]), [["unresolved", ["macro:select"]]]);
+  assert.deepEqual(
+    edges({ "src/lib.rs": MACRO }, "select").map((e) => [e.conf, e.ev]),
+    [["unresolved", ["macro:select"]]],
+  );
 });
 
 // Cause (c) cfg-duplicated callees: `#[cfg(unix)] fn device_num` / `#[cfg(windows)] fn device_num` / ... in
@@ -145,11 +166,25 @@ test("(c) cfg-gated alternatives are all attached as probable targets", () => {
   const dn = edges(CFG, "device_num");
   assert.equal(dn.length, 2, JSON.stringify(dn));
   for (const e of dn) {
-    assert.deepEqual([e.target, e.all, e.conf], [3, [3, 5, 7], "probable"], JSON.stringify(e));
-    assert.ok(e.ev.some((x) => x.startsWith("ambiguous:cfg")), JSON.stringify(e));
+    assert.deepEqual(
+      [e.target, e.all, e.conf],
+      [3, [3, 5, 7], "probable"],
+      JSON.stringify(e),
+    );
+    assert.ok(
+      e.ev.some((x) => x.startsWith("ambiguous:cfg")),
+      JSON.stringify(e),
+    );
   }
   // Not cfg-gated: plain same-name ambiguity stays unresolved.
   const tw = edges(CFG, "twice");
-  assert.deepEqual(tw.map((e) => [e.target, e.conf]), [[undefined, "unresolved"]], JSON.stringify(tw));
-  assert.ok(tw[0].ev.some((x) => x.startsWith("ambiguous:2")), JSON.stringify(tw));
+  assert.deepEqual(
+    tw.map((e) => [e.target, e.conf]),
+    [[undefined, "unresolved"]],
+    JSON.stringify(tw),
+  );
+  assert.ok(
+    tw[0].ev.some((x) => x.startsWith("ambiguous:2")),
+    JSON.stringify(tw),
+  );
 });

@@ -43,8 +43,9 @@ test("corrupt cached JSON raises an actionable index error", () => {
   storage.close();
 
   const db = new Database(join(root, ".context-slice/index.sqlite"));
-  db.prepare("INSERT INTO symbols(id, file_path, language, payload) VALUES (?, ?, ?, ?)")
-    .run("broken", "Broken.java", "java", "not json");
+  db.prepare(
+    "INSERT INTO symbols(id, file_path, language, payload) VALUES (?, ?, ?, ?)",
+  ).run("broken", "Broken.java", "java", "not json");
   db.close();
 
   assert.throws(

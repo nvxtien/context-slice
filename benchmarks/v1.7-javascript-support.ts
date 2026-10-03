@@ -17,7 +17,10 @@ type OracleExport = { exportedName: string };
 type OracleCall = { calleeName: string; receiverText?: string };
 
 const repositories: Repository[] = JSON.parse(
-  readFileSync(resolve(process.cwd(), "benchmarks/javascript-repositories.json"), "utf8"),
+  readFileSync(
+    resolve(process.cwd(), "benchmarks/javascript-repositories.json"),
+    "utf8",
+  ),
 );
 
 // Hand-read from the real checked-out source during this benchmark's own writing (not guessed).
@@ -105,7 +108,9 @@ for (const repo of repositories) {
 
   let symbolsFound = 0;
   for (const expected of oracle) {
-    const match = index.symbols.some((s) => s.name === expected.name && s.kind === expected.kind);
+    const match = index.symbols.some(
+      (s) => s.name === expected.name && s.kind === expected.kind,
+    );
     if (match) symbolsFound++;
     else missing.push(`${expected.kind} ${expected.name}`);
   }
@@ -116,7 +121,8 @@ for (const repo of repositories) {
       (i) =>
         i.module === expected.module &&
         i.kind === expected.kind &&
-        (expected.localName === undefined || i.localName === expected.localName),
+        (expected.localName === undefined ||
+          i.localName === expected.localName),
     );
     if (match) importsFound++;
     else missing.push(`import ${expected.module} (${expected.kind})`);
@@ -124,7 +130,9 @@ for (const repo of repositories) {
 
   let exportsFound = 0;
   for (const expected of oracleExports) {
-    const match = index.exports.some((e) => e.exportedName === expected.exportedName);
+    const match = index.exports.some(
+      (e) => e.exportedName === expected.exportedName,
+    );
     if (match) exportsFound++;
     else missing.push(`export ${expected.exportedName}`);
   }
@@ -134,10 +142,14 @@ for (const repo of repositories) {
     const match = index.calls.some(
       (c) =>
         c.calleeName === expected.calleeName &&
-        (expected.receiverText === undefined || c.receiverText === expected.receiverText),
+        (expected.receiverText === undefined ||
+          c.receiverText === expected.receiverText),
     );
     if (match) callsFound++;
-    else missing.push(`call ${expected.receiverText ? `${expected.receiverText}.` : ""}${expected.calleeName}`);
+    else
+      missing.push(
+        `call ${expected.receiverText ? `${expected.receiverText}.` : ""}${expected.calleeName}`,
+      );
   }
 
   results[repo.id] = {
@@ -160,4 +172,7 @@ for (const repo of repositories) {
 const outDir = resolve(process.cwd(), "benchmarks/results");
 if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 const report = { generatedAt: new Date().toISOString(), results };
-writeFileSync(join(outDir, "v1.7-javascript-support.json"), JSON.stringify(report, null, 2) + "\n");
+writeFileSync(
+  join(outDir, "v1.7-javascript-support.json"),
+  JSON.stringify(report, null, 2) + "\n",
+);

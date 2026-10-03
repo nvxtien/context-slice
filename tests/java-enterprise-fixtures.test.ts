@@ -7,14 +7,17 @@ import { ProjectIndex } from "../src/indexer/index.js";
 import "../src/languages/java/enterprise/spring-mvc.js"; // side-effect: registers the extractor
 
 const root = mkdtempSync(join(tmpdir(), "context-slice-java-enterprise-"));
-cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, { recursive: true });
+cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, {
+  recursive: true,
+});
 const index = new ProjectIndex(root);
 index.rebuild();
 
 const routesFor = (fileName: string) =>
   index.enterpriseRelations.filter(
     (relation) =>
-      relation.kind === "ROUTE_TO_HANDLER" && relation.filePath.split("/").pop() === fileName,
+      relation.kind === "ROUTE_TO_HANDLER" &&
+      relation.filePath.split("/").pop() === fileName,
   );
 
 test("controller-with-class-route: class + method literal paths compose to one exact route", () => {

@@ -9,9 +9,11 @@ import { resolveRustCalls } from "../src/languages/rust/resolve.js";
 
 /** A single lib.rs of about `size` chars: structs, impls, self / typed / path / bare calls. */
 function big(size: number, tag = "") {
-  let s = "use std::collections::HashMap;\nuse crate::inner::*;\nmod inner { pub fn g() {} }\n";
+  let s =
+    "use std::collections::HashMap;\nuse crate::inner::*;\nmod inner { pub fn g() {} }\n";
   for (let i = 0; s.length < size; i++)
-    s += `pub struct S${i} { f: HashMap<String, u8> }\n` +
+    s +=
+      `pub struct S${i} { f: HashMap<String, u8> }\n` +
       `impl S${i} {\n  pub fn new() -> Self { S${i} { f: HashMap::new() } }\n  pub fn m(&self, x: u8) -> u8 { self.n(); let a = S${i}::new(); a.n(); self.f.len(); g(); x }\n  fn n(&self) {}\n}\n` +
       `fn f${i}(s: &S${i}) -> u8 { ${tag}s.m(1); crate::inner::g(); S${i}::new().m(2) }\n`;
   return s;
@@ -20,7 +22,8 @@ function withDir<T>(files: Record<string, string>, run: (dir: string) => T): T {
   const dir = mkdtempSync(join(tmpdir(), "cs-rust-robust-"));
   try {
     mkdirSync(join(dir, "src"));
-    for (const [f, body] of Object.entries(files)) writeFileSync(join(dir, f), body);
+    for (const [f, body] of Object.entries(files))
+      writeFileSync(join(dir, f), body);
     return run(dir);
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -28,8 +31,18 @@ function withDir<T>(files: Record<string, string>, run: (dir: string) => T): T {
 }
 const outcomes = (index: ProjectIndex, file: string) => {
   const byId = new Map(index.symbols.map((s) => [s.id, s]));
-  return JSON.stringify(index.calls.filter((c) => c.filePath === file).map((c) =>
-    [c.range, c.calleeName, c.resolvedTargetId && byId.get(c.resolvedTargetId)?.range.startLine, c.confidence, c.resolutionKind, c.evidence]));
+  return JSON.stringify(
+    index.calls
+      .filter((c) => c.filePath === file)
+      .map((c) => [
+        c.range,
+        c.calleeName,
+        c.resolvedTargetId && byId.get(c.resolvedTargetId)?.range.startLine,
+        c.confidence,
+        c.resolutionKind,
+        c.evidence,
+      ]),
+  );
 };
 
 test("perf guard: resolution stays roughly linear in file size (was quadratic)", () => {
@@ -40,7 +53,10 @@ test("perf guard: resolution stays roughly linear in file size (was quadratic)",
     index.rebuild();
     const cold = performance.now() - t;
     assert.ok(index.calls.length > 15_000);
-    assert.ok(cold < 15_000, `cold rebuild of a 500K-char file took ${cold.toFixed(0)} ms`);
+    assert.ok(
+      cold < 15_000,
+      `cold rebuild of a 500K-char file took ${cold.toFixed(0)} ms`,
+    );
   });
 });
 
@@ -57,7 +73,13 @@ test("warm rebuild after an edit resolves the edited file exactly like a cold bu
       const cold = new ProjectIndex(dir2);
       cold.rebuild();
       assert.equal(outcomes(warm, "src/lib.rs"), outcomes(cold, "src/lib.rs"));
-      assert.ok(cold.calls.some((c) => c.calleeName === "m" && c.evidence.some((e) => e.startsWith("no-type:"))));
+      assert.ok(
+        cold.calls.some(
+          (c) =>
+            c.calleeName === "m" &&
+            c.evidence.some((e) => e.startsWith("no-type:")),
+        ),
+      );
     });
   });
 });
@@ -88,18 +110,30 @@ test("a throw while resolving one edge leaves that edge unresolved and resolves 
   assert.equal(calls.find((c) => c.calleeName === "g")!.confidence, "exact");
   const m = calls.find((c) => c.calleeName === "m")!;
   assert.equal(m.resolvedTargetId, undefined);
-  assert.deepEqual([m.confidence, m.evidence], ["unresolved", ["no-type:resolver-error"]]);
+  assert.deepEqual(
+    [m.confidence, m.evidence],
+    ["unresolved", ["no-type:resolver-error"]],
+  );
 });
 
 test("a throw before the per-edge loop leaves every Rust edge unresolved instead of aborting the rebuild", () => {
   const calls = resolveWithVanishedFile({
-    "src/lib.rs": "mod b;\nfn g() {}\nfn f() { g(); println!(\"x\"); }\n",
-    "src/b.rs": "struct T;\nimpl T { fn m(&self) {} }\nfn h(t: &T) { t.m(); }\n",
+    "src/lib.rs": 'mod b;\nfn g() {}\nfn f() { g(); println!("x"); }\n',
+    "src/b.rs":
+      "struct T;\nimpl T { fn m(&self) {} }\nfn h(t: &T) { t.m(); }\n",
   });
   for (const c of calls) {
     assert.equal(c.resolvedTargetId, undefined);
     assert.equal(c.confidence, "unresolved");
   }
-  assert.ok(calls.find((c) => c.calleeName === "g")!.evidence.includes("no-type:resolver-error"));
-  assert.ok(calls.find((c) => c.calleeName === "println")!.evidence.some((e) => e.startsWith("macro:")));
+  assert.ok(
+    calls
+      .find((c) => c.calleeName === "g")!
+      .evidence.includes("no-type:resolver-error"),
+  );
+  assert.ok(
+    calls
+      .find((c) => c.calleeName === "println")!
+      .evidence.some((e) => e.startsWith("macro:")),
+  );
 });

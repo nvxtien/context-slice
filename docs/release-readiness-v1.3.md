@@ -39,15 +39,15 @@ Evidence:
 
 ## Results
 
-| Metric | Python v1.3 (15 tasks, 3 repos) |
-| --- | --- |
-| Required-fact recall | 100% |
-| Retrieval recall | 100% |
-| Semantic call recall / precision | 100% / 100% |
-| Median context reduction | 94.14% |
-| Whole-file / whole-module fallback | 0% / 0% |
-| Median dynamic unresolved rate | ~49% of call edges, costing 0 required facts |
-| Parse errors | 0 across 366 Python files |
+| Metric                             | Python v1.3 (15 tasks, 3 repos)              |
+| ---------------------------------- | -------------------------------------------- |
+| Required-fact recall               | 100%                                         |
+| Retrieval recall                   | 100%                                         |
+| Semantic call recall / precision   | 100% / 100%                                  |
+| Median context reduction           | 94.14%                                       |
+| Whole-file / whole-module fallback | 0% / 0%                                      |
+| Median dynamic unresolved rate     | ~49% of call edges, costing 0 required facts |
+| Parse errors                       | 0 across 366 Python files                    |
 
 Repository scale: itsdangerous 15 files, Flask 65, Django ORM 286 (1.5 s cold index).
 
@@ -55,13 +55,13 @@ Repository scale: itsdangerous 15 files, Flask 65, Django ORM 286 (1.5 s cold in
 
 Measured alone against the fixture ground truth, 20 edges:
 
-| Rule | Semantic call recall |
-| --- | --- |
-| core resolution only | 80.00% |
-| + self attribute receiver | 86.67% |
-| + instance receiver | 86.67% |
-| + class receiver | 86.67% |
-| all three | 100.00% |
+| Rule                      | Semantic call recall |
+| ------------------------- | -------------------- |
+| core resolution only      | 80.00%               |
+| + self attribute receiver | 86.67%               |
+| + instance receiver       | 86.67%               |
+| + class receiver          | 86.67%               |
+| all three                 | 100.00%              |
 
 Each receiver rule recovers an edge no other rule reaches, so all three are retained. The first measurement showed the instance rule recovering nothing; that turned out to be a gap in the fixture, not a dead rule, and the fixture was fixed rather than the result being accepted.
 

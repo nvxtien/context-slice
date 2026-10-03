@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { parseJava } from "../src/parser/java-parser.js";
-import { extractEnterpriseRelations, resolveEnterpriseRelations, __resetEnterpriseExtractorsForTests } from "../src/languages/java/enterprise/registry.js";
+import {
+  extractEnterpriseRelations,
+  resolveEnterpriseRelations,
+  __resetEnterpriseExtractorsForTests,
+} from "../src/languages/java/enterprise/registry.js";
 import "../src/languages/java/enterprise/jpa-entity.js"; // side-effect: registers extractor + resolver
 
 function relationsFor(files: Record<string, string>) {
@@ -10,7 +14,10 @@ function relationsFor(files: Record<string, string>) {
   for (const [filePath, source] of Object.entries(files)) {
     const { symbols } = parseJava(filePath, source);
     allSymbols.push(...symbols);
-    perFile.push({ symbols, relations: extractEnterpriseRelations(symbols, filePath, source) });
+    perFile.push({
+      symbols,
+      relations: extractEnterpriseRelations(symbols, filePath, source),
+    });
   }
   const provisional = perFile.flatMap((f) => f.relations);
   const resolved = resolveEnterpriseRelations(provisional, allSymbols);
@@ -27,10 +34,15 @@ class Owner {
 }
 `;
   const pet = `@Entity\nclass Pet {}`;
-  const { symbols, relations } = relationsFor({ "src/main/java/Owner.java": owner, "src/main/java/Pet.java": pet });
+  const { symbols, relations } = relationsFor({
+    "src/main/java/Owner.java": owner,
+    "src/main/java/Pet.java": pet,
+  });
   const ownerClass = symbols.find((s) => s.name === "Owner")!;
   const petClass = symbols.find((s) => s.name === "Pet")!;
-  const rel = relations.find((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === ownerClass.id)!;
+  const rel = relations.find(
+    (r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === ownerClass.id,
+  )!;
   assert.ok(rel, "expected an ENTITY_RELATION for Owner.pets");
   assert.equal(rel.targetSymbolId, petClass.id);
   assert.equal(rel.targetLabel, "Pet");
@@ -43,7 +55,10 @@ class Owner {
 test("no explicit fetch/cascade/mappedBy means none appear in evidence", () => {
   const order = `@Entity\nclass Order {\n    @ManyToOne\n    private Customer customer;\n}`;
   const customer = `@Entity\nclass Customer {}`;
-  const { relations } = relationsFor({ "src/main/java/Order.java": order, "src/main/java/Customer.java": customer });
+  const { relations } = relationsFor({
+    "src/main/java/Order.java": order,
+    "src/main/java/Customer.java": customer,
+  });
   const rel = relations.find((r) => r.kind === "ENTITY_RELATION")!;
   const text = rel.evidence.join(" ");
   assert.ok(!text.includes("fetch"));
@@ -54,7 +69,10 @@ test("no explicit fetch/cascade/mappedBy means none appear in evidence", () => {
 test("a bidirectional relationship's explicit mappedBy is captured", () => {
   const order = `@Entity\nclass Order {\n    @OneToMany(mappedBy = "order")\n    private java.util.List<OrderItem> items;\n}`;
   const item = `@Entity\nclass OrderItem {}`;
-  const { relations } = relationsFor({ "src/main/java/Order.java": order, "src/main/java/OrderItem.java": item });
+  const { relations } = relationsFor({
+    "src/main/java/Order.java": order,
+    "src/main/java/OrderItem.java": item,
+  });
   const rel = relations.find((r) => r.kind === "ENTITY_RELATION")!;
   assert.match(rel.evidence.join(" "), /mappedBy = "order"/);
 });
@@ -81,7 +99,9 @@ test("an ambiguous relationship target (two same-name entities) is unresolved, n
 
 test("@Entity inside a comment produces no relation", () => {
   const source = `class PlainUtil {\n    // example: @Entity\n    void helper() {}\n}`;
-  const { relations } = relationsFor({ "src/main/java/PlainUtil.java": source });
+  const { relations } = relationsFor({
+    "src/main/java/PlainUtil.java": source,
+  });
   assert.equal(relations.length, 0);
 });
 
@@ -95,11 +115,19 @@ class Visit {
 }
 `;
   const pet = `@Entity\nclass Pet {}`;
-  const { symbols, relations } = relationsFor({ "src/main/java/Visit.java": visit, "src/main/java/Pet.java": pet });
+  const { symbols, relations } = relationsFor({
+    "src/main/java/Visit.java": visit,
+    "src/main/java/Pet.java": pet,
+  });
   const visitClass = symbols.find((s) => s.name === "Visit")!;
   const petClass = symbols.find((s) => s.name === "Pet")!;
-  const rel = relations.find((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === visitClass.id)!;
-  assert.ok(rel, "expected an ENTITY_RELATION despite the nested-paren @JoinColumn argument");
+  const rel = relations.find(
+    (r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === visitClass.id,
+  )!;
+  assert.ok(
+    rel,
+    "expected an ENTITY_RELATION despite the nested-paren @JoinColumn argument",
+  );
   assert.equal(rel.targetSymbolId, petClass.id);
   assert.equal(rel.targetLabel, "Pet");
 });
@@ -113,10 +141,19 @@ class Owner {
 }
 `;
   const pet = `@Entity\nclass Pet {}`;
-  const { symbols, relations } = relationsFor({ "src/main/java/Owner.java": owner, "src/main/java/Pet.java": pet });
+  const { symbols, relations } = relationsFor({
+    "src/main/java/Owner.java": owner,
+    "src/main/java/Pet.java": pet,
+  });
   const ownerClass = symbols.find((s) => s.name === "Owner")!;
-  const entityRelations = relations.filter((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === ownerClass.id);
-  assert.equal(entityRelations.length, 2, "both pets and favorites must produce their own relation");
+  const entityRelations = relations.filter(
+    (r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === ownerClass.id,
+  );
+  assert.equal(
+    entityRelations.length,
+    2,
+    "both pets and favorites must produce their own relation",
+  );
   for (const rel of entityRelations) {
     assert.equal(rel.targetLabel, "Pet");
   }
@@ -131,10 +168,15 @@ class Order {
 }
 `;
   const customer = `@Entity\nclass Customer {}`;
-  const { symbols, relations } = relationsFor({ "src/main/java/Order.java": order, "src/main/java/Customer.java": customer });
+  const { symbols, relations } = relationsFor({
+    "src/main/java/Order.java": order,
+    "src/main/java/Customer.java": customer,
+  });
   const orderClass = symbols.find((s) => s.name === "Order")!;
   const customerClass = symbols.find((s) => s.name === "Customer")!;
-  const rel = relations.find((r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === orderClass.id)!;
+  const rel = relations.find(
+    (r) => r.kind === "ENTITY_RELATION" && r.sourceSymbolId === orderClass.id,
+  )!;
   assert.ok(rel, "expected a relation for a fully-qualified @ManyToOne");
   assert.equal(rel.targetSymbolId, customerClass.id);
 });

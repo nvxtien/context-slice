@@ -520,9 +520,7 @@
     "category": "local-method",
     "split": "dev",
     "supplement": "trait-candidate",
-    "traitMethods": [
-      "DirEntryExt::ino"
-    ],
+    "traitMethods": ["DirEntryExt::ino"],
     "expected": {
       "kind": "external",
       "confidence": "exact",

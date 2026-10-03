@@ -1,17 +1,32 @@
 // Prose for the results .md. Numbers are interpolated from the run; the file:line
 // evidence below was verified by reading the pinned checkouts (see the report).
 type R = any;
-export function findingsProse(results: R[], before: Record<string, R> = {}): string {
+export function findingsProse(
+  results: R[],
+  before: Record<string, R> = {},
+): string {
   const by = (id: string) => results.find((r) => r.id === id)!;
   const w = by("walkdir");
   const m = by("mini-redis");
   const g = by("ripgrep-ignore");
   const rate = (n: number, d: number) => `${n}/${d}`;
-  const ext = (r: R) => (r.useResolution.externalBreakdown["std-family"] ?? 0) + (r.useResolution.externalBreakdown["declared-dependency"] ?? 0);
-  const dropped = (r: R) => r.coverage.filesSilentlyDropped.map((d: R) => `\`${d.file}\` (${d.chars} chars)`).join(", ") || "none";
+  const ext = (r: R) =>
+    (r.useResolution.externalBreakdown["std-family"] ?? 0) +
+    (r.useResolution.externalBreakdown["declared-dependency"] ?? 0);
+  const dropped = (r: R) =>
+    r.coverage.filesSilentlyDropped
+      .map((d: R) => `\`${d.file}\` (${d.chars} chars)`)
+      .join(", ") || "none";
   const b = (id: string) => before[id];
-  const bw = b("walkdir"), bm = b("mini-redis"), bg = b("ripgrep-ignore");
-  const bdropped = (r: R) => (r ? r.coverage.filesSilentlyDropped.map((d: R) => `\`${d.file}\` (${d.chars} chars)`).join(", ") : "n/a");
+  const bw = b("walkdir"),
+    bm = b("mini-redis"),
+    bg = b("ripgrep-ignore");
+  const bdropped = (r: R) =>
+    r
+      ? r.coverage.filesSilentlyDropped
+          .map((d: R) => `\`${d.file}\` (${d.chars} chars)`)
+          .join(", ")
+      : "n/a";
   return `## Findings
 
 These are the numbers AFTER the three fixes in \`src/languages/rust/\` (see "Before / After the fixes" above for every delta). Disclosure: the attribution rules (including the emptied-file PARSER rule and the treatment of \`examples/*.rs\` as crate roots) were adjusted after inspecting the first run's data; the rule table above is the final one. The rules assign category labels only and by construction cannot change the headline rates. UNKNOWN is reported as found. Files with a tree-sitter syntax error: walkdir ${w.coverage.parseErrorFiles.length}, mini-redis ${m.coverage.parseErrorFiles.length}, ripgrep-ignore ${g.coverage.parseErrorFiles.length}; files emptied by the adapter: walkdir ${w.coverage.filesSilentlyDropped.length}, mini-redis ${m.coverage.filesSilentlyDropped.length}, ripgrep-ignore ${g.coverage.filesSilentlyDropped.length}.

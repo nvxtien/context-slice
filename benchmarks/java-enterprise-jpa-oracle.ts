@@ -25,7 +25,8 @@
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-export type RelationKind = "OneToOne" | "OneToMany" | "ManyToOne" | "ManyToMany";
+export type RelationKind =
+  "OneToOne" | "OneToMany" | "ManyToOne" | "ManyToMany";
 
 export type EntityRelationEntry = {
   repo: string;
@@ -70,9 +71,11 @@ export type OracleResult = {
   repositoryQueries: RepositoryQueryEntry[];
 };
 
-const RELATION_RE = /@(OneToOne|OneToMany|ManyToOne|ManyToMany)\b(?:\s*\(([^)]*)\))?/g;
+const RELATION_RE =
+  /@(OneToOne|OneToMany|ManyToOne|ManyToMany)\b(?:\s*\(([^)]*)\))?/g;
 const COLLECTION_RE = /\b(?:List|Set|Collection)<\s*([\w.]+)\s*>/;
-const BASE_RE = /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
+const BASE_RE =
+  /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
 const DERIVED_RE = /^(?:find|exists|delete|count)By(?=[A-Z])/;
 const CLASS_DECL_RE = /\b(class|interface|enum|record)\s+([\w$]+)/;
 
@@ -123,7 +126,13 @@ function matchingBrace(text: string, openIndex: number): number {
   return -1;
 }
 
-type TypeBlock = { kind: string; name: string; preamble: string; bodyOpen: number; bodyClose: number };
+type TypeBlock = {
+  kind: string;
+  name: string;
+  preamble: string;
+  bodyOpen: number;
+  bodyClose: number;
+};
 
 /** Every top-level (non-nested) class/interface/enum/record body in a file, with its preamble
  * (annotations, javadoc, header up to and including any `extends`/`implements` clause). Nested
@@ -137,11 +146,19 @@ function topLevelTypeBlocks(source: string): TypeBlock[] {
     if (ch === "{") {
       if (depth === 0) {
         const preamble = source.slice(lastBoundary, i);
-        const classMatch = [...preamble.matchAll(new RegExp(CLASS_DECL_RE, "g"))].pop();
+        const classMatch = [
+          ...preamble.matchAll(new RegExp(CLASS_DECL_RE, "g")),
+        ].pop();
         if (classMatch) {
           const close = matchingBrace(source, i);
           const bodyClose = close === -1 ? source.length - 1 : close;
-          blocks.push({ kind: classMatch[1], name: classMatch[2], preamble, bodyOpen: i, bodyClose });
+          blocks.push({
+            kind: classMatch[1],
+            name: classMatch[2],
+            preamble,
+            bodyOpen: i,
+            bodyClose,
+          });
           lastBoundary = bodyClose + 1;
         }
       }
@@ -155,7 +172,11 @@ function topLevelTypeBlocks(source: string): TypeBlock[] {
 
 /** Member-level body: everything at brace depth 1 kept, depth>1 (method bodies, nested types,
  * initializers) blanked to spaces (newlines preserved so line numbers stay accurate). */
-function memberLevelMask(text: string, bodyOpen: number, bodyClose: number): string {
+function memberLevelMask(
+  text: string,
+  bodyOpen: number,
+  bodyClose: number,
+): string {
   const out = text.split("");
   let depth = 0;
   let inString = false;
@@ -170,13 +191,18 @@ function memberLevelMask(text: string, bodyOpen: number, bodyClose: number): str
     if (!keep && out[i] !== "\n") out[i] = " ";
   }
   for (let i = 0; i < bodyOpen; i++) if (out[i] !== "\n") out[i] = " ";
-  for (let i = bodyClose + 1; i < out.length; i++) if (out[i] !== "\n") out[i] = " ";
+  for (let i = bodyClose + 1; i < out.length; i++)
+    if (out[i] !== "\n") out[i] = " ";
   return out.join("");
 }
 
 // ---------- (a) ENTITY_RELATION scan ----------
 
-function explicitAttributes(args: string): { mappedBy?: string; fetch?: string; cascade?: string } {
+function explicitAttributes(args: string): {
+  mappedBy?: string;
+  fetch?: string;
+  cascade?: string;
+} {
   const mappedBy = args.match(/\bmappedBy\s*=\s*"([^"]*)"/)?.[1];
   const fetch = args.match(/\bfetch\s*=\s*([\w.]+)/)?.[1];
   const cascade = args.match(/\bcascade\s*=\s*(\{[^}]*\}|[\w.]+)/)?.[1];
@@ -194,7 +220,10 @@ type LeadAnnotation = { name: string; args?: string };
  * own bare name and (unparsed) argument text, so a caller can tell a genuine top-level stacked
  * annotation (e.g. a field's own `@JoinColumn`) apart from one merely nested inside another
  * top-level annotation's argument list (e.g. `@JoinTable`'s `joinColumns = @JoinColumn(...)`). */
-function consumeLeadingAnnotations(text: string): { consumed: string; annotations: LeadAnnotation[] } {
+function consumeLeadingAnnotations(text: string): {
+  consumed: string;
+  annotations: LeadAnnotation[];
+} {
   let i = 0;
   const annotations: LeadAnnotation[] = [];
   for (;;) {
@@ -232,7 +261,11 @@ function consumeLeadingAnnotations(text: string): { consumed: string; annotation
   return { consumed: text.slice(0, i), annotations };
 }
 
-function scanEntityRelations(source: string, relPath: string, repo: string): EntityRelationEntry[] {
+function scanEntityRelations(
+  source: string,
+  relPath: string,
+  repo: string,
+): EntityRelationEntry[] {
   const entries: EntityRelationEntry[] = [];
   for (const block of topLevelTypeBlocks(source)) {
     if (block.kind !== "class") continue;
@@ -240,19 +273,27 @@ function scanEntityRelations(source: string, relPath: string, repo: string): Ent
     const body = memberLevelMask(source, block.bodyOpen, block.bodyClose);
     for (const match of body.matchAll(RELATION_RE)) {
       const rest = body.slice((match.index ?? 0) + match[0].length);
-      const { consumed: lead, annotations: leadAnnotations } = consumeLeadingAnnotations(rest);
+      const { consumed: lead, annotations: leadAnnotations } =
+        consumeLeadingAnnotations(rest);
       const decl = rest.slice(lead.length);
       const end = decl.search(/[;=(]/);
       if (end === -1 || decl[end] === "(") continue; // annotated getter/method: not a field
       const bare = decl
         .slice(0, end)
-        .replace(/\b(?:final|private|protected|public|static|transient|volatile)\b/g, " ")
+        .replace(
+          /\b(?:final|private|protected|public|static|transient|volatile)\b/g,
+          " ",
+        )
         .trim();
       const field = bare.match(/^([\w$.]+(?:\s*<.*>)?)\s+([\w$]+)$/s);
       if (!field) continue;
       const [, typeText, fieldName] = field;
-      const rawTarget = typeText.match(COLLECTION_RE)?.[1] ?? typeText.replace(/<.*>/s, "").trim();
-      const joinColumn = leadAnnotations.find((a) => a.name === "JoinColumn")?.args?.trim();
+      const rawTarget =
+        typeText.match(COLLECTION_RE)?.[1] ??
+        typeText.replace(/<.*>/s, "").trim();
+      const joinColumn = leadAnnotations
+        .find((a) => a.name === "JoinColumn")
+        ?.args?.trim();
       const { mappedBy, fetch, cascade } = explicitAttributes(match[2] ?? "");
       entries.push({
         repo,
@@ -275,7 +316,10 @@ function scanEntityRelations(source: string, relPath: string, repo: string): Ent
 // ---------- (b) repository linkage scan ----------
 
 /** Top-level type arguments of the `<...>` opening at `open`. */
-function typeArguments(text: string, open: number): { args: string[]; end: number } | undefined {
+function typeArguments(
+  text: string,
+  open: number,
+): { args: string[]; end: number } | undefined {
   const args: string[] = [];
   let depth = 0;
   let start = open + 1;
@@ -311,7 +355,13 @@ function splitExtendsList(text: string): string[] {
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 
-type MethodInfo = { name: string; paramCount: number; isDerived: boolean; hasQuery: boolean; startLine: number };
+type MethodInfo = {
+  name: string;
+  paramCount: number;
+  isDerived: boolean;
+  hasQuery: boolean;
+  startLine: number;
+};
 
 type IfaceInfo = {
   name: string;
@@ -325,7 +375,9 @@ type IfaceInfo = {
 };
 
 /** Strips one leading annotation (with balanced, string-aware parens) if present. */
-function stripOneAnnotation(text: string): { rest: string; hadQuery: boolean } | undefined {
+function stripOneAnnotation(
+  text: string,
+): { rest: string; hadQuery: boolean } | undefined {
   const m = /^\s*@([\w.]+)/.exec(text);
   if (!m) return undefined;
   let i = (m.index ?? 0) + m[0].length;
@@ -370,7 +422,11 @@ function splitMembers(body: string): string[] {
   return members;
 }
 
-function parseMethod(memberText: string): { name: string; paramCount: number; hasQuery: boolean; declStart: number } | undefined {
+function parseMethod(
+  memberText: string,
+):
+  | { name: string; paramCount: number; hasQuery: boolean; declStart: number }
+  | undefined {
   let rest = memberText;
   let consumed = 0;
   let hasQuery = false;
@@ -403,11 +459,20 @@ function parseMethod(memberText: string): { name: string; paramCount: number; ha
   }
   if (parenClose === -1) return undefined;
   const paramsText = rest.slice(parenOpen + 1, parenClose).trim();
-  const paramCount = paramsText === "" ? 0 : splitExtendsList(paramsText).length;
-  return { name: nameMatch[1], paramCount, hasQuery, declStart: consumed + (nameMatch.index ?? 0) };
+  const paramCount =
+    paramsText === "" ? 0 : splitExtendsList(paramsText).length;
+  return {
+    name: nameMatch[1],
+    paramCount,
+    hasQuery,
+    declStart: consumed + (nameMatch.index ?? 0),
+  };
 }
 
-function scanRepositoryInterfaces(source: string, relPath: string): IfaceInfo[] {
+function scanRepositoryInterfaces(
+  source: string,
+  relPath: string,
+): IfaceInfo[] {
   const ifaces: IfaceInfo[] = [];
   for (const block of topLevelTypeBlocks(source)) {
     if (block.kind !== "interface") continue;
@@ -423,7 +488,10 @@ function scanRepositoryInterfaces(source: string, relPath: string): IfaceInfo[] 
       if (!parsed || parsed.args.length !== 2) continue;
       const [entity, id] = parsed.args;
       if (!/^[\w.]+$/.test(entity)) continue;
-      resolvedEntity = { entity: entity.slice(entity.lastIndexOf(".") + 1), id };
+      resolvedEntity = {
+        entity: entity.slice(entity.lastIndexOf(".") + 1),
+        id,
+      };
       break;
     }
 
@@ -463,10 +531,18 @@ function scanRepositoryInterfaces(source: string, relPath: string): IfaceInfo[] 
 /** Bare, non-generic supertype names from an extends list (e.g. "OwnerRepository" out of
  * "OwnerRepository, Repository<Owner, Integer>") — candidates for the plain-interface walk. */
 function plainSupertypeNames(extendsRaw: string[]): string[] {
-  return extendsRaw.filter((item) => !item.includes("<")).map((item) => item.trim());
+  return extendsRaw
+    .filter((item) => !item.includes("<"))
+    .map((item) => item.trim());
 }
 
-function buildRepositoryFacts(repo: string, allIfaces: IfaceInfo[]): { persistsEntity: PersistsEntityEntry[]; repositoryQueries: RepositoryQueryEntry[] } {
+function buildRepositoryFacts(
+  repo: string,
+  allIfaces: IfaceInfo[],
+): {
+  persistsEntity: PersistsEntityEntry[];
+  repositoryQueries: RepositoryQueryEntry[];
+} {
   const byName = new Map<string, IfaceInfo>();
   for (const iface of allIfaces) byName.set(iface.name, iface);
 
@@ -491,8 +567,14 @@ function buildRepositoryFacts(repo: string, allIfaces: IfaceInfo[]): { persistsE
     // with @Override), record every declaring file for transparency but grade against the fact
     // once.
     const visited = new Set<string>();
-    const bySignature = new Map<string, { info: MethodInfo; files: string[] }>();
-    const queue: string[] = [iface.name, ...plainSupertypeNames(iface.extendsRaw)];
+    const bySignature = new Map<
+      string,
+      { info: MethodInfo; files: string[] }
+    >();
+    const queue: string[] = [
+      iface.name,
+      ...plainSupertypeNames(iface.extendsRaw),
+    ];
     while (queue.length) {
       const name = queue.shift()!;
       if (visited.has(name)) continue;
@@ -508,7 +590,8 @@ function buildRepositoryFacts(repo: string, allIfaces: IfaceInfo[]): { persistsE
         }
         bySignature.set(sig, { info: m, files: [supIface.file] });
       }
-      for (const next of plainSupertypeNames(supIface.extendsRaw)) queue.push(next);
+      for (const next of plainSupertypeNames(supIface.extendsRaw))
+        queue.push(next);
     }
 
     for (const { info, files } of bySignature.values()) {
@@ -537,7 +620,11 @@ function listJavaFiles(dir: string): string[] {
   });
 }
 
-export function extractOracleJpaSpringData(repoRoot: string, repoId: string, scopeDir = "src/main/java"): OracleResult {
+export function extractOracleJpaSpringData(
+  repoRoot: string,
+  repoId: string,
+  scopeDir = "src/main/java",
+): OracleResult {
   const dir = join(repoRoot, scopeDir);
   const files = listJavaFiles(dir);
 
@@ -552,18 +639,25 @@ export function extractOracleJpaSpringData(repoRoot: string, repoId: string, sco
     allIfaces.push(...scanRepositoryInterfaces(source, relPath));
   }
 
-  const { persistsEntity, repositoryQueries } = buildRepositoryFacts(repoId, allIfaces);
+  const { persistsEntity, repositoryQueries } = buildRepositoryFacts(
+    repoId,
+    allIfaces,
+  );
 
   return { entityRelations, persistsEntity, repositoryQueries };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const root = process.cwd();
-  const repositories = JSON.parse(readFileSync(join(root, "benchmarks/repositories.json"), "utf8")) as Array<{
+  const repositories = JSON.parse(
+    readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
+  ) as Array<{
     id: string;
     source: string;
   }>;
-  const targets = repositories.filter((r) => r.id === "spring-petclinic" || r.id === "petclinic-rest");
+  const targets = repositories.filter(
+    (r) => r.id === "spring-petclinic" || r.id === "petclinic-rest",
+  );
   const outDir = join(root, "benchmarks/results");
   mkdirSync(outDir, { recursive: true });
   for (const repo of targets) {

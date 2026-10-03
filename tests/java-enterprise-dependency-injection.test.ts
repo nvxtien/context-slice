@@ -1,17 +1,30 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { parseJava } from "../src/parser/java-parser.js";
-import { extractEnterpriseRelations, resolveEnterpriseRelations } from "../src/languages/java/enterprise/registry.js";
+import {
+  extractEnterpriseRelations,
+  resolveEnterpriseRelations,
+} from "../src/languages/java/enterprise/registry.js";
 import { resolveBeanType } from "../src/languages/java/enterprise/dependency-injection.js"; // also registers the extractor
 
-function relationsFor(source: string, filePath = "src/main/java/OrderService.java") {
+function relationsFor(
+  source: string,
+  filePath = "src/main/java/OrderService.java",
+) {
   const { symbols } = parseJava(filePath, source);
   return { symbols, relations: resolved(symbols, filePath, source) };
 }
 
 // Two-phase: per-file extraction is provisional; bean identity resolves in the project-wide post-pass.
-function resolved(allSymbols: ReturnType<typeof parseJava>["symbols"], filePath: string, source: string) {
-  return resolveEnterpriseRelations(extractEnterpriseRelations(allSymbols, filePath, source), allSymbols);
+function resolved(
+  allSymbols: ReturnType<typeof parseJava>["symbols"],
+  filePath: string,
+  source: string,
+) {
+  return resolveEnterpriseRelations(
+    extractEnterpriseRelations(allSymbols, filePath, source),
+    allSymbols,
+  );
 }
 
 test("constructor injection resolves a unique project type as exact", () => {
@@ -25,8 +38,12 @@ class OrderService {
 `;
   const { symbols, relations } = relationsFor(source);
   const ctor = symbols.find((s) => s.kind === "constructor")!;
-  const repoType = symbols.find((s) => s.kind === "class" && s.name === "OrderRepository")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === ctor.id)!;
+  const repoType = symbols.find(
+    (s) => s.kind === "class" && s.name === "OrderRepository",
+  )!;
+  const rel = relations.find(
+    (r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === ctor.id,
+  )!;
   assert.ok(rel, "expected a constructor-injection relation");
   assert.equal(rel.targetLabel, "OrderRepository");
   assert.equal(rel.targetSymbolId, repoType.id);
@@ -42,9 +59,17 @@ class Checkout {
     private PaymentGateway gateway;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const rel = relations.find(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  )!;
   assert.equal(rel.targetLabel, "PaymentGateway");
   assert.equal(rel.confidence, "exact");
   assert.match(rel.evidence.join(" "), /@Autowired field/);
@@ -59,9 +84,16 @@ class Alerts {
     void setNotifier(Notifier notifier) { this.notifier = notifier; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Alerts.java");
-  const setter = symbols.find((s) => s.kind === "method" && s.name === "setNotifier")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === setter.id)!;
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Alerts.java",
+  );
+  const setter = symbols.find(
+    (s) => s.kind === "method" && s.name === "setNotifier",
+  )!;
+  const rel = relations.find(
+    (r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === setter.id,
+  )!;
   assert.equal(rel.targetLabel, "Notifier");
   assert.equal(rel.confidence, "exact");
   assert.match(rel.evidence.join(" "), /setter/);
@@ -79,10 +111,15 @@ class Foo {
 }
 `;
   const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
-  const method = symbols.find((s) => s.kind === "method" && s.name === "setBar")!;
+  const method = symbols.find(
+    (s) => s.kind === "method" && s.name === "setBar",
+  )!;
   const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
   assert.ok(rel, "the real @Autowired setter must still produce a relation");
-  assert.ok(!rel.evidence.some((e) => e.includes("@Qualifier")), "a comment-only @Qualifier must not appear in evidence");
+  assert.ok(
+    !rel.evidence.some((e) => e.includes("@Qualifier")),
+    "a comment-only @Qualifier must not appear in evidence",
+  );
 });
 
 test("a genuinely @Qualifier-annotated setter still has its value extracted", () => {
@@ -97,9 +134,14 @@ class Foo {
 }
 `;
   const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
-  const method = symbols.find((s) => s.kind === "method" && s.name === "setBar")!;
+  const method = symbols.find(
+    (s) => s.kind === "method" && s.name === "setBar",
+  )!;
   const rel = relations.find((r) => r.sourceSymbolId === method.id)!;
-  assert.ok(rel.evidence.some((e) => e.includes('@Qualifier("primary")')), "a real @Qualifier must still be extracted");
+  assert.ok(
+    rel.evidence.some((e) => e.includes('@Qualifier("primary")')),
+    "a real @Qualifier must still be extracted",
+  );
 });
 
 test("@Qualifier in a comment between an @Autowired annotation and a field produces no qualifier evidence", () => {
@@ -115,7 +157,10 @@ class Foo {
   const cls = symbols.find((s) => s.kind === "class" && s.name === "Foo")!;
   const rel = relations.find((r) => r.sourceSymbolId === cls.id)!;
   assert.ok(rel, "the real @Autowired field must still produce a relation");
-  assert.ok(!rel.evidence.some((e) => e.includes("@Qualifier")), "a comment-only @Qualifier must not appear in evidence");
+  assert.ok(
+    !rel.evidence.some((e) => e.includes("@Qualifier")),
+    "a comment-only @Qualifier must not appear in evidence",
+  );
 });
 
 test("a genuinely @Qualifier-annotated field still has its value extracted", () => {
@@ -130,7 +175,10 @@ class Foo {
   const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
   const cls = symbols.find((s) => s.kind === "class" && s.name === "Foo")!;
   const rel = relations.find((r) => r.sourceSymbolId === cls.id)!;
-  assert.ok(rel.evidence.some((e) => e.includes('@Qualifier("primary")')), "a real @Qualifier must still be extracted");
+  assert.ok(
+    rel.evidence.some((e) => e.includes('@Qualifier("primary")')),
+    "a real @Qualifier must still be extracted",
+  );
 });
 
 test("a type matching zero project symbols produces no relation", () => {
@@ -156,8 +204,14 @@ class Checkout {
   // A second, differently-scoped Validator to force real ambiguity across the file set —
   // simulate via a second file's symbols merged in, since parseJava is per-file: build the
   // relations call with a combined symbol list from two separate parses.
-  const first = parseJava("src/main/java/other/Validator.java", "package other;\nclass Validator {}");
-  const { symbols: checkoutSymbols } = parseJava("src/main/java/Checkout.java", source);
+  const first = parseJava(
+    "src/main/java/other/Validator.java",
+    "package other;\nclass Validator {}",
+  );
+  const { symbols: checkoutSymbols } = parseJava(
+    "src/main/java/Checkout.java",
+    source,
+  );
   const allSymbols = [...first.symbols, ...checkoutSymbols];
   const relations = resolved(allSymbols, "src/main/java/Checkout.java", source);
   const ctor = checkoutSymbols.find((s) => s.kind === "constructor")!;
@@ -171,7 +225,10 @@ class Checkout {
 // @Qualifier equal to it can never single one out. Picking the same-file class would be an
 // invented winner (§13), so this stays unresolved, with the qualifier kept as evidence.
 test("a @Qualifier equal to the shared simple name cannot break a tie, so stays unresolved", () => {
-  const first = parseJava("src/main/java/other/Validator.java", "package other;\nclass Validator {}");
+  const first = parseJava(
+    "src/main/java/other/Validator.java",
+    "package other;\nclass Validator {}",
+  );
   const source = `
 class Validator {}
 @Service
@@ -179,7 +236,10 @@ class Checkout {
     Checkout(@Qualifier("Validator") Validator v) {}
 }
 `;
-  const { symbols: checkoutSymbols } = parseJava("src/main/java/Checkout.java", source);
+  const { symbols: checkoutSymbols } = parseJava(
+    "src/main/java/Checkout.java",
+    source,
+  );
   const allSymbols = [...first.symbols, ...checkoutSymbols];
   const relations = resolved(allSymbols, "src/main/java/Checkout.java", source);
   const ctor = checkoutSymbols.find((s) => s.kind === "constructor")!;
@@ -190,11 +250,22 @@ class Checkout {
 });
 
 test("resolveBeanType: unique -> exact, zero -> none, tie -> unresolved", () => {
-  const types = parseJava("A.java", "class Fast {}\nclass Slow {}\nclass Fast2 {}").symbols;
+  const types = parseJava(
+    "A.java",
+    "class Fast {}\nclass Slow {}\nclass Fast2 {}",
+  ).symbols;
   const dup = { ...types[0], id: "other::Fast" };
-  assert.equal(resolveBeanType("Fast", [...types, dup])?.confidence, "unresolved");
-  assert.deepEqual(resolveBeanType("Fast", [...types, dup]), { confidence: "unresolved" });
-  assert.deepEqual(resolveBeanType("Slow", types), { confidence: "exact", targetSymbolId: types[1].id });
+  assert.equal(
+    resolveBeanType("Fast", [...types, dup])?.confidence,
+    "unresolved",
+  );
+  assert.deepEqual(resolveBeanType("Fast", [...types, dup]), {
+    confidence: "unresolved",
+  });
+  assert.deepEqual(resolveBeanType("Slow", types), {
+    confidence: "exact",
+    targetSymbolId: types[1].id,
+  });
   assert.equal(resolveBeanType("Nope", types), undefined);
 });
 
@@ -210,11 +281,22 @@ class Service {
     Service(Repo repo) { this.repo = repo; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Service.java");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Service.java",
+  );
   const ctor = symbols.find((s) => s.kind === "constructor")!;
   const cls = symbols.find((s) => s.kind === "class" && s.name === "Service")!;
-  assert.ok(relations.find((r) => r.sourceSymbolId === ctor.id && r.targetLabel === "Repo"));
-  assert.ok(relations.find((r) => r.sourceSymbolId === cls.id && r.targetLabel === "Gateway"));
+  assert.ok(
+    relations.find(
+      (r) => r.sourceSymbolId === ctor.id && r.targetLabel === "Repo",
+    ),
+  );
+  assert.ok(
+    relations.find(
+      (r) => r.sourceSymbolId === cls.id && r.targetLabel === "Gateway",
+    ),
+  );
 });
 
 test("@Autowired inside a comment produces no relation", () => {
@@ -243,7 +325,10 @@ class Screen {
 });
 
 test("a qualifier matching no candidate stays unresolved", () => {
-  const first = parseJava("src/main/java/other/Validator.java", "package other;\nclass Validator {}");
+  const first = parseJava(
+    "src/main/java/other/Validator.java",
+    "package other;\nclass Validator {}",
+  );
   const source = `
 class Validator {}
 class Checkout {
@@ -251,7 +336,11 @@ class Checkout {
 }
 `;
   const { symbols } = parseJava("src/main/java/Checkout.java", source);
-  const relations = resolved([...first.symbols, ...symbols], "src/main/java/Checkout.java", source);
+  const relations = resolved(
+    [...first.symbols, ...symbols],
+    "src/main/java/Checkout.java",
+    source,
+  );
   assert.equal(relations.length, 1);
   assert.equal(relations[0].confidence, "unresolved");
   assert.equal(relations[0].targetSymbolId, undefined);
@@ -265,11 +354,16 @@ test("ProjectIndex resolves bean identity across files in its post-pass", async 
   const { ProjectIndex } = await import("../src/indexer/index.js");
   const root = mkdtempSync(join(tmpdir(), "di-"));
   mkdirSync(join(root, "src"));
-  writeFileSync(join(root, "src/Service.java"), "@Service\nclass Service {\n  Service(Repo r) {}\n}\n");
+  writeFileSync(
+    join(root, "src/Service.java"),
+    "@Service\nclass Service {\n  Service(Repo r) {}\n}\n",
+  );
   writeFileSync(join(root, "src/Repo.java"), "interface Repo {}\n");
   const index = new ProjectIndex(root);
   index.rebuild();
-  const rel = index.enterpriseRelations.find((r) => r.kind === "INJECTS_DEPENDENCY")!;
+  const rel = index.enterpriseRelations.find(
+    (r) => r.kind === "INJECTS_DEPENDENCY",
+  )!;
   const repo = index.symbols.find((s) => s.name === "Repo")!;
   assert.equal(rel.confidence, "exact");
   assert.equal(rel.targetSymbolId, repo.id);
@@ -327,7 +421,10 @@ class Foo {
 `;
   const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
   const ctor = symbols.find((s) => s.kind === "constructor")!;
-  assert.ok(!relations.some((r) => r.sourceSymbolId === ctor.id), "a comment mentioning @Autowired must not trigger constructor injection");
+  assert.ok(
+    !relations.some((r) => r.sourceSymbolId === ctor.id),
+    "a comment mentioning @Autowired must not trigger constructor injection",
+  );
 });
 
 test("a genuinely @Autowired constructor on a plain class still produces a relation", () => {
@@ -356,7 +453,10 @@ class Foo {
   const { symbols, relations } = relationsFor(source, "src/main/java/Foo.java");
   const ctor = symbols.find((s) => s.kind === "constructor")!;
   const rel = relations.find((r) => r.sourceSymbolId === ctor.id)!;
-  assert.ok(rel, "a fully-qualified @Autowired constructor must still produce a relation");
+  assert.ok(
+    rel,
+    "a fully-qualified @Autowired constructor must still produce a relation",
+  );
 });
 
 test("a field injected via @Inject resolves the same as @Autowired", () => {
@@ -367,9 +467,17 @@ class Checkout {
     private PaymentGateway gateway;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const rel = relations.find(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  )!;
   assert.ok(rel, "expected an @Inject field-injection relation");
   assert.equal(rel.targetLabel, "PaymentGateway");
   assert.match(rel.evidence.join(" "), /@Inject field/);
@@ -383,9 +491,17 @@ class Checkout {
     private PaymentGateway gateway;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const rel = relations.find(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  )!;
   assert.ok(rel, "expected an @Resource field-injection relation");
   assert.equal(rel.targetLabel, "PaymentGateway");
   assert.match(rel.evidence.join(" "), /@Resource field/);
@@ -399,13 +515,29 @@ class Checkout {
     private PaymentGateway a, b;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const diRelations = relations.filter((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id);
-  assert.equal(diRelations.length, 2, "both declarators must still be detected as injection points");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const diRelations = relations.filter(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  );
+  assert.equal(
+    diRelations.length,
+    2,
+    "both declarators must still be detected as injection points",
+  );
   for (const rel of diRelations) {
     assert.equal(rel.targetLabel, "PaymentGateway");
-    assert.doesNotMatch(rel.evidence.join(" "), /@Qualifier/, "multi-declarator fields cannot recover the shared qualifier's value (accepted divergence, see spec)");
+    assert.doesNotMatch(
+      rel.evidence.join(" "),
+      /@Qualifier/,
+      "multi-declarator fields cannot recover the shared qualifier's value (accepted divergence, see spec)",
+    );
   }
 });
 
@@ -419,10 +551,21 @@ class Checkout {
     private PaymentGateway gateway;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
-  assert.ok(rel, "a multi-line annotation argument must not hide the field injection");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const rel = relations.find(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  )!;
+  assert.ok(
+    rel,
+    "a multi-line annotation argument must not hide the field injection",
+  );
   assert.equal(rel.targetLabel, "PaymentGateway");
 });
 
@@ -437,10 +580,20 @@ class Alerts {
     void setNotifier(Notifier notifier) { this.notifier = notifier; }
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Alerts.java");
-  const setter = symbols.find((s) => s.kind === "method" && s.name === "setNotifier")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === setter.id)!;
-  assert.ok(rel, "a multi-line annotation argument must not hide the setter injection");
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Alerts.java",
+  );
+  const setter = symbols.find(
+    (s) => s.kind === "method" && s.name === "setNotifier",
+  )!;
+  const rel = relations.find(
+    (r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === setter.id,
+  )!;
+  assert.ok(
+    rel,
+    "a multi-line annotation argument must not hide the setter injection",
+  );
   assert.equal(rel.targetLabel, "Notifier");
 });
 
@@ -452,10 +605,20 @@ class Checkout {
     private com.example.Repo repo;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const repoType = symbols.find((s) => s.kind === "class" && s.name === "Repo")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const repoType = symbols.find(
+    (s) => s.kind === "class" && s.name === "Repo",
+  )!;
+  const rel = relations.find(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  )!;
   assert.equal(rel.targetLabel, "Repo");
   assert.equal(rel.confidence, "exact");
   assert.equal(rel.targetSymbolId, repoType.id);
@@ -469,10 +632,20 @@ class Checkout {
     private Repo[] arr;
 }
 `;
-  const { symbols, relations } = relationsFor(source, "src/main/java/Checkout.java");
-  const checkoutClass = symbols.find((s) => s.kind === "class" && s.name === "Checkout")!;
-  const repoType = symbols.find((s) => s.kind === "class" && s.name === "Repo")!;
-  const rel = relations.find((r) => r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id)!;
+  const { symbols, relations } = relationsFor(
+    source,
+    "src/main/java/Checkout.java",
+  );
+  const checkoutClass = symbols.find(
+    (s) => s.kind === "class" && s.name === "Checkout",
+  )!;
+  const repoType = symbols.find(
+    (s) => s.kind === "class" && s.name === "Repo",
+  )!;
+  const rel = relations.find(
+    (r) =>
+      r.kind === "INJECTS_DEPENDENCY" && r.sourceSymbolId === checkoutClass.id,
+  )!;
   assert.equal(rel.confidence, "exact");
   assert.equal(rel.targetSymbolId, repoType.id);
 });

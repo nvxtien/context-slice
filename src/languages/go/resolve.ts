@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { CallEdge, ImportRecord, SymbolRecord } from "../../types/model.js";
+import type {
+  CallEdge,
+  ImportRecord,
+  SymbolRecord,
+} from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
 
 /** Go's package boundary is per-directory, never by matching package-clause name strings. */
@@ -77,20 +81,26 @@ function receiverVarNameOf(method: SymbolRecord): string | undefined {
  * package's directory to search instead of the caller's own. A `ctorName` instead of `type` means
  * the binding came from "x := NewFoo(...)": the real type is whatever NewFoo actually returns,
  * looked up by the caller rather than assumed from the constructor's own name. */
-type BoundType = { pkg?: string; type: string } | { pkg?: string; ctorName: string };
+type BoundType =
+  { pkg?: string; type: string } | { pkg?: string; ctorName: string };
 
 /** Narrow, regex-based binding-type inference over a function body — mirrors
  * src/languages/python/resolve.ts's bindingClass exactly: single unambiguous assignment only,
  * any reassignment or multiple bindings drop the evidence rather than guessing. Captures an
  * optional package-qualified form ("pkg.Type") alongside the bare form ("Type"). */
-function bindingTypeInBody(body: string, receiver: string): BoundType | undefined {
+function bindingTypeInBody(
+  body: string,
+  receiver: string,
+): BoundType | undefined {
   const literalOrVar = new RegExp(
     `(?<![\\w.])${receiver}\\s*:?=\\s*(?:&)?(?:([A-Za-z_]\\w*)\\.)?([A-Za-z_]\\w*)\\s*\\{` +
       `|var\\s+${receiver}\\s+\\*?(?:([A-Za-z_]\\w*)\\.)?([A-Za-z_]\\w*)\\b`,
     "g",
   );
   const matches = [...body.matchAll(literalOrVar)];
-  const reassignments = [...body.matchAll(new RegExp(`(?<![\\w.:])${receiver}\\s*=[^=]`, "g"))].length;
+  const reassignments = [
+    ...body.matchAll(new RegExp(`(?<![\\w.:])${receiver}\\s*=[^=]`, "g")),
+  ].length;
   if (matches.length === 1 && reassignments === 0) {
     const [, literalPkg, literalType, varPkg, varType] = matches[0];
     if (literalType) return { pkg: literalPkg, type: literalType };
@@ -98,7 +108,9 @@ function bindingTypeInBody(body: string, receiver: string): BoundType | undefine
   }
   if (matches.length === 0 && reassignments === 0) {
     const ctor = body.match(
-      new RegExp(`(?<![\\w.])${receiver}\\s*:=\\s*(?:([A-Za-z_]\\w*)\\.)?(New[A-Za-z_]\\w*)\\s*\\(`),
+      new RegExp(
+        `(?<![\\w.])${receiver}\\s*:=\\s*(?:([A-Za-z_]\\w*)\\.)?(New[A-Za-z_]\\w*)\\s*\\(`,
+      ),
     );
     if (ctor) return { pkg: ctor[1], ctorName: ctor[2] };
   }
@@ -115,8 +127,11 @@ function embeddedTypesOf(
   const siblings = byDirectory.get(dir) ?? [];
   const types: SymbolRecord[] = [];
   for (const f of siblings) {
-    if (f.kind !== "field" || f.parentId !== struct.id || !f.metadata?.embedded) continue;
-    const embeddedType = siblings.find((s) => s.kind === "class" && s.name === f.name);
+    if (f.kind !== "field" || f.parentId !== struct.id || !f.metadata?.embedded)
+      continue;
+    const embeddedType = siblings.find(
+      (s) => s.kind === "class" && s.name === f.name,
+    );
     if (embeddedType && !visited.has(embeddedType.id)) {
       visited.add(embeddedType.id);
       types.push(embeddedType);
@@ -136,14 +151,20 @@ function findPromotedMethod(
   let frontier = embeddedTypesOf(struct, byDirectory, visited);
   while (frontier.length) {
     const matches = frontier
-      .map((t) => (byDirectory.get(directoryOf(t.filePath)) ?? []).find(
-        (s) => s.kind === "method" && s.name === methodName && s.supertypes?.includes(t.name),
-      ))
+      .map((t) =>
+        (byDirectory.get(directoryOf(t.filePath)) ?? []).find(
+          (s) =>
+            s.kind === "method" &&
+            s.name === methodName &&
+            s.supertypes?.includes(t.name),
+        ),
+      )
       .filter((m): m is SymbolRecord => Boolean(m));
     if (matches.length === 1) return matches[0];
     if (matches.length > 1) return "ambiguous";
     const next: SymbolRecord[] = [];
-    for (const t of frontier) next.push(...embeddedTypesOf(t, byDirectory, visited));
+    for (const t of frontier)
+      next.push(...embeddedTypesOf(t, byDirectory, visited));
     frontier = next;
   }
   return undefined;
@@ -154,11 +175,18 @@ function findPromotedMethod(
  * same-named one, mirroring findPromotedMethod's own depth-shadowing — unlike call resolution's
  * mere "is this name reachable at all", interface satisfaction needs the signature that would
  * actually be promoted, so a same-name-different-signature method at a deeper level must not win). */
-function methodSetOf(struct: SymbolRecord, byDirectory: Map<string, SymbolRecord[]>): Map<string, string> {
+function methodSetOf(
+  struct: SymbolRecord,
+  byDirectory: Map<string, SymbolRecord[]>,
+): Map<string, string> {
   const methods = new Map<string, string>();
   const collectDirect = (type: SymbolRecord) => {
     for (const s of byDirectory.get(directoryOf(type.filePath)) ?? [])
-      if (s.kind === "method" && s.supertypes?.includes(type.name) && !methods.has(s.name))
+      if (
+        s.kind === "method" &&
+        s.supertypes?.includes(type.name) &&
+        !methods.has(s.name)
+      )
         methods.set(s.name, s.metadata?.methodSignature ?? "");
   };
   collectDirect(struct);
@@ -175,11 +203,16 @@ function methodSetOf(struct: SymbolRecord, byDirectory: Map<string, SymbolRecord
   return methods;
 }
 
-function resolveInterfaceSatisfaction(symbols: SymbolRecord[], byDirectory: Map<string, SymbolRecord[]>) {
+function resolveInterfaceSatisfaction(
+  symbols: SymbolRecord[],
+  byDirectory: Map<string, SymbolRecord[]>,
+) {
   // Go's interface satisfaction is structural and project-wide, not package-scoped: a struct in
   // package "impl" can satisfy an interface declared in package "contract" with no import between
   // them. Interfaces and structs are therefore collected across every directory, not grouped by one.
-  const interfaces = symbols.filter((s) => s.kind === "interface" && s.metadata?.interfaceMethods);
+  const interfaces = symbols.filter(
+    (s) => s.kind === "interface" && s.metadata?.interfaceMethods,
+  );
   const structs = symbols.filter((s) => s.kind === "class");
   for (const struct of structs) {
     const methods = methodSetOf(struct, byDirectory);
@@ -193,7 +226,10 @@ function resolveInterfaceSatisfaction(symbols: SymbolRecord[], byDirectory: Map<
       const signatures = iface.metadata!.interfaceMethodSignatures ?? {};
       // Exact-signature match: a method of the same name but a different parameter/result
       // shape does not satisfy the interface, matching Go's own compile-time rule.
-      if (required.length > 0 && required.every((name) => methods.get(name) === signatures[name])) {
+      if (
+        required.length > 0 &&
+        required.every((name) => methods.get(name) === signatures[name])
+      ) {
         satisfied.push(iface.name);
       }
     }
@@ -232,10 +268,11 @@ export function resolveGoCalls(context: ResolveContext): void {
   }
 
   const resolveDirectCall = (call: CallEdge, caller: SymbolRecord) => {
-    const candidates = (byDirectory.get(directoryOf(caller.filePath)) ?? []).filter(
-      (s) => s.kind === "function" && s.name === call.calleeName,
-    );
-    if (candidates.length === 1) settle(call, candidates[0], "same-file", "same-package direct call");
+    const candidates = (
+      byDirectory.get(directoryOf(caller.filePath)) ?? []
+    ).filter((s) => s.kind === "function" && s.name === call.calleeName);
+    if (candidates.length === 1)
+      settle(call, candidates[0], "same-file", "same-package direct call");
   };
 
   // Go modules convention: a module path at major version >=2 ends in "/vN" (go.dev/ref/mod#major-version-suffixes),
@@ -243,24 +280,41 @@ export function resolveGoCalls(context: ResolveContext): void {
   // Strip that suffix before taking the last path segment for the unaliased case. Known limitation: a package whose
   // real (unversioned) last segment happens to look like "vN" itself is not handled — rare enough not to special-case.
   const importLocalName = (record: ImportRecord): string | undefined =>
-    record.localName ?? record.module.replace(/\/v\d+$/, "").split("/").pop();
+    record.localName ??
+    record.module
+      .replace(/\/v\d+$/, "")
+      .split("/")
+      .pop();
 
   // Shared by resolveQualifiedCall (pkg.Func()) and resolveMethodCall (x.Method() where x's type
   // is pkg.Type): maps an import alias, as used in the caller's file, to that package's directory
   // within THIS module. undefined means the alias is unresolvable or names an external package.
-  const resolveImportDirectory = (alias: string, callerFilePath: string): string | undefined => {
-    const record = (importsByFile.get(callerFilePath) ?? []).find((r) => importLocalName(r) === alias);
+  const resolveImportDirectory = (
+    alias: string,
+    callerFilePath: string,
+  ): string | undefined => {
+    const record = (importsByFile.get(callerFilePath) ?? []).find(
+      (r) => importLocalName(r) === alias,
+    );
     if (!record) return undefined;
     for (const mod of modules) {
-      if (record.module === mod.path || record.module.startsWith(mod.path + "/")) {
-        const withinModule = record.module.slice(mod.path.length).replace(/^\//, "");
+      if (
+        record.module === mod.path ||
+        record.module.startsWith(mod.path + "/")
+      ) {
+        const withinModule = record.module
+          .slice(mod.path.length)
+          .replace(/^\//, "");
         return [mod.dir, withinModule].filter(Boolean).join("/");
       }
     }
     return undefined;
   };
 
-  const resolveQualifiedCall = (call: CallEdge, caller: SymbolRecord): boolean => {
+  const resolveQualifiedCall = (
+    call: CallEdge,
+    caller: SymbolRecord,
+  ): boolean => {
     if (!call.receiverText || !/^[A-Z]/.test(call.calleeName)) return false; // unexported: never a package-qualified target
     const record = (importsByFile.get(caller.filePath) ?? []).find(
       (r) => importLocalName(r) === call.receiverText,
@@ -272,7 +326,10 @@ export function resolveGoCalls(context: ResolveContext): void {
       return false;
     }
     const candidates = (byDirectory.get(relative) ?? []).filter(
-      (s) => s.kind === "function" && s.name === call.calleeName && s.modifiers.includes("exported"),
+      (s) =>
+        s.kind === "function" &&
+        s.name === call.calleeName &&
+        s.modifiers.includes("exported"),
     );
     if (candidates.length === 1) {
       settle(call, candidates[0], "imported", "package-qualified import call");
@@ -285,17 +342,26 @@ export function resolveGoCalls(context: ResolveContext): void {
     if (!call.receiverText) return;
     let typeName: string | undefined;
     let pkgAlias: string | undefined;
-    if (caller.kind === "method" && caller.supertypes?.[0] && receiverVarNameOf(caller) === call.receiverText) {
+    if (
+      caller.kind === "method" &&
+      caller.supertypes?.[0] &&
+      receiverVarNameOf(caller) === call.receiverText
+    ) {
       typeName = caller.supertypes[0];
     } else {
-      const bound = bindingTypeInBody(caller.body ?? caller.source, call.receiverText);
+      const bound = bindingTypeInBody(
+        caller.body ?? caller.source,
+        call.receiverText,
+      );
       pkgAlias = bound?.pkg;
       if (bound && "type" in bound) {
         typeName = bound.type;
       } else if (bound && "ctorName" in bound) {
         // The real constructed type is whatever the constructor itself declares as its return
         // type, not a name guessed from the constructor's own name (e.g. "NewFoo" returning *Bar).
-        const ctorDir = pkgAlias ? resolveImportDirectory(pkgAlias, caller.filePath) : directoryOf(caller.filePath);
+        const ctorDir = pkgAlias
+          ? resolveImportDirectory(pkgAlias, caller.filePath)
+          : directoryOf(caller.filePath);
         const ctorFn =
           ctorDir === undefined
             ? undefined
@@ -332,10 +398,16 @@ export function resolveGoCalls(context: ResolveContext): void {
       settle(call, directMethod, "same-type", "receiver-type method call");
       return;
     }
-    const struct = (byDirectory.get(dir) ?? []).find((s) => s.kind === "class" && s.name === typeName);
+    const struct = (byDirectory.get(dir) ?? []).find(
+      (s) => s.kind === "class" && s.name === typeName,
+    );
     if (!struct) return;
     const promoted = findPromotedMethod(struct, call.calleeName, byDirectory);
-    if (promoted && promoted !== "ambiguous" && (!requireExported || promoted.modifiers.includes("exported"))) {
+    if (
+      promoted &&
+      promoted !== "ambiguous" &&
+      (!requireExported || promoted.modifiers.includes("exported"))
+    ) {
       settle(call, promoted, "same-type", "struct embedding method promotion");
     }
   };

@@ -38,7 +38,10 @@ test("a Java skeleton carries field declarations and fields are now indexed as s
   assert.match(skeleton.rendered, /public int current\(\)/);
   assert.ok(
     index.symbols.some(
-      (symbol) => symbol.name === "count" && symbol.filePath.endsWith(".java") && symbol.kind === "field",
+      (symbol) =>
+        symbol.name === "count" &&
+        symbol.filePath.endsWith(".java") &&
+        symbol.kind === "field",
     ),
     "field 'count' should be indexed as a separate symbol",
   );

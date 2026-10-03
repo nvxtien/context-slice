@@ -1,5 +1,8 @@
 import { registerLanguage, type LanguageAdapter } from "../adapter.js";
-import { JAVASCRIPT_LANGUAGE_ID, parseTypeScript } from "../typescript/parse.js";
+import {
+  JAVASCRIPT_LANGUAGE_ID,
+  parseTypeScript,
+} from "../typescript/parse.js";
 import { resolveTypeScriptCalls } from "../typescript/resolve.js";
 
 // Reuses the TypeScript grammar/parser: JS syntax is a subset of TS, and parseTypeScript

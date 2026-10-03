@@ -1,10 +1,7 @@
 [
   {
     "taskId": "walkdir-check-loop-locate",
-    "files": [
-      "src/lib.rs",
-      "src/error.rs"
-    ],
+    "files": ["src/lib.rs", "src/error.rs"],
     "reasoning": {
       "src/lib.rs": "declares check_loop, the ancestor stack and the loop error",
       "src/error.rs": "defines Error::from_loop"
@@ -12,19 +9,14 @@
   },
   {
     "taskId": "walkdir-push-explain",
-    "files": [
-      "src/lib.rs"
-    ],
+    "files": ["src/lib.rs"],
     "reasoning": {
       "src/lib.rs": "contains push and the max_open and sorter logic"
     }
   },
   {
     "taskId": "walkdir-handle-entry-explain",
-    "files": [
-      "src/lib.rs",
-      "src/dent.rs"
-    ],
+    "files": ["src/lib.rs", "src/dent.rs"],
     "reasoning": {
       "src/lib.rs": "contains handle_entry",
       "src/dent.rs": "defines DirEntry accessors used here"
@@ -32,11 +24,7 @@
   },
   {
     "taskId": "walkdir-same-fs-change",
-    "files": [
-      "src/lib.rs",
-      "src/util.rs",
-      "src/error.rs"
-    ],
+    "files": ["src/lib.rs", "src/util.rs", "src/error.rs"],
     "reasoning": {
       "src/lib.rs": "contains is_same_file_system",
       "src/util.rs": "defines device_num per platform",
@@ -45,19 +33,14 @@
   },
   {
     "taskId": "walkdir-skippable-impact",
-    "files": [
-      "src/lib.rs"
-    ],
+    "files": ["src/lib.rs"],
     "reasoning": {
       "src/lib.rs": "contains skippable and both callers"
     }
   },
   {
     "taskId": "mini-redis-from-frame-locate",
-    "files": [
-      "src/cmd/mod.rs",
-      "src/parse.rs"
-    ],
+    "files": ["src/cmd/mod.rs", "src/parse.rs"],
     "reasoning": {
       "src/cmd/mod.rs": "contains from_frame and the dispatch match",
       "src/parse.rs": "defines the Parse cursor used"
@@ -65,18 +48,14 @@
   },
   {
     "taskId": "mini-redis-db-set-explain",
-    "files": [
-      "src/db.rs"
-    ],
+    "files": ["src/db.rs"],
     "reasoning": {
       "src/db.rs": "contains set and the expiration bookkeeping"
     }
   },
   {
     "taskId": "mini-redis-purge-explain",
-    "files": [
-      "src/db.rs"
-    ],
+    "files": ["src/db.rs"],
     "reasoning": {
       "src/db.rs": "contains purge_expired_keys and its state"
     }
@@ -124,18 +103,14 @@
   },
   {
     "taskId": "ripgrep-ignore-add-line-explain",
-    "files": [
-      "crates/ignore/src/gitignore.rs"
-    ],
+    "files": ["crates/ignore/src/gitignore.rs"],
     "reasoning": {
       "crates/ignore/src/gitignore.rs": "contains add_line"
     }
   },
   {
     "taskId": "ripgrep-ignore-matched-stripped-explain",
-    "files": [
-      "crates/ignore/src/gitignore.rs"
-    ],
+    "files": ["crates/ignore/src/gitignore.rs"],
     "reasoning": {
       "crates/ignore/src/gitignore.rs": "contains matched_stripped"
     }

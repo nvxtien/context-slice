@@ -5,7 +5,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
-import { extractOracleRoutes, type OracleEntry } from "./java-enterprise-route-oracle.js";
+import {
+  extractOracleRoutes,
+  type OracleEntry,
+} from "./java-enterprise-route-oracle.js";
 
 type Repository = { id: string; source: string };
 type FailureCategory =
@@ -16,32 +19,55 @@ type FailureCategory =
   | "GROUND_TRUTH"
   | "UNKNOWN";
 
-type Miss = { repo: string; oracle: OracleEntry; category: FailureCategory; detail: string };
-type FalsePositive = { repo: string; filePath: string; targetLabel: string | undefined; detail: string };
+type Miss = {
+  repo: string;
+  oracle: OracleEntry;
+  category: FailureCategory;
+  detail: string;
+};
+type FalsePositive = {
+  repo: string;
+  filePath: string;
+  targetLabel: string | undefined;
+  detail: string;
+};
 
 const root = process.cwd();
 const outDir = join(root, "benchmarks/results");
 mkdirSync(outDir, { recursive: true });
 
-const repositories = JSON.parse(readFileSync(join(root, "benchmarks/repositories.json"), "utf8")) as Repository[];
-const targets = repositories.filter((r) => r.id === "spring-petclinic" || r.id === "petclinic-rest");
+const repositories = JSON.parse(
+  readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
+) as Repository[];
+const targets = repositories.filter(
+  (r) => r.id === "spring-petclinic" || r.id === "petclinic-rest",
+);
 
 let oracleTotal = 0;
 let matched = 0;
 let falsePositiveCount = 0;
 const misses: Miss[] = [];
 const falsePositives: FalsePositive[] = [];
-const perRepo: Record<string, { oracleCount: number; matched: number; falsePositives: number }> = {};
+const perRepo: Record<
+  string,
+  { oracleCount: number; matched: number; falsePositives: number }
+> = {};
 
 for (const repo of targets) {
   const repoRoot = join(root, repo.source);
   const oracleEntries = extractOracleRoutes(repoRoot, repo.id);
   oracleTotal += oracleEntries.length;
-  perRepo[repo.id] = { oracleCount: oracleEntries.length, matched: 0, falsePositives: 0 };
+  perRepo[repo.id] = {
+    oracleCount: oracleEntries.length,
+    matched: 0,
+    falsePositives: 0,
+  };
 
   const index = new ProjectIndex(repoRoot);
   index.rebuild();
-  const routeRelations = index.enterpriseRelations.filter((r) => r.kind === "ROUTE_TO_HANDLER");
+  const routeRelations = index.enterpriseRelations.filter(
+    (r) => r.kind === "ROUTE_TO_HANDLER",
+  );
 
   const claimedByOracleKey = new Set<string>();
 
@@ -57,14 +83,17 @@ for (const repo of targets) {
         s.range.startLine <= oracle.startLine &&
         oracle.startLine <= s.range.endLine,
     );
-    const relation = symbol ? routeRelations.find((r) => r.sourceSymbolId === symbol.id) : undefined;
+    const relation = symbol
+      ? routeRelations.find((r) => r.sourceSymbolId === symbol.id)
+      : undefined;
 
     if (!symbol) {
       misses.push({
         repo: repo.id,
         oracle,
         category: "GROUND_TRUTH",
-        detail: "No matching method symbol found at oracle's file+name+line (oracle/parser disagreement).",
+        detail:
+          "No matching method symbol found at oracle's file+name+line (oracle/parser disagreement).",
       });
       continue;
     }
@@ -74,7 +103,8 @@ for (const repo of targets) {
         repo: repo.id,
         oracle,
         category: "ANNOTATION_EXTRACTION",
-        detail: "Extractor produced no ROUTE_TO_HANDLER relation for this handler method at all.",
+        detail:
+          "Extractor produced no ROUTE_TO_HANDLER relation for this handler method at all.",
       });
       continue;
     }
@@ -119,7 +149,8 @@ for (const repo of targets) {
       repo: repo.id,
       filePath: relation.filePath,
       targetLabel: relation.targetLabel,
-      detail: "Extractor emitted a non-unresolved ROUTE_TO_HANDLER relation the oracle has no corresponding handler for.",
+      detail:
+        "Extractor emitted a non-unresolved ROUTE_TO_HANDLER relation the oracle has no corresponding handler for.",
     });
   }
 }
@@ -128,7 +159,8 @@ falsePositiveCount = falsePositives.length;
 for (const fp of falsePositives) perRepo[fp.repo].falsePositives++;
 
 const route_linkage_recall = oracleTotal ? matched / oracleTotal : 1;
-const route_linkage_precision = matched + falsePositiveCount ? matched / (matched + falsePositiveCount) : 1;
+const route_linkage_precision =
+  matched + falsePositiveCount ? matched / (matched + falsePositiveCount) : 1;
 
 const failureAttribution: Record<FailureCategory, number> = {
   ANNOTATION_EXTRACTION: 0,
@@ -153,11 +185,20 @@ const results = {
   falsePositives,
 };
 
-writeFileSync(join(outDir, "v1.4-phase1-spring-mvc-routes.json"), JSON.stringify(results, null, 2) + "\n");
+writeFileSync(
+  join(outDir, "v1.4-phase1-spring-mvc-routes.json"),
+  JSON.stringify(results, null, 2) + "\n",
+);
 
-console.log(`Oracle total: ${oracleTotal}, matched: ${matched}, false positives: ${falsePositiveCount}`);
-console.log(`route_linkage_recall: ${(route_linkage_recall * 100).toFixed(1)}%`);
-console.log(`route_linkage_precision: ${(route_linkage_precision * 100).toFixed(1)}%`);
+console.log(
+  `Oracle total: ${oracleTotal}, matched: ${matched}, false positives: ${falsePositiveCount}`,
+);
+console.log(
+  `route_linkage_recall: ${(route_linkage_recall * 100).toFixed(1)}%`,
+);
+console.log(
+  `route_linkage_precision: ${(route_linkage_precision * 100).toFixed(1)}%`,
+);
 console.log("Failure attribution:", failureAttribution);
 if (existsSync(join(outDir, "v1.4-phase1-spring-mvc-routes.json"))) {
   console.log("Wrote benchmarks/results/v1.4-phase1-spring-mvc-routes.json");

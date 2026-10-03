@@ -744,8 +744,14 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
         // alone — that's CommonJS module semantics, a separate, untouched limitation.
         const left = field(node, "left");
         const right = field(node, "right");
-        const objectText = left?.type === "member_expression" ? text(field(left, "object")) : undefined;
-        const propertyName = left?.type === "member_expression" ? text(field(left, "property")) : undefined;
+        const objectText =
+          left?.type === "member_expression"
+            ? text(field(left, "object"))
+            : undefined;
+        const propertyName =
+          left?.type === "member_expression"
+            ? text(field(left, "property"))
+            : undefined;
         if (
           chain.length === 0 &&
           owner === undefined &&
@@ -756,17 +762,28 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
         ) {
           const parameters = parameterSignature(field(right!, "parameters"));
           const body = field(right!, "body");
-          const symbol = addSymbol(node, "function", propertyName, [...chain, objectText], {
-            parameters,
-            signature: `${propertyName}(${parameters})${returnType(right!) ? `: ${returnType(right!)}` : ""}`,
-            bodyNode: body,
-            metadata: {
-              async: right!.text.startsWith("async "),
-              reactComponent: looksLikeComponent(propertyName, right!, filePath),
+          const symbol = addSymbol(
+            node,
+            "function",
+            propertyName,
+            [...chain, objectText],
+            {
+              parameters,
+              signature: `${propertyName}(${parameters})${returnType(right!) ? `: ${returnType(right!)}` : ""}`,
+              bodyNode: body,
+              metadata: {
+                async: right!.text.startsWith("async "),
+                reactComponent: looksLikeComponent(
+                  propertyName,
+                  right!,
+                  filePath,
+                ),
+              },
             },
-          });
+          );
           scopes.push({ types: new Map() });
-          for (const parameter of field(right!, "parameters")?.namedChildren ?? [])
+          for (const parameter of field(right!, "parameters")?.namedChildren ??
+            [])
             noteBinding(
               text(field(parameter, "pattern") ?? parameter.namedChild(0)),
               text(field(parameter, "type"))

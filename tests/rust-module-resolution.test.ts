@@ -72,7 +72,11 @@ test("an anchored target is never external; a module-only miss falls back to the
   assert.equal(resolved.file, undefined);
   assert.equal(resolved.externalPackage, undefined);
   // Module-only path: documented file-granularity fallback to the crate root.
-  const moduleOnly = resolveRustModule(["crate", "nope"], "src/service.rs", index);
+  const moduleOnly = resolveRustModule(
+    ["crate", "nope"],
+    "src/service.rs",
+    index,
+  );
   assert.equal(moduleOnly.file, "src/lib.rs");
   assert.equal(moduleOnly.externalPackage, undefined);
 });
@@ -93,7 +97,10 @@ test("non-anchored path resolves to a child module of the current module first",
     resolveRustModule(["postgres"], "src/repository/mod.rs", index).file,
     "src/repository/postgres.rs",
   );
-  assert.equal(resolveRustModule(["service"], "src/lib.rs", index).file, "src/service.rs");
+  assert.equal(
+    resolveRustModule(["service"], "src/lib.rs", index).file,
+    "src/service.rs",
+  );
 });
 
 test("a module named like a dependency never resolves to itself", () => {
@@ -107,12 +114,19 @@ test("colliding module paths are ambiguous and resolve to nothing", () => {
   const index = rustModuleIndex(["crates/a/src/lib.rs", "crates/b/src/lib.rs"]);
   assert.equal(index.byModule.has(""), false);
   assert.ok(index.ambiguous.has(""));
-  assert.deepEqual(resolveRustModule(["crate", "X"], "crates/b/src/lib.rs", index), {});
+  assert.deepEqual(
+    resolveRustModule(["crate", "X"], "crates/b/src/lib.rs", index),
+    {},
+  );
 });
 
 test("a bare (non-anchored) target falling outside the crate is external", () => {
   const index = rustModuleIndex(FILES);
-  const resolved = resolveRustModule(["serde", "Serialize"], "src/service.rs", index);
+  const resolved = resolveRustModule(
+    ["serde", "Serialize"],
+    "src/service.rs",
+    index,
+  );
   assert.equal(resolved.file, undefined);
   assert.equal(resolved.externalPackage, "serde");
 });

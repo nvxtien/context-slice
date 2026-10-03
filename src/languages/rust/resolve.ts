@@ -127,7 +127,8 @@ export function resolveRustModule(
   otherCrates?: ReadonlyMap<string, ReturnType<typeof rustModuleIndex>>,
 ): { file?: string; externalPackage?: string } {
   const [anchor, ...rest] = segments;
-  const anchored = anchor === "crate" || anchor === "self" || anchor === "super";
+  const anchored =
+    anchor === "crate" || anchor === "self" || anchor === "super";
   const here = index.byFile.get(fromFile) ?? [];
   let absolute: string[];
   let minLen = 0; // non-anchored: matches must be strictly deeper than `here`
@@ -135,7 +136,8 @@ export function resolveRustModule(
     absolute = rest;
   } else if (anchor === "self" || anchor === "super") {
     if (!index.byFile.has(fromFile)) return {};
-    const base = anchor === "super" ? here.slice(0, Math.max(0, here.length - 1)) : here;
+    const base =
+      anchor === "super" ? here.slice(0, Math.max(0, here.length - 1)) : here;
     absolute = [...base, ...rest];
   } else {
     absolute = [...here, ...segments];
@@ -180,11 +182,15 @@ export function resolveRustCalls(context: ResolveContext) {
   // project's prior, unpartitioned behavior.
   const discovered = discoverCrates(context.root);
   const crateDirs = discovered.length ? discovered : [{ name: "", dir: "" }];
-  if (!crateDirs.some((c) => c.dir === "")) crateDirs.push({ name: "", dir: "" });
-  const dirsByLengthDesc = [...crateDirs].sort((a, b) => b.dir.length - a.dir.length);
+  if (!crateDirs.some((c) => c.dir === ""))
+    crateDirs.push({ name: "", dir: "" });
+  const dirsByLengthDesc = [...crateDirs].sort(
+    (a, b) => b.dir.length - a.dir.length,
+  );
   const crateFor = (file: string): CrateInfo =>
-    dirsByLengthDesc.find((c) => c.dir === "" || file === c.dir || file.startsWith(c.dir + "/")) ??
-    dirsByLengthDesc[dirsByLengthDesc.length - 1];
+    dirsByLengthDesc.find(
+      (c) => c.dir === "" || file === c.dir || file.startsWith(c.dir + "/"),
+    ) ?? dirsByLengthDesc[dirsByLengthDesc.length - 1];
 
   const filesByCrateDir = new Map<string, string[]>();
   for (const file of allFiles) {
@@ -194,7 +200,10 @@ export function resolveRustCalls(context: ResolveContext) {
     filesByCrateDir.set(dir, list);
   }
   const indexByCrateDir = new Map<string, ReturnType<typeof rustModuleIndex>>();
-  const indexByCrateName = new Map<string, ReturnType<typeof rustModuleIndex>>();
+  const indexByCrateName = new Map<
+    string,
+    ReturnType<typeof rustModuleIndex>
+  >();
   for (const crate of crateDirs) {
     const crateIndex = rustModuleIndex(filesByCrateDir.get(crate.dir) ?? []);
     indexByCrateDir.set(crate.dir, crateIndex);
@@ -214,10 +223,13 @@ export function resolveRustCalls(context: ResolveContext) {
   // Only type-namespace items (struct/enum/trait/type/mod) can start a `use` path;
   // a fn/const/static with the same name as a crate does not shadow it.
   for (const symbol of context.symbols)
-    if (symbol.kind !== "function" && symbol.kind !== "variable") bind(symbol.filePath, symbol.name);
+    if (symbol.kind !== "function" && symbol.kind !== "variable")
+      bind(symbol.filePath, symbol.name);
   for (const record of context.imports as ImportRecord[]) {
     if (record.wildcard) continue;
-    const bareCrate = record.module === record.importedName && record.localName === record.importedName;
+    const bareCrate =
+      record.module === record.importedName &&
+      record.localName === record.importedName;
     if (!bareCrate) bind(record.filePath, record.localName);
   }
 
@@ -281,7 +293,11 @@ export function resolveRustCalls(context: ResolveContext) {
   for (const record of context.exports) {
     record.symbolId = undefined; // drop any stale id loaded from the cache
     if (record.resolvedFile && record.sourceName)
-      record.symbolId = lookup(record.resolvedFile, record.sourceName, new Set());
+      record.symbolId = lookup(
+        record.resolvedFile,
+        record.sourceName,
+        new Set(),
+      );
   }
 
   // Exact module file for a containing-module path: the dummy trailing segment makes

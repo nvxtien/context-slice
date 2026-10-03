@@ -47,15 +47,16 @@ test("extracts structs, tuple structs, and enums", () => {
 });
 
 test("extracts traits and links inherent + trait impl methods to their impl block", () => {
-  const { symbols } = parseRust(
-    "traits_impls.rs",
-    fixture("traits_impls.rs"),
+  const { symbols } = parseRust("traits_impls.rs", fixture("traits_impls.rs"));
+  const repository = symbols.find(
+    (s) => s.name === "Repository" && s.kind === "interface",
   );
-  const repository = symbols.find((s) => s.name === "Repository" && s.kind === "interface");
   assert.ok(repository);
 
   // Trait method with a body still nests under the trait (it's a default method).
-  const find = symbols.find((s) => s.name === "find" && s.parentId === repository!.id);
+  const find = symbols.find(
+    (s) => s.name === "find" && s.parentId === repository!.id,
+  );
   assert.ok(find, "default trait method 'find' not nested under trait");
 
   const postgresStruct = symbols.find(
@@ -64,9 +65,15 @@ test("extracts traits and links inherent + trait impl methods to their impl bloc
   assert.ok(postgresStruct);
 
   // Two impl blocks for the same type: inherent (new, connect) and trait (save).
-  const newMethod = symbols.find((s) => s.name === "new" && s.kind === "function");
-  const connectMethod = symbols.find((s) => s.name === "connect" && s.kind === "function");
-  const saveMethod = symbols.find((s) => s.name === "save" && s.kind === "function");
+  const newMethod = symbols.find(
+    (s) => s.name === "new" && s.kind === "function",
+  );
+  const connectMethod = symbols.find(
+    (s) => s.name === "connect" && s.kind === "function",
+  );
+  const saveMethod = symbols.find(
+    (s) => s.name === "save" && s.kind === "function",
+  );
   assert.ok(newMethod && connectMethod && saveMethod);
   // Methods from different impl blocks must have different parentIds
   // (each impl_item is its own symbol; methods nest under it, not under the struct).
@@ -77,15 +84,25 @@ test("extracts traits and links inherent + trait impl methods to their impl bloc
 test("extracts modules (declaration and inline) with nested items, and const/static/type", () => {
   const { symbols } = parseRust("modules.rs", fixture("modules.rs"));
 
-  const serviceMod = symbols.find((s) => s.name === "service" && s.kind === "namespace");
+  const serviceMod = symbols.find(
+    (s) => s.name === "service" && s.kind === "namespace",
+  );
   assert.ok(serviceMod, "'mod service;' declaration not indexed");
 
-  const repositoryMod = symbols.find((s) => s.name === "repository" && s.kind === "namespace");
+  const repositoryMod = symbols.find(
+    (s) => s.name === "repository" && s.kind === "namespace",
+  );
   assert.ok(repositoryMod, "inline 'mod repository { ... }' not indexed");
 
-  const inMemory = symbols.find((s) => s.name === "InMemoryRepository" && s.kind === "class");
+  const inMemory = symbols.find(
+    (s) => s.name === "InMemoryRepository" && s.kind === "class",
+  );
   assert.ok(inMemory);
-  assert.equal(inMemory!.parentId, repositoryMod!.id, "struct not nested under its module");
+  assert.equal(
+    inMemory!.parentId,
+    repositoryMod!.id,
+    "struct not nested under its module",
+  );
 
   const maxRetries = symbols.find((s) => s.name === "MAX_RETRIES");
   assert.ok(maxRetries, "const not indexed");
@@ -105,5 +122,9 @@ test("large-file parser regression: a big Rust file parses without silent skips"
   const { symbols, parseError } = parseRust("big.rs", bigSource);
   assert.equal(parseError, false);
   const generated = symbols.filter((s) => s.name.startsWith("generated_fn_"));
-  assert.equal(generated.length, 60, "not every generated function was indexed");
+  assert.equal(
+    generated.length,
+    60,
+    "not every generated function was indexed",
+  );
 });

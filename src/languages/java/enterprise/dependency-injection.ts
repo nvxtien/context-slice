@@ -1,6 +1,9 @@
 import type { SymbolRecord } from "../../../types/model.js";
 import type { EnterpriseRelation } from "../../../types/enterprise.js";
-import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./registry.js";
+import {
+  registerEnterpriseExtractor,
+  registerEnterpriseResolver,
+} from "./registry.js";
 
 // Two-phase design: the per-file extractor only records injection points (type name,
 // optional @Qualifier) as provisional "unresolved" relations; bean identity (§13) needs
@@ -8,7 +11,14 @@ import { registerEnterpriseExtractor, registerEnterpriseResolver } from "./regis
 // all files are parsed (see registry.ts resolveEnterpriseRelations).
 
 const QUALIFIER_RE = /@Qualifier\s*\(\s*(?:value\s*=\s*)?"([^"]*)"\s*\)/;
-const STEREOTYPES = new Set(["Component", "Service", "Repository", "Controller", "RestController", "Configuration"]);
+const STEREOTYPES = new Set([
+  "Component",
+  "Service",
+  "Repository",
+  "Controller",
+  "RestController",
+  "Configuration",
+]);
 const INJECT_ANNOTATIONS = new Set(["Autowired", "Inject", "Resource"]);
 
 /** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Autowired" -> "Autowired". */
@@ -57,11 +67,16 @@ function parseDeclaration(text: string) {
   const qualifier = text.match(QUALIFIER_RE)?.[1];
   const bare = text
     .replace(/@[\w.]+(?:\s*\([^)]*\))?/g, " ")
-    .replace(/\b(?:final|private|protected|public|static|transient|volatile)\b/g, " ")
+    .replace(
+      /\b(?:final|private|protected|public|static|transient|volatile)\b/g,
+      " ",
+    )
     .trim();
   // ponytail: generic wrappers (List<Repo>, Optional<Repo>) resolve by the outer type, which
   // is never a project class, so they produce no relation; unwrap if collection DI matters.
-  const match = bare.match(/^((?:[\w$]+\.)*([\w$]+))\s*(?:<.*>)?\s*(?:\[\s*\])*\s+([\w$]+)$/s);
+  const match = bare.match(
+    /^((?:[\w$]+\.)*([\w$]+))\s*(?:<.*>)?\s*(?:\[\s*\])*\s+([\w$]+)$/s,
+  );
   if (!match) return undefined;
   return { type: match[2], name: match[3], qualifier };
 }
@@ -78,7 +93,10 @@ function relation(
     sourceSymbolId: source.id,
     targetLabel: decl.type,
     confidence: "unresolved", // provisional until resolveDependencyRelations runs
-    evidence: decl.qualifier !== undefined ? [evidence, `@Qualifier("${decl.qualifier}")`] : [evidence],
+    evidence:
+      decl.qualifier !== undefined
+        ? [evidence, `@Qualifier("${decl.qualifier}")`]
+        : [evidence],
     range: source.range,
     filePath,
   };
@@ -102,50 +120,91 @@ function extractDependencyInjection(
     if (seen.has(key)) continue;
     seen.add(key);
     const cls = own.find((s) => s.id === ctor.parentId);
-    const stereotyped = cls?.annotations.some((a) => STEREOTYPES.has(bareName(a)));
-    const annotated = ctor.annotations.some((a) => bareName(a) === "Autowired" || bareName(a) === "Inject");
+    const stereotyped = cls?.annotations.some((a) =>
+      STEREOTYPES.has(bareName(a)),
+    );
+    const annotated = ctor.annotations.some(
+      (a) => bareName(a) === "Autowired" || bareName(a) === "Inject",
+    );
     if (!stereotyped && !annotated) continue;
     const params = firstParenGroup(ctor.source);
     if (!params) continue;
     for (const param of splitTopLevel(params)) {
       const decl = parseDeclaration(param);
-      if (decl) relations.push(relation(ctor, filePath, decl, `constructor parameter ${decl.type} ${decl.name}`));
+      if (decl)
+        relations.push(
+          relation(
+            ctor,
+            filePath,
+            decl,
+            `constructor parameter ${decl.type} ${decl.name}`,
+          ),
+        );
     }
   }
 
   // Field injection, using field symbols directly (Phase 0 AST rewrite) instead of a
   // regex scan over class-member text.
   for (const field of own.filter((s) => s.kind === "field")) {
-    const annotation = field.annotations.find((a) => INJECT_ANNOTATIONS.has(bareName(a)));
+    const annotation = field.annotations.find((a) =>
+      INJECT_ANNOTATIONS.has(bareName(a)),
+    );
     if (!annotation) continue;
     const cls = own.find((s) => s.id === field.parentId);
     if (!cls) continue;
-    const decl = parseDeclaration(`${field.metadata?.declaredType ?? ""} ${field.name}`);
+    const decl = parseDeclaration(
+      `${field.metadata?.declaredType ?? ""} ${field.name}`,
+    );
     if (!decl) continue;
-    const hasQualifier = field.annotations.some((a) => bareName(a) === "Qualifier");
-    decl.qualifier ??= hasQualifier ? field.source.match(QUALIFIER_RE)?.[1] : undefined;
+    const hasQualifier = field.annotations.some(
+      (a) => bareName(a) === "Qualifier",
+    );
+    decl.qualifier ??= hasQualifier
+      ? field.source.match(QUALIFIER_RE)?.[1]
+      : undefined;
     relations.push(
-      relation(cls, filePath, decl, `@${bareName(annotation)} field ${decl.type} ${field.name}`),
+      relation(
+        cls,
+        filePath,
+        decl,
+        `@${bareName(annotation)} field ${decl.type} ${field.name}`,
+      ),
     );
   }
 
   // Explicit setter injection, using method symbols directly.
   for (const method of own.filter((s) => s.kind === "method")) {
-    const annotation = method.annotations.find((a) => INJECT_ANNOTATIONS.has(bareName(a)));
+    const annotation = method.annotations.find((a) =>
+      INJECT_ANNOTATIONS.has(bareName(a)),
+    );
     if (!annotation) continue;
     // method.source includes any leading annotations (tree-sitter's method_declaration node
     // starts at the modifiers); strip them first so a parenthesized annotation argument (e.g.
     // @Autowired(required = false)) isn't mistaken by firstParenGroup for the method's own params.
-    const bodyText = method.source.replace(/^(?:\s*@[\w.]+(?:\s*\([^)]*\))?\s*)*/, "");
+    const bodyText = method.source.replace(
+      /^(?:\s*@[\w.]+(?:\s*\([^)]*\))?\s*)*/,
+      "",
+    );
     const params = firstParenGroup(bodyText);
     if (params === undefined) continue;
-    const hasQualifier = method.annotations.some((a) => bareName(a) === "Qualifier");
-    const qualifier = hasQualifier ? method.source.match(QUALIFIER_RE)?.[1] : undefined;
+    const hasQualifier = method.annotations.some(
+      (a) => bareName(a) === "Qualifier",
+    );
+    const qualifier = hasQualifier
+      ? method.source.match(QUALIFIER_RE)?.[1]
+      : undefined;
     for (const param of splitTopLevel(params)) {
       const p = parseDeclaration(param);
       if (!p) continue;
       p.qualifier ??= qualifier;
-      relations.push(relation(method, filePath, p, `${annotation} setter ${method.name}(${p.type})`));
+      relations.push(
+        relation(
+          method,
+          filePath,
+          p,
+          `${annotation} setter ${method.name}(${p.type})`,
+        ),
+      );
     }
   }
   return relations;
@@ -162,7 +221,8 @@ export function resolveBeanType(
 ): { confidence: "exact" | "unresolved"; targetSymbolId?: string } | undefined {
   const candidates = projectTypes.filter((s) => s.name === typeName);
   if (candidates.length === 0) return undefined;
-  if (candidates.length === 1) return { confidence: "exact", targetSymbolId: candidates[0].id };
+  if (candidates.length === 1)
+    return { confidence: "exact", targetSymbolId: candidates[0].id };
   return { confidence: "unresolved" };
 }
 
@@ -171,9 +231,12 @@ export function resolveDependencyRelations(
   relations: EnterpriseRelation[],
   allSymbols: SymbolRecord[],
 ): EnterpriseRelation[] {
-  const projectTypes = allSymbols.filter((s) => s.kind === "class" || s.kind === "interface");
+  const projectTypes = allSymbols.filter(
+    (s) => s.kind === "class" || s.kind === "interface",
+  );
   return relations.flatMap((r) => {
-    if (r.kind !== "INJECTS_DEPENDENCY" || r.family !== "dependency-injection") return [r];
+    if (r.kind !== "INJECTS_DEPENDENCY" || r.family !== "dependency-injection")
+      return [r];
     const resolved = resolveBeanType(r.targetLabel ?? "", projectTypes);
     if (!resolved) return [];
     const { targetSymbolId: _stale, ...rest } = r;

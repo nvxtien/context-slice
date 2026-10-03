@@ -12,7 +12,11 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
-import { extractOracleTransactions, type Attribute, type OracleEntry } from "./java-enterprise-transactions-oracle.js";
+import {
+  extractOracleTransactions,
+  type Attribute,
+  type OracleEntry,
+} from "./java-enterprise-transactions-oracle.js";
 
 type Repository = { id: string; source: string };
 type FailureCategory =
@@ -24,15 +28,29 @@ type FailureCategory =
   | "GROUND_TRUTH"
   | "UNKNOWN";
 
-type Miss = { repo: string; oracle: OracleEntry; category: FailureCategory; detail: string };
-type FalsePositive = { repo: string; filePath: string; targetLabel: string | undefined; detail: string };
+type Miss = {
+  repo: string;
+  oracle: OracleEntry;
+  category: FailureCategory;
+  detail: string;
+};
+type FalsePositive = {
+  repo: string;
+  filePath: string;
+  targetLabel: string | undefined;
+  detail: string;
+};
 
 const root = process.cwd();
 const outDir = join(root, "benchmarks/results");
 mkdirSync(outDir, { recursive: true });
 
-const repositories = JSON.parse(readFileSync(join(root, "benchmarks/repositories.json"), "utf8")) as Repository[];
-const targets = repositories.filter((r) => r.id === "spring-petclinic" || r.id === "petclinic-rest");
+const repositories = JSON.parse(
+  readFileSync(join(root, "benchmarks/repositories.json"), "utf8"),
+) as Repository[];
+const targets = repositories.filter(
+  (r) => r.id === "spring-petclinic" || r.id === "petclinic-rest",
+);
 
 /** "readOnly=true, timeout=30" style key, sorted so attribute order never matters. */
 function attrKey(attrs: Attribute[]): string {
@@ -46,7 +64,11 @@ let oracleTotal = 0;
 let matched = 0;
 const misses: Miss[] = [];
 const falsePositives: FalsePositive[] = [];
-type RepoStats = { oracleTotal: number; matched: number; falsePositives: number };
+type RepoStats = {
+  oracleTotal: number;
+  matched: number;
+  falsePositives: number;
+};
 const perRepo: Record<string, RepoStats> = {};
 const allOracleEntries: OracleEntry[] = [];
 
@@ -54,11 +76,17 @@ for (const repo of targets) {
   const repoRoot = join(root, repo.source);
   const oracleEntries = extractOracleTransactions(repoRoot, repo.id);
   allOracleEntries.push(...oracleEntries);
-  perRepo[repo.id] = { oracleTotal: oracleEntries.length, matched: 0, falsePositives: 0 };
+  perRepo[repo.id] = {
+    oracleTotal: oracleEntries.length,
+    matched: 0,
+    falsePositives: 0,
+  };
 
   const index = new ProjectIndex(repoRoot);
   index.rebuild();
-  const txRelations = index.enterpriseRelations.filter((r) => r.kind === "TRANSACTION_BOUNDARY");
+  const txRelations = index.enterpriseRelations.filter(
+    (r) => r.kind === "TRANSACTION_BOUNDARY",
+  );
   const claimed = new Set<(typeof txRelations)[number]>();
 
   for (const oracle of oracleEntries) {
@@ -83,7 +111,9 @@ for (const repo of targets) {
       continue;
     }
 
-    const candidates = txRelations.filter((r) => r.sourceSymbolId === method.id);
+    const candidates = txRelations.filter(
+      (r) => r.sourceSymbolId === method.id,
+    );
     if (candidates.length === 0) {
       misses.push({
         repo: repo.id,
@@ -95,7 +125,9 @@ for (const repo of targets) {
     }
 
     const expectedKey = attrKey(oracle.attributes);
-    const relation = candidates.find((r) => attrKey(parseTargetLabel(r.targetLabel)) === expectedKey);
+    const relation = candidates.find(
+      (r) => attrKey(parseTargetLabel(r.targetLabel)) === expectedKey,
+    );
     if (!relation) {
       misses.push({
         repo: repo.id,
@@ -130,7 +162,8 @@ for (const repo of targets) {
       repo: repo.id,
       filePath: relation.filePath,
       targetLabel: relation.targetLabel,
-      detail: "Extractor emitted a TRANSACTION_BOUNDARY relation the oracle has no corresponding @Transactional(...) occurrence for.",
+      detail:
+        "Extractor emitted a TRANSACTION_BOUNDARY relation the oracle has no corresponding @Transactional(...) occurrence for.",
     });
   }
 }
@@ -147,16 +180,23 @@ for (const fp of falsePositives) perRepo[fp.repo].falsePositives++;
 const falsePositiveCount = falsePositives.length;
 
 const transaction_boundary_recall = oracleTotal ? matched / oracleTotal : 1;
-const transaction_boundary_precision = matched + falsePositiveCount ? matched / (matched + falsePositiveCount) : 1;
+const transaction_boundary_precision =
+  matched + falsePositiveCount ? matched / (matched + falsePositiveCount) : 1;
 
 // readOnly-only subset — the only mechanism with real-repository evidence (plan's grounding
 // section + this run's own oracle: every real occurrence in both pinned repos is bare
 // `readOnly = true`, nothing else). Retention rule (§51) is applied to THIS subset, per brief
 // Step 5, since it is the only one with real ground truth to measure against.
-const readOnlyMisses = misses.filter((m) => attrKey(m.oracle.attributes) === "readOnly=true");
-const readOnlyOracleTotal = allOracleEntries.filter((e) => attrKey(e.attributes) === "readOnly=true").length;
+const readOnlyMisses = misses.filter(
+  (m) => attrKey(m.oracle.attributes) === "readOnly=true",
+);
+const readOnlyOracleTotal = allOracleEntries.filter(
+  (e) => attrKey(e.attributes) === "readOnly=true",
+).length;
 const readOnlyMatched = readOnlyOracleTotal - readOnlyMisses.length;
-const readOnly_recall = readOnlyOracleTotal ? readOnlyMatched / readOnlyOracleTotal : 1;
+const readOnly_recall = readOnlyOracleTotal
+  ? readOnlyMatched / readOnlyOracleTotal
+  : 1;
 
 const failureAttribution: Record<FailureCategory, number> = {
   ANNOTATION_EXTRACTION: 0,
@@ -176,21 +216,38 @@ const results = {
   falsePositiveCount,
   transaction_boundary_recall,
   transaction_boundary_precision,
-  readOnlySubset: { oracleTotal: readOnlyOracleTotal, matched: readOnlyMatched, recall: readOnly_recall },
+  readOnlySubset: {
+    oracleTotal: readOnlyOracleTotal,
+    matched: readOnlyMatched,
+    recall: readOnly_recall,
+  },
   perRepo,
   failureAttribution,
   misses,
   falsePositives,
 };
 
-writeFileSync(join(outDir, "v1.4-phase3-transactions.json"), JSON.stringify(results, null, 2) + "\n");
+writeFileSync(
+  join(outDir, "v1.4-phase3-transactions.json"),
+  JSON.stringify(results, null, 2) + "\n",
+);
 
-console.log(`Oracle total: ${oracleTotal}, matched: ${matched}, false positives: ${falsePositiveCount}`);
-console.log(`transaction_boundary_recall: ${(transaction_boundary_recall * 100).toFixed(1)}%`);
-console.log(`transaction_boundary_precision: ${(transaction_boundary_precision * 100).toFixed(1)}%`);
-console.log(`readOnly subset recall: ${(readOnly_recall * 100).toFixed(1)}% (${readOnlyMatched}/${readOnlyOracleTotal})`);
+console.log(
+  `Oracle total: ${oracleTotal}, matched: ${matched}, false positives: ${falsePositiveCount}`,
+);
+console.log(
+  `transaction_boundary_recall: ${(transaction_boundary_recall * 100).toFixed(1)}%`,
+);
+console.log(
+  `transaction_boundary_precision: ${(transaction_boundary_precision * 100).toFixed(1)}%`,
+);
+console.log(
+  `readOnly subset recall: ${(readOnly_recall * 100).toFixed(1)}% (${readOnlyMatched}/${readOnlyOracleTotal})`,
+);
 console.log("Failure attribution:", failureAttribution);
 for (const [repoId, stats] of Object.entries(perRepo)) {
-  console.log(`${repoId}: oracle=${stats.oracleTotal} matched=${stats.matched} falsePositives=${stats.falsePositives}`);
+  console.log(
+    `${repoId}: oracle=${stats.oracleTotal} matched=${stats.matched} falsePositives=${stats.falsePositives}`,
+  );
 }
 console.log("Wrote benchmarks/results/v1.4-phase3-transactions.json");

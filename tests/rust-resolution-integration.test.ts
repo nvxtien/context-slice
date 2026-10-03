@@ -25,14 +25,19 @@ const build = (dir: string) => {
 };
 
 test("use serde::Serialize is external, not lib.rs (cold and warm)", () => {
-  withRepo({ "src/lib.rs": "use serde::Serialize;\npub struct A;\n" }, (dir) => {
-    for (let i = 0; i < 2; i++) {
-      const imp = build(dir).imports.find((r) => r.importedName === "Serialize");
-      assert.ok(imp);
-      assert.equal(imp!.externalPackage, "serde");
-      assert.equal(imp!.resolvedFile, undefined);
-    }
-  });
+  withRepo(
+    { "src/lib.rs": "use serde::Serialize;\npub struct A;\n" },
+    (dir) => {
+      for (let i = 0; i < 2; i++) {
+        const imp = build(dir).imports.find(
+          (r) => r.importedName === "Serialize",
+        );
+        assert.ok(imp);
+        assert.equal(imp!.externalPackage, "serde");
+        assert.equal(imp!.resolvedFile, undefined);
+      }
+    },
+  );
 });
 
 test("a local module named like a dependency does not resolve to itself", () => {
@@ -42,7 +47,9 @@ test("a local module named like a dependency does not resolve to itself", () => 
       "src/serde.rs": "use serde::Serializer;\npub struct S;\n",
     },
     (dir) => {
-      const imp = build(dir).imports.find((r) => r.importedName === "Serializer");
+      const imp = build(dir).imports.find(
+        (r) => r.importedName === "Serializer",
+      );
       assert.ok(imp);
       assert.equal(imp!.resolvedFile, undefined);
       assert.equal(imp!.externalPackage, "serde");
@@ -127,22 +134,29 @@ test("mutual pub use cycle terminates with no symbolId", () => {
 
 // --- locally bound first segments are not external crates (D3) ---
 test("use of a same-file enum's variants is not external", () => {
-  withRepo({ "src/lib.rs": "enum Command { A, B }\nuse Command::*;\n" }, (dir) => {
-    const imp = build(dir).imports.find((r) => r.wildcard);
-    assert.ok(imp);
-    assert.equal(imp!.externalPackage, undefined);
-    assert.equal(imp!.resolvedFile, undefined);
-  });
+  withRepo(
+    { "src/lib.rs": "enum Command { A, B }\nuse Command::*;\n" },
+    (dir) => {
+      const imp = build(dir).imports.find((r) => r.wildcard);
+      assert.ok(imp);
+      assert.equal(imp!.externalPackage, undefined);
+      assert.equal(imp!.resolvedFile, undefined);
+    },
+  );
 });
 
 test("first segment bound by another use in the same file is not external", () => {
   withRepo(
     {
-      "src/lib.rs": "pub mod parse;\nuse crate::parse::{Parse, ParseError};\nuse ParseError::EndOfStream;\n",
-      "src/parse.rs": "pub struct Parse;\npub enum ParseError { EndOfStream }\n",
+      "src/lib.rs":
+        "pub mod parse;\nuse crate::parse::{Parse, ParseError};\nuse ParseError::EndOfStream;\n",
+      "src/parse.rs":
+        "pub struct Parse;\npub enum ParseError { EndOfStream }\n",
     },
     (dir) => {
-      const imp = build(dir).imports.find((r) => r.importedName === "EndOfStream");
+      const imp = build(dir).imports.find(
+        (r) => r.importedName === "EndOfStream",
+      );
       assert.ok(imp);
       assert.equal(imp!.externalPackage, undefined);
       assert.equal(imp!.resolvedFile, undefined);
@@ -151,9 +165,16 @@ test("first segment bound by another use in the same file is not external", () =
 });
 
 test("an unbound external crate is still external", () => {
-  withRepo({ "src/lib.rs": "use serde::Serialize;\npub struct A;\n" }, (dir) => {
-    assert.equal(build(dir).imports.find((r) => r.importedName === "Serialize")!.externalPackage, "serde");
-  });
+  withRepo(
+    { "src/lib.rs": "use serde::Serialize;\npub struct A;\n" },
+    (dir) => {
+      assert.equal(
+        build(dir).imports.find((r) => r.importedName === "Serialize")!
+          .externalPackage,
+        "serde",
+      );
+    },
+  );
 });
 
 test("a binding in one file does not affect another file's external import", () => {
@@ -175,9 +196,15 @@ test("a binding in one file does not affect another file's external import", () 
 
 test("a fn or const named like a crate does not shadow the crate", () => {
   withRepo(
-    { "src/lib.rs": "use serde::X;\nstruct S;\nimpl S { fn serde(&self) {} }\nfn serde() {}\nconst serde2: u8 = 0;\n" },
+    {
+      "src/lib.rs":
+        "use serde::X;\nstruct S;\nimpl S { fn serde(&self) {} }\nfn serde() {}\nconst serde2: u8 = 0;\n",
+    },
     (dir) => {
-      assert.equal(build(dir).imports.find((r) => r.importedName === "X")!.externalPackage, "serde");
+      assert.equal(
+        build(dir).imports.find((r) => r.importedName === "X")!.externalPackage,
+        "serde",
+      );
     },
   );
 });
@@ -185,10 +212,13 @@ test("a fn or const named like a crate does not shadow the crate", () => {
 test("self in a use group binds the module name locally", () => {
   withRepo(
     {
-      "src/lib.rs": "use crate::frame::{self, Frame};\nuse frame::Error::Incomplete;\npub struct A;\n",
+      "src/lib.rs":
+        "use crate::frame::{self, Frame};\nuse frame::Error::Incomplete;\npub struct A;\n",
     },
     (dir) => {
-      const imp = build(dir).imports.find((r) => r.importedName === "Incomplete");
+      const imp = build(dir).imports.find(
+        (r) => r.importedName === "Incomplete",
+      );
       assert.ok(imp);
       assert.equal(imp!.externalPackage, undefined);
     },

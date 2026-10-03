@@ -8,7 +8,7 @@ test("a file with top-level use declarations gets a synthetic import symbol", ()
     "use crate::util::helper;",
     "",
     "pub fn run() {",
-    "    fs::read_to_string(\"x\").ok();",
+    '    fs::read_to_string("x").ok();',
     "}",
   ].join("\n");
   const parsed = parseRust("src/lib.rs", source);
@@ -21,14 +21,18 @@ test("a file with top-level use declarations gets a synthetic import symbol", ()
   assert.match(moduleSymbol!.source, /use std::fs;/);
   assert.match(moduleSymbol!.source, /use crate::util::helper;/);
   // The real function symbol must be unaffected and still present.
-  assert.ok(parsed.symbols.some((s) => s.kind === "function" && s.name === "run"));
+  assert.ok(
+    parsed.symbols.some((s) => s.kind === "function" && s.name === "run"),
+  );
 });
 
 test("a file with no top-level use declarations gets no synthetic symbol", () => {
-  const source = "pub fn main() {\n    println!(\"hi\");\n}\n";
+  const source = 'pub fn main() {\n    println!("hi");\n}\n';
   const parsed = parseRust("src/main.rs", source);
   assert.equal(
-    parsed.symbols.some((s) => s.kind === "namespace" && s.metadata?.moduleScope === true),
+    parsed.symbols.some(
+      (s) => s.kind === "namespace" && s.metadata?.moduleScope === true,
+    ),
     false,
   );
 });

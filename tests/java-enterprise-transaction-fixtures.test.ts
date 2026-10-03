@@ -8,14 +8,17 @@ import { composeTransactionContext } from "../src/planner/composition.js";
 import "../src/languages/java/enterprise/transactions.js"; // side-effect: registers the extractor
 
 const root = mkdtempSync(join(tmpdir(), "context-slice-java-enterprise-tx-"));
-cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, { recursive: true });
+cpSync(join(process.cwd(), "tests/fixtures/java-enterprise"), root, {
+  recursive: true,
+});
 const index = new ProjectIndex(root);
 index.rebuild();
 
 const relationsFor = (fileName: string) =>
   index.enterpriseRelations.filter(
     (relation) =>
-      relation.kind === "TRANSACTION_BOUNDARY" && relation.filePath.split("/").pop() === fileName,
+      relation.kind === "TRANSACTION_BOUNDARY" &&
+      relation.filePath.split("/").pop() === fileName,
   );
 
 test("bare-transactional-negative: a bare @Transactional method produces zero relations", () => {
@@ -37,24 +40,33 @@ test("multi-attribute: readOnly, timeout, and propagation are all captured toget
   const relations = relationsFor("TransactionalMultiAttributeService.java");
   assert.equal(relations.length, 1);
   assert.equal(relations[0].evidence.length, 3);
-  assert.equal(relations[0].targetLabel, "readOnly=false, timeout=30, propagation=Propagation.REQUIRES_NEW");
+  assert.equal(
+    relations[0].targetLabel,
+    "readOnly=false, timeout=30, propagation=Propagation.REQUIRES_NEW",
+  );
 });
 
 test("self-invocation: the callee's own relation exists, keyed to the callee method only", () => {
   const relations = relationsFor("SelfInvokedTransactionalService.java");
   assert.equal(relations.length, 1);
   const callee = index.symbols.find(
-    (s) => s.name === "findById" && s.filePath.endsWith("SelfInvokedTransactionalService.java"),
+    (s) =>
+      s.name === "findById" &&
+      s.filePath.endsWith("SelfInvokedTransactionalService.java"),
   )!;
   assert.equal(relations[0].sourceSymbolId, callee.id);
 });
 
 test("a transactional method's own attributes surface via composeTransactionContext regardless of an unrelated caller being in relatedIds", () => {
   const caller = index.symbols.find(
-    (s) => s.name === "lookupOrder" && s.filePath.endsWith("SelfInvokedTransactionalService.java"),
+    (s) =>
+      s.name === "lookupOrder" &&
+      s.filePath.endsWith("SelfInvokedTransactionalService.java"),
   )!;
   const callee = index.symbols.find(
-    (s) => s.name === "findById" && s.filePath.endsWith("SelfInvokedTransactionalService.java"),
+    (s) =>
+      s.name === "findById" &&
+      s.filePath.endsWith("SelfInvokedTransactionalService.java"),
   )!;
 
   // §17 is satisfied structurally, not by call-graph-aware logic: neither the extractor

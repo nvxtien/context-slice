@@ -240,11 +240,7 @@ function requestMcp(binary: string, cwd: string) {
   return { child, request, invalid, getStderr: () => stderr };
 }
 
-async function smokeMcp(
-  binary: string,
-  cwd: string,
-  query = "retryPayment",
-) {
+async function smokeMcp(binary: string, cwd: string, query = "retryPayment") {
   const session = requestMcp(binary, cwd);
   let responded = false;
   let gracefulShutdown = false;
@@ -433,11 +429,10 @@ export async function runPackageSmoke(
       rustRepository,
     );
     const rustMcp = await smokeMcp(binary, rustRepository, "create_order");
-    const rustGitStatus = execFileSync(
-      "git",
-      ["status", "--porcelain"],
-      { cwd: rustRepository, encoding: "utf8" },
-    );
+    const rustGitStatus = execFileSync("git", ["status", "--porcelain"], {
+      cwd: rustRepository,
+      encoding: "utf8",
+    });
     if (!rustPreview.includes("pub fn create_order"))
       throw new Error(
         `Rust smoke preview missing real fixture signature: ${rustPreview}`,

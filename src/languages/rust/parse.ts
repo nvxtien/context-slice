@@ -76,7 +76,12 @@ const isAsync = (node: Node) =>
         child.children.some((c) => c.type === "async")),
   );
 
-function canonicalId(filePath: string, chain: string[], kind: SymbolKind, name: string) {
+function canonicalId(
+  filePath: string,
+  chain: string[],
+  kind: SymbolKind,
+  name: string,
+) {
   return [filePath, ...chain, kind, name].join("::");
 }
 
@@ -91,7 +96,9 @@ function canonicalId(filePath: string, chain: string[], kind: SymbolKind, name: 
 export function modulePathFor(filePath: string): string[] {
   const normalized = filePath.replace(/\\/g, "/");
   const srcMatch = /(^|\/)src\//.exec(normalized); // segment-safe: not `mysrc/`
-  const relative = srcMatch ? normalized.slice(srcMatch.index + srcMatch[0].length) : normalized;
+  const relative = srcMatch
+    ? normalized.slice(srcMatch.index + srcMatch[0].length)
+    : normalized;
   const parts = relative.split("/").filter(Boolean);
   const last = parts.pop() ?? "";
   const base = last.replace(/\.rs$/, "");
@@ -103,7 +110,9 @@ export function modulePathFor(filePath: string): string[] {
 function implLabel(node: Node): string {
   const selfType = text(field(node, "type"));
   const traitNode = field(node, "trait");
-  return traitNode ? `impl ${text(traitNode)} for ${selfType}` : `impl ${selfType}`;
+  return traitNode
+    ? `impl ${text(traitNode)} for ${selfType}`
+    : `impl ${selfType}`;
 }
 
 function itemName(node: Node): string {
@@ -126,10 +135,7 @@ function pathSegments(node: Node): string[] {
 }
 
 /** One `use` statement can bind several names (a grouped list) — always returns an array, even for the common single-binding case. */
-function parseUseDeclaration(
-  node: Node,
-  filePath: string,
-): ImportRecord[] {
+function parseUseDeclaration(node: Node, filePath: string): ImportRecord[] {
   const argument = field(node, "argument");
   if (!argument) return [];
   const baseRecord = {
@@ -143,11 +149,18 @@ function parseUseDeclaration(
   const leaf = (full: string[], localName?: string) => {
     const importedName = full.at(-1);
     if (!importedName) return;
-    const module = full.length > 1 ? full.slice(0, -1).join("::") : importedName;
-    records.push({ ...baseRecord, module, importedName, localName: localName ?? importedName });
+    const module =
+      full.length > 1 ? full.slice(0, -1).join("::") : importedName;
+    records.push({
+      ...baseRecord,
+      module,
+      importedName,
+      localName: localName ?? importedName,
+    });
   };
   const wildcard = (full: string[]) => {
-    if (full.length) records.push({ ...baseRecord, module: full.join("::"), wildcard: true });
+    if (full.length)
+      records.push({ ...baseRecord, module: full.join("::"), wildcard: true });
   };
   // `self` inside `m::{self}` imports module `m` itself (module = m's parent path).
   const selfLeaf = (prefix: string[], alias?: string) => {
@@ -172,7 +185,8 @@ function parseUseDeclaration(
       case "scoped_use_list": {
         const path = field(item, "path");
         const list = field(item, "list");
-        if (list) useTree(list, [...prefix, ...(path ? pathSegments(path) : [])]);
+        if (list)
+          useTree(list, [...prefix, ...(path ? pathSegments(path) : [])]);
         return;
       }
       case "use_wildcard": {
@@ -185,7 +199,8 @@ function parseUseDeclaration(
         const alias = text(field(item, "alias"));
         if (!path || !alias) return;
         if (path.type === "self") selfLeaf(prefix, alias);
-        else if (isPathNode(path)) leaf([...prefix, ...pathSegments(path)], alias);
+        else if (isPathNode(path))
+          leaf([...prefix, ...pathSegments(path)], alias);
         return;
       }
       case "self":
@@ -200,16 +215,20 @@ function parseUseDeclaration(
 }
 
 const isPathNode = (node: Node) =>
-  ["scoped_identifier", "identifier", "self", "crate", "super"].includes(node.type);
+  ["scoped_identifier", "identifier", "self", "crate", "super"].includes(
+    node.type,
+  );
 
 const isComment = (n: Node) => n.type.endsWith("comment");
-const namedNoComments = (n: Node | null) => (n?.namedChildren ?? []).filter((c) => !isComment(c));
+const namedNoComments = (n: Node | null) =>
+  (n?.namedChildren ?? []).filter((c) => !isComment(c));
 
 /** Names of an impl's own generic type parameters (not lifetimes/consts). */
 export function typeParamNames(impl: Node): Set<string> {
   const names = new Set<string>();
   for (const p of field(impl, "type_parameters")?.namedChildren ?? []) {
-    const n = p.type === "type_identifier" ? p : (field(p, "left") ?? field(p, "name"));
+    const n =
+      p.type === "type_identifier" ? p : (field(p, "left") ?? field(p, "name"));
     if (n?.type === "type_identifier") names.add(n.text);
   }
   return names;
@@ -220,7 +239,10 @@ export function typeParamNames(impl: Node): Set<string> {
  * Undefined for shapes that are not one named type (slices, arrays, tuples, fn pointers,
  * multi-bound `dyn`, `impl Trait`, `!`, `_`) and for names in `generics`.
  */
-function baseTypeName(node: Node | null, generics?: Set<string>): string | undefined {
+function baseTypeName(
+  node: Node | null,
+  generics?: Set<string>,
+): string | undefined {
   if (!node) return undefined;
   let name: string;
   switch (node.type) {
@@ -255,22 +277,33 @@ function symbolMetadata(node: Node): SymbolMetadata | undefined {
     const body = field(node, "body");
     if (body?.type === "field_declaration_list") {
       for (const f of body.namedChildren)
-        if (f.type === "field_declaration") types[text(field(f, "name"))] = text(field(f, "type"));
+        if (f.type === "field_declaration")
+          types[text(field(f, "name"))] = text(field(f, "type"));
     } else if (body) {
-      body.childrenForFieldName("type").forEach((t, i) => (types[String(i)] = t.text));
+      body
+        .childrenForFieldName("type")
+        .forEach((t, i) => (types[String(i)] = t.text));
     }
     if (Object.keys(types).length) meta.declaredTypes = types;
-  } else if (node.type === "function_item" || node.type === "function_signature_item") {
+  } else if (
+    node.type === "function_item" ||
+    node.type === "function_signature_item"
+  ) {
     const types: Record<string, string> = {};
     // declaredTypes.self is "&self" | "&mut self" | "self" for plain receivers, or the raw type
     // text (e.g. "Box<Self>") for a typed `self: T`. Pattern params (`(a, b): T`, `_: T`) are skipped.
     for (const p of namedNoComments(field(node, "parameters"))) {
       if (p.type === "self_parameter") {
         const ref = p.children.some((c) => c.type === "&");
-        types.self = ref ? (p.children.some((c) => c.type === "mutable_specifier") ? "&mut self" : "&self") : "self";
+        types.self = ref
+          ? p.children.some((c) => c.type === "mutable_specifier")
+            ? "&mut self"
+            : "&self"
+          : "self";
       } else if (p.type === "parameter") {
         const pattern = field(p, "pattern");
-        if (pattern?.type === "identifier" || pattern?.type === "self") types[pattern.text] = text(field(p, "type"));
+        if (pattern?.type === "identifier" || pattern?.type === "self")
+          types[pattern.text] = text(field(p, "type"));
       }
     }
     if (Object.keys(types).length) meta.declaredTypes = types;
@@ -290,7 +323,9 @@ const chainDots = (node: Node): number | undefined => {
 function receiverOf(node: Node): string {
   const dots = chainDots(node);
   if (dots !== undefined) return dots <= 3 ? node.text : "<field>";
-  return node.type === "field_expression" ? "<expr>" : `<${node.type.replace(/_expression$/, "")}>`;
+  return node.type === "field_expression"
+    ? "<expr>"
+    : `<${node.type.replace(/_expression$/, "")}>`;
 }
 
 /** Path prefix text without generic arguments (`Vec::<u8>` -> `Vec`). */
@@ -298,7 +333,11 @@ const prefixText = (node: Node): string =>
   node.type === "generic_type" ? text(field(node, "type")) : node.text;
 
 /** Turns a call_expression / macro_invocation into an unresolved edge. */
-export function callEdge(node: Node, filePath: string, callerId: string): CallEdge {
+export function callEdge(
+  node: Node,
+  filePath: string,
+  callerId: string,
+): CallEdge {
   const edge: CallEdge = {
     callerId,
     calleeName: "",
@@ -311,8 +350,12 @@ export function callEdge(node: Node, filePath: string, callerId: string): CallEd
   };
   if (node.type === "macro_invocation") {
     const macro = field(node, "macro")!;
-    edge.calleeName = macro.type === "scoped_identifier" ? text(field(macro, "name")) : macro.text;
-    if (macro.type === "scoped_identifier") edge.receiverText = prefixText(field(macro, "path")!);
+    edge.calleeName =
+      macro.type === "scoped_identifier"
+        ? text(field(macro, "name"))
+        : macro.text;
+    if (macro.type === "scoped_identifier")
+      edge.receiverText = prefixText(field(macro, "path")!);
     edge.argumentCount = 0;
     edge.evidence = [`macro:${edge.calleeName}`];
     return edge;
@@ -327,13 +370,15 @@ export function callEdge(node: Node, filePath: string, callerId: string): CallEd
     edge.calleeName = text(field(fn, "name"));
     const path = field(fn, "path");
     if (path) edge.receiverText = prefixText(path);
-    const qualified = path?.type === "bracketed_type" ? path.namedChild(0) : null;
+    const qualified =
+      path?.type === "bracketed_type" ? path.namedChild(0) : null;
     if (qualified?.type === "qualified_type")
       edge.evidence = [`qualified:${baseTypeName(field(qualified, "alias"))}`];
   } else if (fn.type === "identifier") {
     edge.calleeName = fn.text;
   } else {
-    const inner = fn.type === "parenthesized_expression" ? fn.namedChild(0) : null;
+    const inner =
+      fn.type === "parenthesized_expression" ? fn.namedChild(0) : null;
     edge.calleeName =
       inner?.type === "field_expression"
         ? text(field(inner, "field"))
@@ -357,9 +402,30 @@ export function callEdge(node: Node, filePath: string, callerId: string): CallEd
 // (real control flow) and dbg!'s sole argument is the real expression being inspected — both verified to
 // recover only real, correctly-named calls, with no pattern-confusion risk.
 const OPAQUE_MACROS = new Set([
-  "println", "print", "eprintln", "eprint", "format", "format_args", "write", "writeln", "vec", "panic",
-  "unreachable", "todo", "unimplemented", "trace", "debug", "info", "warn", "error", "log", "event", "span",
-  "anyhow", "bail", "matches",
+  "println",
+  "print",
+  "eprintln",
+  "eprint",
+  "format",
+  "format_args",
+  "write",
+  "writeln",
+  "vec",
+  "panic",
+  "unreachable",
+  "todo",
+  "unimplemented",
+  "trace",
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "log",
+  "event",
+  "span",
+  "anyhow",
+  "bail",
+  "matches",
 ]);
 const OPAQUE_ROOTS = new Set(["log", "tracing", "std", "core", "alloc"]);
 const MACRO_PREFIX = "fn __m() {";
@@ -369,29 +435,48 @@ export function macroArgs(mac: Node): MacroArgs | undefined {
   const m = field(mac, "macro");
   if (!m) return undefined;
   const name = m.type === "scoped_identifier" ? text(field(m, "name")) : m.text;
-  if (m.type === "scoped_identifier" && OPAQUE_ROOTS.has(m.text.split("::")[0].trim())) return undefined;
-  if (OPAQUE_MACROS.has(name) || /^(debug_)?assert/.test(name)) return undefined;
+  if (
+    m.type === "scoped_identifier" &&
+    OPAQUE_ROOTS.has(m.text.split("::")[0].trim())
+  )
+    return undefined;
+  if (OPAQUE_MACROS.has(name) || /^(debug_)?assert/.test(name))
+    return undefined;
   const tt = mac.namedChildren.find((c) => c.type === "token_tree");
   if (!tt || tt.text.length < 3) return undefined;
   const src = `${MACRO_PREFIX}${tt.text.slice(1, -1)}}`;
   try {
-    return { root: rustParser().parse((i: number) => src.slice(i, i + 4_096)).rootNode, tt, macro: name };
+    return {
+      root: rustParser().parse((i: number) => src.slice(i, i + 4_096)).rootNode,
+      tt,
+      macro: name,
+    };
   } catch {
     return undefined;
   }
 }
 /** Index / position in the token tree's own tree of a node of the re-parsed argument tree. */
-export const macroIndex = (a: MacroArgs, i: number) => a.tt.startIndex + 1 + i - MACRO_PREFIX.length;
+export const macroIndex = (a: MacroArgs, i: number) =>
+  a.tt.startIndex + 1 + i - MACRO_PREFIX.length;
 const macroPos = (a: MacroArgs, p: Parser.Point): Parser.Point =>
   p.row === 0
-    ? { row: a.tt.startPosition.row, column: a.tt.startPosition.column + 1 + p.column - MACRO_PREFIX.length }
+    ? {
+        row: a.tt.startPosition.row,
+        column: a.tt.startPosition.column + 1 + p.column - MACRO_PREFIX.length,
+      }
     : { row: a.tt.startPosition.row + p.row, column: p.column };
 
 /**
  * Calls inside a macro's arguments, recursively through nested non-denylisted macros. `pos` maps a position
  * of `a`'s own tree to the file. Each edge carries `macro:arg <macro>` (resolution caps it at `probable`).
  */
-function macroCalls(a: MacroArgs, pos: (p: Parser.Point) => Parser.Point, filePath: string, callerId: string, out: CallEdge[]) {
+function macroCalls(
+  a: MacroArgs,
+  pos: (p: Parser.Point) => Parser.Point,
+  filePath: string,
+  callerId: string,
+  out: CallEdge[],
+) {
   const here = (p: Parser.Point) => pos(macroPos(a, p));
   const walk = (n: Node) => {
     for (const c of n.namedChildren) {
@@ -399,7 +484,12 @@ function macroCalls(a: MacroArgs, pos: (p: Parser.Point) => Parser.Point, filePa
         const edge = callEdge(c, filePath, callerId);
         const s = here(c.startPosition);
         const e = here(c.endPosition);
-        edge.range = { startLine: s.row + 1, startColumn: s.column, endLine: e.row + 1, endColumn: e.column };
+        edge.range = {
+          startLine: s.row + 1,
+          startColumn: s.column,
+          endLine: e.row + 1,
+          endColumn: e.column,
+        };
         edge.evidence = [...edge.evidence, `macro:arg ${a.macro}`];
         out.push(edge);
       } else if (c.type === "macro_invocation") {
@@ -420,10 +510,18 @@ export function parseRust(filePath: string, source: string): ParsedFile {
   let tree: Parser.Tree;
   try {
     // The node binding rejects string inputs of ~32KB or more, so feed it in small chunks.
-    tree = rustParser().parse((index: number) => source.slice(index, index + 4_096));
+    tree = rustParser().parse((index: number) =>
+      source.slice(index, index + 4_096),
+    );
     parseError = tree.rootNode.hasError;
   } catch {
-    return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
+    return {
+      symbols: [],
+      calls: [],
+      imports: [],
+      exports: [],
+      parseError: true,
+    };
   }
 
   const modulePath = modulePathFor(filePath);
@@ -456,7 +554,8 @@ export function parseRust(filePath: string, source: string): ParsedFile {
       // line: deterministic and human-readable, unlike an incrementing
       // counter that could shift under fixture reordering.
       let id = canonicalIdentity;
-      if (seenIds.has(id)) id = `${canonicalIdentity}#${child.startPosition.row + 1}`;
+      if (seenIds.has(id))
+        id = `${canonicalIdentity}#${child.startPosition.row + 1}`;
       seenIds.add(id);
       const modifiers = isPub(child) ? ["pub"] : [];
       const symbol: SymbolRecord = {
@@ -469,7 +568,9 @@ export function parseRust(filePath: string, source: string): ParsedFile {
         signature: child.text.split("\n")[0].trim(),
         filePath,
         range: range(child),
-        bodyRange: field(child, "body") ? range(field(child, "body")!) : undefined,
+        bodyRange: field(child, "body")
+          ? range(field(child, "body")!)
+          : undefined,
         parentId: parent?.id,
         annotations: attributes,
         modifiers,
@@ -492,7 +593,10 @@ export function parseRust(filePath: string, source: string): ParsedFile {
     for (const child of node.namedChildren) {
       if (child.type === "token_tree") continue;
       const owner = fnByNode.get(child.id) ?? caller;
-      if (owner && (child.type === "call_expression" || child.type === "macro_invocation"))
+      if (
+        owner &&
+        (child.type === "call_expression" || child.type === "macro_invocation")
+      )
         calls.push(callEdge(child, filePath, owner.id));
       if (owner && child.type === "macro_invocation") {
         const args = macroArgs(child);

@@ -276,7 +276,9 @@ export class ProjectIndex {
     // resolvedTargetId it settled on — a non-first alternative must still be reachable as a
     // caller/dependency edge, or context composition can never include it (see docs/rust-support.md).
     return this.calls
-      .filter((call) => (call.runtimeTargetIds ?? [call.resolvedTargetId]).includes(target.id))
+      .filter((call) =>
+        (call.runtimeTargetIds ?? [call.resolvedTargetId]).includes(target.id),
+      )
       .map((call) => this.symbols.find((s) => s.id === call.callerId))
       .filter((s): s is SymbolRecord => Boolean(s));
   }
@@ -295,7 +297,11 @@ export class ProjectIndex {
   dependencies(target: SymbolRecord) {
     return this.calls
       .filter((call) => call.callerId === target.id)
-      .flatMap((call) => call.runtimeTargetIds ?? (call.resolvedTargetId ? [call.resolvedTargetId] : []))
+      .flatMap(
+        (call) =>
+          call.runtimeTargetIds ??
+          (call.resolvedTargetId ? [call.resolvedTargetId] : []),
+      )
       .map((id) => this.symbols.find((s) => s.id === id))
       .filter((s): s is SymbolRecord => Boolean(s));
   }
@@ -406,7 +412,11 @@ export class ProjectIndex {
   sourceFor(symbol: SymbolRecord) {
     const full = resolve(this.root, symbol.filePath);
     const fromRoot = relative(this.root, full);
-    if (fromRoot === ".." || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot))
+    if (
+      fromRoot === ".." ||
+      fromRoot.startsWith(`..${sep}`) ||
+      isAbsolute(fromRoot)
+    )
       throw new Error("Path nằm ngoài repository root");
     return readFileSync(full, "utf8");
   }

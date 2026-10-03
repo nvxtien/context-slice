@@ -59,7 +59,12 @@ function receiverBaseTypeName(methodNode: Node): string | undefined {
   return typeNode.type === "type_identifier" ? typeNode.text : undefined;
 }
 
-function canonicalId(filePath: string, kind: SymbolKind, name: string, parameters?: string) {
+function canonicalId(
+  filePath: string,
+  kind: SymbolKind,
+  name: string,
+  parameters?: string,
+) {
   return [filePath, kind, name, parameters].filter(Boolean).join("::");
 }
 
@@ -106,11 +111,17 @@ function methodSignatureOf(node: Node): string {
  * "Bar"), used to look up what a "x := NewFoo()" binding actually constructs instead of assuming
  * the type from the function's own name. A multi-value return ("(*Bar, error)") takes the first
  * value, matching Go's constructor convention of returning the created value first. */
-function primaryReturnType(result: Node | null | undefined): string | undefined {
+function primaryReturnType(
+  result: Node | null | undefined,
+): string | undefined {
   if (!result) return undefined;
-  const first = result.type === "parameter_list" ? result.namedChildren[0] : result;
+  const first =
+    result.type === "parameter_list" ? result.namedChildren[0] : result;
   if (!first) return undefined;
-  const typeNode = first.type === "parameter_declaration" ? (first.namedChildren.at(-1) ?? first) : first;
+  const typeNode =
+    first.type === "parameter_declaration"
+      ? (first.namedChildren.at(-1) ?? first)
+      : first;
   return typeNode.text.replace(/^\*/, "");
 }
 
@@ -164,10 +175,20 @@ function buildCallEdge(
  * is read off the immediate parent's type during the walk — verified empirically that
  * this correctly tags only the direct target, never a call nested inside its arguments.
  */
-function collectCalls(node: Node, ownerId: string, filePath: string, calls: CallEdge[]) {
+function collectCalls(
+  node: Node,
+  ownerId: string,
+  filePath: string,
+  calls: CallEdge[],
+) {
   for (const child of node.namedChildren) {
     if (child.type === "call_expression") {
-      const wrapKind = node.type === "go_statement" ? "go" : node.type === "defer_statement" ? "defer" : undefined;
+      const wrapKind =
+        node.type === "go_statement"
+          ? "go"
+          : node.type === "defer_statement"
+            ? "defer"
+            : undefined;
       const edge = buildCallEdge(child, filePath, ownerId, wrapKind);
       // Skip edges whose callee couldn't be named (e.g. `go func(){ ... }()`,
       // `getHandler()()`, `(g)()`) rather than emitting a garbage calleeName: "" edge.
@@ -188,7 +209,9 @@ export function parseGo(filePath: string, source: string): ParsedFile {
   try {
     // tree-sitter's node binding rejects large single-string inputs; feed it in chunks,
     // matching every other adapter in this project (rust, typescript).
-    tree = goParser().parse((index: number) => source.slice(index, index + 4_096));
+    tree = goParser().parse((index: number) =>
+      source.slice(index, index + 4_096),
+    );
   } catch {
     return { symbols, calls, imports, exports, parseError: true };
   }
@@ -209,7 +232,8 @@ export function parseGo(filePath: string, source: string): ParsedFile {
 
   const structByName = new Map<string, SymbolRecord>();
   const pendingMethods: { node: Node; receiverName: string | undefined }[] = [];
-  const callables: { symbol: SymbolRecord; body: Node | null | undefined }[] = [];
+  const callables: { symbol: SymbolRecord; body: Node | null | undefined }[] =
+    [];
 
   for (const child of tree.rootNode.namedChildren) {
     if (child.type === "function_declaration") {
@@ -228,7 +252,9 @@ export function parseGo(filePath: string, source: string): ParsedFile {
         signature: `func ${name}${parameters}`,
         filePath,
         range: range(child),
-        bodyRange: field(child, "body") ? range(field(child, "body")!) : undefined,
+        bodyRange: field(child, "body")
+          ? range(field(child, "body")!)
+          : undefined,
         annotations: [],
         modifiers: modifiersFor(name),
         metadata: returnType ? { returnType } : undefined,
@@ -241,7 +267,10 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       // Deferred: struct symbols may appear later in this same file's top-level
       // children (Go has no forward-declaration ordering requirement), so method
       // linkage runs in a second pass below once every struct in this file is known.
-      pendingMethods.push({ node: child, receiverName: receiverBaseTypeName(child) });
+      pendingMethods.push({
+        node: child,
+        receiverName: receiverBaseTypeName(child),
+      });
     } else if (child.type === "type_declaration") {
       for (const spec of child.namedChildren.filter(
         (c) => c.type === "type_spec" || c.type === "type_alias",
@@ -270,14 +299,20 @@ export function parseGo(filePath: string, source: string): ParsedFile {
           // struct_type's field list is a NAMED CHILD (field_declaration_list), not
           // reachable via childForFieldName("body") — verified empirically: field()
           // returns undefined here, so the fallback lookup is required, not optional.
-          const fieldList = typeNode.namedChildren.find((c) => c.type === "field_declaration_list");
-          for (const fieldDecl of fieldList?.namedChildren.filter((c) => c.type === "field_declaration") ?? []) {
+          const fieldList = typeNode.namedChildren.find(
+            (c) => c.type === "field_declaration_list",
+          );
+          for (const fieldDecl of fieldList?.namedChildren.filter(
+            (c) => c.type === "field_declaration",
+          ) ?? []) {
             // An embedded field (e.g. plain "Base") has no "name" field, only "type" —
             // verified empirically: field_declaration's name field is absent for embeds.
             const explicitName = text(field(fieldDecl, "name"));
             const fieldName = explicitName || text(field(fieldDecl, "type"));
             if (!fieldName) continue;
-            const fieldId = uniqueId(canonicalId(filePath, "field", `${name}.${fieldName}`));
+            const fieldId = uniqueId(
+              canonicalId(filePath, "field", `${name}.${fieldName}`),
+            );
             symbols.push({
               id: fieldId,
               language: LANGUAGE_ID,
@@ -297,12 +332,17 @@ export function parseGo(filePath: string, source: string): ParsedFile {
           }
         } else if (typeNode.type === "interface_type") {
           const id = uniqueId(canonicalId(filePath, "interface", name));
-          const methodElems = typeNode.namedChildren.filter((c) => c.type === "method_elem");
-          const interfaceMethods = methodElems.map((m) => text(m.namedChild(0))).filter(Boolean);
+          const methodElems = typeNode.namedChildren.filter(
+            (c) => c.type === "method_elem",
+          );
+          const interfaceMethods = methodElems
+            .map((m) => text(m.namedChild(0)))
+            .filter(Boolean);
           const interfaceMethodSignatures: Record<string, string> = {};
           for (const m of methodElems) {
             const methodName = text(m.namedChild(0));
-            if (methodName) interfaceMethodSignatures[methodName] = methodSignatureOf(m);
+            if (methodName)
+              interfaceMethodSignatures[methodName] = methodSignatureOf(m);
           }
           symbols.push({
             id,
@@ -337,10 +377,15 @@ export function parseGo(filePath: string, source: string): ParsedFile {
           });
         }
       }
-    } else if (child.type === "const_declaration" || child.type === "var_declaration") {
+    } else if (
+      child.type === "const_declaration" ||
+      child.type === "var_declaration"
+    ) {
       const kind = child.type === "const_declaration" ? "const" : "var";
       const specType = kind === "const" ? "const_spec" : "var_spec";
-      for (const spec of child.namedChildren.filter((c) => c.type === specType)) {
+      for (const spec of child.namedChildren.filter(
+        (c) => c.type === specType,
+      )) {
         // const_spec/var_spec's "name" field only yields the FIRST identifier in a
         // multi-name spec (e.g. "var a, b int"); Phase 1 scope is single-name specs,
         // the common case — multi-name specs are a known, accepted gap, not a bug to
@@ -374,7 +419,10 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       );
       for (const spec of specs) {
         const pathNode = field(spec, "path");
-        const module = text(pathNode?.namedChild(0) ?? pathNode).replace(/^["']|["']$/g, "");
+        const module = text(pathNode?.namedChild(0) ?? pathNode).replace(
+          /^["']|["']$/g,
+          "",
+        );
         if (!module) continue;
         const nameNode = field(spec, "name");
         if (nameNode?.type === "blank_identifier") {
@@ -403,7 +451,10 @@ export function parseGo(filePath: string, source: string): ParsedFile {
             module,
             kind: "namespace",
             typeOnly: false,
-            localName: nameNode?.type === "package_identifier" ? nameNode.text : undefined,
+            localName:
+              nameNode?.type === "package_identifier"
+                ? nameNode.text
+                : undefined,
             range: range(spec),
           });
         }
@@ -420,8 +471,12 @@ export function parseGo(filePath: string, source: string): ParsedFile {
     if (!name) continue;
     const parameters = text(field(methodNode, "parameters"));
     const qualifiedName = receiverName ? `${receiverName}.${name}` : name;
-    const id = uniqueId(canonicalId(filePath, "method", qualifiedName, parameters));
-    const receiverStruct = receiverName ? structByName.get(receiverName) : undefined;
+    const id = uniqueId(
+      canonicalId(filePath, "method", qualifiedName, parameters),
+    );
+    const receiverStruct = receiverName
+      ? structByName.get(receiverName)
+      : undefined;
     const symbol: SymbolRecord = {
       id,
       language: LANGUAGE_ID,
@@ -432,7 +487,9 @@ export function parseGo(filePath: string, source: string): ParsedFile {
       signature: `func (${receiverName ?? ""}) ${name}${parameters}`,
       filePath,
       range: range(methodNode),
-      bodyRange: field(methodNode, "body") ? range(field(methodNode, "body")!) : undefined,
+      bodyRange: field(methodNode, "body")
+        ? range(field(methodNode, "body")!)
+        : undefined,
       parentId: receiverStruct?.id,
       supertypes: receiverName ? [receiverName] : undefined,
       annotations: [],

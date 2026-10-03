@@ -24,15 +24,26 @@ const one = (body: string) => {
 };
 
 test("method calls: receiver text and markers", () => {
-  assert.deepEqual(one("self.m(1, 2);"), { name: "m", recv: "self", args: 2, ev: [] });
+  assert.deepEqual(one("self.m(1, 2);"), {
+    name: "m",
+    recv: "self",
+    args: 2,
+    ev: [],
+  });
   assert.equal(one("self.a.b.m();").recv, "self.a.b");
   assert.equal(one("x.m();").recv, "x");
   assert.equal(one("self.a.b.c.d.m();").recv, "<field>"); // chain too long
-  assert.equal(calls("self.a().b.c();").find((c) => c.name === "c")?.recv, "<expr>"); // chain contains a call
+  assert.equal(
+    calls("self.a().b.c();").find((c) => c.name === "c")?.recv,
+    "<expr>",
+  ); // chain contains a call
   assert.equal(one("self.0.m();").recv, "self.0");
   assert.deepEqual(
     calls("a().b();").map((c) => [c.name, c.recv]),
-    [["b", "<call>"], ["a", undefined]],
+    [
+      ["b", "<call>"],
+      ["a", undefined],
+    ],
   );
   assert.equal(one("v[0].m();").recv, "<index>");
 });
@@ -44,7 +55,12 @@ test("scoped path calls", () => {
   assert.equal(one("crate::x::f();").recv, "crate::x");
   assert.equal(one("super::f();").recv, "super");
   assert.equal(one("self::f();").recv, "self");
-  assert.deepEqual(one("Vec::<u8>::new();"), { name: "new", recv: "Vec", args: 0, ev: [] });
+  assert.deepEqual(one("Vec::<u8>::new();"), {
+    name: "new",
+    recv: "Vec",
+    args: 0,
+    ev: [],
+  });
 });
 
 test("qualified trait call", () => {
@@ -55,17 +71,33 @@ test("qualified trait call", () => {
 });
 
 test("bare calls, turbofish, constructors", () => {
-  assert.deepEqual(one("f(1);"), { name: "f", recv: undefined, args: 1, ev: [] });
-  assert.deepEqual(one("f::<T>(1);"), { name: "f", recv: undefined, args: 1, ev: [] });
+  assert.deepEqual(one("f(1);"), {
+    name: "f",
+    recv: undefined,
+    args: 1,
+    ev: [],
+  });
+  assert.deepEqual(one("f::<T>(1);"), {
+    name: "f",
+    recv: undefined,
+    args: 1,
+    ev: [],
+  });
   assert.equal(one("Some(1);").name, "Some");
   assert.equal(one("Foo(1, 2);").args, 2);
 });
 
 test("parenthesised callee", () => {
   assert.deepEqual(one("(self.cb)(x);"), {
-    name: "cb", recv: undefined, args: 1, ev: ["no-type:callee-expression"],
+    name: "cb",
+    recv: undefined,
+    args: 1,
+    ev: ["no-type:callee-expression"],
   });
-  assert.equal(calls("(get())(x);").find((c) => c.name === "<expr>")?.ev[0], "no-type:callee-expression");
+  assert.equal(
+    calls("(get())(x);").find((c) => c.name === "<expr>")?.ev[0],
+    "no-type:callee-expression",
+  );
 });
 
 test("await and ? add no edges beyond the call itself", () => {
@@ -74,8 +106,11 @@ test("await and ? add no edges beyond the call itself", () => {
 });
 
 test("macros: no descent into token trees", () => {
-  assert.deepEqual(one("println!(\"{}\", g());"), {
-    name: "println", recv: undefined, args: 0, ev: ["macro:println"],
+  assert.deepEqual(one('println!("{}", g());'), {
+    name: "println",
+    recv: undefined,
+    args: 0,
+    ev: ["macro:println"],
   });
   const m = one("a::b::foo!(1);");
   assert.equal(m.name, "foo");
@@ -102,7 +137,10 @@ test("macro-argument call recovery: ensure!'s condition is real control flow, no
 
 test("macro-argument call recovery: dbg! wraps a single real expression, not denylisted", () => {
   const list = calls("dbg!(fetch());");
-  assert.deepEqual(list.map((c) => c.name), ["dbg", "fetch"]);
+  assert.deepEqual(
+    list.map((c) => c.name),
+    ["dbg", "fetch"],
+  );
 });
 
 test("macro-argument call recovery: matches! is denylisted — its pattern argument is not an expression and a tuple-variant pattern (e.g. Opt::Foo(_)) would otherwise misparse as a spurious call", () => {
@@ -113,7 +151,10 @@ test("macro-argument call recovery: matches! is denylisted — its pattern argum
 
 test("struct literals are not calls; consts are ignored", () => {
   assert.deepEqual(calls("let s = Foo { a: 1 };"), []);
-  const p = parseRust("src/lib.rs", "const X: u8 = f();\nstatic Y: u8 = g();\n");
+  const p = parseRust(
+    "src/lib.rs",
+    "const X: u8 = f();\nstatic Y: u8 = g();\n",
+  );
   assert.deepEqual(p.calls, []);
 });
 
@@ -131,9 +172,17 @@ impl S {
 }\n`,
   );
   const byName = Object.fromEntries(
-    p.calls.map((c) => [c.calleeName, p.symbols.find((s) => s.id === c.callerId)!.name]),
+    p.calls.map((c) => [
+      c.calleeName,
+      p.symbols.find((s) => s.id === c.callerId)!.name,
+    ]),
   );
-  assert.deepEqual(byName, { z: "outer", w: "outer", deep: "inner", top: "outer" });
+  assert.deepEqual(byName, {
+    z: "outer",
+    w: "outer",
+    deep: "inner",
+    top: "outer",
+  });
   const c = p.calls[0];
   assert.equal(c.confidence, "unresolved");
   assert.equal(c.resolutionKind, "unresolved");
@@ -150,7 +199,13 @@ test("impl metadata", () => {
   const impls = p.symbols.filter((s) => s.name.startsWith("impl"));
   assert.deepEqual(
     impls.map((s) => [s.metadata?.implSelfType, s.metadata?.implTrait]),
-    [["Vec", "Tr"], ["A", undefined], ["B", "Tr2"], ["Box", "Tr3"], [undefined, "Tr4"]],
+    [
+      ["Vec", "Tr"],
+      ["A", undefined],
+      ["B", "Tr2"],
+      ["Box", "Tr3"],
+      [undefined, "Tr4"],
+    ],
   );
 });
 
@@ -167,7 +222,8 @@ impl S {
   fn s() {}
 }\n`,
   );
-  const dt = (n: string) => p.symbols.find((s) => s.name === n)?.metadata?.declaredTypes;
+  const dt = (n: string) =>
+    p.symbols.find((s) => s.name === n)?.metadata?.declaredTypes;
   assert.deepEqual(dt("S"), { a: "u8", b: "Vec<String>" });
   assert.deepEqual(dt("T"), { "0": "u8", "1": "String" });
   assert.equal(dt("U"), undefined);
@@ -202,7 +258,8 @@ impl Tr for *const Foo {}
 impl a::b::Tr for c::Foo {}
 `,
   );
-  const dt = (n: string) => p.symbols.find((s) => s.name === n)?.metadata?.declaredTypes;
+  const dt = (n: string) =>
+    p.symbols.find((s) => s.name === n)?.metadata?.declaredTypes;
   assert.deepEqual(dt("m"), { self: "Box<Self>", x: "u8" });
   assert.deepEqual(dt("n"), { z: "Z" }); // pattern params skipped by design
   const impls = p.symbols.filter((s) => s.name.startsWith("impl"));
@@ -210,39 +267,75 @@ impl a::b::Tr for c::Foo {}
     impls.map((s) => [s.metadata?.implSelfType, s.metadata?.implTrait]),
     [
       ["S", undefined],
-      [undefined, "Tr"], [undefined, "Tr"], [undefined, "Tr"], [undefined, "Tr"],
-      [undefined, "Tr"], [undefined, "Tr"], ["Vec", "Tr"], ["Foo", "Tr"],
-      ["Tr", undefined], ["Foo", "Tr"], ["Foo", "Tr"],
+      [undefined, "Tr"],
+      [undefined, "Tr"],
+      [undefined, "Tr"],
+      [undefined, "Tr"],
+      [undefined, "Tr"],
+      [undefined, "Tr"],
+      ["Vec", "Tr"],
+      ["Foo", "Tr"],
+      ["Tr", undefined],
+      ["Foo", "Tr"],
+      ["Foo", "Tr"],
     ],
   );
 });
 
 test("Phase-1 symbol fields unchanged apart from new metadata", () => {
-  const p = parseRust("src/lib.rs", "pub struct S { a: u8 }\nimpl S {\n  pub fn m(&self) {}\n}\n");
+  const p = parseRust(
+    "src/lib.rs",
+    "pub struct S { a: u8 }\nimpl S {\n  pub fn m(&self) {}\n}\n",
+  );
   assert.deepEqual(
-    p.symbols.map(({ metadata: _m, ...rest }) => rest).map(({ source, body, ...r }) => r),
+    p.symbols
+      .map(({ metadata: _m, ...rest }) => rest)
+      .map(({ source, body, ...r }) => r),
     [
       {
-        id: "src/lib.rs::class::S", language: "rust", kind: "class", name: "S", qualifiedName: "S",
-        canonicalIdentity: "src/lib.rs::class::S", signature: "pub struct S { a: u8 }", filePath: "src/lib.rs",
+        id: "src/lib.rs::class::S",
+        language: "rust",
+        kind: "class",
+        name: "S",
+        qualifiedName: "S",
+        canonicalIdentity: "src/lib.rs::class::S",
+        signature: "pub struct S { a: u8 }",
+        filePath: "src/lib.rs",
         range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 22 },
         bodyRange: { startLine: 1, startColumn: 13, endLine: 1, endColumn: 22 },
-        annotations: [], modifiers: ["pub"], parentId: undefined,
+        annotations: [],
+        modifiers: ["pub"],
+        parentId: undefined,
       },
       {
-        id: "src/lib.rs::type::impl S", language: "rust", kind: "type", name: "impl S", qualifiedName: "impl S",
-        canonicalIdentity: "src/lib.rs::type::impl S", signature: "impl S {", filePath: "src/lib.rs",
+        id: "src/lib.rs::type::impl S",
+        language: "rust",
+        kind: "type",
+        name: "impl S",
+        qualifiedName: "impl S",
+        canonicalIdentity: "src/lib.rs::type::impl S",
+        signature: "impl S {",
+        filePath: "src/lib.rs",
         range: { startLine: 2, startColumn: 0, endLine: 4, endColumn: 1 },
         bodyRange: { startLine: 2, startColumn: 7, endLine: 4, endColumn: 1 },
-        annotations: [], modifiers: [], parentId: undefined,
+        annotations: [],
+        modifiers: [],
+        parentId: undefined,
       },
       {
-        id: "src/lib.rs::impl S::function::m", language: "rust", kind: "function", name: "m",
-        qualifiedName: "impl S::m", canonicalIdentity: "src/lib.rs::impl S::function::m",
-        signature: "pub fn m(&self) {}", filePath: "src/lib.rs",
+        id: "src/lib.rs::impl S::function::m",
+        language: "rust",
+        kind: "function",
+        name: "m",
+        qualifiedName: "impl S::m",
+        canonicalIdentity: "src/lib.rs::impl S::function::m",
+        signature: "pub fn m(&self) {}",
+        filePath: "src/lib.rs",
         range: { startLine: 3, startColumn: 2, endLine: 3, endColumn: 20 },
         bodyRange: { startLine: 3, startColumn: 18, endLine: 3, endColumn: 20 },
-        annotations: [], modifiers: ["pub"], parentId: "src/lib.rs::type::impl S",
+        annotations: [],
+        modifiers: ["pub"],
+        parentId: "src/lib.rs::type::impl S",
       },
     ],
   );
@@ -251,20 +344,38 @@ test("Phase-1 symbol fields unchanged apart from new metadata", () => {
 test("ProjectIndex: calls persist and are stable across warm rebuild and one-file edit", () => {
   const dir = mkdtempSync(join(tmpdir(), "cs-rust-calls-"));
   mkdirSync(join(dir, "src"));
-  writeFileSync(join(dir, "src", "lib.rs"), "pub fn a(q: u8) { b(); x.m(); }\npub fn b() {}\nstruct S { f: u8 }\nimpl Tr for S { fn t(&self, y: Y) {} }\n");
-  writeFileSync(join(dir, "src", "other.rs"), "pub fn c() { Vec::<u8>::new(); println!(\"x\"); }\n");
+  writeFileSync(
+    join(dir, "src", "lib.rs"),
+    "pub fn a(q: u8) { b(); x.m(); }\npub fn b() {}\nstruct S { f: u8 }\nimpl Tr for S { fn t(&self, y: Y) {} }\n",
+  );
+  writeFileSync(
+    join(dir, "src", "other.rs"),
+    'pub fn c() { Vec::<u8>::new(); println!("x"); }\n',
+  );
   const meta = (i: ProjectIndex) =>
     JSON.stringify(
       i.symbols
         .filter((s) => s.language === "rust")
-        .map((s) => [s.id, s.metadata?.implSelfType, s.metadata?.implTrait, s.metadata?.declaredTypes])
+        .map((s) => [
+          s.id,
+          s.metadata?.implSelfType,
+          s.metadata?.implTrait,
+          s.metadata?.declaredTypes,
+        ])
         .sort(),
     );
   const snap = (i: ProjectIndex) =>
     JSON.stringify(
       i.calls
         .filter((c) => c.language === "rust")
-        .map((c) => [c.filePath, c.calleeName, c.receiverText, c.argumentCount, c.evidence, c.range])
+        .map((c) => [
+          c.filePath,
+          c.calleeName,
+          c.receiverText,
+          c.argumentCount,
+          c.evidence,
+          c.range,
+        ])
         .sort(),
     );
   try {
@@ -281,7 +392,10 @@ test("ProjectIndex: calls persist and are stable across warm rebuild and one-fil
     reopened.rebuild();
     assert.equal(snap(reopened), first);
     assert.equal(meta(reopened), firstMeta);
-    writeFileSync(join(dir, "src", "other.rs"), "pub fn c() { Vec::<u8>::new(); }\n");
+    writeFileSync(
+      join(dir, "src", "other.rs"),
+      "pub fn c() { Vec::<u8>::new(); }\n",
+    );
     reopened.rebuild();
     assert.equal(reopened.calls.filter((c) => c.language === "rust").length, 3);
     const fresh = new ProjectIndex(dir);

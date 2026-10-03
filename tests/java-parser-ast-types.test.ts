@@ -10,7 +10,10 @@ test("a simple annotated class matches the old regex parser's id/source shape", 
   assert.equal(owner.packageName, "com.example");
   assert.equal(owner.qualifiedName, "com.example.Owner");
   assert.equal(owner.id, "Owner.java::com.example::Owner::class::Owner");
-  assert.ok(owner.source.startsWith("@Entity"), "source must include the leading annotation");
+  assert.ok(
+    owner.source.startsWith("@Entity"),
+    "source must include the leading annotation",
+  );
   assert.deepEqual(owner.annotations, ["@Entity"]);
   assert.deepEqual(owner.modifiers, ["public"]);
 });
@@ -51,7 +54,9 @@ test("a javadoc sentence containing a type keyword does not produce a fake symbo
     "}",
   ].join("\n");
   const { symbols } = parseJava("Real.java", source);
-  const names = symbols.filter((s) => s.kind === "interface").map((s) => s.name);
+  const names = symbols
+    .filter((s) => s.kind === "interface")
+    .map((s) => s.name);
   assert.deepEqual(names, ["Real"]);
 });
 
@@ -66,15 +71,22 @@ test("nested types produce the correct parentId chain and qualifiedName", () => 
 
 test("generic type arguments in extends/implements are stripped to the bare type name, matching the old parser", () => {
   const classSrc = "class Foo extends AbstractFoo<Bar> {}";
-  const ifaceSrc = "interface UserRepository extends JpaRepository<User, Long> {}";
+  const ifaceSrc =
+    "interface UserRepository extends JpaRepository<User, Long> {}";
   const { symbols: classSyms } = parseJava("Foo.java", classSrc);
   const { symbols: ifaceSyms } = parseJava("R.java", ifaceSrc);
-  assert.deepEqual(classSyms.find((s) => s.name === "Foo")!.supertypes, ["AbstractFoo"]);
-  assert.deepEqual(ifaceSyms.find((s) => s.name === "UserRepository")!.supertypes, ["JpaRepository"]);
+  assert.deepEqual(classSyms.find((s) => s.name === "Foo")!.supertypes, [
+    "AbstractFoo",
+  ]);
+  assert.deepEqual(
+    ifaceSyms.find((s) => s.name === "UserRepository")!.supertypes,
+    ["JpaRepository"],
+  );
 });
 
 test("enum and record kinds are both recognized", () => {
-  const source = "enum Status { ACTIVE, INACTIVE }\nrecord Point(int x, int y) {}\n";
+  const source =
+    "enum Status { ACTIVE, INACTIVE }\nrecord Point(int x, int y) {}\n";
   const { symbols } = parseJava("Both.java", source);
   assert.ok(symbols.some((s) => s.kind === "enum" && s.name === "Status"));
   assert.ok(symbols.some((s) => s.kind === "record" && s.name === "Point"));

@@ -9,11 +9,5 @@
   "homepage": "https://github.com/nvxtien/context-slice",
   "repository": "https://github.com/nvxtien/context-slice",
   "license": "MIT",
-  "keywords": [
-    "context",
-    "code-search",
-    "mcp",
-    "tree-sitter",
-    "context-window"
-  ]
+  "keywords": ["context", "code-search", "mcp", "tree-sitter", "context-window"]
 }
