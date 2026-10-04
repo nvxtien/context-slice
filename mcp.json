@@ -3,8 +3,8 @@
   "mcpServers": {
     "context-slice": {
       "type": "stdio",
-      "command": "node",
-      "args": ["${PLUGIN_ROOT}/dist/src/server/mcp-server.js"]
+      "command": "npx",
+      "args": ["-y", "context-slice@1.8.2", "mcp"]
     }
   }
 }
