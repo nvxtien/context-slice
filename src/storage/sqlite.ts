@@ -27,6 +27,11 @@ CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, file_path TEXT NOT NULL
 CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY AUTOINCREMENT, caller_id TEXT NOT NULL, callee_name TEXT NOT NULL, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS imports (id INTEGER PRIMARY KEY AUTOINCREMENT, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS exports (id INTEGER PRIMARY KEY AUTOINCREMENT, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_symbols_file_path ON symbols(file_path);
+CREATE INDEX IF NOT EXISTS idx_calls_file_path ON calls(file_path);
+CREATE INDEX IF NOT EXISTS idx_calls_caller_id ON calls(caller_id);
+CREATE INDEX IF NOT EXISTS idx_imports_file_path ON imports(file_path);
+CREATE INDEX IF NOT EXISTS idx_exports_file_path ON exports(file_path);
 `;
 
 export class IndexStorage {
@@ -136,17 +141,27 @@ export class IndexStorage {
         const deleteSymbols = this.db.prepare(
           "DELETE FROM symbols WHERE file_path = ?",
         );
+        // Imports/exports are pure per-file parse output (nothing downstream mutates them the
+        // way call resolution mutates calls below), so they can be kept genuinely incremental:
+        // only the changed/removed files' own rows are ever touched.
+        const deleteImports = this.db.prepare(
+          "DELETE FROM imports WHERE file_path = ?",
+        );
+        const deleteExports = this.db.prepare(
+          "DELETE FROM exports WHERE file_path = ?",
+        );
         for (const path of new Set([...changed, ...removed])) {
           deleteFile.run(path);
           deleteSymbols.run(path);
+          deleteImports.run(path);
+          deleteExports.run(path);
         }
       } else {
         this.db.prepare("DELETE FROM files").run();
         this.db.prepare("DELETE FROM symbols").run();
+        this.db.prepare("DELETE FROM imports").run();
+        this.db.prepare("DELETE FROM exports").run();
       }
-      this.db.prepare("DELETE FROM calls").run();
-      this.db.prepare("DELETE FROM imports").run();
-      this.db.prepare("DELETE FROM exports").run();
       const fileStatement = this.db.prepare(
         "INSERT OR REPLACE INTO files(path, content_hash, language, parse_error, indexing_version) VALUES (?, ?, ?, 0, ?)",
       );
@@ -164,35 +179,64 @@ export class IndexStorage {
             symbol.language,
             JSON.stringify(symbol),
           );
-      const callStatement = this.db.prepare(
-        "INSERT INTO calls(caller_id, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?)",
-      );
-      for (const call of calls)
-        callStatement.run(
-          call.callerId,
-          call.calleeName,
-          call.filePath,
-          call.language ?? "java",
-          JSON.stringify(call),
-        );
       const importStatement = this.db.prepare(
         "INSERT INTO imports(file_path, language, payload) VALUES (?, ?, ?)",
       );
       for (const record of imports)
-        importStatement.run(
-          record.filePath,
-          record.language,
-          JSON.stringify(record),
-        );
+        if (!incremental || changed.has(record.filePath))
+          importStatement.run(
+            record.filePath,
+            record.language,
+            JSON.stringify(record),
+          );
       const exportStatement = this.db.prepare(
         "INSERT INTO exports(file_path, language, payload) VALUES (?, ?, ?)",
       );
       for (const record of exports)
-        exportStatement.run(
-          record.filePath,
-          record.language,
-          JSON.stringify(record),
+        if (!incremental || changed.has(record.filePath))
+          exportStatement.run(
+            record.filePath,
+            record.language,
+            JSON.stringify(record),
+          );
+      // Calls are different: resolution is graph-wide (see ProjectIndex.rebuild), so a call's
+      // resolved fields can change even when its own file didn't. Rewriting only the
+      // changed-file set would silently leave stale resolution data for every other file's
+      // calls. Instead, diff against what's already stored, by payload, as a MULTISET (two
+      // distinct call sites can legitimately produce an identical payload) — so only rows that
+      // actually changed cost a write, and everything identical is left untouched.
+      const existingCalls = this.db
+        .prepare("SELECT id, payload FROM calls")
+        .all() as Array<{ id: number; payload: string }>;
+      const existingIdsByPayload = new Map<string, number[]>();
+      for (const row of existingCalls) {
+        const ids = existingIdsByPayload.get(row.payload);
+        if (ids) ids.push(row.id);
+        else existingIdsByPayload.set(row.payload, [row.id]);
+      }
+      const insertCall = this.db.prepare(
+        "INSERT INTO calls(caller_id, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?)",
+      );
+      for (const call of calls) {
+        const payload = JSON.stringify(call);
+        const reusable = existingIdsByPayload.get(payload);
+        if (reusable?.length) {
+          // An identical row already exists in the table; keep it rather than
+          // deleting and reinserting the same bytes.
+          reusable.pop();
+          continue;
+        }
+        insertCall.run(
+          call.callerId,
+          call.calleeName,
+          call.filePath,
+          call.language ?? "java",
+          payload,
         );
+      }
+      const deleteCallById = this.db.prepare("DELETE FROM calls WHERE id = ?");
+      for (const ids of existingIdsByPayload.values())
+        for (const id of ids) deleteCallById.run(id);
       this.db
         .prepare(
           "INSERT OR REPLACE INTO metadata(key, value) VALUES ('last_refreshed_at', ?)",

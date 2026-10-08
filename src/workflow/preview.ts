@@ -155,7 +155,7 @@ function chooseTarget(index: ProjectIndex, task: string) {
 
   const ranked = index
     .search(task, 10)
-    .map((result) => index.symbols.find((symbol) => symbol.id === result.id))
+    .map((result) => index.symbolById(result.id))
     .filter((symbol): symbol is SymbolRecord => Boolean(symbol));
   const target = preferProduction(ranked)[0];
   if (target) return target;
@@ -303,7 +303,7 @@ export function buildPreview(
 
   const relatedFiles = new Set(
     [...includedIds]
-      .map((id) => index.symbols.find((s) => s.id === id)?.filePath)
+      .map((id) => index.symbolById(id)?.filePath)
       .filter(
         (file): file is string => Boolean(file) && file !== target.filePath,
       ),

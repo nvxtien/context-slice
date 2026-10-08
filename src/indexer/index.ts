@@ -60,6 +60,16 @@ export class ProjectIndex {
   private readonly storage: IndexStorage;
   private sourceSignatures?: Map<string, string>;
   private cachedRefresh?: ReturnType<ProjectIndex["refresh"]>;
+  // Derived lookup indexes, rebuilt once per rebuild() by reindex() instead of being
+  // recomputed (via repeated .find()/.filter() scans over `symbols`/`calls`) on every
+  // callers()/dependencies()/composition lookup — those scans previously ran on every
+  // preview/query request, not just on index rebuild.
+  private symbolIndex = new Map<string, SymbolRecord>();
+  private callsByCaller = new Map<string, CallEdge[]>();
+  private callsByTarget = new Map<string, CallEdge[]>();
+  private childrenByParent = new Map<string, SymbolRecord[]>();
+  private moduleScopeSymbolByFile = new Map<string, SymbolRecord>();
+  private methodCountByName = new Map<string, number>();
   constructor(root: string) {
     this.root = resolve(root);
     this.storage = new IndexStorage(this.root);
@@ -118,8 +128,87 @@ export class ProjectIndex {
       ([path, signature]) => this.sourceSignatures?.get(path) === signature,
     );
   }
+  /** Rebuilds the id/parent/caller/target lookup maps from the current `symbols`/`calls`
+   * arrays. Called once per rebuild() so callers(), dependencies() and the composition
+   * helpers can look symbols up in O(1) instead of scanning the full arrays on every call. */
+  private reindex() {
+    this.symbolIndex = new Map(this.symbols.map((s) => [s.id, s]));
+    this.childrenByParent = new Map();
+    this.moduleScopeSymbolByFile = new Map();
+    this.methodCountByName = new Map();
+    for (const s of this.symbols) {
+      if (s.parentId) {
+        const siblings = this.childrenByParent.get(s.parentId);
+        if (siblings) siblings.push(s);
+        else this.childrenByParent.set(s.parentId, [s]);
+      }
+      if (s.kind === "namespace" && s.metadata?.moduleScope === true)
+        this.moduleScopeSymbolByFile.set(s.filePath, s);
+      if (s.kind === "method")
+        this.methodCountByName.set(
+          s.name,
+          (this.methodCountByName.get(s.name) ?? 0) + 1,
+        );
+    }
+    this.callsByCaller = new Map();
+    this.callsByTarget = new Map();
+    for (const call of this.calls) {
+      const fromCaller = this.callsByCaller.get(call.callerId);
+      if (fromCaller) fromCaller.push(call);
+      else this.callsByCaller.set(call.callerId, [call]);
+      const targetIds =
+        call.runtimeTargetIds ??
+        (call.resolvedTargetId ? [call.resolvedTargetId] : []);
+      for (const id of targetIds) {
+        const toTarget = this.callsByTarget.get(id);
+        if (toTarget) toTarget.push(call);
+        else this.callsByTarget.set(id, [call]);
+      }
+    }
+  }
+  /** O(1) symbol lookup by id, backed by the index reindex() maintains. */
+  symbolById(id: string): SymbolRecord | undefined {
+    return this.symbolIndex.get(id);
+  }
+  /** Direct children of `parentId` (e.g. a class's members), backed by the index reindex()
+   * maintains — avoids an O(symbols) `.filter()` per call. */
+  childrenOf(parentId: string): SymbolRecord[] {
+    return this.childrenByParent.get(parentId) ?? [];
+  }
+  /** Rust's synthetic per-file module-scope symbol (carries the file's top-level `use`
+   * declarations), backed by the index reindex() maintains. */
+  moduleScopeSymbol(filePath: string): SymbolRecord | undefined {
+    return this.moduleScopeSymbolByFile.get(filePath);
+  }
   inspect() {
     const files = this.files(this.root);
+    const signatures = this.signatures(files);
+    // Nothing on disk has changed since the last refresh()/rebuild() in this process: the
+    // in-memory index is already authoritative, so report CURRENT without re-reading and
+    // re-hashing every source file's full contents again (computeFreshness below). This is
+    // what makes repeated calls — e.g. the freshness check buildPreview() runs on every
+    // preview request — cheap instead of redoing the full-repo hash scan each time.
+    if (this.hashes.size > 0 && this.sameSignatures(signatures)) {
+      const metadata = this.storage.metadata();
+      const counts = this.counts(files);
+      return {
+        state: "CURRENT" as const,
+        sourceFiles: files.length,
+        filesByExtension: counts.byExtension,
+        filesByLanguage: counts.byLanguage,
+        languages: Object.keys(counts.byLanguage),
+        indexedFiles: this.hashes.size,
+        schemaVersion: metadata.schema_version ?? INDEX_VERSION,
+        lastRefreshedAt: metadata.last_refreshed_at,
+      };
+    }
+    return this.computeFreshness(files);
+  }
+  /** The expensive path: re-reads and sha256-hashes every source file's full contents and
+   * compares against the stored index. Only reached on a cold process (no prior
+   * refresh()/rebuild() yet) or when the cheap stat-based signature in inspect() detects a
+   * real change. */
+  private computeFreshness(files: string[]) {
     const previous = this.storage.load();
     const hashes = new Map<string, string>();
     for (const file of files) {
@@ -155,8 +244,11 @@ export class ProjectIndex {
   }
   refresh() {
     const summary = this.rebuild();
-    const result = { summary, freshness: this.inspect() };
+    // Set before inspect() so its cheap signature check can recognize the index it just
+    // built as current, instead of inspect() re-reading and re-hashing every file a second
+    // time right after rebuild() already did exactly that.
     this.sourceSignatures = this.signatures(this.files(this.root));
+    const result = { summary, freshness: this.inspect() };
     this.cachedRefresh = result;
     return result;
   }
@@ -257,6 +349,7 @@ export class ProjectIndex {
       };
       if (context.symbols.length) adapter.resolveCalls(context);
     }
+    this.reindex();
     this.storage.save(
       this.hashes,
       this.symbols,
@@ -328,11 +421,8 @@ export class ProjectIndex {
     // A cfg-gated call (spec §40) carries every alternative in runtimeTargetIds, not just the
     // resolvedTargetId it settled on — a non-first alternative must still be reachable as a
     // caller/dependency edge, or context composition can never include it (see docs/rust-support.md).
-    return this.calls
-      .filter((call) =>
-        (call.runtimeTargetIds ?? [call.resolvedTargetId]).includes(target.id),
-      )
-      .map((call) => this.symbols.find((s) => s.id === call.callerId))
+    return (this.callsByTarget.get(target.id) ?? [])
+      .map((call) => this.symbolIndex.get(call.callerId))
       .filter((s): s is SymbolRecord => Boolean(s));
   }
   callersAtDepth(target: SymbolRecord, depth: number) {
@@ -348,14 +438,13 @@ export class ProjectIndex {
     return [...found.values()];
   }
   dependencies(target: SymbolRecord) {
-    return this.calls
-      .filter((call) => call.callerId === target.id)
+    return (this.callsByCaller.get(target.id) ?? [])
       .flatMap(
         (call) =>
           call.runtimeTargetIds ??
           (call.resolvedTargetId ? [call.resolvedTargetId] : []),
       )
-      .map((id) => this.symbols.find((s) => s.id === id))
+      .map((id) => this.symbolIndex.get(id))
       .filter((s): s is SymbolRecord => Boolean(s));
   }
   dependenciesAtDepth(target: SymbolRecord, depth: number) {
@@ -374,53 +463,77 @@ export class ProjectIndex {
     return this.calls.filter(
       (call) =>
         !call.resolvedTargetId &&
-        this.symbols.filter(
-          (symbol) =>
-            symbol.kind === "method" && symbol.name === call.calleeName,
-        ).length > 1,
+        (this.methodCountByName.get(call.calleeName) ?? 0) > 1,
     );
   }
   diagnostics() {
     const simpleNames = new Map<string, number>();
-    for (const symbol of this.symbols)
-      simpleNames.set(symbol.name, (simpleNames.get(symbol.name) ?? 0) + 1);
+    const filePaths = new Set<string>();
     const ids = new Set<string>();
     let collisions = 0;
+    const kindCounts: Record<string, number> = {};
+    let componentsIndexed = 0;
+    const symbolsByLanguage: Record<string, number> = {};
     for (const symbol of this.symbols) {
+      simpleNames.set(symbol.name, (simpleNames.get(symbol.name) ?? 0) + 1);
+      filePaths.add(symbol.filePath);
       if (ids.has(symbol.id)) collisions++;
       ids.add(symbol.id);
+      kindCounts[symbol.kind] = (kindCounts[symbol.kind] ?? 0) + 1;
+      if (symbol.metadata?.reactComponent) componentsIndexed++;
+      symbolsByLanguage[symbol.language] =
+        (symbolsByLanguage[symbol.language] ?? 0) + 1;
     }
-    const resolutionKindCounts = Object.fromEntries(
-      [...new Set(this.calls.map((call) => call.resolutionKind))].map(
-        (kind) => [
-          kind,
-          this.calls.filter((call) => call.resolutionKind === kind).length,
-        ],
-      ),
-    );
+    const resolutionKindCounts: Record<string, number> = {};
+    let callEdgesExact = 0;
+    let callEdgesProbable = 0;
+    let callEdgesUnresolved = 0;
+    let externalCallEdges = 0;
+    const callsByLanguage: Record<string, number> = {};
+    for (const call of this.calls) {
+      resolutionKindCounts[call.resolutionKind] =
+        (resolutionKindCounts[call.resolutionKind] ?? 0) + 1;
+      if (call.confidence === "exact") callEdgesExact++;
+      else if (call.confidence === "probable") callEdgesProbable++;
+      else if (call.confidence === "unresolved") callEdgesUnresolved++;
+      if (call.externalPackage) externalCallEdges++;
+      const language = call.language ?? "java";
+      callsByLanguage[language] = (callsByLanguage[language] ?? 0) + 1;
+    }
+    let importsResolved = 0;
+    let externalImports = 0;
+    const importsByLanguage: Record<string, number> = {};
+    for (const record of this.imports) {
+      if (record.resolvedFile) importsResolved++;
+      if (record.externalPackage) externalImports++;
+      importsByLanguage[record.language] =
+        (importsByLanguage[record.language] ?? 0) + 1;
+    }
+    let reexportsTotal = 0;
+    let reexportsResolved = 0;
+    const exportsByLanguage: Record<string, number> = {};
+    for (const record of this.exports) {
+      if (record.fromModule) {
+        reexportsTotal++;
+        if (record.resolvedFile) reexportsResolved++;
+      }
+      exportsByLanguage[record.language] =
+        (exportsByLanguage[record.language] ?? 0) + 1;
+    }
     const byLanguage = Object.fromEntries(
       languages().map((adapter) => [
         adapter.id,
         {
-          symbols: this.symbols.filter(
-            (symbol) => symbol.language === adapter.id,
-          ).length,
-          calls: this.calls.filter(
-            (call) => (call.language ?? "java") === adapter.id,
-          ).length,
-          imports: this.imports.filter(
-            (record) => record.language === adapter.id,
-          ).length,
-          exports: this.exports.filter(
-            (record) => record.language === adapter.id,
-          ).length,
+          symbols: symbolsByLanguage[adapter.id] ?? 0,
+          calls: callsByLanguage[adapter.id] ?? 0,
+          imports: importsByLanguage[adapter.id] ?? 0,
+          exports: exportsByLanguage[adapter.id] ?? 0,
         },
       ]),
     );
-    const kindCount = (kind: string) =>
-      this.symbols.filter((symbol) => symbol.kind === kind).length;
+    const kindCount = (kind: string) => kindCounts[kind] ?? 0;
     return {
-      filesIndexed: new Set(this.symbols.map((symbol) => symbol.filePath)).size,
+      filesIndexed: filePaths.size,
       symbolsIndexed: this.symbols.length,
       methodsIndexed: kindCount("method"),
       constructorsIndexed: kindCount("constructor"),
@@ -430,34 +543,22 @@ export class ProjectIndex {
       enumsIndexed: kindCount("enum"),
       functionsIndexed: kindCount("function"),
       typesIndexed: kindCount("type"),
-      componentsIndexed: this.symbols.filter(
-        (symbol) => symbol.metadata?.reactComponent,
-      ).length,
+      componentsIndexed,
       duplicateSimpleNames: [...simpleNames.values()].filter(
         (count) => count > 1,
       ).length,
       ambiguousLookups: 0,
       symbolIdCollisions: collisions,
       callEdgesTotal: this.calls.length,
-      callEdgesExact: this.calls.filter((call) => call.confidence === "exact")
-        .length,
-      callEdgesProbable: this.calls.filter(
-        (call) => call.confidence === "probable",
-      ).length,
-      callEdgesUnresolved: this.calls.filter(
-        (call) => call.confidence === "unresolved",
-      ).length,
-      externalCallEdges: this.calls.filter((call) => call.externalPackage)
-        .length,
+      callEdgesExact,
+      callEdgesProbable,
+      callEdgesUnresolved,
+      externalCallEdges,
       importsTotal: this.imports.length,
-      importsResolved: this.imports.filter((record) => record.resolvedFile)
-        .length,
-      externalImports: this.imports.filter((record) => record.externalPackage)
-        .length,
-      reexportsTotal: this.exports.filter((record) => record.fromModule).length,
-      reexportsResolved: this.exports.filter(
-        (record) => record.fromModule && record.resolvedFile,
-      ).length,
+      importsResolved,
+      externalImports,
+      reexportsTotal,
+      reexportsResolved,
       byLanguage,
       resolutionKindCounts,
     };

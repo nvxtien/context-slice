@@ -63,13 +63,11 @@ export function composeSiblings(
   /** Symbols already in the slice: the skeleton must not repeat them. */
   alreadyIncluded: ReadonlySet<string> = new Set(),
 ): CompositionCandidate[] {
-  const parent = target.parentId
-    ? index.symbols.find((symbol) => symbol.id === target.parentId)
-    : undefined;
+  const parent = target.parentId ? index.symbolById(target.parentId) : undefined;
   if (!parent || !TYPE_KINDS.has(parent.kind)) return [];
-  const members = index.symbols.filter(
-    (symbol) => symbol.parentId === parent.id && symbol.id !== target.id,
-  );
+  const members = index
+    .childrenOf(parent.id)
+    .filter((symbol) => symbol.id !== target.id);
   if (!members.length) return [];
 
   const remaining = members.filter((member) => !alreadyIncluded.has(member.id));
@@ -122,12 +120,7 @@ export function composeImportContext(
   for (const file of relatedFiles) {
     if (seen.has(file)) continue;
     seen.add(file);
-    const symbol = index.symbols.find(
-      (s) =>
-        s.kind === "namespace" &&
-        s.metadata?.moduleScope === true &&
-        s.filePath === file,
-    );
+    const symbol = index.moduleScopeSymbol(file);
     if (!symbol || alreadyIncluded.has(symbol.id) || !symbol.source) continue;
     candidates.push({
       symbol,
@@ -183,25 +176,17 @@ export function composeDependencyContext(
 
   let owner: SymbolRecord | undefined =
     target.kind === "class" ? target : undefined;
-  let cursor = target.parentId
-    ? index.symbols.find((s) => s.id === target.parentId)
-    : undefined;
+  let cursor = target.parentId ? index.symbolById(target.parentId) : undefined;
   while (!owner && cursor) {
     if (cursor.kind === "class") owner = cursor;
-    else
-      cursor = cursor.parentId
-        ? index.symbols.find((s) => s.id === cursor!.parentId)
-        : undefined;
+    else cursor = cursor.parentId ? index.symbolById(cursor.parentId) : undefined;
   }
   if (!owner) return [];
 
   const ownSymbolIds = new Set(
-    index.symbols
-      .filter(
-        (s) =>
-          s.parentId === owner!.id &&
-          (s.kind === "constructor" || s.kind === "method"),
-      )
+    index
+      .childrenOf(owner.id)
+      .filter((s) => s.kind === "constructor" || s.kind === "method")
       .map((s) => s.id),
   );
   ownSymbolIds.add(owner.id);
@@ -213,9 +198,7 @@ export function composeDependencyContext(
     if (relation.confidence === "unresolved") continue;
     if (!ownSymbolIds.has(relation.sourceSymbolId)) continue;
     if (!relation.targetSymbolId) continue;
-    const dependencyMembers = index.symbols.filter(
-      (s) => s.parentId === relation.targetSymbolId,
-    );
+    const dependencyMembers = index.childrenOf(relation.targetSymbolId);
     const isRelevant = dependencyMembers.some((s) => relatedIds.has(s.id));
     if (!isRelevant) continue;
     const key = `${relation.sourceSymbolId}:${relation.targetSymbolId}`;
@@ -263,9 +246,7 @@ export function composeTransactionContext(
     // slice (as the target itself, or as an already-included caller/callee)
     // and the shared composition loop in buildPreview dedupes candidates by
     // symbol id — attaching it would silently drop this very candidate.
-    const methodSymbol = index.symbols.find(
-      (s) => s.id === relation.sourceSymbolId,
-    );
+    const methodSymbol = index.symbolById(relation.sourceSymbolId);
     const name =
       methodSymbol?.qualifiedName ?? methodSymbol?.name ?? target.name;
     const rendered = `// Transaction\n${name} (${relation.targetLabel})`;
@@ -323,15 +304,10 @@ export function composeJpaContext(
 
   let owner: SymbolRecord | undefined =
     target.kind === "class" ? target : undefined;
-  let cursor = target.parentId
-    ? index.symbols.find((s) => s.id === target.parentId)
-    : undefined;
+  let cursor = target.parentId ? index.symbolById(target.parentId) : undefined;
   while (!owner && cursor) {
     if (cursor.kind === "class") owner = cursor;
-    else
-      cursor = cursor.parentId
-        ? index.symbols.find((s) => s.id === cursor!.parentId)
-        : undefined;
+    else cursor = cursor.parentId ? index.symbolById(cursor.parentId) : undefined;
   }
 
   const candidateIds = new Set([target.id, ...relatedIds]);
@@ -352,9 +328,7 @@ export function composeJpaContext(
     // entity type owns a member already in the slice.
     if (relation.kind === "ENTITY_RELATION") {
       if (!relation.targetSymbolId) continue;
-      const targetMembers = index.symbols.filter(
-        (s) => s.parentId === relation.targetSymbolId,
-      );
+      const targetMembers = index.childrenOf(relation.targetSymbolId);
       if (!targetMembers.some((s) => relatedIds.has(s.id))) continue;
     }
     // evidence[0] names the declaring field (e.g. "@ManyToOne on field
@@ -372,9 +346,7 @@ export function composeJpaContext(
     // relative) and the shared composition loop in buildPreview dedupes
     // candidates by symbol id — attaching it would silently drop this very
     // candidate.
-    const sourceSymbol = index.symbols.find(
-      (s) => s.id === relation.sourceSymbolId,
-    );
+    const sourceSymbol = index.symbolById(relation.sourceSymbolId);
     const name = sourceSymbol?.name ?? target.name;
     let rendered: string;
     if (relation.kind === "ENTITY_RELATION") {
@@ -424,9 +396,7 @@ export function composeRouteContext(
     // shared composition loop in buildPreview dedupes candidates by symbol
     // id — attaching it would silently drop the very route line this
     // function exists to surface.
-    const handlerSymbol = index.symbols.find(
-      (s) => s.id === relation.sourceSymbolId,
-    );
+    const handlerSymbol = index.symbolById(relation.sourceSymbolId);
     const rendered = `// Route\n${relation.targetLabel} → ${handlerSymbol?.name ?? target.name}`;
     candidates.push({
       label: relation.targetLabel ?? "route",
