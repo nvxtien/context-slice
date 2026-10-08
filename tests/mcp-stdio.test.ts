@@ -70,7 +70,7 @@ function startMcp(root: string) {
 }
 
 test(
-  "mcp is protocol-safe and refreshes before each request",
+  "mcp is protocol-safe and refreshes only when the repository changes",
   { timeout: 15_000 },
   async () => {
     const root = javaRepository();
@@ -97,6 +97,13 @@ test(
         0,
         `non-protocol stdout: ${mcp.invalidStdout.join("\n")}`,
       );
+
+      const unchanged = await mcp.request("tools/call", {
+        name: "context.search",
+        arguments: { query: "retryPayment" },
+      });
+      const unchangedBody = JSON.parse(unchanged.result.content[0].text);
+      assert.equal(unchangedBody.refresh.summary.filesParsed, 1);
 
       const ambiguous = await mcp.request("tools/call", {
         name: "context.slice",

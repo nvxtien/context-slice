@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync, realpathSync } from "node:fs";
+import { readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type {
   CallEdge,
@@ -21,22 +21,15 @@ import {
   languages,
   type ResolveContext,
 } from "../languages/adapter.js";
+import { ensureLanguageBootstrap } from "../languages/bootstrap.js";
+import { resetCallResolution } from "./resolution-state.js";
 import type { EnterpriseRelation } from "../types/enterprise.js";
 import {
   extractEnterpriseRelations,
   resolveEnterpriseRelations,
 } from "../languages/java/enterprise/registry.js";
-import "../languages/java.js";
-import "../languages/typescript/index.js";
-import "../languages/javascript/index.js";
-import "../languages/python/index.js";
-import "../languages/rust/index.js";
-import "../languages/go/index.js";
-import "../languages/java/enterprise/spring-mvc.js";
-import "../languages/java/enterprise/dependency-injection.js";
-import "../languages/java/enterprise/transactions.js";
-import "../languages/java/enterprise/jpa-entity.js";
-import "../languages/java/enterprise/spring-data.js";
+
+ensureLanguageBootstrap();
 
 const coreIgnored = new Set([
   ".git",
@@ -65,6 +58,8 @@ export class ProjectIndex {
   enterpriseRelations: EnterpriseRelation[] = [];
   private hashes = new Map<string, IndexedFileRecord>();
   private readonly storage: IndexStorage;
+  private sourceSignatures?: Map<string, string>;
+  private cachedRefresh?: ReturnType<ProjectIndex["refresh"]>;
   constructor(root: string) {
     this.root = resolve(root);
     this.storage = new IndexStorage(this.root);
@@ -105,6 +100,24 @@ export class ProjectIndex {
     }
     return { byExtension, byLanguage };
   }
+  private signatures(files: string[]) {
+    return new Map(
+      files.map((file) => {
+        const stats = statSync(file);
+        return [
+          relative(this.root, file),
+          `${stats.size}:${stats.mtimeMs}:${stats.ctimeMs}`,
+        ];
+      }),
+    );
+  }
+  private sameSignatures(next: Map<string, string>) {
+    if (!this.sourceSignatures || this.sourceSignatures.size !== next.size)
+      return false;
+    return [...next].every(
+      ([path, signature]) => this.sourceSignatures?.get(path) === signature,
+    );
+  }
   inspect() {
     const files = this.files(this.root);
     const previous = this.storage.load();
@@ -142,9 +155,19 @@ export class ProjectIndex {
   }
   refresh() {
     const summary = this.rebuild();
-    return { summary, freshness: this.inspect() };
+    const result = { summary, freshness: this.inspect() };
+    this.sourceSignatures = this.signatures(this.files(this.root));
+    this.cachedRefresh = result;
+    return result;
+  }
+  refreshIfStale() {
+    const next = this.signatures(this.files(this.root));
+    if (this.cachedRefresh && this.sameSignatures(next))
+      return this.cachedRefresh;
+    return this.refresh();
   }
   rebuild() {
+    this.cachedRefresh = undefined;
     const started = Date.now();
     const files = this.files(this.root);
     const previous = this.storage.load();
@@ -156,6 +179,7 @@ export class ProjectIndex {
     this.hashes = new Map();
     let filesParsed = 0;
     let cacheHits = 0;
+    const changedPaths = new Set<string>();
     const previousByFile = <T extends { filePath: string }>(records: T[]) => {
       const grouped = new Map<string, T[]>();
       for (const record of records) {
@@ -186,6 +210,7 @@ export class ProjectIndex {
         this.exports.push(...(previousExports.get(filePath) ?? []));
         cacheHits++;
       } else {
+        changedPaths.add(filePath);
         const parsed = adapter.parse(filePath, source);
         fileSymbols = parsed.symbols;
         this.symbols.push(...parsed.symbols);
@@ -201,6 +226,10 @@ export class ProjectIndex {
         );
       }
     }
+    const currentPaths = new Set(this.hashes.keys());
+    const removedPaths = new Set(
+      [...previous.files.keys()].filter((path) => !currentPaths.has(path)),
+    );
     this.enterpriseRelations = resolveEnterpriseRelations(
       this.enterpriseRelations,
       this.symbols.filter((symbol) => symbol.language === "java"),
@@ -208,11 +237,7 @@ export class ProjectIndex {
     // Each language resolves only its own edges; cross-language calls stay unresolved.
     // Resolution depends on the complete current symbol graph, so cached edges must be
     // invalidated even when their caller file did not change.
-    for (const call of this.calls) {
-      call.declaredTargetId = undefined;
-      call.resolvedTargetId = undefined;
-      call.confidence = "unresolved";
-    }
+    for (const call of this.calls) resetCallResolution(call);
     for (const adapter of languages()) {
       const context: ResolveContext = {
         root: this.root,
@@ -238,6 +263,8 @@ export class ProjectIndex {
       this.calls,
       this.imports,
       this.exports,
+      changedPaths,
+      removedPaths,
     );
     const counts = this.counts(files);
     return {

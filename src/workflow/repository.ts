@@ -1,12 +1,10 @@
 import { existsSync, readdirSync, realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { adapterFor, ignoredDirectories } from "../languages/adapter.js";
-import "../languages/java.js";
-import "../languages/typescript/index.js";
-import "../languages/javascript/index.js";
-import "../languages/python/index.js";
-import "../languages/go/index.js";
+import { ensureLanguageBootstrap } from "../languages/bootstrap.js";
 import { WorkflowError } from "./errors.js";
+
+ensureLanguageBootstrap();
 
 const ignored = new Set([
   ".git",

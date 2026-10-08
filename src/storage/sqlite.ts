@@ -122,10 +122,28 @@ export class IndexStorage {
     calls: CallEdge[],
     imports: ImportRecord[] = [],
     exports: ExportRecord[] = [],
+    changedPaths?: ReadonlySet<string>,
+    removedPaths?: ReadonlySet<string>,
   ) {
+    const incremental =
+      changedPaths !== undefined && removedPaths !== undefined;
+    const changed = changedPaths ?? new Set(files.keys());
+    const removed = removedPaths ?? new Set<string>();
+    if (incremental && changed.size === 0 && removed.size === 0) return;
     const transaction = this.db.transaction(() => {
-      this.db.prepare("DELETE FROM files").run();
-      this.db.prepare("DELETE FROM symbols").run();
+      if (incremental) {
+        const deleteFile = this.db.prepare("DELETE FROM files WHERE path = ?");
+        const deleteSymbols = this.db.prepare(
+          "DELETE FROM symbols WHERE file_path = ?",
+        );
+        for (const path of new Set([...changed, ...removed])) {
+          deleteFile.run(path);
+          deleteSymbols.run(path);
+        }
+      } else {
+        this.db.prepare("DELETE FROM files").run();
+        this.db.prepare("DELETE FROM symbols").run();
+      }
       this.db.prepare("DELETE FROM calls").run();
       this.db.prepare("DELETE FROM imports").run();
       this.db.prepare("DELETE FROM exports").run();
@@ -133,17 +151,19 @@ export class IndexStorage {
         "INSERT OR REPLACE INTO files(path, content_hash, language, parse_error, indexing_version) VALUES (?, ?, ?, 0, ?)",
       );
       for (const [path, record] of files)
-        fileStatement.run(path, record.hash, record.language, INDEX_VERSION);
+        if (!incremental || changed.has(path))
+          fileStatement.run(path, record.hash, record.language, INDEX_VERSION);
       const symbolStatement = this.db.prepare(
         "INSERT INTO symbols(id, file_path, language, payload) VALUES (?, ?, ?, ?)",
       );
       for (const symbol of symbols)
-        symbolStatement.run(
-          symbol.id,
-          symbol.filePath,
-          symbol.language,
-          JSON.stringify(symbol),
-        );
+        if (!incremental || changed.has(symbol.filePath))
+          symbolStatement.run(
+            symbol.id,
+            symbol.filePath,
+            symbol.language,
+            JSON.stringify(symbol),
+          );
       const callStatement = this.db.prepare(
         "INSERT INTO calls(caller_id, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?)",
       );

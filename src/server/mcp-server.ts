@@ -37,7 +37,7 @@ export async function startMcpServer(
     name: packageInfo.name,
     version: packageInfo.version,
   });
-  const refresh = () => index.refresh();
+  const refresh = () => index.refreshIfStale();
   const one = (symbol: string) => {
     const candidates = index.resolveSymbol(symbol);
     if (!candidates.length) throw new Error(`Symbol not found: ${symbol}`);

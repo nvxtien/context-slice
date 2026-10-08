@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  rmSync,
   writeFileSync,
   readdirSync,
   cpSync,
@@ -34,6 +35,106 @@ test("cold cache, warm cache, and updating a single file", () => {
   const third = new ProjectIndex(projectRoot).rebuild();
   assert.equal(third.filesParsed, 1);
   assert.equal(third.cacheHits, 3);
+});
+
+test("freshness-gated refresh skips unchanged files and notices add/change/delete", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-freshness-"));
+  const file = join(root, "main.ts");
+  writeFileSync(file, "export function main() {}\n");
+  const index = new ProjectIndex(root);
+
+  const first = index.refreshIfStale();
+  assert.strictEqual(index.refreshIfStale(), first);
+
+  writeFileSync(file, "export function changed() {}\n");
+  const changed = index.refreshIfStale();
+  assert.notStrictEqual(changed, first);
+
+  writeFileSync(join(root, "added.ts"), "export function added() {}\n");
+  const added = index.refreshIfStale();
+  assert.notStrictEqual(added, changed);
+
+  rmSync(file);
+  const deleted = index.refreshIfStale();
+  assert.notStrictEqual(deleted, added);
+});
+
+test("incremental storage keeps unchanged symbols and removes deleted files", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-storage-"));
+  writeFileSync(join(root, "a.ts"), "export function alpha() {}\n");
+  writeFileSync(join(root, "b.ts"), "export function beta() {}\n");
+  new ProjectIndex(root).rebuild();
+
+  writeFileSync(join(root, "a.ts"), "export function changed() {}\n");
+  writeFileSync(join(root, "c.ts"), "export function gamma() {}\n");
+  new ProjectIndex(root).rebuild();
+
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  const paths = () =>
+    (
+      db.prepare("SELECT path FROM files ORDER BY path").all() as Array<{
+        path: string;
+      }>
+    ).map((row) => row.path);
+  assert.deepEqual(paths(), ["a.ts", "b.ts", "c.ts"]);
+  assert.equal(
+    (
+      db
+        .prepare(
+          "SELECT COUNT(*) AS count FROM symbols WHERE file_path = 'b.ts'",
+        )
+        .get() as { count: number }
+    ).count,
+    1,
+  );
+
+  rmSync(join(root, "b.ts"));
+  new ProjectIndex(root).rebuild();
+  assert.deepEqual(paths(), ["a.ts", "c.ts"]);
+  db.close();
+});
+
+test("rebuild writes only changed symbol rows and skips unchanged database writes", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-storage-audit-"));
+  writeFileSync(join(root, "a.ts"), "export function alpha() {}\n");
+  writeFileSync(join(root, "b.ts"), "export function beta() {}\n");
+  new ProjectIndex(root).rebuild();
+
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  db.exec(
+    "CREATE TABLE deleted_symbols(count INTEGER); INSERT INTO deleted_symbols VALUES (0); CREATE TRIGGER audit_symbol_delete AFTER DELETE ON symbols BEGIN UPDATE deleted_symbols SET count = count + 1; END;",
+  );
+  db.close();
+
+  writeFileSync(join(root, "a.ts"), "export function changed() {}\n");
+  new ProjectIndex(root).rebuild();
+  const audited = new Database(join(root, ".context-slice/index.sqlite"));
+  assert.equal(
+    (
+      audited.prepare("SELECT count FROM deleted_symbols").get() as {
+        count: number;
+      }
+    ).count,
+    1,
+  );
+  audited
+    .prepare(
+      "UPDATE metadata SET value = 'sentinel' WHERE key = 'last_refreshed_at'",
+    )
+    .run();
+  audited.close();
+
+  new ProjectIndex(root).rebuild();
+  const unchanged = new Database(join(root, ".context-slice/index.sqlite"));
+  assert.equal(
+    (
+      unchanged
+        .prepare("SELECT value FROM metadata WHERE key = 'last_refreshed_at'")
+        .get() as { value: string }
+    ).value,
+    "sentinel",
+  );
+  unchanged.close();
 });
 
 test("re-resolves cached calls when a target file changes", () => {
