@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "generatedAt": "2026-10-02T16:56:19.910Z",
+  "generatedAt": "2026-10-08T19:30:10.775Z",
   "environment": {
     "node": "v22.12.0",
     "npm": "11.7.0",
@@ -8,25 +8,29 @@
   },
   "package": {
     "name": "context-slice",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "license": "MIT",
     "repository": "git+https://github.com/nvxtien/context-slice.git"
   },
   "tarball": {
-    "name": "context-slice-1.8.0.tgz",
-    "bytes": 95625,
-    "fileCount": 44,
+    "name": "context-slice-1.9.0.tgz",
+    "bytes": 109353,
+    "fileCount": 56,
     "files": [
       "package/LICENSE",
       "package/dist/src/languages/adapter.js",
+      "package/dist/src/languages/bootstrap.js",
       "package/dist/src/planner/budget.js",
       "package/dist/src/languages/rust/calls-resolve.js",
       "package/dist/src/cli.js",
       "package/dist/src/render/compact-context.js",
       "package/dist/src/planner/composition.js",
       "package/dist/src/languages/java/enterprise/dependency-injection.js",
+      "package/dist/src/storage/dirty-marker.js",
       "package/dist/src/types/enterprise.js",
       "package/dist/src/workflow/errors.js",
+      "package/dist/src/storage/file-watcher.js",
+      "package/dist/src/storage/index-snapshot.js",
       "package/dist/src/indexer/index.js",
       "package/dist/src/languages/go/index.js",
       "package/dist/src/languages/javascript/index.js",
@@ -36,6 +40,7 @@
       "package/dist/src/parser/java-parser.js",
       "package/dist/src/languages/java.js",
       "package/dist/src/languages/java/enterprise/jpa-entity.js",
+      "package/dist/src/indexer/language-snapshot.js",
       "package/dist/src/server/mcp-server.js",
       "package/dist/src/types/model.js",
       "package/dist/src/package-info.js",
@@ -44,19 +49,26 @@
       "package/dist/src/languages/rust/parse.js",
       "package/dist/src/languages/typescript/parse.js",
       "package/dist/src/workflow/preview.js",
+      "package/dist/src/indexer/query-index.js",
       "package/dist/src/planner/rank.js",
       "package/dist/src/languages/java/enterprise/registry.js",
       "package/dist/src/workflow/repository.js",
+      "package/dist/src/indexer/resolution-pipeline.js",
+      "package/dist/src/indexer/resolution-state.js",
       "package/dist/src/languages/go/resolve.js",
       "package/dist/src/languages/python/resolve.js",
       "package/dist/src/languages/rust/resolve.js",
       "package/dist/src/languages/typescript/resolve.js",
+      "package/dist/src/languages/java/enterprise/shared.js",
       "package/dist/src/languages/java/enterprise/spring-data.js",
       "package/dist/src/languages/java/enterprise/spring-mvc.js",
       "package/dist/src/storage/sqlite.js",
       "package/dist/src/languages/java/enterprise/transactions.js",
+      "package/mcp.json",
       "package/package.json",
+      "package/plugin.json",
       "package/README.md",
+      "package/skills/context-slice/SKILL.md",
       "package/queries/java/annotations.scm",
       "package/queries/java/calls.scm",
       "package/queries/java/imports.scm",
@@ -85,12 +97,12 @@
   },
   "install": {
     "isolatedPrefix": true,
-    "packageRoot": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ip6dTF/npm prefix/node_modules/context-slice",
+    "packageRoot": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ONvmW2/npm prefix/node_modules/context-slice",
     "packageDirectoryReadOnly": "deferred",
     "npx": "publication-dependent"
   },
   "cli": {
-    "version": "1.8.0",
+    "version": "1.9.0",
     "help": true,
     "init": true,
     "status": "CURRENT",
@@ -126,7 +138,7 @@
   "upgrade": {
     "simulated": true,
     "cachePreserved": true,
-    "schema": "1.12.0"
+    "schema": "1.18.0"
   },
   "uninstall": {
     "executableGone": true,
@@ -139,16 +151,16 @@
   },
   "pathWithSpaces": {
     "passed": true,
-    "path": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ip6dTF/context slice repo-5TBvLf"
+    "path": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ONvmW2/context slice repo-E6HHLM"
   },
   "nestedCwd": {
     "passed": true,
-    "cwd": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ip6dTF/context slice repo-5TBvLf/src/main/java"
+    "cwd": "/private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v08-ONvmW2/context slice repo-E6HHLM/src/main/java"
   },
   "publishDryRun": {
     "status": "pass",
     "exitCode": 0,
-    "output": "\n    {\n      \"path\": \"dist/src/languages/go/resolve.js\",\n      \"size\": 15287,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java.js\",\n      \"size\": 4329,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/dependency-injection.js\",\n      \"size\": 8400,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/jpa-entity.js\",\n      \"size\": 4736,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/registry.js\",\n      \"size\": 1011,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/spring-data.js\",\n      \"size\": 11545,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/spring-mvc.js\",\n      \"size\": 8664,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/transactions.js\",\n      \"size\": 4381,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/javascript/index.js\",\n      \"size\": 875,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/python/index.js\",\n      \"size\": 763,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/python/parse.js\",\n      \"size\": 16993,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/python/resolve.js\",\n      \"size\": 18566,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/calls-resolve.js\",\n      \"size\": 73950,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/index.js\",\n      \"size\": 374,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/parse.js\",\n      \"size\": 23648,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/resolve.js\",\n      \"size\": 12571,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/typescript/index.js\",\n      \"size\": 807,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/typescript/parse.js\",\n      \"size\": 34939,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/typescript/resolve.js\",\n      \"size\": 21564,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/package-info.js\",\n      \"size\": 535,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/parser/java-parser.js\",\n      \"size\": 16000,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/budget.js\",\n      \"size\": 68,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/composition.js\",\n      \"size\": 16906,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/rank.js\",\n      \"size\": 567,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/render/compact-context.js\",\n      \"size\": 424,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/server/mcp-server.js\",\n      \"size\": 6173,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/storage/sqlite.js\",\n      \"size\": 5949,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/types/enterprise.js\",\n      \"size\": 11,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/types/model.js\",\n      \"size\": 11,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/errors.js\",\n      \"size\": 251,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/preview.js\",\n      \"size\": 8923,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/repository.js\",\n      \"size\": 1939,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"package.json\",\n      \"size\": 3076,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/annotations.scm\",\n      \"size\": 25,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/calls.scm\",\n      \"size\": 50,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/imports.scm\",\n      \"size\": 29,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/symbols.scm\",\n      \"size\": 104,\n      \"mode\": 420\n    }\n  ],\n  \"entryCount\": 44,\n  \"bundled\": []\n}\nnpm warn This command requires you to be logged in to https://registry.npmjs.org/ (dry-run)\nnpm notice Publishing to https://registry.npmjs.org/ with tag latest and default access (dry-run)\n"
+    "output": "ist/src/languages/java/enterprise/shared.js\",\n      \"size\": 1565,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/spring-data.js\",\n      \"size\": 11973,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/spring-mvc.js\",\n      \"size\": 7732,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/java/enterprise/transactions.js\",\n      \"size\": 2574,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/javascript/index.js\",\n      \"size\": 876,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/python/index.js\",\n      \"size\": 763,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/python/parse.js\",\n      \"size\": 17327,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/python/resolve.js\",\n      \"size\": 19267,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/calls-resolve.js\",\n      \"size\": 79484,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/index.js\",\n      \"size\": 374,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/parse.js\",\n      \"size\": 24305,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/rust/resolve.js\",\n      \"size\": 12603,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/typescript/index.js\",\n      \"size\": 807,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/typescript/parse.js\",\n      \"size\": 36072,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/languages/typescript/resolve.js\",\n      \"size\": 22429,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/package-info.js\",\n      \"size\": 535,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/parser/java-parser.js\",\n      \"size\": 17829,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/budget.js\",\n      \"size\": 68,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/composition.js\",\n      \"size\": 16573,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/planner/rank.js\",\n      \"size\": 567,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/render/compact-context.js\",\n      \"size\": 424,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/server/mcp-server.js\",\n      \"size\": 7381,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/storage/dirty-marker.js\",\n      \"size\": 1055,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/storage/file-watcher.js\",\n      \"size\": 2281,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/storage/index-snapshot.js\",\n      \"size\": 11,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/storage/sqlite.js\",\n      \"size\": 17025,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/types/enterprise.js\",\n      \"size\": 11,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/types/model.js\",\n      \"size\": 11,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/errors.js\",\n      \"size\": 251,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/preview.js\",\n      \"size\": 10208,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"dist/src/workflow/repository.js\",\n      \"size\": 2206,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"mcp.json\",\n      \"size\": 225,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"package.json\",\n      \"size\": 3617,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"plugin.json\",\n      \"size\": 647,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/annotations.scm\",\n      \"size\": 25,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/calls.scm\",\n      \"size\": 50,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/imports.scm\",\n      \"size\": 29,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"queries/java/symbols.scm\",\n      \"size\": 104,\n      \"mode\": 420\n    },\n    {\n      \"path\": \"skills/context-slice/SKILL.md\",\n      \"size\": 3448,\n      \"mode\": 420\n    }\n  ],\n  \"entryCount\": 56,\n  \"bundled\": []\n}\nnpm notice Publishing to https://registry.npmjs.org/ with tag latest and default access (dry-run)\n"
   },
   "trial": {
     "type": "clean-room self-trial",

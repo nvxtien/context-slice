@@ -46,10 +46,15 @@ export async function startMcpServer(
   let warmup: Promise<void> = Promise.resolve();
   let warmupResult: ReturnType<typeof refresh> | undefined;
   let warmupError: unknown;
+  let warmupConsumed = false;
   const ready = async () => {
     await warmup;
     if (warmupError) throw warmupError;
-    return warmupResult ?? refresh();
+    if (!warmupConsumed && warmupResult) {
+      warmupConsumed = true;
+      return warmupResult;
+    }
+    return refresh();
   };
   const one = (symbol: string) => {
     const candidates = index.resolveSymbol(symbol);

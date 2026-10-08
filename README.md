@@ -140,7 +140,7 @@ The package is publish-ready but is not currently published to the npm registry.
 ```sh
 npm ci
 npm pack
-npm install -g ./context-slice-1.8.2.tgz
+npm install -g ./context-slice-1.9.0.tgz
 context-slice --version
 ```
 

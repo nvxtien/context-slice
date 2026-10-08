@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.0 — Index lifecycle and release hardening (unpublished)
+
+- **Incremental indexing.** File watchers and dirty markers refresh changed source without requiring an external notification tool.
+- **Lower memory pressure.** SQLite stores source text once, symbols hydrate source/body lazily, and call diagnostics stream aggregate statistics instead of retaining the full graph.
+- **Faster cache access.** Call targets are normalized for partial caller/target loading, and MCP starts with background warmup while the first request waits for a ready index.
+- **Release validation.** Package smoke and clean-room release scripts validate isolated tarball installation, CLI/MCP behavior, cache preservation, and uninstall safety. Local tarballs are ignored by Git.
+
+Not published to npm. No Git tag or GitHub Release was created.
+
 ## 1.8.0 — Cross-language resolution fixes (unpublished)
 
 - **Go: cross-package resolution.** Interface satisfaction is now project-wide, not same-directory-only (a struct in one package can satisfy an interface declared in another, matching Go's own structural typing). Method calls through a package-qualified local variable (`x := &store.Store{}`) now resolve across packages in the same module. `go.work` multi-module workspaces are supported (both the block and single-line `use` forms).

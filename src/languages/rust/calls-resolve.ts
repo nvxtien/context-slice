@@ -178,6 +178,8 @@ const PERSIST = {
 
 export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const calls = context.callsToResolve ?? context.calls;
+  const persistKey = (key: string) => `${context.root}\0${key}`;
+  const persistPrefix = `${context.root}\0`;
   const byId = new Map<string, SymbolRecord>();
   const childrenOf = new Map<string, SymbolRecord[]>();
   const topByFile = new Map<string, SymbolRecord[]>();
@@ -202,9 +204,18 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       methodCount.set(s.name, (methodCount.get(s.name) ?? 0) + 1);
   }
   for (const k of PERSIST.files.keys())
-    if (!symbolsByFile.has(k)) PERSIST.files.delete(k);
+    if (
+      k.startsWith(persistPrefix) &&
+      !symbolsByFile.has(k.slice(persistPrefix.length))
+    )
+      PERSIST.files.delete(k);
   for (const m of [PERSIST.bindings, PERSIST.generics])
-    for (const k of m.keys()) if (!byId.has(k)) m.delete(k);
+    for (const k of m.keys())
+      if (
+        k.startsWith(persistPrefix) &&
+        !byId.has(k.slice(persistPrefix.length))
+      )
+        m.delete(k);
   const importsByFile = new Map<string, ImportRecord[]>();
   for (const r of context.imports) push(importsByFile, r.filePath, r);
 
@@ -291,12 +302,12 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     let c = sourceCache.get(sample.filePath);
     if (!c) {
       const text = context.sourceOf(sample);
-      c = PERSIST.files.get(sample.filePath);
+      c = PERSIST.files.get(persistKey(sample.filePath));
       if (c?.text !== text) {
         const lines = [0];
         for (let i = 0; i < text.length; i++)
           if (text.charCodeAt(i) === 10) lines.push(i + 1);
-        PERSIST.files.set(sample.filePath, (c = { text, lines }));
+        PERSIST.files.set(persistKey(sample.filePath), (c = { text, lines }));
       }
       sourceCache.set(sample.filePath, c);
     }
@@ -830,7 +841,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
    * (offsets relative to its start). `*` = unparsable: every name may be shadowed.
    */
   const bindingSites = (caller: SymbolRecord): Bindings => {
-    let c = PERSIST.bindings.get(caller.id);
+    let c = PERSIST.bindings.get(persistKey(caller.id));
     if (c?.source === caller.source) return c;
     const sites = new Map<string, Node[]>();
     const calls = new Map<string, Node>();
@@ -896,7 +907,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       sites.set("*", []);
     }
     PERSIST.bindings.set(
-      caller.id,
+      persistKey(caller.id),
       (c = { source: caller.source, sites, calls, root }),
     );
     return c;
@@ -904,7 +915,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
   const bindingsOf = (caller: SymbolRecord) => bindingSites(caller).sites;
   /** Type/const parameter names declared by a fn / impl / trait, read from its syntax tree (any qualifiers). */
   const declaredGenerics = (s: SymbolRecord) => {
-    const hit = PERSIST.generics.get(s.id);
+    const hit = PERSIST.generics.get(persistKey(s.id));
     if (hit?.source === s.source) return hit.names;
     const names = new Set<string>();
     try {
@@ -928,7 +939,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     } catch {
       names.add("*"); // unparsable head: any name may be a type parameter
     }
-    PERSIST.generics.set(s.id, { source: s.source, names });
+    PERSIST.generics.set(persistKey(s.id), { source: s.source, names });
     return names;
   };
   /** Type parameters in scope for a caller: its own, its impl's or trait's. */

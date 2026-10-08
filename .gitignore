@@ -5,3 +5,4 @@ dist/
 benchmarks/checkouts/
 .DS_Store
 .worktrees/
+*.tgz
