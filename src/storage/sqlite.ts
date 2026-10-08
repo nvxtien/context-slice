@@ -3,10 +3,14 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type {
+  IndexSnapshot,
+  IndexStore,
+  IndexedFileRecord,
+} from "./index-snapshot.js";
+import type {
   CallEdge,
   ExportRecord,
   ImportRecord,
-  LanguageId,
   SymbolRecord,
 } from "../types/model.js";
 import { WorkflowError } from "../workflow/errors.js";
@@ -16,14 +20,7 @@ import { WorkflowError } from "../workflow/errors.js";
 // which refuses to regenerate its snapshot for changed output without a bump here.
 export const INDEX_VERSION = "1.14.0";
 
-export interface IndexedFileRecord {
-  hash: string;
-  language: LanguageId;
-  parseError: boolean;
-  size: number;
-  mtimeMs: number;
-  ctimeMs: number;
-}
+export type { IndexedFileRecord } from "./index-snapshot.js";
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -39,7 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_imports_file_path ON imports(file_path);
 CREATE INDEX IF NOT EXISTS idx_exports_file_path ON exports(file_path);
 `;
 
-export class IndexStorage {
+export class IndexStorage implements IndexStore {
   private readonly db: Database.Database;
   constructor(root: string) {
     const directory = join(root, ".context-slice");
@@ -140,14 +137,11 @@ export class IndexStorage {
     return Object.fromEntries(rows.map((row) => [row.key, row.value]));
   }
   save(
-    files: Map<string, IndexedFileRecord>,
-    symbols: SymbolRecord[],
-    calls: CallEdge[],
-    imports: ImportRecord[] = [],
-    exports: ExportRecord[] = [],
+    snapshot: IndexSnapshot,
     changedPaths?: ReadonlySet<string>,
     removedPaths?: ReadonlySet<string>,
   ) {
+    const { files, symbols, calls, imports, exports } = snapshot;
     const incremental =
       changedPaths !== undefined && removedPaths !== undefined;
     const changed = changedPaths ?? new Set(files.keys());

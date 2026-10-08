@@ -6,6 +6,7 @@ import Database from "better-sqlite3";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { INDEX_VERSION, IndexStorage } from "../src/storage/sqlite.js";
+import type { IndexStore } from "../src/storage/index-snapshot.js";
 import { WorkflowError } from "../src/workflow/errors.js";
 
 test("caller depth expands transitively", () => {
@@ -36,10 +37,23 @@ test("file records use the current index version", () => {
   db.close();
 });
 
+test("SQLite implements the storage boundary", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-store-boundary-"));
+  const store: IndexStore = new IndexStorage(root);
+  assert.ok(store.metadata());
+  store.close();
+});
+
 test("corrupt cached JSON raises an actionable index error", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-corrupt-payload-"));
   const storage = new IndexStorage(root);
-  storage.save(new Map(), [], [], [], []);
+  storage.save({
+    files: new Map(),
+    symbols: [],
+    calls: [],
+    imports: [],
+    exports: [],
+  });
   storage.close();
 
   const db = new Database(join(root, ".context-slice/index.sqlite"));

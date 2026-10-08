@@ -9,11 +9,11 @@ import type {
   SymbolRecord,
 } from "../types/model.js";
 import { rankSymbol } from "../planner/rank.js";
-import {
-  INDEX_VERSION,
-  IndexStorage,
-  type IndexedFileRecord,
-} from "../storage/sqlite.js";
+import { INDEX_VERSION, IndexStorage } from "../storage/sqlite.js";
+import type {
+  IndexedFileRecord,
+  IndexStore,
+} from "../storage/index-snapshot.js";
 import { WorkflowError } from "../workflow/errors.js";
 import {
   adapterFor,
@@ -22,11 +22,13 @@ import {
   type ResolveContext,
 } from "../languages/adapter.js";
 import { ensureLanguageBootstrap } from "../languages/bootstrap.js";
-import { resetCallResolution } from "./resolution-state.js";
+import { QueryIndex } from "./query-index.js";
+import { ResolutionPipeline } from "./resolution-pipeline.js";
+import { languageSnapshots } from "./language-snapshot.js";
 import type { EnterpriseRelation } from "../types/enterprise.js";
 import {
-  extractEnterpriseRelations,
-  resolveEnterpriseRelations,
+  createEnterpriseRegistry,
+  type EnterpriseRegistry,
 } from "../languages/java/enterprise/registry.js";
 
 ensureLanguageBootstrap();
@@ -57,26 +59,16 @@ export class ProjectIndex {
   exports: ExportRecord[] = [];
   enterpriseRelations: EnterpriseRelation[] = [];
   private hashes = new Map<string, IndexedFileRecord>();
-  private readonly storage: IndexStorage;
+  private readonly storage: IndexStore;
+  private readonly enterpriseRegistry: EnterpriseRegistry;
   private sourceSignatures?: Map<string, string>;
   private cachedRefresh?: ReturnType<ProjectIndex["refresh"]>;
-  // Derived lookup indexes, rebuilt once per rebuild() by reindex() instead of being
-  // recomputed (via repeated .find()/.filter() scans over `symbols`/`calls`) on every
-  // callers()/dependencies()/composition lookup — those scans previously ran on every
-  // preview/query request, not just on index rebuild.
-  private symbolIndex = new Map<string, SymbolRecord>();
-  private symbolsByName = new Map<string, SymbolRecord[]>();
-  private symbolsByQualifiedName = new Map<string, SymbolRecord[]>();
-  private symbolsByCanonicalIdentity = new Map<string, SymbolRecord[]>();
-  private symbolsBySignature = new Map<string, SymbolRecord[]>();
-  private callsByCaller = new Map<string, CallEdge[]>();
-  private callsByTarget = new Map<string, CallEdge[]>();
-  private childrenByParent = new Map<string, SymbolRecord[]>();
-  private moduleScopeSymbolByFile = new Map<string, SymbolRecord>();
-  private methodCountByName = new Map<string, number>();
+  private readonly queryIndex = new QueryIndex();
+  private readonly resolutionPipeline = new ResolutionPipeline();
   constructor(root: string) {
     this.root = resolve(root);
     this.storage = new IndexStorage(this.root);
+    this.enterpriseRegistry = createEnterpriseRegistry();
   }
   private files(dir: string, visited = new Set<string>()): string[] {
     let realDir: string;
@@ -132,72 +124,20 @@ export class ProjectIndex {
       ([path, signature]) => this.sourceSignatures?.get(path) === signature,
     );
   }
-  /** Rebuilds the id/parent/caller/target lookup maps from the current `symbols`/`calls`
-   * arrays. Called once per rebuild() so callers(), dependencies() and the composition
-   * helpers can look symbols up in O(1) instead of scanning the full arrays on every call. */
   private reindex() {
-    this.symbolIndex = new Map(this.symbols.map((s) => [s.id, s]));
-    this.symbolsByName = new Map();
-    this.symbolsByQualifiedName = new Map();
-    this.symbolsByCanonicalIdentity = new Map();
-    this.symbolsBySignature = new Map();
-    this.childrenByParent = new Map();
-    this.moduleScopeSymbolByFile = new Map();
-    this.methodCountByName = new Map();
-    for (const s of this.symbols) {
-      for (const [key, map] of [
-        [s.name, this.symbolsByName],
-        [s.qualifiedName, this.symbolsByQualifiedName],
-        [s.canonicalIdentity, this.symbolsByCanonicalIdentity],
-        [s.signature, this.symbolsBySignature],
-      ] as const) {
-        if (!key) continue;
-        const matches = map.get(key);
-        if (matches) matches.push(s);
-        else map.set(key, [s]);
-      }
-      if (s.parentId) {
-        const siblings = this.childrenByParent.get(s.parentId);
-        if (siblings) siblings.push(s);
-        else this.childrenByParent.set(s.parentId, [s]);
-      }
-      if (s.kind === "namespace" && s.metadata?.moduleScope === true)
-        this.moduleScopeSymbolByFile.set(s.filePath, s);
-      if (s.kind === "method")
-        this.methodCountByName.set(
-          s.name,
-          (this.methodCountByName.get(s.name) ?? 0) + 1,
-        );
-    }
-    this.callsByCaller = new Map();
-    this.callsByTarget = new Map();
-    for (const call of this.calls) {
-      const fromCaller = this.callsByCaller.get(call.callerId);
-      if (fromCaller) fromCaller.push(call);
-      else this.callsByCaller.set(call.callerId, [call]);
-      const targetIds =
-        call.runtimeTargetIds ??
-        (call.resolvedTargetId ? [call.resolvedTargetId] : []);
-      for (const id of targetIds) {
-        const toTarget = this.callsByTarget.get(id);
-        if (toTarget) toTarget.push(call);
-        else this.callsByTarget.set(id, [call]);
-      }
-    }
+    this.queryIndex.rebuild(this.symbols, this.calls);
   }
-  /** O(1) symbol lookup by id, backed by the index reindex() maintains. */
+
   symbolById(id: string): SymbolRecord | undefined {
-    return this.symbolIndex.get(id);
+    return this.queryIndex.symbolById(id);
   }
-  /** Direct children of `parentId` (e.g. a class's members), backed by the index reindex()
-   * maintains — avoids an O(symbols) `.filter()` per call. */
+
   childrenOf(parentId: string): SymbolRecord[] {
-    return this.childrenByParent.get(parentId) ?? [];
+    return this.queryIndex.childrenOf(parentId);
   }
-  /** Rust's synthetic per-file module-scope symbol (carries the file's top-level `use`
-   * declarations), backed by the index reindex() maintains. */
+
   moduleScopeSymbol(filePath: string): SymbolRecord | undefined {
-    return this.moduleScopeSymbolByFile.get(filePath);
+    return this.queryIndex.moduleScopeSymbol(filePath);
   }
   inspect() {
     const files = this.files(this.root);
@@ -275,9 +215,9 @@ export class ProjectIndex {
     for (const [filePath, symbols] of symbolsByFile)
       if (symbols.some((symbol) => symbol.language === "java"))
         this.enterpriseRelations.push(
-          ...extractEnterpriseRelations(symbols, filePath, ""),
+          ...this.enterpriseRegistry.extractRelations(symbols, filePath, ""),
         );
-    this.enterpriseRelations = resolveEnterpriseRelations(
+    this.enterpriseRelations = this.enterpriseRegistry.resolveRelations(
       this.enterpriseRelations,
       this.symbols.filter((symbol) => symbol.language === "java"),
     );
@@ -402,7 +342,7 @@ export class ProjectIndex {
       }
       if (adapter.id === "java") {
         this.enterpriseRelations.push(
-          ...extractEnterpriseRelations(
+          ...this.enterpriseRegistry.extractRelations(
             fileSymbols,
             filePath,
             sourceCache.get(filePath) ?? "",
@@ -414,40 +354,36 @@ export class ProjectIndex {
     const removedPaths = new Set(
       [...previous.files.keys()].filter((path) => !currentPaths.has(path)),
     );
-    this.enterpriseRelations = resolveEnterpriseRelations(
+    this.enterpriseRelations = this.enterpriseRegistry.resolveRelations(
       this.enterpriseRelations,
       this.symbols.filter((symbol) => symbol.language === "java"),
     );
-    // Each language resolves only its own edges; cross-language calls stay unresolved.
-    // Resolution depends on the complete current symbol graph, so cached edges must be
-    // invalidated even when their caller file did not change.
-    for (const call of this.calls) resetCallResolution(call);
-    for (const adapter of languages()) {
-      const context: ResolveContext = {
-        root: this.root,
-        symbols: this.symbols.filter(
-          (symbol) => symbol.language === adapter.id,
-        ),
-        calls: this.calls.filter(
-          (call) => (call.language ?? "java") === adapter.id,
-        ),
-        imports: this.imports.filter(
-          (record) => record.language === adapter.id,
-        ),
-        exports: this.exports.filter(
-          (record) => record.language === adapter.id,
-        ),
-        sourceOf: (symbol) => this.sourceFor(symbol, sourceCache),
-      };
-      if (context.symbols.length) adapter.resolveCalls(context);
-    }
-    this.reindex();
-    this.storage.save(
-      this.hashes,
+    const snapshots = languageSnapshots(
       this.symbols,
       this.calls,
       this.imports,
       this.exports,
+    );
+    this.resolutionPipeline.resolve({
+      root: this.root,
+      symbols: this.symbols,
+      calls: this.calls,
+      imports: this.imports,
+      exports: this.exports,
+      snapshots,
+      sourceOf: (symbol) => this.sourceFor(symbol, sourceCache),
+      changedPaths,
+      removedPaths,
+    });
+    this.reindex();
+    this.storage.save(
+      {
+        files: this.hashes,
+        symbols: this.symbols,
+        calls: this.calls,
+        imports: this.imports,
+        exports: this.exports,
+      },
       changedPaths,
       removedPaths,
     );
@@ -485,39 +421,13 @@ export class ProjectIndex {
       .slice(0, limit);
   }
   resolveSymbol(input: string): SymbolRecord[] {
-    // An overload signature is API surface; the implementation is the target.
-    const preferImplementation = (matches: SymbolRecord[]) => {
-      const implementations = matches.filter(
-        (symbol) => !symbol.metadata?.overloadSignature,
-      );
-      return implementations.length ? implementations : matches;
-    };
-    const exact = [
-      this.symbolIndex.get(input),
-      ...(this.symbolsByCanonicalIdentity.get(input) ?? []),
-      ...(this.symbolsByQualifiedName.get(input) ?? []),
-      ...(this.symbolsBySignature.get(input) ?? []),
-    ].filter(
-      (symbol, index, matches): symbol is SymbolRecord =>
-        Boolean(symbol) && matches.indexOf(symbol) === index,
-    );
-    if (exact.length) return preferImplementation(exact);
-    const qualifiedSuffix = this.symbols.filter((s) =>
-      s.qualifiedName?.endsWith(`.${input}`),
-    );
-    return preferImplementation(
-      qualifiedSuffix.length
-        ? qualifiedSuffix
-        : (this.symbolsByName.get(input) ?? []),
-    );
+    return this.queryIndex.resolveSymbol(input);
   }
   callers(target: SymbolRecord) {
     // A cfg-gated call (spec §40) carries every alternative in runtimeTargetIds, not just the
     // resolvedTargetId it settled on — a non-first alternative must still be reachable as a
     // caller/dependency edge, or context composition can never include it (see docs/rust-support.md).
-    return (this.callsByTarget.get(target.id) ?? [])
-      .map((call) => this.symbolIndex.get(call.callerId))
-      .filter((s): s is SymbolRecord => Boolean(s));
+    return this.queryIndex.callers(target);
   }
   callersAtDepth(target: SymbolRecord, depth: number) {
     let frontier = [target];
@@ -532,14 +442,7 @@ export class ProjectIndex {
     return [...found.values()];
   }
   dependencies(target: SymbolRecord) {
-    return (this.callsByCaller.get(target.id) ?? [])
-      .flatMap(
-        (call) =>
-          call.runtimeTargetIds ??
-          (call.resolvedTargetId ? [call.resolvedTargetId] : []),
-      )
-      .map((id) => this.symbolIndex.get(id))
-      .filter((s): s is SymbolRecord => Boolean(s));
+    return this.queryIndex.dependencies(target);
   }
   dependenciesAtDepth(target: SymbolRecord, depth: number) {
     let frontier = [target];
@@ -557,7 +460,7 @@ export class ProjectIndex {
     return this.calls.filter(
       (call) =>
         !call.resolvedTargetId &&
-        (this.methodCountByName.get(call.calleeName) ?? 0) > 1,
+        this.queryIndex.methodCount(call.calleeName) > 1,
     );
   }
   diagnostics() {
@@ -678,7 +581,7 @@ export class ProjectIndex {
   }
 
   callsFor(caller: SymbolRecord) {
-    return this.callsByCaller.get(caller.id) ?? [];
+    return this.queryIndex.callsFor(caller);
   }
 }
 
