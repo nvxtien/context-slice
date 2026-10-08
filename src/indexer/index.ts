@@ -434,7 +434,7 @@ export class ProjectIndex {
     )
       throw new WorkflowError(
         "INVALID_ARGUMENT",
-        `Path nằm ngoài repository root: ${symbol.filePath}`,
+        `Path escapes repository root: ${symbol.filePath}`,
         "Pass a symbol whose filePath resolves inside the indexed repository root.",
       );
     return readFileSync(full, "utf8");

@@ -3,7 +3,7 @@ import test from "node:test";
 import { join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
 
-test("index tìm được symbol và caller", () => {
+test("index finds symbols and their callers", () => {
   const index = new ProjectIndex(join(process.cwd(), "test-fixtures/java"));
   const summary = index.rebuild();
   assert.ok(summary.symbols > 0);

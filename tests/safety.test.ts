@@ -13,13 +13,13 @@ const walk = (dir: string): string[] =>
   );
 import { ProjectIndex } from "../src/indexer/index.js";
 
-test("không đọc file ngoài repository root", () => {
+test("refuses to read a file outside the repository root", () => {
   const index = new ProjectIndex(join(process.cwd(), "test-fixtures/java"));
   index.rebuild();
   const symbol = index.resolveSymbol("PaymentService")[0];
   assert.throws(
     () => index.sourceFor({ ...symbol, filePath: "../outside.java" }),
-    /ngoài repository root/,
+    /escapes repository root/,
   );
 });
 

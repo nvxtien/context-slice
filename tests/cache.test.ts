@@ -14,7 +14,7 @@ import Database from "better-sqlite3";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { INDEX_VERSION } from "../src/storage/sqlite.js";
 
-test("cache lạnh, cache ấm và cập nhật một file", () => {
+test("cold cache, warm cache, and updating a single file", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
   mkdirSync(join(root, "java"));
   for (const file of readdirSync(join(process.cwd(), "test-fixtures/java")))
