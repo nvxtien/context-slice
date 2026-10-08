@@ -44,6 +44,67 @@ test("SQLite implements the storage boundary", () => {
   store.close();
 });
 
+test("SQLite loads calls by caller and target", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-targeted-calls-"));
+  const storage = new IndexStorage(root);
+  const first = {
+    callerId: "caller-1",
+    calleeName: "target",
+    resolvedTargetId: "target-1",
+    filePath: "A.java",
+    language: "java",
+    range: { startLine: 1, startColumn: 1, endLine: 1, endColumn: 2 },
+    confidence: "exact" as const,
+    resolutionKind: "same-type" as const,
+    evidence: [],
+  };
+  const second = { ...first, callerId: "caller-2", filePath: "B.java" };
+  storage.save({
+    files: new Map(),
+    symbols: [],
+    calls: [first, second],
+    imports: [],
+    exports: [],
+  });
+  assert.deepEqual(storage.loadCallsForCaller("caller-1"), [first]);
+  assert.deepEqual(storage.loadCallsForTarget("target-1"), [first, second]);
+  storage.close();
+});
+
+test("SQLite aggregates call diagnostics without returning the graph", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-call-stats-"));
+  const storage = new IndexStorage(root);
+  const call = {
+    callerId: "caller-1",
+    calleeName: "target",
+    resolvedTargetId: "target-1",
+    externalPackage: "example",
+    filePath: "A.java",
+    language: "java",
+    range: { startLine: 1, startColumn: 1, endLine: 1, endColumn: 2 },
+    confidence: "exact" as const,
+    resolutionKind: "same-type" as const,
+    evidence: [],
+  };
+  storage.save({
+    files: new Map(),
+    symbols: [],
+    calls: [call],
+    imports: [],
+    exports: [],
+  });
+  assert.deepEqual(storage.callStats(), {
+    total: 1,
+    exact: 1,
+    probable: 0,
+    unresolved: 0,
+    external: 1,
+    byLanguage: { java: 1 },
+    byResolutionKind: { "same-type": 1 },
+  });
+  storage.close();
+});
+
 test("corrupt cached JSON raises an actionable index error", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-corrupt-payload-"));
   const storage = new IndexStorage(root);

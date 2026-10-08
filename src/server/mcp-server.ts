@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { ProjectIndex } from "../indexer/index.js";
+import { ProjectFileWatcher } from "../storage/file-watcher.js";
 import { packageInfo } from "../package-info.js";
 import { estimateTokens } from "../planner/budget.js";
 import { renderSignature, renderSkeleton } from "../render/compact-context.js";
@@ -36,11 +37,20 @@ export async function startMcpServer(
 ) {
   const resolvedRoot = resolveRepositoryRoot({ repository: root });
   const index = new ProjectIndex(resolvedRoot);
+  new ProjectFileWatcher(resolvedRoot);
   const server = new McpServer({
     name: packageInfo.name,
     version: packageInfo.version,
   });
   const refresh = () => index.refreshIfStale();
+  let warmup: Promise<void> = Promise.resolve();
+  let warmupResult: ReturnType<typeof refresh> | undefined;
+  let warmupError: unknown;
+  const ready = async () => {
+    await warmup;
+    if (warmupError) throw warmupError;
+    return warmupResult ?? refresh();
+  };
   const one = (symbol: string) => {
     const candidates = index.resolveSymbol(symbol);
     if (!candidates.length) throw new Error(`Symbol not found: ${symbol}`);
@@ -59,7 +69,7 @@ export async function startMcpServer(
       limit: z.number().int().positive().max(100).optional(),
     },
     async ({ query, limit }) => {
-      const refreshed = refresh();
+      const refreshed = await ready();
       return result({
         refresh: refreshed,
         results: index.search(query, limit ?? 10),
@@ -74,7 +84,7 @@ export async function startMcpServer(
       detail: z.enum(["signature", "skeleton", "body", "full"]).optional(),
     },
     async ({ symbol, detail }) => {
-      const refreshed = refresh();
+      const refreshed = await ready();
       const target = one(symbol);
       const level = detail ?? "skeleton";
       const calls = index
@@ -104,7 +114,7 @@ export async function startMcpServer(
       limit: z.number().int().positive().max(100).optional(),
     },
     async ({ symbol, depth, limit }) => {
-      const refreshed = refresh();
+      const refreshed = await ready();
       const target = one(symbol);
       const actualDepth = depth ?? 1;
       return result({
@@ -131,7 +141,7 @@ export async function startMcpServer(
       depth: z.number().int().min(1).max(5).optional(),
     },
     async ({ task, budget, depth }) => {
-      const refreshed = refresh();
+      const refreshed = await ready();
       return result({
         refresh: refreshed,
         ...buildPreview(index, task, { budget, depth }),
@@ -148,7 +158,7 @@ export async function startMcpServer(
       depth: z.number().int().min(1).max(5).optional(),
     },
     async ({ symbol, intent, budget, depth }) => {
-      const refreshed = refresh();
+      const refreshed = await ready();
       const target = one(symbol);
       return result({
         refresh: refreshed,
@@ -166,7 +176,7 @@ export async function startMcpServer(
       budget: z.number().int().positive().optional(),
     },
     async ({ base, head, budget }) => {
-      const refreshed = refresh();
+      const refreshed = await ready();
       const args = gitDiffArgs(base, head);
       let diff = "";
       try {
@@ -198,7 +208,15 @@ export async function startMcpServer(
     },
   );
 
-  await server.connect(new StdioServerTransport());
+  const connected = server.connect(new StdioServerTransport());
+  warmup = connected.then(() => {
+    try {
+      warmupResult = refresh();
+    } catch (error) {
+      warmupError = error;
+    }
+  });
+  await connected;
   return server;
 }
 

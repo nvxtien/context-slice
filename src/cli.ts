@@ -4,6 +4,7 @@ import { packageInfo } from "./package-info.js";
 import { buildPreview } from "./workflow/preview.js";
 import { WorkflowError } from "./workflow/errors.js";
 import { resolveRepositoryRoot } from "./workflow/repository.js";
+import { markDirty } from "./storage/dirty-marker.js";
 
 interface Arguments {
   command?: string;
@@ -17,7 +18,7 @@ interface Arguments {
 
 function usage() {
   return [
-    "Usage: context-slice <init|index|status|doctor|preview|mcp> [options]",
+    "Usage: context-slice <init|index|status|doctor|preview|mark-dirty|mcp> [options]",
     "",
     "Options:",
     "  --repo <path>     Repository root (defaults to nearest Git root)",
@@ -31,6 +32,7 @@ function usage() {
     "  status            Show cache freshness and readiness",
     "  doctor            Diagnose repository and cache setup",
     "  preview <task>    Build a strict-budget context preview",
+    "  mark-dirty [file] Tell a running MCP index that source changed",
     "  mcp               Start the stdio MCP server",
   ].join("\n");
 }
@@ -159,7 +161,15 @@ async function execute(args: Arguments) {
   if (!command || command === "help")
     return print({ usage: usage() }, args, "help", usage());
   if (
-    !["init", "index", "status", "doctor", "preview", "mcp"].includes(command)
+    ![
+      "init",
+      "index",
+      "status",
+      "doctor",
+      "preview",
+      "mark-dirty",
+      "mcp",
+    ].includes(command)
   )
     throw new WorkflowError(
       "INVALID_ARGUMENT",
@@ -175,6 +185,16 @@ async function execute(args: Arguments) {
     const { startMcpServer } = await import("./server/mcp-server.js");
     await startMcpServer(repository);
     return;
+  }
+
+  if (command === "mark-dirty") {
+    markDirty(repository, args.positional);
+    return print(
+      { repository, paths: args.positional },
+      args,
+      command,
+      `Marked ${repository} dirty for MCP refresh.`,
+    );
   }
 
   const index = new ProjectIndex(repository);

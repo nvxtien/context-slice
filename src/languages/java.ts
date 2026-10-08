@@ -58,20 +58,37 @@ export const javaAdapter: LanguageAdapter = {
   resolveCalls({ symbols, calls, callsToResolve, sourceOf }: ResolveContext) {
     const byId = new Map(symbols.map((symbol) => [symbol.id, symbol]));
     const callableByName = new Map<string, SymbolRecord[]>();
+    const callableByOwnerAndName = new Map<string, SymbolRecord[]>();
+    const addCallable = (
+      map: Map<string, SymbolRecord[]>,
+      key: string,
+      symbol: SymbolRecord,
+    ) => {
+      const list = map.get(key);
+      if (list) list.push(symbol);
+      else map.set(key, [symbol]);
+    };
     for (const symbol of symbols) {
       if (symbol.kind !== "method" && symbol.kind !== "constructor") continue;
-      const list = callableByName.get(symbol.name);
-      if (list) list.push(symbol);
-      else callableByName.set(symbol.name, [symbol]);
+      addCallable(callableByName, symbol.name, symbol);
+      const owner = symbol.parentId ? byId.get(symbol.parentId) : undefined;
+      if (owner)
+        addCallable(
+          callableByOwnerAndName,
+          `${owner.name}\0${symbol.name}`,
+          symbol,
+        );
     }
     for (const call of callsToResolve ?? calls) {
       const caller = byId.get(call.callerId);
       if (!caller) continue;
       const parent = caller.parentId ? byId.get(caller.parentId) : undefined;
       const candidates = callableByName.get(call.calleeName) ?? [];
-      const sameType = candidates.filter(
-        (candidate) => candidate.parentId === caller.parentId,
-      );
+      const sameType = caller.parentId
+        ? (callableByOwnerAndName.get(
+            `${byId.get(caller.parentId)?.name}\0${call.calleeName}`,
+          ) ?? [])
+        : [];
       const source = sourceOf(caller);
       const declaredType = call.receiverText
         ? declaredTypeOf(source, call.receiverText)
@@ -82,19 +99,14 @@ export const javaAdapter: LanguageAdapter = {
           ? call.receiverText
           : undefined);
       const typed = receiverType
-        ? candidates.filter(
-            (candidate) =>
-              (candidate.parentId ? byId.get(candidate.parentId) : undefined)
-                ?.name === receiverType,
-          )
+        ? (callableByOwnerAndName.get(`${receiverType}\0${call.calleeName}`) ??
+          [])
         : [];
       const inherited =
-        parent?.supertypes?.flatMap((supertype) =>
-          candidates.filter(
-            (candidate) =>
-              (candidate.parentId ? byId.get(candidate.parentId) : undefined)
-                ?.name === supertype,
-          ),
+        parent?.supertypes?.flatMap(
+          (supertype) =>
+            callableByOwnerAndName.get(`${supertype}\0${call.calleeName}`) ??
+            [],
         ) ?? [];
       const narrowed = (items: SymbolRecord[]) =>
         call.argumentCount === undefined

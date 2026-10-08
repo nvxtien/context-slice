@@ -46,3 +46,18 @@ test("query index owns derived symbol and call lookups", () => {
     index.calls.filter((call) => call.callerId === target.id),
   );
 });
+
+test("query index can add lazy-loaded calls without rebuilding symbols", () => {
+  const index = new ProjectIndex(
+    join(process.cwd(), "tests/fixtures/symbol-index"),
+  );
+  index.rebuild();
+  const query = new QueryIndex();
+  query.rebuild(index.symbols, []);
+  query.addCalls(index.calls);
+  const target = index.symbols.find((symbol) => symbol.name === "run")!;
+  assert.deepEqual(
+    query.callsFor(target),
+    index.calls.filter((call) => call.callerId === target.id),
+  );
+});

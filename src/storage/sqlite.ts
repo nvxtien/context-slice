@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type {
+  CallStats,
   IndexSnapshot,
   IndexStore,
   IndexedFileRecord,
@@ -18,20 +19,24 @@ import { WorkflowError } from "../workflow/errors.js";
 // Bump whenever any language adapter's parse OR resolve output changes: unchanged files and their cached (resolved)
 // call edges are otherwise reused from cache. Rust parse and resolve output is guarded by tests/rust-parse-snapshot.test.ts,
 // which refuses to regenerate its snapshot for changed output without a bump here.
-export const INDEX_VERSION = "1.14.0";
+export const INDEX_VERSION = "1.18.0";
 
 export type { IndexedFileRecord } from "./index-snapshot.js";
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, content_hash TEXT NOT NULL, language TEXT NOT NULL, parse_error INTEGER NOT NULL, indexing_version TEXT NOT NULL, size INTEGER NOT NULL, mtime_ms REAL NOT NULL, ctime_ms REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS sources (file_path TEXT PRIMARY KEY, source TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY AUTOINCREMENT, caller_id TEXT NOT NULL, callee_name TEXT NOT NULL, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY AUTOINCREMENT, caller_id TEXT NOT NULL, target_ids TEXT NOT NULL, callee_name TEXT NOT NULL, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS call_targets (call_id INTEGER NOT NULL, target_id TEXT NOT NULL, PRIMARY KEY (call_id, target_id));
 CREATE TABLE IF NOT EXISTS imports (id INTEGER PRIMARY KEY AUTOINCREMENT, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS exports (id INTEGER PRIMARY KEY AUTOINCREMENT, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_symbols_file_path ON symbols(file_path);
 CREATE INDEX IF NOT EXISTS idx_calls_file_path ON calls(file_path);
 CREATE INDEX IF NOT EXISTS idx_calls_caller_id ON calls(caller_id);
+CREATE INDEX IF NOT EXISTS idx_calls_target_ids ON calls(target_ids);
+CREATE INDEX IF NOT EXISTS idx_call_targets_target_id ON call_targets(target_id);
 CREATE INDEX IF NOT EXISTS idx_imports_file_path ON imports(file_path);
 CREATE INDEX IF NOT EXISTS idx_exports_file_path ON exports(file_path);
 `;
@@ -72,8 +77,11 @@ export class IndexStorage implements IndexStore {
     // A cache written by any other schema is dropped and rebuilt, never reused.
     if (version?.value !== INDEX_VERSION)
       this.db.exec(
-        "DROP TABLE IF EXISTS files; DROP TABLE IF EXISTS symbols; DROP TABLE IF EXISTS calls; DROP TABLE IF EXISTS imports; DROP TABLE IF EXISTS exports;",
+        "DROP TABLE IF EXISTS files; DROP TABLE IF EXISTS sources; DROP TABLE IF EXISTS symbols; DROP TABLE IF EXISTS calls; DROP TABLE IF EXISTS call_targets; DROP TABLE IF EXISTS imports; DROP TABLE IF EXISTS exports;",
       );
+    if (version?.value !== INDEX_VERSION)
+      this.db.prepare("DELETE FROM metadata WHERE key = 'calls_digest'").run();
+    if (version?.value !== INDEX_VERSION) this.db.exec("VACUUM");
     this.db.exec(SCHEMA);
     if (version?.value !== INDEX_VERSION)
       this.db
@@ -82,7 +90,7 @@ export class IndexStorage implements IndexStore {
         )
         .run(INDEX_VERSION);
   }
-  load() {
+  load(options: { calls?: boolean; symbols?: "full" | "lean" } = {}) {
     const files = new Map<string, IndexedFileRecord>();
     for (const row of this.db
       .prepare(
@@ -105,6 +113,16 @@ export class IndexStorage implements IndexStore {
         mtimeMs: row.mtime_ms,
         ctimeMs: row.ctime_ms,
       });
+    const sources = new Map(
+      (
+        this.db
+          .prepare("SELECT file_path, source FROM sources")
+          .all() as Array<{
+          file_path: string;
+          source: string;
+        }>
+      ).map((row) => [row.file_path, row.source]),
+    );
     const rows = <T>(table: string) =>
       (
         this.db.prepare(`SELECT payload FROM ${table}`).all() as Array<{
@@ -124,11 +142,83 @@ export class IndexStorage implements IndexStore {
       });
     return {
       files,
-      symbols: rows<SymbolRecord>("symbols"),
-      calls: rows<CallEdge>("calls"),
+      symbols: rows<SymbolRecord>("symbols").map((symbol) => {
+        if (options.symbols !== "full") {
+          delete (symbol as Partial<SymbolRecord>).source;
+          delete (symbol as Partial<SymbolRecord>).body;
+        } else if (!symbol.source) {
+          symbol.source = sources.get(symbol.filePath) ?? "";
+        }
+        return symbol;
+      }),
+      calls: options.calls === false ? [] : rows<CallEdge>("calls"),
       imports: rows<ImportRecord>("imports"),
       exports: rows<ExportRecord>("exports"),
     };
+  }
+  loadCalls() {
+    return this.parseCalls(
+      this.db.prepare("SELECT payload FROM calls").all() as Array<{
+        payload: string;
+      }>,
+    );
+  }
+  loadCallsForCaller(callerId: string) {
+    return this.parseCalls(
+      this.db
+        .prepare("SELECT payload FROM calls WHERE caller_id = ?")
+        .all(callerId) as Array<{ payload: string }>,
+    );
+  }
+  loadCallsForTarget(targetId: string) {
+    return this.parseCalls(
+      this.db
+        .prepare(
+          "SELECT calls.payload FROM calls JOIN call_targets ON call_targets.call_id = calls.id WHERE call_targets.target_id = ?",
+        )
+        .all(targetId) as Array<{ payload: string }>,
+    );
+  }
+  callStats(): CallStats {
+    const stats: CallStats = {
+      total: 0,
+      exact: 0,
+      probable: 0,
+      unresolved: 0,
+      external: 0,
+      byLanguage: {},
+      byResolutionKind: {},
+    };
+    for (const row of this.db
+      .prepare("SELECT payload FROM calls")
+      .iterate() as Iterable<{ payload: string }>) {
+      const call = this.parseCall(row.payload);
+      stats.total++;
+      if (call.confidence === "exact") stats.exact++;
+      else if (call.confidence === "probable") stats.probable++;
+      else if (call.confidence === "unresolved") stats.unresolved++;
+      if (call.externalPackage) stats.external++;
+      const language = call.language ?? "java";
+      stats.byLanguage[language] = (stats.byLanguage[language] ?? 0) + 1;
+      stats.byResolutionKind[call.resolutionKind] =
+        (stats.byResolutionKind[call.resolutionKind] ?? 0) + 1;
+    }
+    return stats;
+  }
+  private parseCalls(rows: Array<{ payload: string }>) {
+    return rows.map((row) => this.parseCall(row.payload));
+  }
+  private parseCall(payload: string) {
+    try {
+      return JSON.parse(payload) as CallEdge;
+    } catch (error) {
+      this.db.close();
+      throw new WorkflowError(
+        "INDEX_CORRUPT",
+        `Unreadable index cache payload in calls: ${error instanceof Error ? error.message : String(error)}`,
+        "Delete the cache and rebuild it: rm -rf .context-slice && context-slice init",
+      );
+    }
   }
   metadata() {
     const rows = this.db
@@ -140,6 +230,7 @@ export class IndexStorage implements IndexStore {
     snapshot: IndexSnapshot,
     changedPaths?: ReadonlySet<string>,
     removedPaths?: ReadonlySet<string>,
+    callPaths?: ReadonlySet<string>,
   ) {
     const { files, symbols, calls, imports, exports } = snapshot;
     const incremental =
@@ -153,6 +244,9 @@ export class IndexStorage implements IndexStore {
         const deleteSymbols = this.db.prepare(
           "DELETE FROM symbols WHERE file_path = ?",
         );
+        const deleteSources = this.db.prepare(
+          "DELETE FROM sources WHERE file_path = ?",
+        );
         // Imports/exports are pure per-file parse output (nothing downstream mutates them the
         // way call resolution mutates calls below), so they can be kept genuinely incremental:
         // only the changed/removed files' own rows are ever touched.
@@ -164,12 +258,14 @@ export class IndexStorage implements IndexStore {
         );
         for (const path of new Set([...changed, ...removed])) {
           deleteFile.run(path);
+          deleteSources.run(path);
           deleteSymbols.run(path);
           deleteImports.run(path);
           deleteExports.run(path);
         }
       } else {
         this.db.prepare("DELETE FROM files").run();
+        this.db.prepare("DELETE FROM sources").run();
         this.db.prepare("DELETE FROM symbols").run();
         this.db.prepare("DELETE FROM imports").run();
         this.db.prepare("DELETE FROM exports").run();
@@ -198,8 +294,22 @@ export class IndexStorage implements IndexStore {
             symbol.id,
             symbol.filePath,
             symbol.language,
-            JSON.stringify(symbol),
+            this.symbolPayload(symbol),
           );
+      const sourceByFile = new Map<string, string>();
+      for (const symbol of symbols)
+        if (
+          (!incremental || changed.has(symbol.filePath)) &&
+          !sourceByFile.has(symbol.filePath) &&
+          typeof symbol.source === "string"
+        )
+          sourceByFile.set(symbol.filePath, symbol.source);
+      const sourceStatement = this.db.prepare(
+        "INSERT INTO sources(file_path, source) VALUES (?, ?)",
+      );
+      for (const [filePath, source] of sourceByFile) {
+        sourceStatement.run(filePath, source);
+      }
       const importStatement = this.db.prepare(
         "INSERT INTO imports(file_path, language, payload) VALUES (?, ?, ?)",
       );
@@ -220,68 +330,120 @@ export class IndexStorage implements IndexStore {
             record.language,
             JSON.stringify(record),
           );
-      // Calls are different: resolution is graph-wide (see ProjectIndex.rebuild), so a call's
-      // resolved fields can change even when its own file didn't. Rewriting only the
-      // changed-file set would silently leave stale resolution data for every other file's
-      // calls. Instead, diff against what's already stored, by payload, as a MULTISET (two
-      // distinct call sites can legitimately produce an identical payload) — so only rows that
-      // actually changed cost a write, and everything identical is left untouched.
-      const digest = createHash("sha256");
-      for (const call of calls) digest.update(JSON.stringify(call));
-      const callsDigest = digest.digest("hex");
-      const previousCallsDigest = (
-        this.db
-          .prepare("SELECT value FROM metadata WHERE key = 'calls_digest'")
-          .get() as { value?: string } | undefined
-      )?.value;
-      if (previousCallsDigest !== callsDigest) {
-        const existingCalls = this.db
-          .prepare("SELECT id, payload FROM calls")
-          .all() as Array<{ id: number; payload: string }>;
-        const existingIdsByPayload = new Map<string, number[]>();
-        for (const row of existingCalls) {
-          const ids = existingIdsByPayload.get(row.payload);
-          if (ids) ids.push(row.id);
-          else existingIdsByPayload.set(row.payload, [row.id]);
+      if (callPaths) {
+        const deleteCallTargets = this.db.prepare(
+          "DELETE FROM call_targets WHERE call_id IN (SELECT id FROM calls WHERE file_path = ?)",
+        );
+        const deleteCalls = this.db.prepare(
+          "DELETE FROM calls WHERE file_path = ?",
+        );
+        for (const path of callPaths) {
+          deleteCallTargets.run(path);
+          deleteCalls.run(path);
         }
         const insertCall = this.db.prepare(
-          "INSERT INTO calls(caller_id, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?)",
+          "INSERT INTO calls(caller_id, target_ids, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?, ?)",
         );
-        for (const call of calls) {
-          const payload = JSON.stringify(call);
-          const reusable = existingIdsByPayload.get(payload);
-          if (reusable?.length) {
-            reusable.pop();
-            continue;
+        const insertCallTarget = this.db.prepare(
+          "INSERT INTO call_targets(call_id, target_id) VALUES (?, ?)",
+        );
+        for (const call of calls)
+          if (callPaths.has(call.filePath))
+            this.insertCall(insertCall, insertCallTarget, call);
+      } else {
+        // Full resolution can change calls in any file, so use the existing multiset diff.
+        const digest = createHash("sha256");
+        for (const call of calls) digest.update(JSON.stringify(call));
+        const callsDigest = digest.digest("hex");
+        const previousCallsDigest = (
+          this.db
+            .prepare("SELECT value FROM metadata WHERE key = 'calls_digest'")
+            .get() as { value?: string } | undefined
+        )?.value;
+        if (previousCallsDigest !== callsDigest) {
+          const existingCalls = this.db
+            .prepare("SELECT id, payload FROM calls")
+            .all() as Array<{ id: number; payload: string }>;
+          const existingIdsByPayload = new Map<string, number[]>();
+          for (const row of existingCalls) {
+            const ids = existingIdsByPayload.get(row.payload);
+            if (ids) ids.push(row.id);
+            else existingIdsByPayload.set(row.payload, [row.id]);
           }
-          insertCall.run(
-            call.callerId,
-            call.calleeName,
-            call.filePath,
-            call.language ?? "java",
-            payload,
+          const insertCall = this.db.prepare(
+            "INSERT INTO calls(caller_id, target_ids, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?, ?)",
           );
+          const insertCallTarget = this.db.prepare(
+            "INSERT INTO call_targets(call_id, target_id) VALUES (?, ?)",
+          );
+          for (const call of calls) {
+            const payload = JSON.stringify(call);
+            const reusable = existingIdsByPayload.get(payload);
+            if (reusable?.length) {
+              reusable.pop();
+              continue;
+            }
+            this.insertCall(insertCall, insertCallTarget, call, payload);
+          }
+          const deleteCallById = this.db.prepare(
+            "DELETE FROM calls WHERE id = ?",
+          );
+          const deleteCallTargetsById = this.db.prepare(
+            "DELETE FROM call_targets WHERE call_id = ?",
+          );
+          for (const ids of existingIdsByPayload.values())
+            for (const id of ids) {
+              deleteCallTargetsById.run(id);
+              deleteCallById.run(id);
+            }
         }
-        const deleteCallById = this.db.prepare(
-          "DELETE FROM calls WHERE id = ?",
-        );
-        for (const ids of existingIdsByPayload.values())
-          for (const id of ids) deleteCallById.run(id);
+        this.db
+          .prepare(
+            "INSERT OR REPLACE INTO metadata(key, value) VALUES ('calls_digest', ?)",
+          )
+          .run(callsDigest);
       }
       this.db
         .prepare(
           "INSERT OR REPLACE INTO metadata(key, value) VALUES ('last_refreshed_at', ?)",
         )
         .run(new Date().toISOString());
-      this.db
-        .prepare(
-          "INSERT OR REPLACE INTO metadata(key, value) VALUES ('calls_digest', ?)",
-        )
-        .run(callsDigest);
     });
     transaction();
   }
   close() {
     this.db.close();
+  }
+
+  private insertCall(
+    insertCall: Database.Statement,
+    insertCallTarget: Database.Statement,
+    call: CallEdge,
+    payload = JSON.stringify(call),
+  ) {
+    const result = insertCall.run(
+      call.callerId,
+      JSON.stringify(
+        call.runtimeTargetIds ??
+          (call.resolvedTargetId ? [call.resolvedTargetId] : []),
+      ),
+      call.calleeName,
+      call.filePath,
+      call.language ?? "java",
+      payload,
+    );
+    for (const targetId of new Set(
+      call.runtimeTargetIds ??
+        (call.resolvedTargetId ? [call.resolvedTargetId] : []),
+    ))
+      insertCallTarget.run(result.lastInsertRowid, targetId);
+  }
+
+  private symbolPayload(symbol: SymbolRecord) {
+    const payload: Record<string, unknown> = {};
+    for (const key of Object.keys(symbol))
+      if (key !== "source" && key !== "body")
+        payload[key] = (symbol as unknown as Record<string, unknown>)[key];
+    return JSON.stringify(payload);
   }
 }

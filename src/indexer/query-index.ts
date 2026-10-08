@@ -4,6 +4,7 @@ export class QueryIndex {
   private symbols = new Map<string, SymbolRecord>();
   private byName = new Map<string, SymbolRecord[]>();
   private byQualifiedName = new Map<string, SymbolRecord[]>();
+  private byQualifiedSuffix = new Map<string, SymbolRecord[]>();
   private byCanonicalIdentity = new Map<string, SymbolRecord[]>();
   private bySignature = new Map<string, SymbolRecord[]>();
   private callsByCaller = new Map<string, CallEdge[]>();
@@ -16,6 +17,7 @@ export class QueryIndex {
     this.symbols = new Map(symbols.map((symbol) => [symbol.id, symbol]));
     this.byName = new Map();
     this.byQualifiedName = new Map();
+    this.byQualifiedSuffix = new Map();
     this.byCanonicalIdentity = new Map();
     this.bySignature = new Map();
     this.childrenByParent = new Map();
@@ -34,6 +36,17 @@ export class QueryIndex {
     for (const symbol of symbols) {
       add(this.byName, symbol.name, symbol);
       add(this.byQualifiedName, symbol.qualifiedName, symbol);
+      if (symbol.qualifiedName) {
+        let dot = symbol.qualifiedName.indexOf(".");
+        while (dot >= 0) {
+          add(
+            this.byQualifiedSuffix,
+            symbol.qualifiedName.slice(dot + 1),
+            symbol,
+          );
+          dot = symbol.qualifiedName.indexOf(".", dot + 1);
+        }
+      }
       add(this.byCanonicalIdentity, symbol.canonicalIdentity, symbol);
       add(this.bySignature, symbol.signature, symbol);
       if (symbol.parentId) {
@@ -51,6 +64,10 @@ export class QueryIndex {
     }
     this.callsByCaller = new Map();
     this.callsByTarget = new Map();
+    this.addCalls(calls);
+  }
+
+  addCalls(calls: CallEdge[]) {
     for (const call of calls) {
       const callers = this.callsByCaller.get(call.callerId);
       if (callers) callers.push(call);
@@ -120,9 +137,7 @@ export class QueryIndex {
         Boolean(symbol) && matches.indexOf(symbol) === index,
     );
     if (exact.length) return preferImplementation(exact);
-    const qualifiedSuffix = [...this.symbols.values()].filter((symbol) =>
-      symbol.qualifiedName?.endsWith(`.${input}`),
-    );
+    const qualifiedSuffix = this.byQualifiedSuffix.get(input) ?? [];
     return preferImplementation(
       qualifiedSuffix.length ? qualifiedSuffix : (this.byName.get(input) ?? []),
     );

@@ -23,13 +23,28 @@ export interface IndexSnapshot {
   exports: ExportRecord[];
 }
 
+export interface CallStats {
+  total: number;
+  exact: number;
+  probable: number;
+  unresolved: number;
+  external: number;
+  byLanguage: Record<string, number>;
+  byResolutionKind: Record<string, number>;
+}
+
 export interface IndexStore {
-  load(): IndexSnapshot;
+  load(options?: { calls?: boolean; symbols?: "full" | "lean" }): IndexSnapshot;
+  loadCalls(): CallEdge[];
+  loadCallsForCaller(callerId: string): CallEdge[];
+  loadCallsForTarget(targetId: string): CallEdge[];
+  callStats(): CallStats;
   metadata(): Record<string, string>;
   save(
     snapshot: IndexSnapshot,
     changedPaths?: ReadonlySet<string>,
     removedPaths?: ReadonlySet<string>,
+    callPaths?: ReadonlySet<string>,
   ): void;
   close(): void;
 }

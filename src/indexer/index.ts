@@ -11,6 +11,7 @@ import type {
 import { rankSymbol } from "../planner/rank.js";
 import { INDEX_VERSION, IndexStorage } from "../storage/sqlite.js";
 import type {
+  IndexSnapshot,
   IndexedFileRecord,
   IndexStore,
 } from "../storage/index-snapshot.js";
@@ -25,6 +26,11 @@ import { ensureLanguageBootstrap } from "../languages/bootstrap.js";
 import { QueryIndex } from "./query-index.js";
 import { ResolutionPipeline } from "./resolution-pipeline.js";
 import { languageSnapshots } from "./language-snapshot.js";
+import {
+  clearDirty,
+  dirtyMarkerExists,
+  isDirty,
+} from "../storage/dirty-marker.js";
 import type { EnterpriseRelation } from "../types/enterprise.js";
 import {
   createEnterpriseRegistry,
@@ -45,6 +51,59 @@ const coreIgnored = new Set([
 ]);
 const ignored = new Set([...coreIgnored, ...ignoredDirectories()]);
 
+interface LazySymbolContext {
+  root: string;
+}
+type LazySymbol = SymbolRecord & { [lazyContextKey]?: LazySymbolContext };
+const lazyContextKey = Symbol("context-slice-lazy-context");
+const lazySymbolPrototype = {};
+
+function lazySource(symbol: LazySymbol, range: SymbolRecord["range"]) {
+  const context = symbol[lazyContextKey];
+  if (!context) return "";
+  const fullPath = resolve(context.root, symbol.filePath);
+  const fromRoot = relative(context.root, fullPath);
+  if (
+    fromRoot === ".." ||
+    fromRoot.startsWith(`..${sep}`) ||
+    isAbsolute(fromRoot)
+  )
+    throw new WorkflowError(
+      "INVALID_ARGUMENT",
+      `Path escapes repository root: ${symbol.filePath}`,
+      "Pass a symbol whose filePath resolves inside the indexed repository root.",
+    );
+  const source = readFileSync(fullPath, "utf8");
+  const offset = (line: number, column: number) => {
+    let current = 0;
+    for (let index = 1; index < line; index++) {
+      const newline = source.indexOf("\n", current);
+      if (newline < 0) return source.length;
+      current = newline + 1;
+    }
+    return Math.min(current + column, source.length);
+  };
+  return source.slice(
+    offset(range.startLine, range.startColumn),
+    offset(range.endLine, range.endColumn),
+  );
+}
+
+Object.defineProperties(lazySymbolPrototype, {
+  source: {
+    enumerable: true,
+    get(this: LazySymbol) {
+      return lazySource(this, this.range);
+    },
+  },
+  body: {
+    enumerable: true,
+    get(this: LazySymbol) {
+      return this.bodyRange ? lazySource(this, this.bodyRange) : undefined;
+    },
+  },
+});
+
 /** Display suffix: `.d.ts` and `.tsx` are counted separately from `.ts`. */
 function fileSuffix(filePath: string) {
   const lower = filePath.toLowerCase();
@@ -60,7 +119,13 @@ export class ProjectIndex {
   enterpriseRelations: EnterpriseRelation[] = [];
   private hashes = new Map<string, IndexedFileRecord>();
   private readonly storage: IndexStore;
+  private snapshot?: IndexSnapshot;
+  private callsLoaded = true;
+  private readonly loadedCallCallers = new Set<string>();
+  private readonly loadedCallTargets = new Set<string>();
+  private readonly loadedCallKeys = new Set<string>();
   private readonly enterpriseRegistry: EnterpriseRegistry;
+  private readonly lazySymbolContext: LazySymbolContext;
   private sourceSignatures?: Map<string, string>;
   private cachedRefresh?: ReturnType<ProjectIndex["refresh"]>;
   private readonly queryIndex = new QueryIndex();
@@ -68,6 +133,7 @@ export class ProjectIndex {
   constructor(root: string) {
     this.root = resolve(root);
     this.storage = new IndexStorage(this.root);
+    this.lazySymbolContext = { root: this.root };
     this.enterpriseRegistry = createEnterpriseRegistry();
   }
   private files(dir: string, visited = new Set<string>()): string[] {
@@ -128,6 +194,30 @@ export class ProjectIndex {
     this.queryIndex.rebuild(this.symbols, this.calls);
   }
 
+  private makeSymbolsLazy(symbols: SymbolRecord[]) {
+    for (const symbol of symbols) {
+      delete (symbol as Partial<SymbolRecord>).source;
+      delete (symbol as Partial<SymbolRecord>).body;
+      Object.defineProperty(symbol, lazyContextKey, {
+        configurable: true,
+        enumerable: false,
+        value: this.lazySymbolContext,
+      });
+      Object.setPrototypeOf(symbol, lazySymbolPrototype);
+    }
+  }
+
+  private declarationShape(symbol: SymbolRecord) {
+    return JSON.stringify([
+      symbol.kind,
+      symbol.name,
+      symbol.qualifiedName,
+      symbol.signature,
+      symbol.parentId,
+      symbol.supertypes,
+    ]);
+  }
+
   symbolById(id: string): SymbolRecord | undefined {
     return this.queryIndex.symbolById(id);
   }
@@ -164,7 +254,10 @@ export class ProjectIndex {
     return this.computeFreshness(files);
   }
   /** Compare filesystem metadata with the persisted index without reading source contents. */
-  private computeFreshness(files: string[], previous = this.storage.load()) {
+  private computeFreshness(
+    files: string[],
+    previous = this.storage.load({ calls: false, symbols: "lean" }),
+  ) {
     const signatures = this.signatures(files);
     const hasIndex = previous.files.size > 0;
     const stale =
@@ -198,13 +291,23 @@ export class ProjectIndex {
     files: string[],
     signatures: Map<string, string>,
     freshness: ReturnType<ProjectIndex["computeFreshness"]>,
-    previous = this.storage.load(),
+    previous = this.storage.load({ calls: false, symbols: "lean" }),
+    callsLoaded = true,
   ) {
     this.hashes = previous.files;
     this.symbols = previous.symbols;
     this.calls = previous.calls;
     this.imports = previous.imports;
     this.exports = previous.exports;
+    this.snapshot = previous;
+    this.callsLoaded = callsLoaded;
+    this.makeSymbolsLazy(this.symbols);
+    this.loadedCallCallers.clear();
+    this.loadedCallTargets.clear();
+    this.loadedCallKeys.clear();
+    if (callsLoaded)
+      for (const call of this.calls)
+        this.loadedCallKeys.add(JSON.stringify(call));
     this.enterpriseRelations = [];
     const symbolsByFile = new Map<string, SymbolRecord[]>();
     for (const symbol of this.symbols) {
@@ -238,9 +341,11 @@ export class ProjectIndex {
       imports: this.imports.length,
       exports: this.exports.length,
       elapsedMs: 0,
+      timingsMs: {},
     };
     const result = { summary, freshness };
     this.sourceSignatures = signatures;
+    if (dirtyMarkerExists(this.root)) clearDirty(this.root);
     this.cachedRefresh = result;
     return result;
   }
@@ -254,24 +359,77 @@ export class ProjectIndex {
     this.cachedRefresh = result;
     return result;
   }
+  private ensureCallsLoaded() {
+    if (this.callsLoaded) return;
+    this.calls = this.storage.loadCalls();
+    this.callsLoaded = true;
+    this.loadedCallCallers.clear();
+    this.loadedCallTargets.clear();
+    this.loadedCallKeys.clear();
+    for (const call of this.calls)
+      this.loadedCallKeys.add(JSON.stringify(call));
+    this.snapshot = { ...this.snapshot!, calls: this.calls };
+    this.reindex();
+  }
+
+  private mergePartialCalls(calls: CallEdge[]) {
+    const added: CallEdge[] = [];
+    for (const call of calls) {
+      const key = JSON.stringify(call);
+      if (this.loadedCallKeys.has(key)) continue;
+      this.loadedCallKeys.add(key);
+      this.calls.push(call);
+      added.push(call);
+    }
+    this.snapshot = { ...this.snapshot!, calls: this.calls };
+    this.queryIndex.addCalls(added);
+  }
+
+  private ensureCallsForCaller(callerId: string) {
+    if (this.callsLoaded || this.loadedCallCallers.has(callerId)) return;
+    this.mergePartialCalls(this.storage.loadCallsForCaller(callerId));
+    this.loadedCallCallers.add(callerId);
+  }
+
+  private ensureCallsForTarget(targetId: string) {
+    if (this.callsLoaded || this.loadedCallTargets.has(targetId)) return;
+    this.mergePartialCalls(this.storage.loadCallsForTarget(targetId));
+    this.loadedCallTargets.add(targetId);
+  }
+
   refreshIfStale() {
+    if (
+      this.cachedRefresh &&
+      dirtyMarkerExists(this.root) &&
+      !isDirty(this.root)
+    )
+      return this.cachedRefresh;
     const files = this.files(this.root);
     const next = this.signatures(files);
-    if (this.cachedRefresh && this.sameSignatures(next))
+    if (this.cachedRefresh && this.sameSignatures(next)) {
+      if (dirtyMarkerExists(this.root)) clearDirty(this.root);
       return this.cachedRefresh;
+    }
     if (!this.cachedRefresh) {
-      const previous = this.storage.load();
+      const previous = this.storage.load({ calls: false, symbols: "lean" });
       const freshness = this.computeFreshness(files, previous);
       if (freshness.state === "CURRENT")
-        return this.hydrateCached(files, next, freshness, previous);
+        return this.hydrateCached(files, next, freshness, previous, false);
     }
     return this.refresh();
   }
   rebuild() {
     this.cachedRefresh = undefined;
+    this.ensureCallsLoaded();
     const started = Date.now();
+    const timingsMs: Record<string, number> = {};
+    let phaseStarted = started;
     const files = this.files(this.root);
-    const previous = this.storage.load();
+    timingsMs.fileDiscovery = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
+    const previous = this.snapshot ?? this.storage.load({ symbols: "lean" });
+    timingsMs.storageLoad = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
     this.symbols = [];
     this.calls = [];
     this.imports = [];
@@ -281,6 +439,7 @@ export class ProjectIndex {
     let filesParsed = 0;
     let cacheHits = 0;
     const changedPaths = new Set<string>();
+    const declarationChangedPaths = new Set<string>();
     const previousByFile = <T extends { filePath: string }>(records: T[]) => {
       const grouped = new Map<string, T[]>();
       for (const record of records) {
@@ -339,6 +498,14 @@ export class ProjectIndex {
           ctimeMs: stats.ctimeMs,
         });
         filesParsed++;
+        const previousShape = (previousSymbols.get(filePath) ?? [])
+          .map((symbol) => this.declarationShape(symbol))
+          .sort();
+        const currentShape = fileSymbols
+          .map((symbol) => this.declarationShape(symbol))
+          .sort();
+        if (JSON.stringify(previousShape) !== JSON.stringify(currentShape))
+          declarationChangedPaths.add(filePath);
       }
       if (adapter.id === "java") {
         this.enterpriseRelations.push(
@@ -350,6 +517,8 @@ export class ProjectIndex {
         );
       }
     }
+    timingsMs.parseAndCache = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
     const currentPaths = new Set(this.hashes.keys());
     const removedPaths = new Set(
       [...previous.files.keys()].filter((path) => !currentPaths.has(path)),
@@ -358,16 +527,22 @@ export class ProjectIndex {
       this.enterpriseRelations,
       this.symbols.filter((symbol) => symbol.language === "java"),
     );
+    timingsMs.enterprise = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
     const snapshots = languageSnapshots(
       this.symbols,
       this.calls,
       this.imports,
       this.exports,
     );
-    this.resolutionPipeline.resolve({
+    timingsMs.snapshots = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
+    const affectedPaths = new Set(changedPaths);
+    const affectedCallPaths = this.resolutionPipeline.resolve({
       root: this.root,
       symbols: this.symbols,
-      previousSymbols: previous.symbols,
+      declarationChangedPaths,
+      affectedPaths,
       calls: this.calls,
       imports: this.imports,
       exports: this.exports,
@@ -376,7 +551,11 @@ export class ProjectIndex {
       changedPaths,
       removedPaths,
     });
+    timingsMs.resolution = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
     this.reindex();
+    timingsMs.queryIndex = Date.now() - phaseStarted;
+    phaseStarted = Date.now();
     this.storage.save(
       {
         files: this.hashes,
@@ -387,7 +566,18 @@ export class ProjectIndex {
       },
       changedPaths,
       removedPaths,
+      affectedCallPaths,
     );
+    this.snapshot = {
+      files: this.hashes,
+      symbols: this.symbols,
+      calls: this.calls,
+      imports: this.imports,
+      exports: this.exports,
+    };
+    this.makeSymbolsLazy(this.symbols);
+    timingsMs.storageSave = Date.now() - phaseStarted;
+    if (dirtyMarkerExists(this.root)) clearDirty(this.root);
     const counts = this.counts(files);
     return {
       files: files.length,
@@ -403,6 +593,7 @@ export class ProjectIndex {
       imports: this.imports.length,
       exports: this.exports.length,
       elapsedMs: Date.now() - started,
+      timingsMs,
     };
   }
   search(query: string, limit = 10) {
@@ -425,6 +616,7 @@ export class ProjectIndex {
     return this.queryIndex.resolveSymbol(input);
   }
   callers(target: SymbolRecord) {
+    this.ensureCallsForTarget(target.id);
     // A cfg-gated call (spec §40) carries every alternative in runtimeTargetIds, not just the
     // resolvedTargetId it settled on — a non-first alternative must still be reachable as a
     // caller/dependency edge, or context composition can never include it (see docs/rust-support.md).
@@ -443,6 +635,7 @@ export class ProjectIndex {
     return [...found.values()];
   }
   dependencies(target: SymbolRecord) {
+    this.ensureCallsForCaller(target.id);
     return this.queryIndex.dependencies(target);
   }
   dependenciesAtDepth(target: SymbolRecord, depth: number) {
@@ -458,6 +651,7 @@ export class ProjectIndex {
     return [...found.values()];
   }
   ambiguousCalls() {
+    this.ensureCallsLoaded();
     return this.calls.filter(
       (call) =>
         !call.resolvedTargetId &&
@@ -483,21 +677,13 @@ export class ProjectIndex {
         (symbolsByLanguage[symbol.language] ?? 0) + 1;
     }
     const resolutionKindCounts: Record<string, number> = {};
-    let callEdgesExact = 0;
-    let callEdgesProbable = 0;
-    let callEdgesUnresolved = 0;
-    let externalCallEdges = 0;
-    const callsByLanguage: Record<string, number> = {};
-    for (const call of this.calls) {
-      resolutionKindCounts[call.resolutionKind] =
-        (resolutionKindCounts[call.resolutionKind] ?? 0) + 1;
-      if (call.confidence === "exact") callEdgesExact++;
-      else if (call.confidence === "probable") callEdgesProbable++;
-      else if (call.confidence === "unresolved") callEdgesUnresolved++;
-      if (call.externalPackage) externalCallEdges++;
-      const language = call.language ?? "java";
-      callsByLanguage[language] = (callsByLanguage[language] ?? 0) + 1;
-    }
+    const callStats = this.storage.callStats();
+    const callEdgesExact = callStats.exact;
+    const callEdgesProbable = callStats.probable;
+    const callEdgesUnresolved = callStats.unresolved;
+    const externalCallEdges = callStats.external;
+    const callsByLanguage = callStats.byLanguage;
+    Object.assign(resolutionKindCounts, callStats.byResolutionKind);
     let importsResolved = 0;
     let externalImports = 0;
     const importsByLanguage: Record<string, number> = {};
@@ -547,7 +733,7 @@ export class ProjectIndex {
       ).length,
       ambiguousLookups: 0,
       symbolIdCollisions: collisions,
-      callEdgesTotal: this.calls.length,
+      callEdgesTotal: callStats.total,
       callEdgesExact,
       callEdgesProbable,
       callEdgesUnresolved,
@@ -582,6 +768,7 @@ export class ProjectIndex {
   }
 
   callsFor(caller: SymbolRecord) {
+    this.ensureCallsForCaller(caller.id);
     return this.queryIndex.callsFor(caller);
   }
 }

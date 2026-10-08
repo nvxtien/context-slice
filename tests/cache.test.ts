@@ -13,6 +13,7 @@ import { join } from "node:path";
 import test from "node:test";
 import Database from "better-sqlite3";
 import { ProjectIndex } from "../src/indexer/index.js";
+import { markDirty } from "../src/storage/dirty-marker.js";
 import { INDEX_VERSION } from "../src/storage/sqlite.js";
 
 test("cold cache, warm cache, and updating a single file", () => {
@@ -259,6 +260,17 @@ test("body-only changes keep unrelated call resolutions cached", () => {
   assert.equal(result.cacheHits, 2);
   const after = index.calls.find((call) => call.filePath === "unrelated.ts");
   assert.equal(after?.resolvedTargetId, before?.resolvedTargetId);
+});
+
+test("external dirty marker refreshes a running index", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-ts-"));
+  writeFileSync(join(root, "a.ts"), "export function value() { return 1; }\n");
+  const index = new ProjectIndex(root);
+  index.refresh();
+  writeFileSync(join(root, "a.ts"), "export function value() { return 2; }\n");
+  markDirty(root, ["a.ts"]);
+  const refreshed = index.refreshIfStale();
+  assert.equal(refreshed.summary.filesParsed, 1);
 });
 
 test("cache directory ignores itself so the target repository stays clean", () => {
