@@ -33,7 +33,7 @@
     "package-smoke": "tsx scripts/package-smoke-test.ts",
     "release:rc": "tsx scripts/clean-room-rc.ts",
     "test": "tsx --test tests/**/*.test.ts",
-    "benchmark": "tsx benchmarks/benchmark.ts",
+    "benchmark": "tsx benchmarks/v1.8-java-jsoup.ts",
     "benchmark:checkouts": "tsx benchmarks/fetch-checkouts.ts",
     "benchmark:v03": "npm run benchmark:checkouts && tsx benchmarks/v0.3-real-repositories.ts",
     "benchmark:v04": "npm run benchmark:v03 && tsx benchmarks/v0.4-symbol-index-hardening.ts",

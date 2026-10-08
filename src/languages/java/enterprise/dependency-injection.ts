@@ -37,7 +37,6 @@ function firstParenGroup(text: string): string | undefined {
   return undefined;
 }
 
-
 /** "@Qualifier("x") final a.b.Repo repo" -> { type: "Repo", name: "repo", qualifier: "x" }. */
 function parseDeclaration(text: string) {
   const qualifier = text.match(QUALIFIER_RE)?.[1];

@@ -426,7 +426,13 @@ export function parsePython(filePath: string, source: string): ParsedFile {
   try {
     walk(tree.rootNode, undefined, []);
   } catch {
-    return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
+    return {
+      symbols: [],
+      calls: [],
+      imports: [],
+      exports: [],
+      parseError: true,
+    };
   }
 
   // Two declarations can share a canonical identity (conditional defs, overloads).

@@ -144,6 +144,9 @@ test("context.diff uses the working tree when only base is supplied", () => {
 });
 
 test("context.diff rejects revisions that look like git flags", () => {
-  assert.throws(() => gitDiffArgs("--output=/tmp/pwned"), /Invalid git revision/);
+  assert.throws(
+    () => gitDiffArgs("--output=/tmp/pwned"),
+    /Invalid git revision/,
+  );
   assert.throws(() => gitDiffArgs("main", "-x"), /Invalid git revision/);
 });

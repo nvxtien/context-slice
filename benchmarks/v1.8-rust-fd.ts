@@ -29,7 +29,9 @@ const repositories: Repository[] = JSON.parse(
 ) as Repository[];
 const repo = repositories.find((r) => r.id === "fd");
 if (!repo)
-  throw new Error("fd entry missing from benchmarks/rust-repositories-extra.json");
+  throw new Error(
+    "fd entry missing from benchmarks/rust-repositories-extra.json",
+  );
 
 type OracleSymbol = { name: string; kind: string; file: string; line: number };
 
@@ -47,11 +49,21 @@ const symbols: OracleSymbol[] = [
   { name: "SanitizedStr", kind: "class", file: "src/sanitize.rs", line: 47 },
   { name: "FileTypes", kind: "class", file: "src/filetypes.rs", line: 8 },
   { name: "Outputs", kind: "class", file: "src/exec/command.rs", line: 8 },
-  { name: "OutputBuffer", kind: "class", file: "src/exec/command.rs", line: 12 },
+  {
+    name: "OutputBuffer",
+    kind: "class",
+    file: "src/exec/command.rs",
+    line: 12,
+  },
   { name: "ExecutionMode", kind: "enum", file: "src/exec/mod.rs", line: 22 },
   { name: "CommandSet", kind: "class", file: "src/exec/mod.rs", line: 30 },
   { name: "CommandBuilder", kind: "class", file: "src/exec/mod.rs", line: 125 },
-  { name: "CommandTemplate", kind: "class", file: "src/exec/mod.rs", line: 215 },
+  {
+    name: "CommandTemplate",
+    kind: "class",
+    file: "src/exec/mod.rs",
+    line: 215,
+  },
   { name: "OwnerFilter", kind: "class", file: "src/filter/owner.rs", line: 6 },
   { name: "Check", kind: "enum", file: "src/filter/owner.rs", line: 12 },
   { name: "TimeFilter", kind: "enum", file: "src/filter/time.rs", line: 7 },
@@ -226,7 +238,10 @@ for (const expected of symbols) {
       s.range.startLine === expected.line,
   );
   if (match) symbolsFound++;
-  else missing.push(`symbol ${expected.kind} ${expected.name} (${expected.file}:${expected.line})`);
+  else
+    missing.push(
+      `symbol ${expected.kind} ${expected.name} (${expected.file}:${expected.line})`,
+    );
 }
 
 let resolutionsMatched = 0;
@@ -243,9 +258,15 @@ for (const expected of resolutions) {
     missing.push(`${label}: call site not found in index.calls`);
     continue;
   }
-  const evidenceOk = actual.evidence.some((e) => e.includes(expected.evidenceContains));
+  const evidenceOk = actual.evidence.some((e) =>
+    e.includes(expected.evidenceContains),
+  );
   if (expected.expectedKind === "unresolved") {
-    if (!actual.resolvedTargetId && actual.resolutionKind === "unresolved" && evidenceOk) {
+    if (
+      !actual.resolvedTargetId &&
+      actual.resolutionKind === "unresolved" &&
+      evidenceOk
+    ) {
       resolutionsMatched++;
     } else {
       missing.push(
@@ -254,7 +275,9 @@ for (const expected of resolutions) {
     }
     continue;
   }
-  const target = actual.resolvedTargetId ? symbolsById.get(actual.resolvedTargetId) : undefined;
+  const target = actual.resolvedTargetId
+    ? symbolsById.get(actual.resolvedTargetId)
+    : undefined;
   const kindOk = actual.resolutionKind === expected.expectedKind;
   const targetOk =
     !!target &&
@@ -286,4 +309,7 @@ const report = {
   resolutionsMatched,
   missing,
 };
-writeFileSync(join(outDir, "v1.8-rust-fd.json"), JSON.stringify(report, null, 2) + "\n");
+writeFileSync(
+  join(outDir, "v1.8-rust-fd.json"),
+  JSON.stringify(report, null, 2) + "\n",
+);

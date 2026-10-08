@@ -63,7 +63,9 @@ export function composeSiblings(
   /** Symbols already in the slice: the skeleton must not repeat them. */
   alreadyIncluded: ReadonlySet<string> = new Set(),
 ): CompositionCandidate[] {
-  const parent = target.parentId ? index.symbolById(target.parentId) : undefined;
+  const parent = target.parentId
+    ? index.symbolById(target.parentId)
+    : undefined;
   if (!parent || !TYPE_KINDS.has(parent.kind)) return [];
   const members = index
     .childrenOf(parent.id)
@@ -179,7 +181,8 @@ export function composeDependencyContext(
   let cursor = target.parentId ? index.symbolById(target.parentId) : undefined;
   while (!owner && cursor) {
     if (cursor.kind === "class") owner = cursor;
-    else cursor = cursor.parentId ? index.symbolById(cursor.parentId) : undefined;
+    else
+      cursor = cursor.parentId ? index.symbolById(cursor.parentId) : undefined;
   }
   if (!owner) return [];
 
@@ -307,7 +310,8 @@ export function composeJpaContext(
   let cursor = target.parentId ? index.symbolById(target.parentId) : undefined;
   while (!owner && cursor) {
     if (cursor.kind === "class") owner = cursor;
-    else cursor = cursor.parentId ? index.symbolById(cursor.parentId) : undefined;
+    else
+      cursor = cursor.parentId ? index.symbolById(cursor.parentId) : undefined;
   }
 
   const candidateIds = new Set([target.id, ...relatedIds]);

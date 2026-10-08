@@ -492,9 +492,7 @@ export function parseJava(filePath: string, source: string) {
   );
   for (const caller of callable) {
     const body = caller.body ?? "";
-    for (const match of body.matchAll(
-      /(?:(\w+)\.)?([A-Za-z_$][\w$]*)\s*\(/g,
-    )) {
+    for (const match of body.matchAll(/(?:(\w+)\.)?([A-Za-z_$][\w$]*)\s*\(/g)) {
       const calleeName = match[2];
       const offset = match.index ?? 0;
       const prefix = body.slice(Math.max(0, offset - 8), offset);

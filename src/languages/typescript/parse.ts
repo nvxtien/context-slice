@@ -846,7 +846,8 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
                 ? field(value, "property")
                 : undefined;
             const aliasOf =
-              object?.type === "identifier" && property?.type === "property_identifier"
+              object?.type === "identifier" &&
+              property?.type === "property_identifier"
                 ? `${object.text}.${property.text}`
                 : undefined;
             addSymbol(declarator, "variable", name, chain, {
@@ -884,7 +885,13 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
   try {
     walk(tree.rootNode, undefined, []);
   } catch {
-    return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
+    return {
+      symbols: [],
+      calls: [],
+      imports: [],
+      exports: [],
+      parseError: true,
+    };
   }
 
   if (moduleSymbol) {

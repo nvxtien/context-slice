@@ -16,15 +16,18 @@ const result = (value: unknown) => ({
 });
 
 function assertRevision(value: string): string {
-  if (value.startsWith("-"))
-    throw new Error(`Invalid git revision: ${value}`);
+  if (value.startsWith("-")) throw new Error(`Invalid git revision: ${value}`);
   return value;
 }
 
 export function gitDiffArgs(base?: string, head?: string) {
-  const revisions = base || head
-    ? [assertRevision(base ?? "HEAD"), ...(head ? [assertRevision(head)] : [])]
-    : ["HEAD"];
+  const revisions =
+    base || head
+      ? [
+          assertRevision(base ?? "HEAD"),
+          ...(head ? [assertRevision(head)] : []),
+        ]
+      : ["HEAD"];
   return [...revisions, "--"];
 }
 

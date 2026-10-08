@@ -27,36 +27,136 @@ type OracleSymbol = { name: string; kind: string; filePath: string };
 
 const oracleSymbols: OracleSymbol[] = [
   // Jsoup.java
-  { name: "Jsoup", kind: "class", filePath: "src/main/java/org/jsoup/Jsoup.java" },
-  { name: "Jsoup", kind: "constructor", filePath: "src/main/java/org/jsoup/Jsoup.java" },
-  { name: "parse", kind: "method", filePath: "src/main/java/org/jsoup/Jsoup.java" },
-  { name: "connect", kind: "method", filePath: "src/main/java/org/jsoup/Jsoup.java" },
-  { name: "newSession", kind: "method", filePath: "src/main/java/org/jsoup/Jsoup.java" },
-  { name: "isValid", kind: "method", filePath: "src/main/java/org/jsoup/Jsoup.java" },
+  {
+    name: "Jsoup",
+    kind: "class",
+    filePath: "src/main/java/org/jsoup/Jsoup.java",
+  },
+  {
+    name: "Jsoup",
+    kind: "constructor",
+    filePath: "src/main/java/org/jsoup/Jsoup.java",
+  },
+  {
+    name: "parse",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/Jsoup.java",
+  },
+  {
+    name: "connect",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/Jsoup.java",
+  },
+  {
+    name: "newSession",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/Jsoup.java",
+  },
+  {
+    name: "isValid",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/Jsoup.java",
+  },
   // Connection.java (>=32KB file; only indexed correctly after the chunked-parse fix)
-  { name: "Connection", kind: "interface", filePath: "src/main/java/org/jsoup/Connection.java" },
-  { name: "Method", kind: "enum", filePath: "src/main/java/org/jsoup/Connection.java" },
-  { name: "hasBody", kind: "field", filePath: "src/main/java/org/jsoup/Connection.java" },
-  { name: "Request", kind: "interface", filePath: "src/main/java/org/jsoup/Connection.java" },
-  { name: "Response", kind: "interface", filePath: "src/main/java/org/jsoup/Connection.java" },
-  { name: "KeyVal", kind: "interface", filePath: "src/main/java/org/jsoup/Connection.java" },
-  { name: "data", kind: "method", filePath: "src/main/java/org/jsoup/Connection.java" },
+  {
+    name: "Connection",
+    kind: "interface",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
+  {
+    name: "Method",
+    kind: "enum",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
+  {
+    name: "hasBody",
+    kind: "field",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
+  {
+    name: "Request",
+    kind: "interface",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
+  {
+    name: "Response",
+    kind: "interface",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
+  {
+    name: "KeyVal",
+    kind: "interface",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
+  {
+    name: "data",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/Connection.java",
+  },
   // nodes/Node.java (>=32KB file; only indexed correctly after the chunked-parse fix)
-  { name: "Node", kind: "class", filePath: "src/main/java/org/jsoup/nodes/Node.java" },
-  { name: "nodeName", kind: "method", filePath: "src/main/java/org/jsoup/nodes/Node.java" },
-  { name: "attr", kind: "method", filePath: "src/main/java/org/jsoup/nodes/Node.java" },
-  { name: "parentNode", kind: "field", filePath: "src/main/java/org/jsoup/nodes/Node.java" },
+  {
+    name: "Node",
+    kind: "class",
+    filePath: "src/main/java/org/jsoup/nodes/Node.java",
+  },
+  {
+    name: "nodeName",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/nodes/Node.java",
+  },
+  {
+    name: "attr",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/nodes/Node.java",
+  },
+  {
+    name: "parentNode",
+    kind: "field",
+    filePath: "src/main/java/org/jsoup/nodes/Node.java",
+  },
   // nodes/LeafNode.java
-  { name: "LeafNode", kind: "class", filePath: "src/main/java/org/jsoup/nodes/LeafNode.java" },
-  { name: "coreValue", kind: "method", filePath: "src/main/java/org/jsoup/nodes/LeafNode.java" },
+  {
+    name: "LeafNode",
+    kind: "class",
+    filePath: "src/main/java/org/jsoup/nodes/LeafNode.java",
+  },
+  {
+    name: "coreValue",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/nodes/LeafNode.java",
+  },
   // nodes/TextNode.java
-  { name: "TextNode", kind: "class", filePath: "src/main/java/org/jsoup/nodes/TextNode.java" },
-  { name: "TextNode", kind: "constructor", filePath: "src/main/java/org/jsoup/nodes/TextNode.java" },
-  { name: "text", kind: "method", filePath: "src/main/java/org/jsoup/nodes/TextNode.java" },
-  { name: "splitText", kind: "method", filePath: "src/main/java/org/jsoup/nodes/TextNode.java" },
+  {
+    name: "TextNode",
+    kind: "class",
+    filePath: "src/main/java/org/jsoup/nodes/TextNode.java",
+  },
+  {
+    name: "TextNode",
+    kind: "constructor",
+    filePath: "src/main/java/org/jsoup/nodes/TextNode.java",
+  },
+  {
+    name: "text",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/nodes/TextNode.java",
+  },
+  {
+    name: "splitText",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/nodes/TextNode.java",
+  },
   // select/Selector.java
-  { name: "Selector", kind: "class", filePath: "src/main/java/org/jsoup/select/Selector.java" },
-  { name: "select", kind: "method", filePath: "src/main/java/org/jsoup/select/Selector.java" },
+  {
+    name: "Selector",
+    kind: "class",
+    filePath: "src/main/java/org/jsoup/select/Selector.java",
+  },
+  {
+    name: "select",
+    kind: "method",
+    filePath: "src/main/java/org/jsoup/select/Selector.java",
+  },
 ];
 
 // Hand-verified call-resolution outcomes, by reading the real source and cross-checking
@@ -132,7 +232,7 @@ const oracleResolutions: OracleResolution[] = [
     file: "src/main/java/org/jsoup/helper/HttpConnection.java",
     line: 125,
     expectedKind: "static",
-    note: "validateMimeContentType(String) calls Validate.notEmptyParam(contentType, \"contentType\"); resolves cross-file to helper/Validate.java's single notEmptyParam(String,String)",
+    note: 'validateMimeContentType(String) calls Validate.notEmptyParam(contentType, "contentType"); resolves cross-file to helper/Validate.java\'s single notEmptyParam(String,String)',
   },
   {
     // Next line, same method: Validate.isFalse(cond, msg) -- Validate has 2 overloads named
@@ -158,7 +258,7 @@ const oracleResolutions: OracleResolution[] = [
     file: "src/main/java/org/jsoup/nodes/TextNode.java",
     line: 33,
     expectedKind: "static",
-    note: "text() calls StringUtil.normaliseWhitespace(getWholeText()); now resolves correctly now that declaredTypeOf() rejects the Java keyword \"return\" as a false declared-type match",
+    note: 'text() calls StringUtil.normaliseWhitespace(getWholeText()); now resolves correctly now that declaredTypeOf() rejects the Java keyword "return" as a false declared-type match',
   },
 ];
 
@@ -166,7 +266,8 @@ const repositories: Repository[] = JSON.parse(
   readFileSync(resolve(process.cwd(), "benchmarks/repositories.json"), "utf8"),
 );
 const repo = repositories.find((r) => r.id === "jsoup");
-if (!repo) throw new Error("jsoup entry missing from benchmarks/repositories.json");
+if (!repo)
+  throw new Error("jsoup entry missing from benchmarks/repositories.json");
 
 const root = resolve(process.cwd(), repo.source);
 const index = new ProjectIndex(root);
@@ -183,7 +284,10 @@ for (const expected of oracleSymbols) {
       s.filePath === expected.filePath,
   );
   if (match) symbolsFound++;
-  else missing.push(`symbol ${expected.kind} ${expected.name} (${expected.filePath})`);
+  else
+    missing.push(
+      `symbol ${expected.kind} ${expected.name} (${expected.filePath})`,
+    );
 }
 
 let resolutionsMatched = 0;

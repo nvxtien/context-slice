@@ -84,18 +84,16 @@ export const javaAdapter: LanguageAdapter = {
       const typed = receiverType
         ? candidates.filter(
             (candidate) =>
-              (candidate.parentId
-                ? byId.get(candidate.parentId)
-                : undefined)?.name === receiverType,
+              (candidate.parentId ? byId.get(candidate.parentId) : undefined)
+                ?.name === receiverType,
           )
         : [];
       const inherited =
         parent?.supertypes?.flatMap((supertype) =>
           candidates.filter(
             (candidate) =>
-              (candidate.parentId
-                ? byId.get(candidate.parentId)
-                : undefined)?.name === supertype,
+              (candidate.parentId ? byId.get(candidate.parentId) : undefined)
+                ?.name === supertype,
           ),
         ) ?? [];
       const narrowed = (items: SymbolRecord[]) =>
