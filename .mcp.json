@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "context-slice": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/src/server/mcp-server.js"],
+      "command": "npx",
+      "args": ["-y", "--package=context-slice@1.9.0", "context-slice", "mcp"],
       "env": {
         "CONTEXT_SLICE_ROOT": "${CLAUDE_PROJECT_DIR}"
       }
