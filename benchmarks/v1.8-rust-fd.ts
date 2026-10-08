@@ -3,15 +3,19 @@
 // benchmarks/checkouts/fd (commit 14dcd92fb76ca0ebc2e82671a275f67c790d25fc) during this task's
 // own execution — not copied from another repo's benchmark and not guessed from memory.
 //
-// Two scope notes, both intentional (see src/languages/rust/calls-resolve.ts):
+// One scope note, intentional (see src/languages/rust/calls-resolve.ts):
 // - filter/size.rs:61 `SizeFilter::Min(size)` is an enum tuple-variant constructor call. The
 //   Rust resolver deliberately leaves bare `Enum::Variant(..)` calls unresolved
 //   (`no-symbol:variant` evidence) because a variant is not a callable symbol in the index.
 //   This is the documented, correct behavior, not a miss.
-// - dir_entry.rs:87 `self.metadata()` inside `DirEntry::file_type()`: `DirEntry` has an inherent
-//   `metadata()` (line 91) AND an unrelated `impl Colorable for DirEntry` method also named
-//   `metadata()` (line 166). Two same-name candidates on the receiver type make this
-//   `ambiguous:2`, correctly left unresolved. Also a documented gap, not a bug.
+//
+// FIXED (was a KNOWN GAP): dir_entry.rs:87 `self.metadata()` inside `DirEntry::file_type()`.
+// `DirEntry` has an inherent `metadata()` (line 91) AND an unrelated `impl Colorable for
+// DirEntry` method also named `metadata()` (line 166). memberOf() used to report any 2+
+// same-named candidates on a type as unconditionally ambiguous, regardless of origin. Real
+// Rust always picks the inherent method over a trait method of the same name (inherent
+// methods are tried first in method resolution, no ambiguity exists), so memberOf() now
+// settles on the sole inherent candidate when exactly one exists among the collisions.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
@@ -108,9 +112,10 @@ const resolutions: OracleResolution[] = [
     file: "src/dir_entry.rs",
     line: 87,
     col: 51,
-    expectedKind: "unresolved",
-    evidenceContains: "ambiguous:2",
-    note: "self.metadata() inside file_type(): inherent metadata() vs impl Colorable for DirEntry's metadata() both named metadata, ambiguous",
+    expectedKind: "this-member",
+    evidenceContains: "inherent:unique",
+    expectedTarget: { file: "src/dir_entry.rs", line: 91 },
+    note: "self.metadata() inside file_type(): the inherent metadata() (line 91) now correctly wins over the unrelated impl Colorable for DirEntry's same-named method (line 166), matching Rust's own inherent-over-trait method resolution rule",
   },
   {
     calleeName: "stripped_path",

@@ -103,13 +103,22 @@ test("self.m(): unique method across several impl blocks and files, trait impl e
   );
 });
 
-test("self.m(): a trait impl and an inherent impl both define m => ambiguous, unresolved", () => {
+test("self.m(): an inherent impl and a trait impl both define m => the inherent one wins", () => {
+  // Rust's own method-resolution rule: inherent methods are tried first and always shadow a
+  // trait method of the same name, even when the call site is itself inside the trait impl.
   withRepo(
     {
       "src/lib.rs":
         "trait Tr { fn m(&self); }\nstruct A;\nimpl A { fn m(&self) {} }\nimpl Tr for A { fn m(&self) {} fn c(&self) { self.m(); } }\n",
     },
-    (dir) => unresolved(one(dir, "m", "A::c"), "ambiguous:2"),
+    (dir) => {
+      const e = one(dir, "m", "A::c");
+      assert.deepEqual(
+        [e.target, e.conf, e.kind],
+        ["A::m", "exact", "this-member"],
+      );
+      assert.ok(e.ev[0].startsWith("inherent:"));
+    },
   );
 });
 

@@ -1096,12 +1096,25 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
           : `inherent:unique target ${decl.name}::${name}`,
       );
     }
-    if (cands.length > 1)
+    if (cands.length > 1) {
+      // An inherent method always shadows any trait-impl method of the same name (Rust's own
+      // method-resolution rule: inherent methods are tried first, unconditionally), so a type
+      // with one inherent `metadata()` and an unrelated `impl SomeTrait { fn metadata() }` is
+      // never actually ambiguous in real Rust -- only 2+ candidates from trait impls are.
+      const inherent = cands.filter((c) => !c.impl.metadata?.implTrait);
+      if (inherent.length === 1)
+        return settle(
+          call,
+          inherent[0].sym,
+          kind,
+          `inherent:unique target ${decl.name}::${name} (shadows ${cands.length - 1} same-named trait impl method(s))`,
+        );
       return ambiguous(
         call,
         cands.length,
         `candidates for ${decl.name}::${name}`,
       );
+    }
     const traits = new Set(traitsByType.get(decl.id) ?? []);
     if (extraTrait) traits.add(extraTrait);
     const viaTrait = [...traits].filter((t) => traitMethods(t, name).length);
