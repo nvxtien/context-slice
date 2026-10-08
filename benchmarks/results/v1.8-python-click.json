@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-10-08T10:08:07.349Z",
+  "result": {
+    "repository": "click",
+    "symbolsTotal": 32,
+    "symbolsFound": 32,
+    "callsTotal": 8,
+    "callsFound": 8,
+    "resolutionsTotal": 8,
+    "resolutionsFound": 8,
+    "missing": []
+  }
+}

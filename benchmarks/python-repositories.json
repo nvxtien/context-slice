@@ -19,6 +19,16 @@
     "kind": "web-framework"
   },
   {
+    "id": "click",
+    "scale": "medium",
+    "url": "https://github.com/pallets/click.git",
+    "commit": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+    "sparse": ["src/click", "tests"],
+    "source": "benchmarks/checkouts/click",
+    "scope": "src/click and tests (CLI framework, decorator-heavy)",
+    "kind": "library"
+  },
+  {
     "id": "django-orm",
     "scale": "large",
     "url": "https://github.com/django/django.git",
