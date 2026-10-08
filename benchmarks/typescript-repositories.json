@@ -33,5 +33,15 @@
     "source": "benchmarks/checkouts/excalidraw",
     "scope": "packages/excalidraw, common, element, math, utils (React/TSX monorepo)",
     "kind": "react"
+  },
+  {
+    "id": "zod-v3",
+    "scale": "medium",
+    "url": "https://github.com/colinhacks/zod.git",
+    "commit": "0b216ef674e297ebe41d8bf902262e56f8755822",
+    "sparse": ["packages/zod/src/v3"],
+    "source": "benchmarks/checkouts/zod-v3",
+    "scope": "packages/zod/src/v3 (stable v3 schema-validation implementation, ~89 files)",
+    "kind": "library"
   }
 ]

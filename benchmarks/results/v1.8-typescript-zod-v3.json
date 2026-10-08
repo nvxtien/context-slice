@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-10-08T10:06:07.573Z",
+  "results": {
+    "zod-v3": {
+      "symbolsTotal": 26,
+      "symbolsFound": 26,
+      "importsTotal": 4,
+      "importsFound": 4,
+      "callsTotal": 11,
+      "callsFound": 11,
+      "missing": []
+    }
+  }
+}
