@@ -4,7 +4,7 @@
     "context-slice": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "context-slice@1.8.2", "mcp"]
+      "args": ["-y", "context-slice@1.9.0", "mcp"]
     }
   }
 }
