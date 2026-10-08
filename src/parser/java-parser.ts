@@ -462,7 +462,9 @@ export function parseJava(filePath: string, source: string) {
   let parseError = false;
   let tree: Parser.Tree | undefined;
   try {
-    tree = parser.parse(source);
+    // The node binding rejects inputs of 32KB or more, so always feed it in small chunks,
+    // matching every other adapter in this project (rust, typescript, python, go).
+    tree = parser.parse((index: number) => source.slice(index, index + 4_096));
   } catch {
     parseError = true;
   }
