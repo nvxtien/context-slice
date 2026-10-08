@@ -135,22 +135,20 @@ universal latency guarantee.
 
 ## Limitations
 
-- Java, TypeScript, TSX, JavaScript, Python, Rust and Go only; no other languages, embeddings, vector database, compiler, tsserver, type checker, rust-analyzer, rustc, or LSP integration.
-- Python is dynamic: receivers built by factories, `getattr`, dynamic imports and monkey patching stay unresolved rather than guessed.
-- Rust macro-generated semantics and some trait dispatch remain unresolved; `rust-analyzer` and `rustc` are not used.
-- TypeScript resolution is structural. Receivers whose type needs inference, CommonJS `require`, and imports that leave the checked-out source stay unresolved rather than guessed.
-- JavaScript CommonJS (`require()`/`module.exports`) is not recognized as imports/exports; only ES `import`/`export` syntax is supported. See [benchmarks/results/v1.7-javascript-support.md](benchmarks/results/v1.7-javascript-support.md).
-- Go struct-embedding promotion lookup remains same-package. See [benchmarks/results/v1.6-go-support.md](benchmarks/results/v1.6-go-support.md).
-- Target selection from task text is heuristic and may choose a nearby but not ideal symbol. Naming the method in the task gives a better slice.
-- Tree-sitter analysis cannot prove runtime dispatch, framework-generated implementations, or all generic/fluent call behavior.
-- Token counts are estimates, not model-provider usage telemetry.
-- Sibling composition uses syntactic evidence (`this.field` and Java field names). State shared through an intermediate object is not detected.
-- The local index is an aid to request context, not a substitute for code review or tests.
-- Metadata is the fast freshness path. Dirty notifications verify file content hashes; if an external tool changes a file without a watcher event, run `context-slice mark-dirty [file]` before requesting context.
-- The Claude Code marketplace plugin needs npm registry access on first use to install `context-slice@1.9.0` and its native dependencies; offline use works only after the npm cache is populated.
+- Java, TypeScript, TSX, JavaScript, Python, Rust and Go only; this is not a semantic search or build tool: it does not use vector embeddings, a vector database, a compiler, a type checker, or LSP services such as `tsserver`, `rust-analyzer`, or `rustc`.
+- The index is syntax-based, so runtime dispatch, framework-generated implementations, and some generic or fluent call chains may remain unresolved.
+- Python analysis is AST-based and conservative: when a receiver or target cannot be determined from syntax alone—such as with factory-created receivers, `getattr`, dynamic imports, or monkey patching—the edge remains unresolved rather than guessed.
+- Rust analysis is syntax-based and conservative: macro-expanded semantics and trait dispatch that require expansion or type checking may remain unresolved; `rust-analyzer` and `rustc` are not required.
+- TypeScript resolution uses declared and imported structure: when a receiver type cannot be determined from those facts, or an import leaves the checkout, the edge remains unresolved rather than guessed.
+- JavaScript module analysis currently follows ES module syntax. CommonJS `require()` and `module.exports` are parsed safely but are not yet represented as import/export edges. See [benchmarks/results/v1.7-javascript-support.md](benchmarks/results/v1.7-javascript-support.md).
+- Go analysis resolves struct-embedding promotion when the embedded type and methods are visible in the same package directory. Cross-package promoted methods and constructor-returned interface implementations that require deeper type-flow inference may remain unresolved. See [benchmarks/results/v1.6-go-support.md](benchmarks/results/v1.6-go-support.md).
+- Task-to-symbol selection is heuristic; naming the method or symbol explicitly gives a more precise slice.
+- Sibling composition follows direct syntactic evidence (`this.field` and Java field names); state shared through an intermediate object is not included.
+- Token counts are estimates for budget enforcement, not model-provider usage telemetry.
+- The local index provides focused request context; verify behavior with normal code review and tests.
+- Metadata is the fast freshness path. Watcher or `mark-dirty` notifications verify file content hashes when source changes need confirmation.
 - The Claude plugin is validated with Claude Code 2.1.285 on macOS arm64. Other Claude Code releases and plugin hosts may differ in MCP startup behavior.
-- Validated on macOS arm64 (Node 20.19.5 and 22.12.0). Linux and Windows are unverified.
-- Usability evidence comes from a scripted self clean-room trial; no external developer trial has been run yet.
+- Validated on macOS arm64 (Node 20.19.5 and 22.12.0); Linux and Windows use a directory-tree watcher fallback but are not CI-validated.
 
 ## Development
 
