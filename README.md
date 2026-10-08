@@ -57,17 +57,6 @@ context-slice init
 context-slice preview "explain the payment retry flow" --explain
 ```
 
-For a new checkout, see [Installation](#installation) for the local build and
-MCP setup.
-
-## Why use it
-
-- Whole files contain too much unrelated code.
-- Task names are often enough to locate the relevant symbol, callers, and callees.
-- Strict budgets make omissions visible instead of silently overflowing context.
-- Unresolved dynamic dispatch stays unresolved rather than being guessed.
-- The target repository is never edited; only `.context-slice/` is written locally.
-
 ## Supported languages
 
 | Language   | Extensions                     | Notes                                                                                                                                                                             |
@@ -82,43 +71,7 @@ MCP setup.
 
 One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md), [docs/python-support.md](docs/python-support.md) and [docs/rust-support.md](docs/rust-support.md) for what each language's resolution does and does not cover.
 
-## Scope
-
-- Tree-sitter structural and semantic analysis; no compiler, JDT, tsserver, Pyright, mypy, or LSP dependency, and no code is executed.
-- A local stdio MCP server and a local SQLite cache under `.context-slice/`.
-- Integrates with Codex and Claude Code through one stable command: `context-slice mcp`.
-- Validated on macOS arm64 with Node 20 and Node 22. Other platforms are expected to work but are unverified.
-
 ## Installation
-
-### Codex plugin (GitHub marketplace)
-
-This repository includes a portable Codex plugin manifest and a separate
-Codex marketplace entry backed by the published npm runtime package. Add the
-marketplace and install `context-slice` from `/plugins`:
-
-```sh
-codex plugin marketplace add nvxtien/context-slice
-```
-
-Restart Codex after changing the plugin or marketplace files so it refreshes
-the local marketplace snapshot.
-
-### Claude Code plugin (GitHub marketplace)
-
-This repository is also a Claude Code plugin. The GitHub marketplace install is
-the normal path:
-
-```text
-/plugin marketplace add nvxtien/context-slice
-/plugin install context-slice@context-slice-marketplace
-```
-
-The plugin's `.mcp.json` starts npm from `/tmp` to avoid a Claude plugin
-working-directory collision with the package name. It targets
-`${CLAUDE_PROJECT_DIR}`, not the plugin repository itself. If npm access is
-blocked, install the package first in a trusted environment or use the local
-development workflow below.
 
 ### Local development
 
@@ -130,37 +83,27 @@ npm run build
 npm link
 ```
 
-### Tarball validation
+### npm package
 
-Build and install the release tarball from a checkout (`npm ci` is required
-because `npm pack` compiles TypeScript first):
-
-```sh
-npm ci
-npm pack
-npm install -g ./context-slice-1.9.0.tgz
-context-slice --version
-```
-
-Node.js 20 or newer is required. `npm install` downloads the native `better-sqlite3` and `tree-sitter` builds for your platform, so it needs registry access.
-
-The isolated packaging smoke test uses a temporary npm prefix and does not depend on `npm link`:
-
-```sh
-npm run benchmark:v08
-```
-
-Registry installation and `npx` execution are supported after the package is
-published:
+Node.js 20 or newer is required. Install the published package with:
 
 ```sh
 npm install -g context-slice@1.9.0
 context-slice --version
 ```
 
+For a local tarball smoke test:
+
+```sh
+npm pack
+npm install -g ./context-slice-1.9.0.tgz
+```
+
+For package/release validation, run `npm run benchmark:v08`.
+
 ### CLI examples
 
-Then, in a Java repository:
+In any supported repository:
 
 ```sh
 cd /absolute/path/to/my-java-project
@@ -168,37 +111,12 @@ context-slice init
 context-slice preview "explain payment retry flow" --explain
 ```
 
-`init` creates `.context-slice/index.sqlite` automatically. Repository discovery uses `--repo` when given, otherwise the nearest Git root, otherwise the working directory.
+`init` creates `.context-slice/index.sqlite`. Repository discovery uses
+`--repo` when given, otherwise the nearest Git root, otherwise the working
+directory.
 
-In a TypeScript or TSX repository the workflow is identical:
-
-```sh
-cd /absolute/path/to/my-typescript-project
-context-slice init
-context-slice preview "explain the order create flow" --explain
-```
-
-```text
-Target: OrderService.create
-Context: 139/1200 tokens; 5 items included
-
-Included:
-- task target: OrderService.create — Selected because the task names create.
-- direct caller: createOrder — Direct caller of OrderService.create.
-- direct callee: SqlOrderRepository.save — Direct callee of OrderService.create.
-```
-
-In a Rust repository the workflow is identical:
-
-```sh
-cd /absolute/path/to/my-rust-project
-context-slice init
-context-slice preview "explain the retry loop" --explain
-```
-
-`status` reports the file count per extension, so a mixed repository shows `.java`, `.ts`, `.tsx` and `.rs` separately.
-
-Use `context-slice --version` and `context-slice --help` to inspect the installed package without relying on the source checkout.
+Use `context-slice --version` and `context-slice --help` to inspect the
+installed package.
 
 ### Cache, cleanup, and uninstall
 
@@ -234,7 +152,7 @@ Use `--repo /absolute/path` to select a repository. `--json` provides a stable a
 
 Exit codes are `0` for success, `2` for user or configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
 
-## Example: inspectable context reduction
+## Example
 
 ```text
 Target: demo.PaymentService.retryPayment
@@ -246,85 +164,47 @@ Included:
 - direct callee: demo.PaymentService.audit — Direct callee of demo.PaymentService.retryPayment.
 ```
 
-ContextSlice may also include sibling members that share state or local semantics with the target — a field it writes, the getter that exposes it, the constructor that supplies a dependency — plus a declaration-line skeleton of the enclosing type. It does not expand to the whole class or file. See [docs/context-composition.md](docs/context-composition.md).
+ContextSlice may include relevant sibling members and a compact enclosing-type
+skeleton. See [docs/context-composition.md](docs/context-composition.md).
 
 The target body is always first. Related symbols use compact skeletons. The command never silently exceeds its budget; skipped candidates are reported as `context budget`, and unresolved calls remain unresolved rather than being guessed.
 
-## Codex setup
+## MCP verification
 
-After installing ContextSlice, register its one stable MCP command for a Java repository:
-
-```sh
-codex mcp add context-slice -- context-slice mcp --repo /absolute/path/to/my-java-project
-codex mcp list
-```
-
-Codex also supports project-scoped configuration in `.codex/config.toml` for trusted projects. See the [official OpenAI MCP documentation](https://developers.openai.com/es-419/docs/extend/mcp?surface=cli) for the current Codex CLI and configuration options.
-
-Suggested assistant instruction:
-
-```text
-For Java implementation or explanation tasks, request context.preview with the task first.
-Use the target, inclusion explanations, omissions, and unresolved calls to decide whether to
-request context.symbol, context.callers, or context.slice. Do not assume unresolved runtime
-dispatch has a concrete implementation.
-```
-
-## Claude Code setup
-
-The GitHub plugin configures MCP automatically. Verify the connection with:
+The marketplace plugins configure MCP automatically. Verify Claude with:
 
 ```sh
 claude mcp list
 ```
 
 The expected result is `plugin:context-slice:context-slice - ✔ Connected`.
-ContextSlice itself speaks standard stdio MCP; this repository does not claim
-to have exercised every Claude Code release.
+Codex can verify the same server with `codex mcp list`.
 
 ## How it works
 
-1. Discover a Java repository and scan source while ignoring common generated/build directories.
+1. Discover a repository and scan supported source while ignoring common generated/build directories.
 2. Store symbols, call edges, hashes, schema version, and refresh time in a local SQLite cache.
-3. Refresh before preview or MCP tool execution so changed Java files are not silently served stale.
+3. Refresh before preview or MCP tool execution so changed source files are not silently served stale.
 4. Select a target from task text, then include the target body plus ranked direct callers/callees until the strict token budget is full.
 
 Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `context.preview`, `context.slice`, and `context.diff`. MCP stdout contains protocol messages only; diagnostics must not corrupt stdio framing.
 
-## Trust and explainability
+## Behavior
 
-ContextSlice is deliberately conservative:
-
-- Context previews use only task text, repository source, index data, and configuration. They do not read benchmark answers, required facts, expected symbols, or manual baselines.
-- Call resolution distinguishes exact, probable, and unresolved edges. It does not invent runtime dispatch targets.
-- `CURRENT`, `STALE`, `REFRESHING`, and `ERROR` are the workflow state vocabulary. The CLI exposes the observable cache state; preview/MCP refresh before serving context.
-- Preview, status, doctor, and MCP lookup operations are read-only except for the local cache.
+- Call resolution distinguishes exact, probable, and unresolved edges; it does not invent runtime dispatch targets.
+- Preview, status, doctor, and MCP lookup operations are read-only except for the local `.context-slice/` cache.
+- The target repository is not edited.
 
 ## Benchmarks
 
-Run the workflow benchmark locally:
+Run benchmarks locally:
 
 ```sh
 npm run benchmark:v07
 ```
 
-It writes [JSON](benchmarks/results/v0.7-developer-workflow.json) and [Markdown](benchmarks/results/v0.7-developer-workflow.md) reports with fresh init, cold index, first/warm preview, one-file refresh, and first/subsequent MCP query timings. Timings apply only to the recorded local fixture environment. Codex/Claude telemetry is optional and is reported as unavailable when the runtime provides none.
-
-`npm run benchmark:v03` through `benchmark:v06` first run `npm run benchmark:checkouts`, which fetches the pinned benchmark repositories from `benchmarks/repositories.json` (network required; about 120 MB).
-
-Run `npm run benchmark:v08` for the tarball packaging, isolated installation, upgrade, uninstall, MCP, path-with-spaces, nested-cwd, publish-dry-run, and clean-room self-trial report in [JSON](benchmarks/results/v0.8-packaging-installation.json) and [Markdown](benchmarks/results/v0.8-packaging-installation.md). External developer participation is explicitly deferred; this is not a multi-user study.
-
-Earlier semantic/context measurements remain available:
-
-In the 15-task Java benchmark across three pinned Java repositories, ContextSlice reduced median context size by 94.55% while preserving 100% required-fact recall and 100% retrieval recall. In the separate 15-task TypeScript benchmark across three pinned TypeScript/TSX repositories, it reduced median context size by 83.32% with 95.56% required-fact recall and 100% retrieval recall. Context sizes are deterministic estimates from the built-in estimator, not assistant telemetry, so these are estimated token reductions rather than observed input token usage. The two benchmarks use different repositories and tasks and are not comparable to each other.
-
-Run the TypeScript benchmark with `npm run benchmark:v11`; its report is [v1.1 TypeScript support](benchmarks/results/v1.1-typescript-support.md).
-
-Rust support is measured separately across three pinned repositories (walkdir, mini-redis, ripgrep's `crates/ignore`). Module-path assignment, `use` resolution and re-export resolution were measured on real repositories (module resolution 64-100% depending on crate layout, anchored `use` resolution 100%, re-export resolution 100%; see [v1.5 Phase 1](benchmarks/results/v1.5-phase1-rust-real-repositories.md)). In the 15-task Rust benchmark across the same three repositories, ContextSlice reduced median context size by 93.52% while preserving 100% required-fact recall and 100% retrieval recall, with 0% whole-file fallback; see [v1.5 Phase 3](benchmarks/results/v1.5-phase3-rust-tasks.md). Rust resolution is static analysis, Tree-sitter-first: there is no rust-analyzer or rustc dependency, macro-generated semantics may remain unresolved, and trait dispatch may remain conservative (structural evidence only).
-
-- [v0.6 developer context efficiency](benchmarks/results/v0.6-developer-context-efficiency.md) compares auditable manual whole-file baselines with ContextSlice on pinned Java repositories. Token counts are deterministic estimates unless telemetry is explicitly available.
-- [v0.5 semantic call resolution](benchmarks/results/v0.5-semantic-call-resolution.md) documents declared versus runtime target limitations.
-- [v0.4 symbol index hardening](benchmarks/results/v0.4-symbol-index-hardening.md) documents stable symbol identity and lookup behavior.
+Reports are written under `benchmarks/results/`. Packaging validation is
+available with `npm run benchmark:v08`.
 
 ## Limitations
 
@@ -352,5 +232,3 @@ npm run build
 npm test
 npm run benchmark:v07
 ```
-
-`npm run release:rc` performs the v0.9 clean-room release-candidate validation: fresh clone, `npm ci`, build, tests, regressions, `npm pack`, and an isolated install with a temporary `HOME` and npm cache against a freshly cloned Java repository. See [docs/release-readiness-v0.9.md](docs/release-readiness-v0.9.md) and [CHANGELOG.md](CHANGELOG.md).
