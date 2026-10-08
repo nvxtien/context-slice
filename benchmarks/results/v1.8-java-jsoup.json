@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-10-08T10:11:12.333Z",
+  "results": {
+    "jsoup": {
+      "symbolsTotal": 25,
+      "symbolsFound": 25,
+      "resolutionsTotal": 8,
+      "resolutionsMatched": 8,
+      "missing": []
+    }
+  }
+}

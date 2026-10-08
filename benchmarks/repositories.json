@@ -16,6 +16,14 @@
     "scope": "src/main/java and src/test/java"
   },
   {
+    "id": "jsoup",
+    "scale": "medium",
+    "url": "https://github.com/jhy/jsoup.git",
+    "commit": "088614f4a1454232a1f03c63b7f80742f1f2a854",
+    "source": "benchmarks/checkouts/jsoup",
+    "scope": "src/main/java and src/test/java"
+  },
+  {
     "id": "keycloak-services",
     "scale": "large",
     "url": "https://github.com/keycloak/keycloak.git",

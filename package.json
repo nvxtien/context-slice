@@ -57,7 +57,8 @@
     "benchmark:v18-typescript": "npm run benchmark:checkouts && tsx benchmarks/v1.8-typescript-zod-v3.ts",
     "benchmark:v18-go": "npm run benchmark:checkouts && tsx benchmarks/v1.8-go-gorilla-mux.ts",
     "benchmark:v18-python": "npm run benchmark:checkouts && tsx benchmarks/v1.8-python-click.ts",
-    "benchmark:v18-rust": "npm run benchmark:checkouts && tsx benchmarks/v1.8-rust-fd.ts"
+    "benchmark:v18-rust": "npm run benchmark:checkouts && tsx benchmarks/v1.8-rust-fd.ts",
+    "benchmark:v18-java": "npm run benchmark:checkouts && tsx benchmarks/v1.8-java-jsoup.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
