@@ -831,6 +831,21 @@ test("go.work: an import matching a go.mod directory NOT listed in 'use' stays u
   rmSync(root, { recursive: true, force: true });
 });
 
+test("go.work: a module path that is a prefix of another module's path does not steal its import", () => {
+  const { root, index } = indexedGoProject({
+    "go.work": `go 1.21\n\nuse (\n\t./foo\n\t./foobar\n)\n`,
+    "foo/go.mod": `module example.com/foo\n\ngo 1.21\n`,
+    "foo/caller/caller.go": `package caller\n\nimport "example.com/foo/bar/pkg"\n\nfunc Run() {\n\tpkg.DoThing()\n}\n`,
+    "foobar/go.mod": `module example.com/foo/bar\n\ngo 1.21\n`,
+    "foobar/pkg/thing.go": `package pkg\n\nfunc DoThing() {}\n`,
+  });
+  const doThing = index.symbols.find((s) => s.name === "DoThing")!;
+  const call = index.calls.find((c) => c.calleeName === "DoThing")!;
+  assert.equal(call.resolvedTargetId, doThing.id);
+  assert.equal(call.resolutionKind, "imported");
+  rmSync(root, { recursive: true, force: true });
+});
+
 test("without a go.work file, single-module go.mod resolution still works (no regression)", () => {
   const { root, index } = indexedGoProject({
     "go.mod": `module example.com/proj\n\ngo 1.21\n`,

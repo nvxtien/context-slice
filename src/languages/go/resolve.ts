@@ -258,7 +258,12 @@ export function resolveGoCalls(context: ResolveContext): void {
     list.push(symbol);
     byDirectory.set(dir, list);
   }
-  const modules = discoverModules(context.root);
+  // Longest path first: a workspace can legally have one module's path be a prefix of
+  // another's (e.g. "example.com/foo" and "example.com/foo/bar"), and only the most
+  // specific match is ever correct for a given import.
+  const modules = discoverModules(context.root).sort(
+    (a, b) => b.path.length - a.path.length,
+  );
 
   const importsByFile = new Map<string, ImportRecord[]>();
   for (const record of context.imports) {
