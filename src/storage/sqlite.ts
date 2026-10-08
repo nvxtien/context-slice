@@ -13,11 +13,12 @@ import { WorkflowError } from "../workflow/errors.js";
 // Bump whenever any language adapter's parse OR resolve output changes: unchanged files and their cached (resolved)
 // call edges are otherwise reused from cache. Rust parse and resolve output is guarded by tests/rust-parse-snapshot.test.ts,
 // which refuses to regenerate its snapshot for changed output without a bump here.
-export const INDEX_VERSION = "1.12.0";
+export const INDEX_VERSION = "1.13.0";
 
 export interface IndexedFileRecord {
   hash: string;
   language: LanguageId;
+  parseError: boolean;
 }
 
 const SCHEMA = `
@@ -83,13 +84,18 @@ export class IndexStorage {
   load() {
     const files = new Map<string, IndexedFileRecord>();
     for (const row of this.db
-      .prepare("SELECT path, content_hash, language FROM files")
+      .prepare("SELECT path, content_hash, language, parse_error FROM files")
       .all() as Array<{
       path: string;
       content_hash: string;
       language: string;
+      parse_error: number;
     }>)
-      files.set(row.path, { hash: row.content_hash, language: row.language });
+      files.set(row.path, {
+        hash: row.content_hash,
+        language: row.language,
+        parseError: row.parse_error !== 0,
+      });
     const rows = <T>(table: string) =>
       (
         this.db.prepare(`SELECT payload FROM ${table}`).all() as Array<{
@@ -163,11 +169,17 @@ export class IndexStorage {
         this.db.prepare("DELETE FROM exports").run();
       }
       const fileStatement = this.db.prepare(
-        "INSERT OR REPLACE INTO files(path, content_hash, language, parse_error, indexing_version) VALUES (?, ?, ?, 0, ?)",
+        "INSERT OR REPLACE INTO files(path, content_hash, language, parse_error, indexing_version) VALUES (?, ?, ?, ?, ?)",
       );
       for (const [path, record] of files)
         if (!incremental || changed.has(path))
-          fileStatement.run(path, record.hash, record.language, INDEX_VERSION);
+          fileStatement.run(
+            path,
+            record.hash,
+            record.language,
+            record.parseError ? 1 : 0,
+            INDEX_VERSION,
+          );
       const symbolStatement = this.db.prepare(
         "INSERT INTO symbols(id, file_path, language, payload) VALUES (?, ?, ?, ?)",
       );

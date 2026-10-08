@@ -28,7 +28,7 @@ export interface PreviewOptions {
 }
 
 export interface PreviewItem {
-  symbolId: string;
+  symbolId?: string;
   symbol: string;
   filePath: string;
   reason: PreviewReason;
@@ -232,26 +232,27 @@ export function buildPreview(
   };
   let estimatedTokens = 0;
   const add = (
-    symbol: SymbolRecord,
+    symbol: SymbolRecord | undefined,
     reason: PreviewReason,
     rendered: string,
     explanation: string,
     extra: Pick<PreviewItem, "evidence" | "score" | "confidence"> = {},
+    label?: string,
   ) => {
     const tokens = estimateTokens(rendered);
     if (estimatedTokens + tokens > budget) {
       omitted.push({
-        symbolId: symbol.id,
-        symbol: symbol.qualifiedName ?? symbol.name,
+        symbolId: symbol?.id,
+        symbol: label ?? symbol?.qualifiedName ?? symbol?.name ?? explanation,
         reason: "context budget",
         estimatedTokens: tokens,
       });
       return;
     }
     included.push({
-      symbolId: symbol.id,
-      symbol: symbol.qualifiedName ?? symbol.name,
-      filePath: symbol.filePath,
+      symbolId: symbol?.id,
+      symbol: label ?? symbol?.qualifiedName ?? symbol?.name ?? explanation,
+      filePath: symbol?.filePath ?? target.filePath,
       reason,
       explanation,
       estimatedTokens: tokens,
@@ -360,13 +361,14 @@ export function buildPreview(
     if (candidate.symbol) includedIds.add(candidate.symbol.id);
     compositionTokens += candidate.estimatedTokens;
     add(
-      candidate.symbol ?? target,
+      candidate.symbol,
       candidate.reason,
       candidate.rendered,
       candidate.evidence.join("; "),
       {
         evidence: candidate.evidence,
       },
+      candidate.label,
     );
   }
 

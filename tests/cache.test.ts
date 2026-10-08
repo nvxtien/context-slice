@@ -37,6 +37,26 @@ test("cold cache, warm cache, and updating a single file", () => {
   assert.equal(third.cacheHits, 3);
 });
 
+test("cached parse errors remain visible and symbol updates count changed files only", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-summary-"));
+  writeFileSync(join(root, "broken.ts"), "export function broken( {\n");
+  writeFileSync(join(root, "stable.ts"), "export function stable() {}\n");
+
+  const first = new ProjectIndex(root).rebuild();
+  assert.equal(first.parseErrors, 1);
+  assert.equal(first.symbolsUpdated, 1);
+
+  const second = new ProjectIndex(root).rebuild();
+  assert.equal(second.parseErrors, 1);
+  assert.equal(second.symbolsUpdated, 0);
+
+  writeFileSync(join(root, "stable.ts"), "export function changed() {}\n");
+  const third = new ProjectIndex(root).rebuild();
+  assert.equal(third.filesParsed, 1);
+  assert.equal(third.symbolsUpdated, 1);
+  assert.equal(third.parseErrors, 1);
+});
+
 test("freshness-gated refresh skips unchanged files and notices add/change/delete", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-freshness-"));
   const file = join(root, "main.ts");

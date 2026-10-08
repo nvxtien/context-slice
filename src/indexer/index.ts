@@ -286,15 +286,20 @@ export class ProjectIndex {
     const previousImports = previousByFile(previous.imports);
     const previousExports = previousByFile(previous.exports);
     let parseErrors = 0;
+    let symbolsUpdated = 0;
+    const sourceCache = new Map<string, string>();
     for (const file of files) {
       const filePath = relative(this.root, file);
       const adapter = adapterFor(filePath);
       if (!adapter) continue;
       const source = readFileSync(file, "utf8");
+      sourceCache.set(filePath, source);
       const hash = createHash("sha256").update(source).digest("hex");
-      this.hashes.set(filePath, { hash, language: adapter.id });
       let fileSymbols: SymbolRecord[];
-      if (previous.files.get(filePath)?.hash === hash) {
+      const previousFile = previous.files.get(filePath);
+      if (previousFile?.hash === hash) {
+        this.hashes.set(filePath, previousFile);
+        if (previousFile.parseError) parseErrors++;
         fileSymbols = previousSymbols.get(filePath) ?? [];
         this.symbols.push(...fileSymbols);
         this.calls.push(...(previousCalls.get(filePath) ?? []));
@@ -310,6 +315,12 @@ export class ProjectIndex {
         this.imports.push(...parsed.imports);
         this.exports.push(...parsed.exports);
         if (parsed.parseError) parseErrors++;
+        symbolsUpdated += parsed.symbols.length;
+        this.hashes.set(filePath, {
+          hash,
+          language: adapter.id,
+          parseError: parsed.parseError,
+        });
         filesParsed++;
       }
       if (adapter.id === "java") {
@@ -345,7 +356,7 @@ export class ProjectIndex {
         exports: this.exports.filter(
           (record) => record.language === adapter.id,
         ),
-        sourceOf: (symbol) => this.sourceFor(symbol),
+        sourceOf: (symbol) => this.sourceFor(symbol, sourceCache),
       };
       if (context.symbols.length) adapter.resolveCalls(context);
     }
@@ -369,7 +380,7 @@ export class ProjectIndex {
       filesByExtension: counts.byExtension,
       filesByLanguage: counts.byLanguage,
       symbols: this.symbols.length,
-      symbolsUpdated: this.symbols.length,
+      symbolsUpdated,
       calls: this.calls.length,
       imports: this.imports.length,
       exports: this.exports.length,
@@ -563,7 +574,7 @@ export class ProjectIndex {
       resolutionKindCounts,
     };
   }
-  sourceFor(symbol: SymbolRecord) {
+  sourceFor(symbol: SymbolRecord, sourceCache?: Map<string, string>) {
     const full = resolve(this.root, symbol.filePath);
     const fromRoot = relative(this.root, full);
     if (
@@ -576,6 +587,8 @@ export class ProjectIndex {
         `Path escapes repository root: ${symbol.filePath}`,
         "Pass a symbol whose filePath resolves inside the indexed repository root.",
       );
+    const cached = sourceCache?.get(symbol.filePath);
+    if (cached !== undefined) return cached;
     return readFileSync(full, "utf8");
   }
 }

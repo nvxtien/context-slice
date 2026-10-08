@@ -77,6 +77,11 @@ test("buildPreview surfaces the dependency line end to end", () => {
   assert.ok(
     preview.included.some((item) => item.reason === "enterprise relation"),
   );
+  assert.equal(
+    preview.included.filter((item) => item.symbolId === preview.target.id)
+      .length,
+    1,
+  );
 });
 
 function rustFixture() {
