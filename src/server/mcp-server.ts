@@ -14,8 +14,17 @@ const result = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
 });
 
+function assertRevision(value: string): string {
+  if (value.startsWith("-"))
+    throw new Error(`Invalid git revision: ${value}`);
+  return value;
+}
+
 export function gitDiffArgs(base?: string, head?: string) {
-  return base || head ? [base ?? "HEAD", ...(head ? [head] : [])] : ["HEAD"];
+  const revisions = base || head
+    ? [assertRevision(base ?? "HEAD"), ...(head ? [assertRevision(head)] : [])]
+    : ["HEAD"];
+  return [...revisions, "--"];
 }
 
 export async function startMcpServer(

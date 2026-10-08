@@ -126,8 +126,17 @@ test(
 );
 
 test("context.diff uses the working tree when only base is supplied", () => {
-  assert.deepEqual(gitDiffArgs(), ["HEAD"]);
-  assert.deepEqual(gitDiffArgs("main"), ["main"]);
-  assert.deepEqual(gitDiffArgs(undefined, "feature"), ["HEAD", "feature"]);
-  assert.deepEqual(gitDiffArgs("main", "feature"), ["main", "feature"]);
+  assert.deepEqual(gitDiffArgs(), ["HEAD", "--"]);
+  assert.deepEqual(gitDiffArgs("main"), ["main", "--"]);
+  assert.deepEqual(gitDiffArgs(undefined, "feature"), [
+    "HEAD",
+    "feature",
+    "--",
+  ]);
+  assert.deepEqual(gitDiffArgs("main", "feature"), ["main", "feature", "--"]);
+});
+
+test("context.diff rejects revisions that look like git flags", () => {
+  assert.throws(() => gitDiffArgs("--output=/tmp/pwned"), /Invalid git revision/);
+  assert.throws(() => gitDiffArgs("main", "-x"), /Invalid git revision/);
 });

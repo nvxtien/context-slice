@@ -16,25 +16,33 @@ export const javaAdapter: LanguageAdapter = {
     return { ...parsed, imports: [], exports: [] };
   },
   resolveCalls({ symbols, calls, sourceOf }: ResolveContext) {
+    const byId = new Map(symbols.map((symbol) => [symbol.id, symbol]));
+    const callableByName = new Map<string, SymbolRecord[]>();
+    for (const symbol of symbols) {
+      if (symbol.kind !== "method" && symbol.kind !== "constructor") continue;
+      const list = callableByName.get(symbol.name);
+      if (list) list.push(symbol);
+      else callableByName.set(symbol.name, [symbol]);
+    }
     for (const call of calls) {
-      const caller = symbols.find((symbol) => symbol.id === call.callerId);
+      const caller = byId.get(call.callerId);
       if (!caller) continue;
-      const parent = symbols.find((symbol) => symbol.id === caller.parentId);
-      const candidates = symbols.filter(
-        (symbol) =>
-          (symbol.kind === "method" || symbol.kind === "constructor") &&
-          symbol.name === call.calleeName,
-      );
+      const parent = caller.parentId ? byId.get(caller.parentId) : undefined;
+      const candidates = callableByName.get(call.calleeName) ?? [];
       const sameType = candidates.filter(
         (candidate) => candidate.parentId === caller.parentId,
       );
       const source = sourceOf(caller);
-      const declaredType = call.receiverText
-        ? (source.match(
+      const declaredTypeMatch = call.receiverText
+        ? source.match(
             new RegExp(
               `(?:\\b([A-Za-z_$][\\w$]*)\\s+${call.receiverText}\\b|\\b([A-Za-z_$][\\w$]*)\\s+${call.receiverText}\\s*[=;])`,
             ),
-          )?.[1] ??
+          )
+        : undefined;
+      const declaredType = call.receiverText
+        ? (declaredTypeMatch?.[1] ??
+          declaredTypeMatch?.[2] ??
           source.match(
             new RegExp(`\\b([A-Za-z_$][\\w$]*)\\s+${call.receiverText}\\b`),
           )?.[1])
@@ -47,16 +55,18 @@ export const javaAdapter: LanguageAdapter = {
       const typed = receiverType
         ? candidates.filter(
             (candidate) =>
-              symbols.find((symbol) => symbol.id === candidate.parentId)
-                ?.name === receiverType,
+              (candidate.parentId
+                ? byId.get(candidate.parentId)
+                : undefined)?.name === receiverType,
           )
         : [];
       const inherited =
         parent?.supertypes?.flatMap((supertype) =>
           candidates.filter(
             (candidate) =>
-              symbols.find((symbol) => symbol.id === candidate.parentId)
-                ?.name === supertype,
+              (candidate.parentId
+                ? byId.get(candidate.parentId)
+                : undefined)?.name === supertype,
           ),
         ) ?? [];
       const narrowed = (items: SymbolRecord[]) =>
@@ -85,10 +95,11 @@ export const javaAdapter: LanguageAdapter = {
         const target = options[0];
         call.declaredTargetId = target.id;
         call.resolvedTargetId = target.id;
+        const targetParent = target.parentId
+          ? byId.get(target.parentId)
+          : undefined;
         call.confidence =
-          receiverType &&
-          symbols.find((symbol) => symbol.id === target.parentId)?.kind ===
-            "interface"
+          receiverType && targetParent?.kind === "interface"
             ? "probable"
             : "exact";
         call.resolutionKind =
@@ -97,8 +108,7 @@ export const javaAdapter: LanguageAdapter = {
             : inherited.includes(target)
               ? "inherited"
               : receiverType
-                ? symbols.find((symbol) => symbol.id === target.parentId)
-                    ?.kind === "interface"
+                ? targetParent?.kind === "interface"
                   ? "interface"
                   : /^[A-Z]/.test(call.receiverText ?? "")
                     ? "static"

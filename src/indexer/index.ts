@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, realpathSync } from "node:fs";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type {
   CallEdge,
@@ -14,6 +14,7 @@ import {
   IndexStorage,
   type IndexedFileRecord,
 } from "../storage/sqlite.js";
+import { WorkflowError } from "../workflow/errors.js";
 import {
   adapterFor,
   ignoredDirectories,
@@ -68,12 +69,26 @@ export class ProjectIndex {
     this.root = resolve(root);
     this.storage = new IndexStorage(this.root);
   }
-  private files(dir: string): string[] {
-    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+  private files(dir: string, visited = new Set<string>()): string[] {
+    let realDir: string;
+    try {
+      realDir = realpathSync(dir);
+    } catch {
+      return [];
+    }
+    if (visited.has(realDir)) return [];
+    visited.add(realDir);
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return [];
+    }
+    return entries.flatMap((entry) => {
       if (ignored.has(entry.name)) return [];
       const path = join(dir, entry.name);
       return entry.isDirectory()
-        ? this.files(path)
+        ? this.files(path, visited)
         : entry.isFile() && adapterFor(entry.name)
           ? [path]
           : [];
@@ -417,7 +432,11 @@ export class ProjectIndex {
       fromRoot.startsWith(`..${sep}`) ||
       isAbsolute(fromRoot)
     )
-      throw new Error("Path nằm ngoài repository root");
+      throw new WorkflowError(
+        "INVALID_ARGUMENT",
+        `Path nằm ngoài repository root: ${symbol.filePath}`,
+        "Pass a symbol whose filePath resolves inside the indexed repository root.",
+      );
     return readFileSync(full, "utf8");
   }
 }

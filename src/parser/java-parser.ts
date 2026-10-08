@@ -48,14 +48,34 @@ function parameterSignature(parameters: string) {
     .replace(/\s+/g, " ")
     .trim();
 }
-function callArguments(source: string, open: number) {
+function callSpan(source: string, open: number): { text: string; end: number } {
   let depth = 0;
   for (let i = open; i < source.length; i++) {
     if (source[i] === "(") depth++;
     else if (source[i] === ")" && --depth === 0)
-      return source.slice(open + 1, i);
+      return { text: source.slice(open + 1, i), end: i };
   }
-  return "";
+  return { text: "", end: open };
+}
+/** Counts top-level arguments, ignoring commas nested inside (), [] or {}. */
+function countArguments(argumentsText: string): number {
+  if (!argumentsText.trim()) return 0;
+  let depth = 0;
+  let count = 1;
+  for (const ch of argumentsText) {
+    if (ch === "(" || ch === "[" || ch === "{") depth++;
+    else if (ch === ")" || ch === "]" || ch === "}") depth--;
+    else if (ch === "," && depth === 0) count++;
+  }
+  return count;
+}
+function composePoint(
+  anchor: { line: number; column: number },
+  local: { line: number; column: number },
+) {
+  return local.line === 1
+    ? { line: anchor.line, column: anchor.column + local.column }
+    : { line: anchor.line + local.line - 1, column: local.column };
 }
 
 /** Annotation names + modifier keywords out of a `modifiers` node, in source order (bare annotation names only, no arguments). */
@@ -468,35 +488,61 @@ export function parseJava(filePath: string, source: string) {
   const callable = symbols.filter(
     (s) => s.kind === "method" || s.kind === "constructor",
   );
-  for (const caller of callable)
-    for (const match of (caller.body ?? "").matchAll(
+  for (const caller of callable) {
+    const body = caller.body ?? "";
+    for (const match of body.matchAll(
       /(?:(\w+)\.)?([A-Za-z_$][\w$]*)\s*\(/g,
     )) {
       const calleeName = match[2];
       const offset = match.index ?? 0;
-      const prefix = (caller.body ?? "").slice(Math.max(0, offset - 8), offset);
+      const prefix = body.slice(Math.max(0, offset - 8), offset);
       if (
-        ["if", "for", "while", "switch", "catch", "return"].includes(calleeName)
+        [
+          "if",
+          "for",
+          "while",
+          "switch",
+          "catch",
+          "return",
+          "try",
+          "synchronized",
+          "assert",
+        ].includes(calleeName)
       )
         continue;
-      const argumentsText = callArguments(
-        caller.body ?? "",
-        offset + match[0].lastIndexOf("("),
+      const openIndex = offset + match[0].lastIndexOf("(");
+      const { text: argumentsText, end: closeIndex } = callSpan(
+        body,
+        openIndex,
       );
-      const argumentCount = argumentsText.trim()
-        ? argumentsText.split(",").length
-        : 0;
+      const range =
+        caller.bodyRange &&
+        (() => {
+          const anchor = {
+            line: caller.bodyRange!.startLine,
+            column: caller.bodyRange!.startColumn,
+          };
+          const start = composePoint(anchor, point(body, offset));
+          const end = composePoint(anchor, point(body, closeIndex + 1));
+          return {
+            startLine: start.line,
+            startColumn: start.column,
+            endLine: end.line,
+            endColumn: end.column,
+          };
+        })();
       calls.push({
         callerId: caller.id,
         receiverText: match[1],
         calleeName,
-        argumentCount,
+        argumentCount: countArguments(argumentsText),
         filePath,
-        range: caller.range,
+        range: range ?? caller.range,
         confidence: "unresolved",
         resolutionKind: prefix.includes("new") ? "constructor" : "unresolved",
         evidence: prefix.includes("new") ? ["syntactic new expression"] : [],
       });
     }
+  }
   return { symbols, calls, parseError };
 }

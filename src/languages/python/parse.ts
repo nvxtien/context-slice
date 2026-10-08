@@ -435,6 +435,8 @@ export function parsePython(filePath: string, source: string): ParsedFile {
       symbol.id = `${identity}#${count + 1}`;
       for (const call of calls)
         if (call.callerId === previousId) call.callerId = symbol.id;
+      for (const other of symbols)
+        if (other.parentId === previousId) other.parentId = symbol.id;
     }
     identityCounts.set(identity, count + 1);
   }
