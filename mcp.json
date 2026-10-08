@@ -4,7 +4,7 @@
     "context-slice": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "context-slice@1.9.0", "mcp"],
+      "args": ["-y", "--package=context-slice@1.9.0", "context-slice", "mcp"],
       "env": {
         "CONTEXT_SLICE_ROOT": "${CLAUDE_PROJECT_DIR}"
       }
