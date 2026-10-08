@@ -93,23 +93,6 @@ context-slice --version
 
 For package/release validation, run `npm run benchmark:v08`.
 
-### CLI examples
-
-In any supported repository:
-
-```sh
-cd /absolute/path/to/my-java-project
-context-slice init
-context-slice preview "explain payment retry flow" --explain
-```
-
-`init` creates `.context-slice/index.sqlite`. Repository discovery uses
-`--repo` when given, otherwise the nearest Git root, otherwise the working
-directory.
-
-Use `context-slice --version` and `context-slice --help` to inspect the
-installed package.
-
 ### Cache, cleanup, and uninstall
 
 The only files ContextSlice writes are in `<repository>/.context-slice/`. That directory contains its own `.gitignore`, so it never shows up in `git status` and you do not need to edit your repository's `.gitignore`. ContextSlice never writes into its installed package directory.
