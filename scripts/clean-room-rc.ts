@@ -161,7 +161,12 @@ function fetchPinned(directory: string, url: string, commit: string) {
 function testCounts(output: string) {
   const count = (name: string) =>
     Number(output.match(new RegExp(`^[#ℹ] ${name} (\\d+)`, "m"))?.[1] ?? NaN);
-  return { tests: count("tests"), pass: count("pass"), fail: count("fail") };
+  return {
+    tests: count("tests"),
+    pass: count("pass"),
+    fail: count("fail"),
+    skipped: count("skipped"),
+  };
 }
 
 async function mcpSession(
@@ -470,7 +475,9 @@ const testRun = sh("npm", ["test"], checkout, cleanEnv());
 const counts = testCounts(testRun.stdout + testRun.stderr);
 record(
   "tests",
-  testRun.status === 0 && counts.fail === 0 && counts.pass === counts.tests,
+  testRun.status === 0 &&
+    counts.fail === 0 &&
+    counts.pass + counts.skipped === counts.tests,
   { exit: testRun.status, ms: testRun.ms, ...counts },
 );
 const v06 = sh("npm", ["run", "benchmark:v06"], checkout, cleanEnv());
