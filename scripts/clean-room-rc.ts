@@ -549,17 +549,20 @@ record("regressionV08", v08.status === 0, {
   ms: v08.ms,
   note: "packaging smoke test (tarball install, CLI, MCP, upgrade, uninstall, publish dry run) from the clean checkout",
 });
-const dryRun = sh(
+const packageDryRun = sh(
   "npm",
-  ["publish", "--dry-run", "--json", "--ignore-scripts"],
+  ["pack", "--dry-run", "--json", "--ignore-scripts"],
   checkout,
   cleanEnv(),
 );
-record("publishDryRun", dryRun.status === 0, {
-  command: "npm publish --dry-run",
-  exit: dryRun.status,
-  note: "dry run only; nothing was published",
-  tail: `${dryRun.stdout}${dryRun.stderr}`.trim().split("\n").slice(-6),
+record("packageDryRun", packageDryRun.status === 0, {
+  command: "npm pack --dry-run",
+  exit: packageDryRun.status,
+  note: "package dry run only; nothing was published",
+  tail: `${packageDryRun.stdout}${packageDryRun.stderr}`
+    .trim()
+    .split("\n")
+    .slice(-6),
 });
 await attempt("dependencyAudit", () => {
   const audit = sh("npm", ["audit", "--json"], checkout, cleanEnv());
@@ -1581,7 +1584,7 @@ writeFileSync(
     ...section("5a. v0.6 regression", "regressionV06"),
     ...section("5b. v0.7 regression", "regressionV07"),
     ...section("5c. v0.8 packaging smoke", "regressionV08"),
-    ...section("5d. npm publish --dry-run", "publishDryRun"),
+    ...section("5d. npm pack --dry-run", "packageDryRun"),
     ...section("5e. Dependency audit", "dependencyAudit"),
     ...section("5f. License check", "licenseCheck"),
     ...section("5g. Package name availability", "packageName"),

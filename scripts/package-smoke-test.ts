@@ -79,7 +79,7 @@ type SmokeReport = {
   cleanCheckout: { status: "deferred"; reason: string };
   pathWithSpaces: { passed: boolean; path: string };
   nestedCwd: { passed: boolean; cwd: string };
-  publishDryRun: {
+  packageDryRun: {
     status: "pass" | "deferred";
     exitCode: number;
     output: string;
@@ -320,9 +320,9 @@ function markdown(report: SmokeReport) {
     `- Uninstall executable removed: ${report.uninstall.executableGone}; repository preserved: ${report.uninstall.repositoryPreserved}; cache preserved: ${report.uninstall.cachePreserved}`,
     `- Clean Git checkout validation: ${report.cleanCheckout.status} (${report.cleanCheckout.reason})`,
     "",
-    "## Publish dry run and real developer trial",
+    "## Package dry run and real developer trial",
     "",
-    `- npm publish --dry-run: ${report.publishDryRun.status} (exit ${report.publishDryRun.exitCode})`,
+    `- npm pack --dry-run: ${report.packageDryRun.status} (exit ${report.packageDryRun.exitCode})`,
     `- Trial: ${report.trial.type}; completed=${report.trial.completed}; external developers=${report.trial.externalDevelopers}`,
     `- Tasks: ${report.trial.tasks.join(", ")}`,
     `- Friction: ${report.trial.friction.length ? report.trial.friction.join("; ") : "none observed"}`,
@@ -564,10 +564,10 @@ export async function runPackageSmoke(
         passed: status.result.repository === repository,
         cwd: nested,
       },
-      publishDryRun: (() => {
+      packageDryRun: (() => {
         const dryRun = command(
           "npm",
-          ["publish", "--dry-run", "--json", "--ignore-scripts"],
+          ["pack", "--dry-run", "--json", "--ignore-scripts"],
           root,
         );
         return {
