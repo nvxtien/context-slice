@@ -1,8 +1,8 @@
 {
   "version": "v1.0",
-  "generatedAt": "2026-09-19T22:26:11.444Z",
-  "commit": "6e27d10b5a79c677624c4c841cebc118c4cc76f0",
-  "packageVersion": "1.0.0",
+  "generatedAt": "2026-10-08T20:21:07.175Z",
+  "commit": "b806a065200d6e9541ea3b28364e1a13789aa7ef",
+  "packageVersion": "1.9.0",
   "environment": {
     "node": "v22.12.0",
     "npm": "11.7.0",
@@ -15,22 +15,22 @@
     "requiredEnvironment": "none (HOME, PATH only)"
   },
   "artifact": {
-    "filename": "context-slice-1.0.0.tgz",
-    "bytes": 17962,
-    "fileCount": 20,
-    "shasum": "1c4e95a20639f5737c3601711299ae14e8089afc",
-    "integrity": "sha512-ZqkMERgTWW9qnE0j+v5IGoCodfW/7YfUPaMPSiUCknHewW3cV5M+hpyhV3vYd/h4XqOeKL0HPfvX1Ptn0wmz4Q==",
+    "filename": "context-slice-1.9.0.tgz",
+    "bytes": 109374,
+    "fileCount": 56,
+    "shasum": "9f8afd1bb854010bb644c11e8d125101efcf8a0a",
+    "integrity": "sha512-268SsYFu7VfIq7qk+zBZxYv7ck6P9Tjy8dWiPEeOs0cz+ffyyQwKLLAg4iuYtcZxhWFCaHcZ9sknQBhc24NuNg==",
     "baseline": "context-slice-0.9.0.tgz",
     "baselineRef": "cb9b11a",
-    "packageVersion": "1.0.0"
+    "packageVersion": "1.9.0"
   },
   "steps": {
     "cleanCheckout": {
       "status": "PASS",
       "evidence": {
         "source": "local repository (committed objects only)",
-        "commit": "6e27d10b5a79c677624c4c841cebc118c4cc76f0",
-        "version": "1.0.0",
+        "commit": "b806a065200d6e9541ea3b28364e1a13789aa7ef",
+        "version": "1.9.0",
         "untrackedOrIgnored": "",
         "distPresent": false,
         "trackedRuntimeAssets": [
@@ -47,9 +47,9 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 4475,
+        "ms": 5581,
         "tail": [
-          "added 142 packages in 4s",
+          "added 149 packages in 5s",
           "npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available."
         ]
       }
@@ -58,28 +58,29 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 2147
+        "ms": 2927
       }
     },
     "tests": {
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 13564,
-        "tests": 41,
-        "pass": 41,
-        "fail": 0
+        "ms": 22165,
+        "tests": 592,
+        "pass": 591,
+        "fail": 0,
+        "skipped": 1
       }
     },
     "regressionV06": {
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 201423,
+        "ms": 87107,
         "tasks": 15,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextWindowReduction": 0.9455136893467064,
+        "medianContextWindowReduction": 0.9463269178639198,
         "v04RetrievalRecall": 1,
         "v05SemanticCallRecall": 1,
         "checkoutsFetchedByScript": true
@@ -89,11 +90,11 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 949,
+        "ms": 1541,
         "checklist": "12/12",
         "context": {
           "task": "explain retryPayment",
-          "estimatedTokens": 162,
+          "estimatedTokens": 226,
           "budget": 1200,
           "wholeFileFallback": false,
           "omittedItems": 0
@@ -104,23 +105,23 @@
       "status": "PASS",
       "evidence": {
         "exit": 0,
-        "ms": 9044,
+        "ms": 10678,
         "note": "packaging smoke test (tarball install, CLI, MCP, upgrade, uninstall, publish dry run) from the clean checkout"
       }
     },
     "publishDryRun": {
-      "status": "PASS",
+      "status": "FAIL",
       "evidence": {
         "command": "npm publish --dry-run",
-        "exit": 0,
+        "exit": 1,
         "note": "dry run only; nothing was published",
         "tail": [
-          "  ],",
-          "  \"entryCount\": 20,",
-          "  \"bundled\": []",
+          "    \"detail\": \"\"",
+          "  }",
           "}",
           "npm warn This command requires you to be logged in to https://registry.npmjs.org/ (dry-run)",
-          "npm notice Publishing to https://registry.npmjs.org/ with tag latest and default access (dry-run)"
+          "npm error You cannot publish over the previously published versions: 1.9.0.",
+          "npm error A complete log of this run can be found in: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-cFHqjj/home/.npm/_logs/2026-10-08T20_19_24_561Z-debug-0.log"
         ]
       }
     },
@@ -147,9 +148,14 @@
         "advisories": [],
         "outdated": [
           "@types/better-sqlite3 7.6.13 -> 9.6.0",
-          "@types/node 22.20.4 -> 26.6.2",
+          "@types/node 22.20.4 -> 26.6.4",
           "better-sqlite3 11.10.0 -> 13.0.3",
+          "prettier 3.9.8 -> 3.9.9",
           "tree-sitter 0.21.1 -> 0.25.1",
+          "tree-sitter-go 0.23.4 -> 0.25.0",
+          "tree-sitter-python 0.21.0 -> 0.25.0",
+          "tree-sitter-rust 0.21.0 -> 0.24.0",
+          "tsx 4.23.13 -> 4.23.15",
           "typescript 5.9.3 -> 7.0.2",
           "zod 3.25.76 -> 4.6.5"
         ],
@@ -159,33 +165,69 @@
     "packageArtifact": {
       "status": "PASS",
       "evidence": {
-        "filename": "context-slice-1.0.0.tgz",
-        "bytes": 17962,
-        "unpackedBytes": 63481,
-        "fileCount": 20,
-        "shasum": "1c4e95a20639f5737c3601711299ae14e8089afc",
-        "integrity": "sha512-ZqkMERgTWW9qnE0j+v5IGoCodfW/7YfUPaMPSiUCknHewW3cV5M+hpyhV3vYd/h4XqOeKL0HPfvX1Ptn0wmz4Q==",
+        "filename": "context-slice-1.9.0.tgz",
+        "bytes": 109374,
+        "unpackedBytes": 447975,
+        "fileCount": 56,
+        "shasum": "9f8afd1bb854010bb644c11e8d125101efcf8a0a",
+        "integrity": "sha512-268SsYFu7VfIq7qk+zBZxYv7ck6P9Tjy8dWiPEeOs0cz+ffyyQwKLLAg4iuYtcZxhWFCaHcZ9sknQBhc24NuNg==",
         "files": [
           "package/LICENSE",
           "package/README.md",
           "package/dist/src/cli.js",
           "package/dist/src/indexer/index.js",
+          "package/dist/src/indexer/language-snapshot.js",
+          "package/dist/src/indexer/query-index.js",
+          "package/dist/src/indexer/resolution-pipeline.js",
+          "package/dist/src/indexer/resolution-state.js",
+          "package/dist/src/languages/adapter.js",
+          "package/dist/src/languages/bootstrap.js",
+          "package/dist/src/languages/go/index.js",
+          "package/dist/src/languages/go/parse.js",
+          "package/dist/src/languages/go/resolve.js",
+          "package/dist/src/languages/java/enterprise/dependency-injection.js",
+          "package/dist/src/languages/java/enterprise/jpa-entity.js",
+          "package/dist/src/languages/java/enterprise/registry.js",
+          "package/dist/src/languages/java/enterprise/shared.js",
+          "package/dist/src/languages/java/enterprise/spring-data.js",
+          "package/dist/src/languages/java/enterprise/spring-mvc.js",
+          "package/dist/src/languages/java/enterprise/transactions.js",
+          "package/dist/src/languages/java.js",
+          "package/dist/src/languages/javascript/index.js",
+          "package/dist/src/languages/python/index.js",
+          "package/dist/src/languages/python/parse.js",
+          "package/dist/src/languages/python/resolve.js",
+          "package/dist/src/languages/rust/calls-resolve.js",
+          "package/dist/src/languages/rust/index.js",
+          "package/dist/src/languages/rust/parse.js",
+          "package/dist/src/languages/rust/resolve.js",
+          "package/dist/src/languages/typescript/index.js",
+          "package/dist/src/languages/typescript/parse.js",
+          "package/dist/src/languages/typescript/resolve.js",
           "package/dist/src/package-info.js",
           "package/dist/src/parser/java-parser.js",
           "package/dist/src/planner/budget.js",
+          "package/dist/src/planner/composition.js",
           "package/dist/src/planner/rank.js",
           "package/dist/src/render/compact-context.js",
           "package/dist/src/server/mcp-server.js",
+          "package/dist/src/storage/dirty-marker.js",
+          "package/dist/src/storage/file-watcher.js",
+          "package/dist/src/storage/index-snapshot.js",
           "package/dist/src/storage/sqlite.js",
+          "package/dist/src/types/enterprise.js",
           "package/dist/src/types/model.js",
           "package/dist/src/workflow/errors.js",
           "package/dist/src/workflow/preview.js",
           "package/dist/src/workflow/repository.js",
+          "package/mcp.json",
           "package/package.json",
+          "package/plugin.json",
           "package/queries/java/annotations.scm",
           "package/queries/java/calls.scm",
           "package/queries/java/imports.scm",
-          "package/queries/java/symbols.scm"
+          "package/queries/java/symbols.scm",
+          "package/skills/context-slice/SKILL.md"
         ],
         "forbidden": []
       }
@@ -217,10 +259,14 @@
         "licenseFile": "MIT License",
         "inTarball": true,
         "runtimeDependencies": [
-          "@modelcontextprotocol/sdk@1.30.0: MIT",
+          "@modelcontextprotocol/sdk@1.32.1: MIT",
           "better-sqlite3@11.10.0: MIT",
           "tree-sitter@0.21.1: MIT",
+          "tree-sitter-go@0.23.4: MIT",
           "tree-sitter-java@0.23.5: MIT",
+          "tree-sitter-python@0.21.0: MIT",
+          "tree-sitter-rust@0.21.0: MIT",
+          "tree-sitter-typescript@0.23.2: MIT",
           "zod@3.25.76: MIT"
         ],
         "note": "Release hygiene only; not a formal legal review."
@@ -230,26 +276,26 @@
       "status": "PASS",
       "evidence": {
         "name": "context-slice",
-        "availability": "AVAILABLE",
-        "registryResponse": "{",
+        "availability": "TAKEN",
+        "registryResponse": "\"1.9.0\"",
         "note": "Read-only check. The name was not reserved or published."
       }
     },
     "isolatedInstall": {
       "status": "PASS",
       "evidence": {
-        "command": "npm install -g ./context-slice-1.0.0.tgz",
+        "command": "npm install -g ./context-slice-1.9.0.tgz",
         "prefix": "<workspace>/install prefix (contains a space)",
         "resolvedExecutable": "<workspace>/install prefix/bin/context-slice",
         "packageRealpathInsidePrefix": true,
-        "ms": 2828
+        "ms": 2476
       }
     },
     "cliThroughPath": {
       "status": "PASS",
       "evidence": {
-        "version": "1.0.0",
-        "expected": "1.0.0",
+        "version": "1.9.0",
+        "expected": "1.9.0",
         "help": true,
         "invocation": "context-slice (resolved through PATH)"
       }
@@ -262,24 +308,24 @@
         "statusBeforeInit": [
           "Repository: <workspace>/java repos/spring petclinic",
           "Index: UNINITIALIZED",
-          "Java files: 0/50",
-          "Schema: 0.5.2",
+          "Source files: 0/50",
+          "  .java: 50",
+          "Schema: 1.18.0",
           "Last refresh: never"
         ],
         "init": [
           "Repository: <workspace>/java repos/spring petclinic",
-          "Indexed 50 Java files (266 symbols).",
+          "Indexed 50 source files (318 symbols) across Java: 50.",
           "Next: context-slice preview \"explain <symbol>\""
         ],
-        "initMs": 293,
+        "initMs": 308,
         "statusAfter": {
           "state": "CURRENT",
-          "javaFiles": 50,
-          "schema": "0.5.2"
+          "schema": "1.18.0"
         },
         "doctor": [
           "OK repository: <workspace>/java repos/spring petclinic",
-          "OK java-source: 50 files found",
+          "OK source: 50 files found",
           "OK index: ready",
           "OK mcp: Configure command: context-slice mcp"
         ]
@@ -304,21 +350,22 @@
       "status": "PASS",
       "evidence": {
         "task": "explain the owner update flow",
-        "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
-        "estimatedTokens": 32,
+        "target": "org.springframework.samples.petclinic.owner.OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM",
+        "estimatedTokens": 257,
         "budget": 1200,
         "withinBudget": true,
         "included": [
-          "task target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm"
+          "task target: org.springframework.samples.petclinic.owner.OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM",
+          "enclosing type: org.springframework.samples.petclinic.owner.OwnerController"
         ],
         "omitted": [],
         "unresolved": [],
         "confidence": "high",
         "wholeFileFallback": false,
-        "latencyMs": 288,
+        "latencyMs": 156,
         "humanHeader": [
-          "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
-          "Context: 32/1200 tokens; 1 item included"
+          "Target: org.springframework.samples.petclinic.owner.OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM",
+          "Saved 84% context (257 vs 1566 tokens, 1 file read in full instead of sliced)"
         ]
       }
     },
@@ -327,7 +374,7 @@
       "evidence": {
         "server": {
           "name": "context-slice",
-          "version": "1.0.0"
+          "version": "1.9.0"
         },
         "protocolVersion": "2025-03-26",
         "tools": [
@@ -340,9 +387,9 @@
         ],
         "preview": {
           "ok": true,
-          "ms": 210,
-          "target": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
-          "estimatedTokens": 32,
+          "ms": 22,
+          "target": "org.springframework.samples.petclinic.owner.OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM",
+          "estimatedTokens": 257,
           "budget": 1200
         },
         "staleRefresh": {
@@ -360,10 +407,52 @@
         }
       }
     },
+    "typeScriptRepository": {
+      "status": "FAIL",
+      "evidence": {
+        "error": "git fetch failed (128): fatal: unable to access 'https://github.com/w3cj/express-api-starter-ts.git/': Recv failure: Connection reset by peer\n"
+      }
+    },
+    "pythonRepository": {
+      "status": "PASS",
+      "evidence": {
+        "repository": "https://github.com/pallets/itsdangerous.git@672971d66a2ef9f85151e53283113f33d642dabd",
+        "statusBeforeInit": true,
+        "filesByExtension": {
+          ".py": 15
+        },
+        "init": [
+          "Repository: <workspace>/py repos/itsdangerous clone",
+          "Indexed 15 source files (184 symbols) across Python: 15.",
+          "Next: context-slice preview \"explain <symbol>\""
+        ],
+        "task": "explain how a value is signed",
+        "target": "TestSerializer.value",
+        "language": "python",
+        "estimatedTokens": 214,
+        "budget": 1200,
+        "included": [
+          "task target: TestSerializer.value",
+          "enclosing type: TestSerializer"
+        ],
+        "previewMs": 129,
+        "mcp": {
+          "tools": 6,
+          "previewOk": true,
+          "staleRefresh": {
+            "filesParsed": 1,
+            "cacheHits": 14,
+            "state": "CURRENT"
+          },
+          "protocolSafe": true
+        },
+        "gitClean": true
+      }
+    },
     "claude": {
       "status": "PASS",
       "evidence": {
-        "version": "2.1.277 (Claude Code)",
+        "version": "2.1.285 (Claude Code)",
         "config": {
           "command": "context-slice",
           "args": [
@@ -383,13 +472,13 @@
           "mcp__context-slice__context_preview"
         ],
         "toolCallSucceeded": true,
-        "answer": "`org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm`"
+        "answer": "VIEWS_OWNER_CREATE_OR_UPDATE_FORM"
       }
     },
     "codex": {
       "status": "PASS",
       "evidence": {
-        "version": "codex-cli 0.153.4",
+        "version": "codex-cli 0.160.0",
         "config": {
           "command": "context-slice",
           "args": [
@@ -405,7 +494,7 @@
             "error": null
           }
         ],
-        "answer": "org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+        "answer": "org.springframework.samples.petclinic.owner.OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM",
         "stderrTail": [
           "Reading additional input from stdin..."
         ]
@@ -416,7 +505,7 @@
       "evidence": {
         "chmod": "a-w recursively on the installed package directory",
         "writeProbeBlocked": true,
-        "filesHashed": 3888,
+        "filesHashed": 4117,
         "changedFiles": [],
         "commandsRun": [
           "--version",
@@ -434,11 +523,14 @@
       "status": "PASS",
       "evidence": {
         "from": "0.9.0",
-        "to": "1.0.0",
+        "to": "1.9.0",
         "schemaBefore": "0.5.2",
-        "stateAfterUpgrade": "CURRENT",
-        "schemaAfter": "0.5.2",
-        "previewAfterUpgrade": "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
+        "stateAfterUpgrade": "UNINITIALIZED",
+        "schemaAfter": "1.18.0",
+        "schemaChanged": true,
+        "stateAfterFirstCommand": "CURRENT",
+        "manualCacheDeletionRequired": false,
+        "previewAfterUpgrade": "Target: org.springframework.samples.petclinic.owner.OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM",
         "gitStatusWith080Cache": "(clean)",
         "gitStatusAfterUpgrade": "(clean)",
         "incompatibleCache": {
@@ -446,7 +538,7 @@
           "stateSeen": "UNINITIALIZED",
           "previewExit": 0,
           "stateAfterPreview": "CURRENT",
-          "schemaAfterRebuild": "0.5.2",
+          "schemaAfterRebuild": "1.18.0",
           "manualDeletion": false
         }
       }
@@ -455,53 +547,42 @@
       "status": "PASS",
       "evidence": {
         "version": "0.9.0",
-        "cacheFrom": "1.0.0",
-        "stateOn090Cache": "CURRENT",
-        "previewExit": 0,
-        "newerSchemaCache": {
+        "cacheWrittenBy": "1.9.0",
+        "stateOnNewerCache": "UNINITIALIZED",
+        "previewExit": 1,
+        "previewStderr": "INTERNAL_ERROR: NOT NULL constraint failed: files.language",
+        "schemaChangedSincePreviousRelease": true,
+        "requiresManualCacheDeletion": true,
+        "recoveredAfterCacheDeletion": true,
+        "newerSchemaSameShape": {
           "forgedSchema": "99.0.0",
-          "stateSeenBy080": "UNINITIALIZED",
+          "stateSeen": "UNINITIALIZED",
           "previewExit": 0,
           "behavior": "discarded and rebuilt; never reused"
         },
         "corruptCache": {
-          "v080": {
+          "previousRelease": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-k3EMLp/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-cFHqjj/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           },
-          "v090": {
+          "current": {
             "exit": 2,
-            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-k3EMLp/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
+            "stderr": "INDEX_CORRUPT: Unreadable index cache: /private/var/folders/cg/j8wjs5d90pl4g231n8xh5n9w0000gn/T/context-slice-v09-cFHqjj/java repos/upgrade copy/.context-slice/index.sqlite (file is not a database)\nDelete the cache and rebuild it: rm -rf .context-slice && context-slice init"
           }
         }
       }
     },
     "nodeEngine": {
-      "status": "PASS",
+      "status": "DEFERRED",
       "evidence": {
         "declared": ">=20",
         "engines": [
           {
             "node": "v22.12.0",
             "result": "full clean-room flow above"
-          },
-          {
-            "node": "v20.19.5",
-            "install": 0,
-            "version": "1.0.0",
-            "init": 0,
-            "preview": 0,
-            "target": "Target: org.springframework.samples.petclinic.owner.OwnerController.initUpdateOwnerForm",
-            "stderr": ""
-          },
-          {
-            "node": "v18.20.8",
-            "engineStrictInstall": 1,
-            "rejected": true,
-            "message": "npm error code EBADENGINE"
           }
         ],
-        "minimumExercised": true
+        "minimumExercised": false
       }
     },
     "uninstall": {
@@ -548,8 +629,7 @@
           " M benchmarks/results/v0.7-developer-workflow.json",
           " M benchmarks/results/v0.7-developer-workflow.md",
           " M benchmarks/results/v0.8-packaging-installation.json",
-          " M benchmarks/results/v0.8-packaging-installation.md",
-          "?? context-slice-1.0.0.tgz"
+          " M benchmarks/results/v0.8-packaging-installation.md"
         ],
         "note": "Modified files in the clean checkout are regenerated benchmark reports written by the runs above."
       }
@@ -682,8 +762,11 @@
       "status": "FIXED"
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "automated step failed: publishDryRun",
+    "automated step failed: typeScriptRepository"
+  ],
   "openMajors": [],
-  "recommendation": "GO",
+  "recommendation": "NO-GO",
   "publication": "none (no npm publish, tag, or GitHub release)"
 }
