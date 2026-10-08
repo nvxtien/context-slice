@@ -32,7 +32,10 @@ Install it directly from the GitHub marketplace:
 
 The plugin provides a skill that tells Claude Code to request a focused
 ContextSlice preview before reading source files. The MCP server then targets
-the project Claude Code has open.
+the project Claude Code has open. The plugin starts the published
+`context-slice@1.9.0` npm runtime, so Claude needs npm registry access on first
+use. The package installs native dependencies for the current platform; later
+runs use the local npm cache.
 
 ### Codex plugin
 
@@ -91,8 +94,8 @@ One repository can hold all of them. See [docs/typescript-support.md](docs/types
 ### Codex plugin (GitHub marketplace)
 
 This repository includes a portable Codex plugin manifest and a separate
-Codex marketplace entry backed by the npm runtime package. After publishing
-the package, add the marketplace and install `context-slice` from `/plugins`:
+Codex marketplace entry backed by the published npm runtime package. Add the
+marketplace and install `context-slice` from `/plugins`:
 
 ```sh
 codex plugin marketplace add nvxtien/context-slice
@@ -103,29 +106,23 @@ the local marketplace snapshot.
 
 ### Claude Code plugin (GitHub marketplace)
 
-This repository is also a Claude Code plugin. For local development or a local
-checkout, use the path form instead:
-
-```sh
-git clone https://github.com/nvxtien/context-slice.git
-cd context-slice
-npm ci
-npm run build
-```
+This repository is also a Claude Code plugin. The GitHub marketplace install is
+the normal path:
 
 ```text
-/plugin marketplace add /absolute/path/to/context-slice
+/plugin marketplace add nvxtien/context-slice
 /plugin install context-slice@context-slice-marketplace
 ```
 
-The current plugin runs the compiled `dist/` output, so a local checkout must
-run `npm ci` and `npm run build` before first use. Re-run `npm run build` after
-pulling updates. Its MCP server targets `${CLAUDE_PROJECT_DIR}`, not the plugin
-repository itself.
+The plugin's `.mcp.json` starts npm from `/tmp` to avoid a Claude plugin
+working-directory collision with the package name. It targets
+`${CLAUDE_PROJECT_DIR}`, not the plugin repository itself. If npm access is
+blocked, install the package first in a trusted environment or use the local
+development workflow below.
 
 ### Local development
 
-ContextSlice is not published to npm yet. From this checkout, install and link the local executable:
+For local development, install and link the executable from this checkout:
 
 ```sh
 npm ci
@@ -135,7 +132,8 @@ npm link
 
 ### Tarball validation
 
-The package is publish-ready but is not currently published to the npm registry. Build and install the release-candidate tarball from a checkout (`npm ci` is required because `npm pack` compiles TypeScript first):
+Build and install the release tarball from a checkout (`npm ci` is required
+because `npm pack` compiles TypeScript first):
 
 ```sh
 npm ci
@@ -152,7 +150,13 @@ The isolated packaging smoke test uses a temporary npm prefix and does not depen
 npm run benchmark:v08
 ```
 
-Registry installation (`npm install -g context-slice`) and `npx context-slice` remain publication-dependent and are not claimed as supported yet.
+Registry installation and `npx` execution are supported after the package is
+published:
+
+```sh
+npm install -g context-slice@1.9.0
+context-slice --version
+```
 
 ### CLI examples
 
@@ -268,14 +272,15 @@ dispatch has a concrete implementation.
 
 ## Claude Code setup
 
-Use the equivalent local stdio registration for the same command:
+The GitHub plugin configures MCP automatically. Verify the connection with:
 
 ```sh
-claude mcp add --transport stdio context-slice -- context-slice mcp --repo /absolute/path/to/my-java-project
 claude mcp list
 ```
 
-Verify command syntax against `claude mcp --help` in the installed Claude Code version before sharing configuration. ContextSlice itself speaks standard stdio MCP; this repository does not claim to have exercised every Claude Code release.
+The expected result is `plugin:context-slice:context-slice - ✔ Connected`.
+ContextSlice itself speaks standard stdio MCP; this repository does not claim
+to have exercised every Claude Code release.
 
 ## How it works
 
