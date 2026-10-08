@@ -53,9 +53,12 @@ server for the project Codex has open.
 ### CLI and MCP
 
 ```sh
+npm install -g context-slice@1.9.0
 context-slice init
 context-slice preview "explain the payment retry flow" --explain
 ```
+
+The CLI requires Node.js 20 or newer.
 
 ## How it works
 
@@ -80,29 +83,6 @@ Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `
 
 One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md), [docs/python-support.md](docs/python-support.md) and [docs/rust-support.md](docs/rust-support.md) for what each language's resolution does and does not cover.
 
-## Installation
-
-### npm package
-
-Node.js 20 or newer is required. Install the published package with:
-
-```sh
-npm install -g context-slice@1.9.0
-context-slice --version
-```
-
-For package/release validation, run `npm run benchmark:v08`.
-
-### Cache, cleanup, and uninstall
-
-The only files ContextSlice writes are in `<repository>/.context-slice/`. That directory contains its own `.gitignore`, so it never shows up in `git status` and you do not need to edit your repository's `.gitignore`. ContextSlice never writes into its installed package directory.
-
-- Rebuild from scratch: `rm -rf .context-slice && context-slice init`
-- Remove ContextSlice from a repository: `rm -rf .context-slice`
-- Uninstall the CLI: `npm uninstall -g context-slice` (repository caches are left in place; remove them as above)
-
-Caches are versioned. A cache written by a different index schema, older or newer, is discarded and rebuilt automatically; it is never reused.
-
 ## CLI workflow
 
 ```sh
@@ -124,6 +104,9 @@ context-slice mcp
 | `mcp`            | Start the stdio MCP server with the stable public command.       |
 
 Use `--repo /absolute/path` to select a repository. `--json` provides a stable automation-oriented result. Normal commands are quiet; `--explain` displays why each item was included or omitted.
+
+The local cache is `<repository>/.context-slice/`. Remove it and run `init` to
+rebuild from scratch.
 
 Exit codes are `0` for success, `2` for user or configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
 
