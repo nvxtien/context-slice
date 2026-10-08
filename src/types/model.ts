@@ -158,9 +158,3 @@ export interface CallEdge {
   resolutionKind: ResolutionKind;
   evidence: string[];
 }
-export interface IndexedFile {
-  filePath: string;
-  hash: string;
-  language: LanguageId;
-  parseError: boolean;
-}

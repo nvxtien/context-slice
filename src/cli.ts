@@ -12,7 +12,6 @@ interface Arguments {
   budget?: number;
   json: boolean;
   explain: boolean;
-  verbose: boolean;
   version: boolean;
 }
 
@@ -25,7 +24,6 @@ function usage() {
     "  --budget <tokens> Strict token budget for preview",
     "  --json            Emit stable JSON output",
     "  --explain         Include inclusion and omission explanations",
-    "  --verbose         Include additional operational detail",
     "",
     "Commands:",
     "  init              Create or refresh the repository index",
@@ -42,7 +40,6 @@ function parse(argv: string[]): Arguments {
     positional: [],
     json: false,
     explain: false,
-    verbose: false,
     version: false,
   };
   for (let index = 0; index < argv.length; index++) {
@@ -80,10 +77,6 @@ function parse(argv: string[]): Arguments {
     }
     if (value === "--explain") {
       result.explain = true;
-      continue;
-    }
-    if (value === "--verbose") {
-      result.verbose = true;
       continue;
     }
     if (value === "--version") {
