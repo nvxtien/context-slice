@@ -39,7 +39,8 @@ export class ProjectFileWatcher {
       });
       this.watchers.push(recursive);
     } catch {
-      // Recursive watching is unavailable on some Linux filesystems; top-level coverage remains active.
+      // Recursive watching is unavailable on some Linux filesystems.
+      this.watchDirectoryTree();
     }
   }
 
@@ -65,9 +66,13 @@ export class ProjectFileWatcher {
   private watchDirectoryTree(directory = this.root) {
     if (!this.watchedDirectories.has(directory))
       this.watchers.push(this.watchDirectory(directory));
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      if (entry.isDirectory() && !ignored.has(entry.name))
-        this.watchDirectoryTree(resolve(directory, entry.name));
+    try {
+      for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        if (entry.isDirectory() && !ignored.has(entry.name))
+          this.watchDirectoryTree(resolve(directory, entry.name));
+      }
+    } catch {
+      // The directory may have been removed between the event and the scan.
     }
   }
 
