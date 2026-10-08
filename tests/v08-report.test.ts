@@ -33,9 +33,7 @@ test("v0.8 report and release checklist expose packaging evidence honestly", () 
     readFileSync(checklistPath, "utf8"),
     /clean checkout.*deferred/i,
   );
-  assert.match(
-    readFileSync(join(root, "README.md"), "utf8"),
-    /Tarball validation/,
-  );
-  assert.match(readFileSync(join(root, "README.md"), "utf8"), /not published/i);
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  assert.match(readme, /npm install -g context-slice@1\.9\.0/);
+  assert.match(readme, /npm run benchmark:v08/);
 });

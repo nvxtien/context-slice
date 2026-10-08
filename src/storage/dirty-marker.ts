@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-type DirtyState = { dirty: boolean; markedAt: string };
+type DirtyState = { dirty: boolean; markedAt: string; paths?: string[] };
 
 function markerPath(root: string) {
   return join(resolve(root), ".context-slice", "dirty.json");
@@ -43,5 +43,16 @@ export function isDirty(root: string) {
       .dirty;
   } catch {
     return false;
+  }
+}
+
+export function dirtyPaths(root: string): string[] {
+  try {
+    const state = JSON.parse(
+      readFileSync(markerPath(root), "utf8"),
+    ) as DirtyState;
+    return state.dirty ? (state.paths ?? []) : [];
+  } catch {
+    return [];
   }
 }

@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  statSync,
   rmSync,
   writeFileSync,
   readdirSync,
@@ -270,6 +271,44 @@ test("external dirty marker refreshes a running index", () => {
   writeFileSync(join(root, "a.ts"), "export function value() { return 2; }\n");
   markDirty(root, ["a.ts"]);
   const refreshed = index.refreshIfStale();
+  assert.equal(refreshed.summary.filesParsed, 1);
+});
+
+test("dirty metadata catches a content change with unchanged persisted signatures", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-signature-dirty-"));
+  const file = join(root, "main.ts");
+  writeFileSync(file, "export const value = 1;\n");
+  new ProjectIndex(root).rebuild();
+
+  writeFileSync(file, "export const value = 2;\n");
+  const stats = statSync(file);
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  db.prepare(
+    "UPDATE files SET size = ?, mtime_ms = ?, ctime_ms = ? WHERE path = ?",
+  ).run(stats.size, stats.mtimeMs, stats.ctimeMs, "main.ts");
+  db.close();
+  markDirty(root, ["main.ts"]);
+
+  const refreshed = new ProjectIndex(root).refreshIfStale();
+  assert.equal(refreshed.summary.filesParsed, 1);
+});
+
+test("dirty marker without paths verifies all indexed file hashes", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-all-dirty-"));
+  const file = join(root, "main.ts");
+  writeFileSync(file, "export const value = 1;\n");
+  new ProjectIndex(root).rebuild();
+
+  writeFileSync(file, "export const value = 2;\n");
+  const stats = statSync(file);
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  db.prepare(
+    "UPDATE files SET size = ?, mtime_ms = ?, ctime_ms = ? WHERE path = ?",
+  ).run(stats.size, stats.mtimeMs, stats.ctimeMs, "main.ts");
+  db.close();
+  markDirty(root);
+
+  const refreshed = new ProjectIndex(root).refreshIfStale();
   assert.equal(refreshed.summary.filesParsed, 1);
 });
 

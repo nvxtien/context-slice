@@ -31,3 +31,12 @@ export function isDirty(root) {
         return false;
     }
 }
+export function dirtyPaths(root) {
+    try {
+        const state = JSON.parse(readFileSync(markerPath(root), "utf8"));
+        return state.dirty ? (state.paths ?? []) : [];
+    }
+    catch {
+        return [];
+    }
+}

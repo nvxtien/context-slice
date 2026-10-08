@@ -9,7 +9,7 @@ import { ensureLanguageBootstrap } from "../languages/bootstrap.js";
 import { QueryIndex } from "./query-index.js";
 import { ResolutionPipeline } from "./resolution-pipeline.js";
 import { languageSnapshots } from "./language-snapshot.js";
-import { clearDirty, dirtyMarkerExists, isDirty, } from "../storage/dirty-marker.js";
+import { clearDirty, dirtyPaths, dirtyMarkerExists, isDirty, } from "../storage/dirty-marker.js";
 import { createEnterpriseRegistry, } from "../languages/java/enterprise/registry.js";
 ensureLanguageBootstrap();
 const coreIgnored = new Set([
@@ -285,8 +285,26 @@ export class ProjectIndex {
         this.cachedRefresh = result;
         return result;
     }
-    refresh() {
-        const summary = this.rebuild();
+    dirtyChangedPaths(files, paths) {
+        const previous = this.storage.load({ calls: false, symbols: "lean" });
+        const candidates = paths.length ? paths : [...previous.files.keys()];
+        const currentFiles = new Map(files.map((file) => [relative(this.root, file), file]));
+        const changed = new Set();
+        for (const filePath of candidates) {
+            const file = currentFiles.get(filePath);
+            const previousFile = previous.files.get(filePath);
+            if (!file || !previousFile)
+                continue;
+            const hash = createHash("sha256")
+                .update(readFileSync(file))
+                .digest("hex");
+            if (hash !== previousFile.hash)
+                changed.add(filePath);
+        }
+        return changed;
+    }
+    refresh(forcePaths = new Set()) {
+        const summary = this.rebuild(forcePaths);
         // Set before inspect() so its cheap signature check can recognize the index it just
         // built as current, instead of inspect() re-reading and re-hashing every file a second
         // time right after rebuild() already did exactly that.
@@ -334,13 +352,21 @@ export class ProjectIndex {
         this.loadedCallTargets.add(targetId);
     }
     refreshIfStale() {
-        if (this.cachedRefresh &&
-            dirtyMarkerExists(this.root) &&
-            !isDirty(this.root))
+        const dirty = dirtyMarkerExists(this.root) && isDirty(this.root);
+        const dirtyChanged = dirty
+            ? this.dirtyChangedPaths(this.files(this.root), dirtyPaths(this.root))
+            : new Set();
+        if (this.cachedRefresh && dirty && dirtyChanged.size === 0) {
+            clearDirty(this.root);
+            return this.cachedRefresh;
+        }
+        if (this.cachedRefresh && dirtyMarkerExists(this.root) && !dirty)
             return this.cachedRefresh;
         const files = this.files(this.root);
         const next = this.signatures(files);
-        if (this.cachedRefresh && this.sameSignatures(next)) {
+        if (this.cachedRefresh &&
+            dirtyChanged.size === 0 &&
+            this.sameSignatures(next)) {
             if (dirtyMarkerExists(this.root))
                 clearDirty(this.root);
             return this.cachedRefresh;
@@ -348,12 +374,12 @@ export class ProjectIndex {
         if (!this.cachedRefresh) {
             const previous = this.storage.load({ calls: false, symbols: "lean" });
             const freshness = this.computeFreshness(files, previous);
-            if (freshness.state === "CURRENT")
+            if (freshness.state === "CURRENT" && dirtyChanged.size === 0)
                 return this.hydrateCached(files, next, freshness, previous, false);
         }
-        return this.refresh();
+        return this.refresh(dirtyChanged);
     }
-    rebuild() {
+    rebuild(forcePaths = new Set()) {
         this.cachedRefresh = undefined;
         this.ensureCallsLoaded();
         const started = Date.now();
@@ -399,7 +425,8 @@ export class ProjectIndex {
             const stats = statSync(file);
             let fileSymbols;
             const previousFile = previous.files.get(filePath);
-            if (previousFile?.size === stats.size &&
+            if (!forcePaths.has(filePath) &&
+                previousFile?.size === stats.size &&
                 previousFile.mtimeMs === stats.mtimeMs &&
                 previousFile.ctimeMs === stats.ctimeMs) {
                 this.hashes.set(filePath, previousFile);

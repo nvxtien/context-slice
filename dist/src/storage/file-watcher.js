@@ -1,4 +1,4 @@
-import { watch } from "node:fs";
+import { readdirSync, statSync, watch } from "node:fs";
 import { relative, resolve, sep } from "node:path";
 import { markDirty } from "./dirty-marker.js";
 const ignored = new Set([
@@ -13,6 +13,7 @@ export class ProjectFileWatcher {
     active = false;
     root;
     watchers = [];
+    watchedDirectories = new Set();
     pending = new Set();
     timer;
     constructor(root) {
@@ -28,7 +29,7 @@ export class ProjectFileWatcher {
             recursive.once("error", () => {
                 recursive.close();
                 this.watchers.splice(this.watchers.indexOf(recursive), 1);
-                this.watchTopLevel();
+                this.watchDirectoryTree();
             });
             this.watchers.push(recursive);
         }
@@ -37,23 +38,44 @@ export class ProjectFileWatcher {
         }
     }
     watchTopLevel() {
-        const watcher = watch(this.root, (_event, filename) => this.enqueue(filename));
-        watcher.on("error", () => {
-            this.active = false;
-            watcher.close();
-        });
+        const watcher = this.watchDirectory(this.root);
         this.watchers.push(watcher);
         this.active = true;
     }
-    enqueue(filename) {
+    watchDirectory(directory) {
+        const watcher = watch(directory, (_event, filename) => this.enqueue(filename, directory));
+        this.watchedDirectories.add(directory);
+        watcher.on("error", () => {
+            this.active = false;
+            watcher.close();
+            this.watchedDirectories.delete(directory);
+        });
+        return watcher;
+    }
+    watchDirectoryTree(directory = this.root) {
+        if (!this.watchedDirectories.has(directory))
+            this.watchers.push(this.watchDirectory(directory));
+        for (const entry of readdirSync(directory, { withFileTypes: true })) {
+            if (entry.isDirectory() && !ignored.has(entry.name))
+                this.watchDirectoryTree(resolve(directory, entry.name));
+        }
+    }
+    enqueue(filename, directory = this.root) {
         if (!filename)
             return;
-        const relativePath = relative(this.root, resolve(this.root, filename.toString()));
+        const relativePath = relative(this.root, resolve(directory, filename.toString()));
         if (!relativePath ||
             relativePath === ".." ||
             relativePath.startsWith(`..${sep}`) ||
             relativePath.split(sep).some((part) => ignored.has(part)))
             return;
+        try {
+            if (statSync(resolve(directory, filename.toString())).isDirectory())
+                this.watchDirectoryTree(resolve(directory, filename.toString()));
+        }
+        catch {
+            // The path may already have been removed.
+        }
         this.pending.add(relativePath);
         if (this.timer)
             clearTimeout(this.timer);

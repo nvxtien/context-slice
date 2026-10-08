@@ -108,6 +108,7 @@ context-slice mcp
 | `status`         | Show readiness, schema, cache freshness, and last refresh.       |
 | `doctor`         | Check repository, Java source, cache, and MCP command readiness. |
 | `preview <task>` | Return a deterministic, strict-budget context preview.           |
+| `mark-dirty`     | Force hash verification for changed files.                       |
 | `mcp`            | Start the stdio MCP server with the stable public command.       |
 
 Use `--repo /absolute/path` to select a repository. `--json` provides a stable automation-oriented result. Normal commands are quiet; `--explain` displays why each item was included or omitted.
@@ -128,6 +129,10 @@ npm run benchmark:v07
 Reports are written under `benchmarks/results/`. Packaging validation is
 available with `npm run benchmark:v08`.
 
+On the current macOS arm64 Java fixture, the workflow benchmark measured a
+median 6.309 ms one-file incremental refresh; this is local evidence, not a
+universal latency guarantee.
+
 ## Limitations
 
 - Java, TypeScript, TSX, JavaScript, Python, Rust and Go only; no other languages, embeddings, vector database, compiler, tsserver, type checker, rust-analyzer, rustc, or LSP integration.
@@ -141,6 +146,7 @@ available with `npm run benchmark:v08`.
 - Token counts are estimates, not model-provider usage telemetry.
 - Sibling composition uses syntactic evidence (`this.field` and Java field names). State shared through an intermediate object is not detected.
 - The local index is an aid to request context, not a substitute for code review or tests.
+- Metadata is the fast freshness path. Dirty notifications verify file content hashes; if an external tool changes a file without a watcher event, run `context-slice mark-dirty [file]` before requesting context.
 - The Claude Code marketplace plugin needs npm registry access on first use to install `context-slice@1.9.0` and its native dependencies; offline use works only after the npm cache is populated.
 - The Claude plugin is validated with Claude Code 2.1.285 on macOS arm64. Other Claude Code releases and plugin hosts may differ in MCP startup behavior.
 - Validated on macOS arm64 (Node 20.19.5 and 22.12.0). Linux and Windows are unverified.

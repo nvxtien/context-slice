@@ -1,6 +1,6 @@
 {
   "version": "0.7",
-  "generatedAt": "2026-09-19T18:00:34.952Z",
+  "generatedAt": "2026-10-08T21:08:02.418Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -28,70 +28,70 @@
     {
       "id": "fresh-init",
       "samplesMs": [
-        25.983,
-        11.904,
-        13.252
+        30.348,
+        16.117,
+        19.965
       ],
-      "medianMs": 13.252,
-      "worstMs": 25.983,
+      "medianMs": 19.965,
+      "worstMs": 30.348,
       "filesReparsed": 4
     },
     {
       "id": "cold-index",
       "samplesMs": [
-        12.651,
-        10.19,
-        12.891
+        14.397,
+        16.676,
+        18.739
       ],
-      "medianMs": 12.651,
-      "worstMs": 12.891,
+      "medianMs": 16.676,
+      "worstMs": 18.739,
       "filesReparsed": 4
     },
     {
       "id": "first-preview",
       "samplesMs": [
-        4.637,
-        5.013,
-        3.497
+        1.635,
+        1.509,
+        2.143
       ],
-      "medianMs": 4.637,
-      "worstMs": 5.013,
+      "medianMs": 1.635,
+      "worstMs": 2.143,
       "filesReparsed": 0
     },
     {
       "id": "warm-preview",
       "samplesMs": [
-        1.009,
-        0.813,
-        0.622
+        1.412,
+        1.389,
+        1.487
       ],
-      "medianMs": 0.813,
-      "worstMs": 1.009
+      "medianMs": 1.412,
+      "worstMs": 1.487
     },
     {
       "id": "one-file-edit-refresh",
       "samplesMs": [
-        8.911
+        6.309
       ],
-      "medianMs": 8.911,
-      "worstMs": 8.911,
+      "medianMs": 6.309,
+      "worstMs": 6.309,
       "filesReparsed": 1
     },
     {
       "id": "mcp-startup-query",
       "samplesMs": [
-        509.419
+        646.644
       ],
-      "medianMs": 509.419,
-      "worstMs": 509.419
+      "medianMs": 646.644,
+      "worstMs": 646.644
     },
     {
       "id": "mcp-subsequent-query",
       "samplesMs": [
-        11.799
+        4.573
       ],
-      "medianMs": 11.799,
-      "worstMs": 11.799
+      "medianMs": 4.573,
+      "worstMs": 4.573
     }
   ],
   "staleIndex": {
@@ -100,7 +100,7 @@
   },
   "context": {
     "task": "explain retryPayment",
-    "estimatedTokens": 162,
+    "estimatedTokens": 226,
     "budget": 1200,
     "wholeFileFallback": false,
     "omittedItems": 0
