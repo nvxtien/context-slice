@@ -32,7 +32,7 @@
     "cli": "tsx src/cli.ts",
     "package-smoke": "tsx scripts/package-smoke-test.ts",
     "release:rc": "tsx scripts/clean-room-rc.ts",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "node --import tsx --test \"tests/*.test.ts\"",
     "benchmark": "tsx benchmarks/v1.8-java-jsoup.ts",
     "benchmark:checkouts": "tsx benchmarks/fetch-checkouts.ts",
     "benchmark:v03": "npm run benchmark:checkouts && tsx benchmarks/v0.3-real-repositories.ts",
