@@ -37,7 +37,8 @@ export async function startMcpServer(
 ) {
   const resolvedRoot = resolveRepositoryRoot({ repository: root });
   const index = new ProjectIndex(resolvedRoot);
-  new ProjectFileWatcher(resolvedRoot);
+  const watcher = new ProjectFileWatcher(resolvedRoot);
+  process.stdin.once("end", () => watcher.close());
   const server = new McpServer({
     name: packageInfo.name,
     version: packageInfo.version,
