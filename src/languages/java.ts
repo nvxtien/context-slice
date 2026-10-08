@@ -6,6 +6,46 @@ import {
   type ResolveContext,
 } from "./adapter.js";
 
+// Keywords that can be followed by `<identifier>` in Java source without declaring that
+// identifier's type, so a bare "<word> <receiverText>" match must reject them to avoid
+// e.g. "return StringUtil.foo()" being misread as a variable "StringUtil" of type "return".
+const NON_TYPE_KEYWORDS = new Set([
+  "return",
+  "new",
+  "throw",
+  "yield",
+  "case",
+  "else",
+  "instanceof",
+  "assert",
+  "synchronized",
+  "catch",
+  "do",
+  "while",
+  "if",
+  "for",
+  "switch",
+  "try",
+  "finally",
+  "break",
+  "continue",
+]);
+/** The declared type preceding `receiverText` in a `Type receiverText` style occurrence
+ * anywhere in `source`, skipping any match whose preceding word is a keyword rather than
+ * a real type name. */
+function declaredTypeOf(
+  source: string,
+  receiverText: string,
+): string | undefined {
+  const pattern = new RegExp(
+    `\\b([A-Za-z_$][\\w$]*)\\s+${receiverText}\\b`,
+    "g",
+  );
+  for (const match of source.matchAll(pattern))
+    if (!NON_TYPE_KEYWORDS.has(match[1])) return match[1];
+  return undefined;
+}
+
 export const javaAdapter: LanguageAdapter = {
   id: "java",
   label: "Java",
@@ -33,19 +73,8 @@ export const javaAdapter: LanguageAdapter = {
         (candidate) => candidate.parentId === caller.parentId,
       );
       const source = sourceOf(caller);
-      const declaredTypeMatch = call.receiverText
-        ? source.match(
-            new RegExp(
-              `(?:\\b([A-Za-z_$][\\w$]*)\\s+${call.receiverText}\\b|\\b([A-Za-z_$][\\w$]*)\\s+${call.receiverText}\\s*[=;])`,
-            ),
-          )
-        : undefined;
       const declaredType = call.receiverText
-        ? (declaredTypeMatch?.[1] ??
-          declaredTypeMatch?.[2] ??
-          source.match(
-            new RegExp(`\\b([A-Za-z_$][\\w$]*)\\s+${call.receiverText}\\b`),
-          )?.[1])
+        ? declaredTypeOf(source, call.receiverText)
         : undefined;
       const receiverType =
         declaredType ??

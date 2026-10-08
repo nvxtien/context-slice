@@ -113,19 +113,22 @@ const calls: Record<string, OracleCall[]> = {
     { calleeName: "addIssueToContext" },
     // helpers/util.ts / types.ts: getParsedType(input.data) imported from util
     { calleeName: "getParsedType" },
-    // Known gap (a): ZodType declares `abstract _parse(input): ParseReturnType<Output>;`
-    // with no body (types.ts line 170) — the parser only extracts method symbols for
-    // concrete bodies, so `this._parse(input)` called from ZodType._parseSync /
-    // ZodType._parseAsync / ZodType.safeParseAsync stays unresolved even though the
-    // method is declared right there. Confirmed by running the indexer: all three
-    // call sites have receiverText "this", resolutionKind "unresolved".
-    { calleeName: "_parse", receiverText: "this", resolved: false },
-    // Known gap (b): `const stringType = ZodString.create;` (types.ts line 5046) is
-    // indexed as kind "variable" (its initializer is a property-access, not a
-    // function/arrow literal), so `stringType()` (used in `const ostring = () =>
-    // stringType().optional()`) stays unresolved despite being statically trivial
-    // to follow. Confirmed by running the indexer: resolutionKind "unresolved".
-    { calleeName: "stringType", resolved: false },
+    // FIXED (was known gap (a)): ZodType declares `abstract _parse(input):
+    // ParseReturnType<Output>;` with no body (types.ts line 170). The parser used to
+    // only extract method symbols for concrete bodies, so `this._parse(input)` called
+    // from ZodType._parseSync / ZodType._parseAsync / ZodType.safeParseAsync stayed
+    // unresolved even though the method is declared right there. classMembers() now
+    // also handles `abstract_method_signature` nodes (the TS grammar's node type for
+    // a class's abstract method declaration, distinct from interface method_signature
+    // only by node type, not shape), so these three call sites resolve exact/this-member.
+    { calleeName: "_parse", receiverText: "this", resolved: true },
+    // FIXED (was known gap (b)): `const stringType = ZodString.create;` (types.ts
+    // line 5046) is indexed as kind "variable" since its initializer is a
+    // property-access, not a function/arrow literal. parse.ts now records that as
+    // `metadata.aliasOf: "ZodString.create"` on the variable symbol, and resolve.ts's
+    // bare-call path follows it through the same static-member lookup a direct
+    // `ZodString.create()` call would use, so `stringType()` resolves exact/static.
+    { calleeName: "stringType", resolved: true },
   ],
 };
 

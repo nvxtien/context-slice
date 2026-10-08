@@ -539,6 +539,30 @@ export function resolveTypeScriptCalls(context: ResolveContext) {
       );
       continue;
     }
+    // A module-level `const x = Type.member;` makes `x()` reach that static member.
+    const alias = (symbolsByFile.get(file) ?? []).find(
+      (candidate) =>
+        candidate.kind === "variable" &&
+        candidate.name === call.calleeName &&
+        candidate.metadata?.aliasOf,
+    );
+    if (alias?.metadata?.aliasOf) {
+      const [typeName, member] = alias.metadata.aliasOf.split(".");
+      const aliasContainer = typeSymbol(file, typeName);
+      const aliasTarget = aliasContainer
+        ? primary(memberOf(aliasContainer, member))
+        : undefined;
+      if (aliasTarget) {
+        settle(
+          call,
+          aliasTarget,
+          "static",
+          "exact",
+          `${call.calleeName} aliases static member ${alias.metadata.aliasOf}`,
+        );
+        continue;
+      }
+    }
     const record = importFor(file, call.calleeName);
     if (record) {
       const exportedName =

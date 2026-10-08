@@ -146,26 +146,19 @@ const oracleResolutions: OracleResolution[] = [
     note: "validateMimeContentType(String) calls Validate.isFalse(cond, msg) with 2 args; Validate declares isFalse(boolean) and isFalse(boolean,String), argumentCount=2 disambiguates to the latter",
   },
   {
-    // KNOWN GAP (found during this task, not fixed -- out of scope): text() calls
-    // StringUtil.normaliseWhitespace(getWholeText()). java.ts's declared-type regex scans
-    // the WHOLE FILE's source (sourceOf(caller) returns the entire file, not just the
-    // caller's own body) looking for `IDENT\s+ReceiverText` to detect a local variable's
-    // declared type. TextNode.java happens to contain the literal text "return
-    // StringUtil" (the very call being resolved: "return StringUtil.normaliseWhitespace(...)"),
-    // which the regex misreads as a declared-variable pattern ("return" the "type", bound to
-    // a variable confusingly named "StringUtil"). That bogus declaredType="return" then fails
-    // to match any real symbol's parent name, so the call is left unresolved even though
-    // StringUtil.normaliseWhitespace(String) is a real, unique, resolvable static method.
-    // This is a real, pre-existing limitation of resolveCalls' declared-type heuristic on any
-    // "return Capitalized.method(...)" call site (the same false match breaks
-    // StringUtil.isBlank(...) at TextNode.java:59 and Parser.parse(...) at Jsoup.java:37) --
-    // recorded here as found, not papered over or fixed by this task.
+    // FIXED (was a KNOWN GAP): text() calls StringUtil.normaliseWhitespace(getWholeText()).
+    // java.ts's declared-type lookup used to misread the literal text "return StringUtil"
+    // (this same call site) as a declared-variable pattern ("return" the "type", bound to a
+    // variable confusingly named "StringUtil"), because it scanned the whole file for ANY
+    // "<word> receiverText" occurrence without excluding keywords. declaredTypeOf() now skips
+    // matches whose preceding word is a Java keyword (return/new/throw/etc.), so this resolves
+    // correctly as a static call.
     calleeName: "normaliseWhitespace",
     receiverText: "StringUtil",
     file: "src/main/java/org/jsoup/nodes/TextNode.java",
     line: 33,
-    expectedKind: "unresolved",
-    note: "text() calls StringUtil.normaliseWhitespace(getWholeText()); stays unresolved because java.ts's declared-type regex scans the whole file and misreads the literal text \"return StringUtil\" (this same call site) as a declared-variable pattern, overriding the correct capitalized-receiver static-call inference -- a real, pre-existing bug this task did not fix",
+    expectedKind: "static",
+    note: "text() calls StringUtil.normaliseWhitespace(getWholeText()); now resolves correctly now that declaredTypeOf() rejects the Java keyword \"return\" as a false declared-type match",
   },
 ];
 

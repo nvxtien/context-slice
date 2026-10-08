@@ -76,6 +76,8 @@ export interface SymbolMetadata {
   methodSignature?: string;
   /** Go: a function's declared return type (bare, pointer-stripped; first value of a multi-return) — used to resolve "x := NewFoo()" to its real constructed type instead of guessing from the function's name. */
   returnType?: string;
+  /** TypeScript: a module-level `const x = Type.member;` variable's target, as "Type.member" — lets a later bare call `x()` resolve through that static/namespace member instead of a dead end. */
+  aliasOf?: string;
 }
 export interface SymbolRecord {
   id: string;

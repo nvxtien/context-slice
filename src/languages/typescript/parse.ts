@@ -593,7 +593,10 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
         }
         continue;
       }
-      if (member.type === "method_signature") {
+      if (
+        member.type === "method_signature" ||
+        member.type === "abstract_method_signature"
+      ) {
         const name = text(field(member, "name"));
         const parameters = parameterSignature(field(member, "parameters"));
         addSymbol(member, "method", name, chain, {
@@ -833,10 +836,24 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
             continue;
           }
           // Only module-level values are searchable symbols; locals are not.
-          if (name && chain.length === 0 && owner === undefined)
+          if (name && chain.length === 0 && owner === undefined) {
+            const object =
+              value?.type === "member_expression"
+                ? field(value, "object")
+                : undefined;
+            const property =
+              value?.type === "member_expression"
+                ? field(value, "property")
+                : undefined;
+            const aliasOf =
+              object?.type === "identifier" && property?.type === "property_identifier"
+                ? `${object.text}.${property.text}`
+                : undefined;
             addSymbol(declarator, "variable", name, chain, {
               signature: `${name}${text(field(declarator, "type"))}`,
+              metadata: aliasOf ? { aliasOf } : undefined,
             });
+          }
           if (value) visit(value, owner, chain);
         }
         return;
