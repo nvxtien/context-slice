@@ -4,6 +4,7 @@ import {
   registerEnterpriseExtractor,
   registerEnterpriseResolver,
 } from "./registry.js";
+import { bareName, splitTopLevel } from "./shared.js";
 
 // Two-phase design: the per-file extractor only records injection points (type name,
 // optional @Qualifier) as provisional "unresolved" relations; bean identity (§13) needs
@@ -21,11 +22,6 @@ const STEREOTYPES = new Set([
 ]);
 const INJECT_ANNOTATIONS = new Set(["Autowired", "Inject", "Resource"]);
 
-/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Autowired" -> "Autowired". */
-function bareName(annotation: string): string {
-  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
-}
-
 /** Text between the first top-level "(" and its matching ")", string-aware. */
 function firstParenGroup(text: string): string | undefined {
   let inString = false;
@@ -41,26 +37,6 @@ function firstParenGroup(text: string): string | undefined {
   return undefined;
 }
 
-/** Splits on commas outside (), <>, and strings. */
-function splitTopLevel(text: string): string[] {
-  const parts: string[] = [];
-  let inString = false;
-  let depth = 0;
-  let last = 0;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"' && text[i - 1] !== "\\") inString = !inString;
-    if (inString) continue;
-    if (ch === "(" || ch === "<") depth++;
-    else if (ch === ")" || ch === ">") depth--;
-    else if (ch === "," && depth === 0) {
-      parts.push(text.slice(last, i));
-      last = i + 1;
-    }
-  }
-  parts.push(text.slice(last));
-  return parts.map((p) => p.trim()).filter(Boolean);
-}
 
 /** "@Qualifier("x") final a.b.Repo repo" -> { type: "Repo", name: "repo", qualifier: "x" }. */
 function parseDeclaration(text: string) {

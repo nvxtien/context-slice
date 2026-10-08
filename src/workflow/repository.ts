@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { adapterFor, ignoredDirectories } from "../languages/adapter.js";
 import "../languages/java.js";
@@ -27,12 +27,29 @@ export interface RepositoryOptions {
   repository?: string;
 }
 
-function hasSupportedSource(directory: string): boolean {
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+function hasSupportedSource(
+  directory: string,
+  visited = new Set<string>(),
+): boolean {
+  let realDirectory: string;
+  try {
+    realDirectory = realpathSync(directory);
+  } catch {
+    return false;
+  }
+  if (visited.has(realDirectory)) return false;
+  visited.add(realDirectory);
+  let entries;
+  try {
+    entries = readdirSync(directory, { withFileTypes: true });
+  } catch {
+    return false;
+  }
+  for (const entry of entries) {
     if (ignored.has(entry.name)) continue;
     const path = resolve(directory, entry.name);
     if (entry.isFile() && adapterFor(entry.name)) return true;
-    if (entry.isDirectory() && hasSupportedSource(path)) return true;
+    if (entry.isDirectory() && hasSupportedSource(path, visited)) return true;
   }
   return false;
 }

@@ -1,6 +1,7 @@
 import type { SymbolRecord } from "../../../types/model.js";
 import type { EnterpriseRelation } from "../../../types/enterprise.js";
 import { registerEnterpriseExtractor } from "./registry.js";
+import { bareName, header, splitTopLevel } from "./shared.js";
 
 const KEPT_ATTRS = new Set([
   "readOnly",
@@ -10,11 +11,6 @@ const KEPT_ATTRS = new Set([
   "noRollbackFor",
   "timeout",
 ]);
-
-/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Transactional" -> "Transactional". */
-function bareName(annotation: string): string {
-  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
-}
 
 /**
  * Matches an already-AST-confirmed @Transactional annotation's own argument text. Detection
@@ -27,49 +23,6 @@ function bareName(annotation: string): string {
  */
 function transactionalArgsRegex(): RegExp {
   return /@(?:[\w.]+\.)?Transactional(?:\(([^]*?)\))?/;
-}
-
-/**
- * The symbol's own header text (annotations + declaration), stopping before its body's
- * opening "{". Same string/paren-depth-aware scan as spring-mvc.ts's header(), re-derived
- * here (each family extractor is self-contained, per convention) rather than imported —
- * a naive indexOf("{") would misfire if an attribute value ever contained a brace.
- */
-function header(symbol: SymbolRecord): string {
-  const text = symbol.source;
-  let inString = false;
-  let depth = 0;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"' && text[i - 1] !== "\\") inString = !inString;
-    if (inString) continue;
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    else if (ch === "{" && depth === 0) return text.slice(0, i);
-  }
-  return text;
-}
-
-/** Splits an annotation argument list on commas outside (), strings, so dotted constants
- * (Propagation.REQUIRES_NEW) and .class literals never get mis-split. */
-function splitTopLevel(text: string): string[] {
-  const parts: string[] = [];
-  let inString = false;
-  let depth = 0;
-  let last = 0;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"' && text[i - 1] !== "\\") inString = !inString;
-    if (inString) continue;
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    else if (ch === "," && depth === 0) {
-      parts.push(text.slice(last, i));
-      last = i + 1;
-    }
-  }
-  parts.push(text.slice(last));
-  return parts.map((p) => p.trim()).filter(Boolean);
 }
 
 function extractTransactionRelations(

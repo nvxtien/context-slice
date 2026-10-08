@@ -33,10 +33,18 @@ export class IndexStorage {
   private readonly db: Database.Database;
   constructor(root: string) {
     const directory = join(root, ".context-slice");
-    mkdirSync(directory, { recursive: true });
-    // Self-ignoring cache: keeps `git status` clean without editing the repository's own .gitignore.
-    if (!existsSync(join(directory, ".gitignore")))
-      writeFileSync(join(directory, ".gitignore"), "*\n");
+    try {
+      mkdirSync(directory, { recursive: true });
+      // Self-ignoring cache: keeps `git status` clean without editing the repository's own .gitignore.
+      if (!existsSync(join(directory, ".gitignore")))
+        writeFileSync(join(directory, ".gitignore"), "*\n");
+    } catch (error) {
+      throw new WorkflowError(
+        "INDEX_CORRUPT",
+        `Cannot create index cache directory: ${directory} (${error instanceof Error ? error.message : String(error)})`,
+        "Check write permissions on the repository root, or run from a writable checkout.",
+      );
+    }
     this.db = new Database(join(directory, "index.sqlite"));
     try {
       this.db.pragma("schema_version");
@@ -86,6 +94,7 @@ export class IndexStorage {
         try {
           return JSON.parse(row.payload) as T;
         } catch (error) {
+          this.db.close();
           throw new WorkflowError(
             "INDEX_CORRUPT",
             `Unreadable index cache payload in ${table}: ${error instanceof Error ? error.message : String(error)}`,

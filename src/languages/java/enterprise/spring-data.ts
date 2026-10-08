@@ -4,6 +4,7 @@ import {
   registerEnterpriseExtractor,
   registerEnterpriseResolver,
 } from "./registry.js";
+import { bareName } from "./shared.js";
 
 // Two-phase like jpa-entity.ts: provisional PERSISTS_ENTITY carries the raw entity simple
 // name in targetLabel; this file's own resolver (separate from jpa-entity's, each file
@@ -13,11 +14,6 @@ import {
 const BASE_RE =
   /\b(?:JpaRepository|CrudRepository|PagingAndSortingRepository|Repository)\s*</g;
 const DERIVED_RE = /^(?:find|exists|delete|count)By(?=[A-Z])/;
-
-/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...Query" -> "Query". */
-function bareName(annotation: string): string {
-  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
-}
 
 /** Top-level type arguments of the `<...>` opening at `open`, or undefined if unbalanced. */
 function typeArguments(
@@ -230,6 +226,13 @@ function resolveRepositoryQueryPropagation(
     list.push(s);
     interfacesByName.set(s.name, list);
   }
+  const methodsByParentId = new Map<string, SymbolRecord[]>();
+  for (const s of allSymbols) {
+    if (s.kind !== "method" || !s.parentId) continue;
+    const list = methodsByParentId.get(s.parentId);
+    if (list) list.push(s);
+    else methodsByParentId.set(s.parentId, [s]);
+  }
 
   const existingQuerySources = new Set(
     relations
@@ -255,9 +258,7 @@ function resolveRepositoryQueryPropagation(
       queue.push(...(supIface.supertypes ?? []));
       if (persistsByInterface.has(supIface.id)) continue; // has its own generic: already extracted directly
 
-      for (const method of allSymbols) {
-        if (method.kind !== "method" || method.parentId !== supIface.id)
-          continue;
+      for (const method of methodsByParentId.get(supIface.id) ?? []) {
         if (existingQuerySources.has(method.id)) continue;
         const properties = derivedProperties(method.name);
         const query = queryText(method);

@@ -31,9 +31,13 @@ export function extractEnterpriseRelations(
   filePath: string,
   source: string,
 ): EnterpriseRelation[] {
-  return extractors.flatMap((extractor) =>
-    extractor(symbols, filePath, source),
-  );
+  return extractors.flatMap((extractor) => {
+    try {
+      return extractor(symbols, filePath, source);
+    } catch {
+      return [];
+    }
+  });
 }
 
 export function registerEnterpriseResolver(resolver: EnterpriseResolver) {
@@ -45,10 +49,13 @@ export function resolveEnterpriseRelations(
   relations: EnterpriseRelation[],
   allSymbols: SymbolRecord[],
 ): EnterpriseRelation[] {
-  return resolvers.reduce(
-    (acc, resolver) => resolver(acc, allSymbols),
-    relations,
-  );
+  return resolvers.reduce((acc, resolver) => {
+    try {
+      return resolver(acc, allSymbols);
+    } catch {
+      return acc;
+    }
+  }, relations);
 }
 
 /** Test-only: clears registrations between test files so registry state doesn't leak. */

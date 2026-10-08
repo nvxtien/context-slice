@@ -4,6 +4,7 @@ import {
   registerEnterpriseExtractor,
   registerEnterpriseResolver,
 } from "./registry.js";
+import { bareName } from "./shared.js";
 
 // Two-phase, like dependency-injection.ts: the per-file extractor emits provisional
 // "unresolved" ENTITY_RELATIONs whose targetLabel carries the raw target simple name
@@ -17,11 +18,6 @@ const RELATION_ANNOTATIONS = new Set([
   "ManyToMany",
 ]);
 const COLLECTION_RE = /\b(?:List|Set|Collection)<\s*([\w.]+)\s*>/;
-
-/** Strips a leading "@" and any dotted package prefix, e.g. "@javax.persistence.ManyToOne" -> "ManyToOne". */
-function bareName(annotation: string): string {
-  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
-}
 
 /**
  * Matches ONE specific, already-AST-confirmed relationship annotation's own argument text

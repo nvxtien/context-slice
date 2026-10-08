@@ -9,6 +9,7 @@ import { packageInfo } from "../package-info.js";
 import { estimateTokens } from "../planner/budget.js";
 import { renderSignature, renderSkeleton } from "../render/compact-context.js";
 import { buildPreview } from "../workflow/preview.js";
+import { resolveRepositoryRoot } from "../workflow/repository.js";
 
 const result = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
@@ -30,7 +31,8 @@ export function gitDiffArgs(base?: string, head?: string) {
 export async function startMcpServer(
   root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd(),
 ) {
-  const index = new ProjectIndex(root);
+  const resolvedRoot = resolveRepositoryRoot({ repository: root });
+  const index = new ProjectIndex(resolvedRoot);
   const server = new McpServer({
     name: packageInfo.name,
     version: packageInfo.version,
@@ -166,7 +168,7 @@ export async function startMcpServer(
       let diff = "";
       try {
         diff = execFileSync("git", ["diff", ...args], {
-          cwd: root,
+          cwd: resolvedRoot,
           encoding: "utf8",
           maxBuffer: 2_000_000,
         });

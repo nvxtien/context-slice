@@ -38,7 +38,17 @@ export function moduleIndex(files: string[]) {
       base === "__init__" ? packageSegments : [...packageSegments, base];
     const module = parts.join(".");
     if (module) {
-      byModule.set(module, file);
+      if (anchor < 0) {
+        // No package ancestor: a bare basename like "utils" would collide
+        // across unrelated script directories, so anchor on the full
+        // repo-relative path instead, keeping the bare name only as a
+        // first-registered alias for lookups that still use it.
+        const fullModule = [...segments, base].join(".");
+        if (!byModule.has(fullModule)) byModule.set(fullModule, file);
+        if (!byModule.has(module)) byModule.set(module, file);
+      } else {
+        byModule.set(module, file);
+      }
       byFile.set(file, { module, packagePath: packageSegments });
     } else byFile.set(file, { module: "", packagePath: [] });
   }

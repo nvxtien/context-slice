@@ -499,7 +499,6 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
     parent: SymbolRecord,
   ) {
     if (!body) return;
-    const assigned = assignedPropertyTypes(body);
     for (const member of body.namedChildren) {
       if (member.type === "method_definition") {
         const name = text(field(member, "name"));
@@ -865,7 +864,11 @@ export function parseTypeScript(filePath: string, source: string): ParsedFile {
     }
   }
 
-  walk(tree.rootNode, undefined, []);
+  try {
+    walk(tree.rootNode, undefined, []);
+  } catch {
+    return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
+  }
 
   if (moduleSymbol) {
     // Represent the file's top-level code: imports, configuration and side effects.

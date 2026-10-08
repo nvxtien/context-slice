@@ -4,6 +4,7 @@ import type {
   EnterpriseRelationConfidence,
 } from "../../../types/enterprise.js";
 import { registerEnterpriseExtractor } from "./registry.js";
+import { bareName, header } from "./shared.js";
 
 /**
  * Spring MVC mapping annotation -> HTTP method label. A bare @RequestMapping's
@@ -24,11 +25,6 @@ const CONST_RE_TEMPLATE = (name: string) =>
     `(?:static\\s+final|final\\s+static)\\s+String\\s+${name}\\s*=\\s*"([^"]*)"`,
   );
 
-/** Strips a leading "@" and any dotted package prefix, e.g. "@org.springframework...GetMapping" -> "GetMapping". */
-function bareName(annotation: string): string {
-  return annotation.slice(annotation.lastIndexOf(".") + 1).replace("@", "");
-}
-
 /**
  * Matches ONE specific, already-AST-confirmed mapping annotation's own argument text.
  * Detection of WHICH annotation (if any) is present happens via SymbolRecord.annotations,
@@ -44,27 +40,6 @@ function bareName(annotation: string): string {
  */
 function mappingArgsRegex(name: string): RegExp {
   return new RegExp(`@(?:[\\w.]+\\.)?${name}(?:\\(([^)]*)\\))?`);
-}
-
-/**
- * The symbol's own header text (annotations + declaration), stopping before its body's
- * opening "{". A naive indexOf("{") breaks when a mapping annotation's path literal itself
- * contains "{" (e.g. "/{id}"), so this tracks string-literal and paren depth to find the
- * real body brace instead.
- */
-function header(symbol: SymbolRecord): string {
-  const text = symbol.source;
-  let inString = false;
-  let depth = 0;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"' && text[i - 1] !== "\\") inString = !inString;
-    if (inString) continue;
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    else if (ch === "{" && depth === 0) return text.slice(0, i);
-  }
-  return text;
 }
 
 type PathResolution =

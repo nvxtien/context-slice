@@ -423,7 +423,11 @@ export function parsePython(filePath: string, source: string): ParsedFile {
     }
   }
 
-  walk(tree.rootNode, undefined, []);
+  try {
+    walk(tree.rootNode, undefined, []);
+  } catch {
+    return { symbols: [], calls: [], imports: [], exports: [], parseError: true };
+  }
 
   // Two declarations can share a canonical identity (conditional defs, overloads).
   const identityCounts = new Map<string, number>();

@@ -52,7 +52,14 @@ function parse(argv: string[]): Arguments {
       continue;
     }
     if (value === "--repo") {
-      result.repository = argv[++index];
+      const raw = argv[++index];
+      if (!raw || raw.startsWith("-"))
+        throw new WorkflowError(
+          "INVALID_ARGUMENT",
+          `Invalid --repo value: ${raw ?? "missing"}`,
+          "Pass a repository path after --repo.",
+        );
+      result.repository = raw;
       continue;
     }
     if (value === "--budget") {
