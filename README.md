@@ -57,6 +57,15 @@ context-slice init
 context-slice preview "explain the payment retry flow" --explain
 ```
 
+## How it works
+
+1. Discover a repository and scan supported source while ignoring common generated/build directories.
+2. Store symbols, call edges, hashes, schema version, and refresh time in a local SQLite cache.
+3. Refresh before preview or MCP tool execution so changed source files are not silently served stale.
+4. Select a target from task text, then include the target body plus ranked direct callers/callees until the strict token budget is full.
+
+Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `context.preview`, `context.slice`, and `context.diff`. MCP stdout contains protocol messages only; diagnostics must not corrupt stdio framing.
+
 ## Supported languages
 
 | Language   | Extensions                     | Notes                                                                                                                                                                             |
@@ -179,15 +188,6 @@ claude mcp list
 
 The expected result is `plugin:context-slice:context-slice - ✔ Connected`.
 Codex can verify the same server with `codex mcp list`.
-
-## How it works
-
-1. Discover a repository and scan supported source while ignoring common generated/build directories.
-2. Store symbols, call edges, hashes, schema version, and refresh time in a local SQLite cache.
-3. Refresh before preview or MCP tool execution so changed source files are not silently served stale.
-4. Select a target from task text, then include the target body plus ranked direct callers/callees until the strict token budget is full.
-
-Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `context.preview`, `context.slice`, and `context.diff`. MCP stdout contains protocol messages only; diagnostics must not corrupt stdio framing.
 
 ## Behavior
 
