@@ -25,5 +25,14 @@
     "source": "benchmarks/checkouts/chi",
     "scope": "whole repository (HTTP routing library)",
     "kind": "library"
+  },
+  {
+    "id": "gorilla-mux",
+    "scale": "small",
+    "url": "https://github.com/gorilla/mux.git",
+    "commit": "db9d1d0073d27a0a2d9a8c1bc52aa0af4374d265",
+    "source": "benchmarks/checkouts/gorilla-mux",
+    "scope": "whole repository (flat single-package HTTP router, ~2300 non-test lines)",
+    "kind": "library"
   }
 ]

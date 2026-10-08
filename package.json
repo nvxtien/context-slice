@@ -54,7 +54,8 @@
     "benchmark:v14-phase2": "npm run benchmark:checkouts && tsx benchmarks/v1.4-phase2-dependency-injection.ts",
     "benchmark:v14-phase3": "npm run benchmark:checkouts && tsx benchmarks/v1.4-phase3-transactions.ts",
     "benchmark:v14-phase4": "npm run benchmark:checkouts && tsx benchmarks/v1.4-phase4-jpa-spring-data.ts",
-    "benchmark:v18-typescript": "npm run benchmark:checkouts && tsx benchmarks/v1.8-typescript-zod-v3.ts"
+    "benchmark:v18-typescript": "npm run benchmark:checkouts && tsx benchmarks/v1.8-typescript-zod-v3.ts",
+    "benchmark:v18-go": "npm run benchmark:checkouts && tsx benchmarks/v1.8-go-gorilla-mux.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
