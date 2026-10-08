@@ -19,6 +19,13 @@ It is local, read-only, and deterministic: Tree-sitter performs the structural
 analysis, SQLite stores the index, and no source code is sent to a hosted
 service by ContextSlice.
 
+The result is:
+
+- Less context to read and pay for: return the target symbol plus the most relevant callers and callees instead of whole files.
+- Better signal: rank results by task relevance and keep unresolved runtime dispatch explicit instead of guessing.
+- Predictable output: enforce a token budget and explain why items were included or omitted.
+- Local control: keep source analysis and the SQLite index in the repository; the target source is never edited.
+
 ## Quick start
 
 ### Claude Code plugin
