@@ -326,7 +326,17 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
       if (n.type === "block") return [n.startIndex, n.endIndex];
     return undefined;
   };
-  /** True when the block declaring the item at `at` also encloses the call being resolved. */
+  /**
+   * True when the block declaring the item at `at` also encloses the call being resolved.
+   * Converts `currentCall`'s position with `sample`'s own file line table (`offsetIn(sample, ...)`),
+   * so `sample.filePath` MUST equal the file `currentCall` lives in, or the comparison is garbage.
+   * This holds today only because every caller reaching here through a cross-file lookup
+   * (fieldTy / aliasTy / armTy, whose `from` can be a decl in another file) first checks
+   * `inFn(from)` and bails when it's true -- which is also what `visible()` relies on to exclude
+   * a fn-local `use`/item unrelated to that cross-file `from`. Adding a new caller that passes a
+   * cross-file `sample` without that same `inFn` guard would silently reintroduce file-mismatched
+   * offsets here.
+   */
   const declEnclosesCall = (
     sample: SymbolRecord,
     at: SymbolRecord["range"],
