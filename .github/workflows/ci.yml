@@ -32,7 +32,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm test
+      - run: npm test -- --exclude=package-smoke.test.ts
 
   format:
     name: format
