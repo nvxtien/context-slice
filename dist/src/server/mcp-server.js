@@ -32,7 +32,10 @@ export async function startMcpServer(root = process.env.CONTEXT_SLICE_ROOT ?? pr
     const resolvedRoot = resolveRepositoryRoot({ repository: root });
     const index = new ProjectIndex(resolvedRoot);
     const watcher = new ProjectFileWatcher(resolvedRoot);
-    process.stdin.once("end", () => watcher.close());
+    process.stdin.once("end", () => {
+        watcher.close();
+        index.close();
+    });
     const server = new McpServer({
         name: packageInfo.name,
         version: packageInfo.version,

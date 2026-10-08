@@ -137,6 +137,11 @@ export class ProjectIndex {
     this.lazySymbolContext = { root: this.root };
     this.enterpriseRegistry = createEnterpriseRegistry();
   }
+
+  close() {
+    this.storage.close();
+  }
+
   private files(dir: string, visited = new Set<string>()): string[] {
     let realDir: string;
     try {

@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync as removeSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
@@ -9,6 +14,18 @@ import { ProjectIndex } from "../src/indexer/index.js";
 import "../src/languages/go/index.js";
 
 type Files = Record<string, string>;
+const openIndexes = new Set<ProjectIndex>();
+
+function rmSync(path: string, options: Parameters<typeof removeSync>[1]) {
+  for (const index of openIndexes) {
+    if (index.root === path) {
+      index.close();
+      openIndexes.delete(index);
+    }
+  }
+  removeSync(path, options);
+}
+
 /** Mirrors tests/rust-call-resolution.test.ts's `withRepo`: resolution is inherently
  * cross-file, so these tests need real multi-file `ProjectIndex` fixtures on disk.
  * Returns both the index and its root dir so tests needing import resolution (which
@@ -21,6 +38,7 @@ function indexedGoProject(files: Files): { root: string; index: ProjectIndex } {
   }
   const index = new ProjectIndex(dir);
   index.rebuild();
+  openIndexes.add(index);
   return { root: dir, index };
 }
 
