@@ -57,6 +57,53 @@ test("cached parse errors remain visible and symbol updates count changed files 
   assert.equal(third.parseErrors, 1);
 });
 
+test("persists file signatures and the call graph digest", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-signatures-"));
+  writeFileSync(join(root, "main.ts"), "export function main() {}\n");
+  new ProjectIndex(root).rebuild();
+
+  const db = new Database(join(root, ".context-slice/index.sqlite"));
+  const columns = db.prepare("PRAGMA table_info(files)").all() as Array<{
+    name: string;
+  }>;
+  assert.deepEqual(
+    columns.map((column) => column.name),
+    [
+      "path",
+      "content_hash",
+      "language",
+      "parse_error",
+      "indexing_version",
+      "size",
+      "mtime_ms",
+      "ctime_ms",
+    ],
+  );
+  assert.ok(
+    (
+      db
+        .prepare("SELECT value FROM metadata WHERE key = 'calls_digest'")
+        .get() as { value?: string } | undefined
+    )?.value,
+  );
+  db.close();
+});
+
+test("a new index hydrates a current cache without rebuilding", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-hydrate-"));
+  writeFileSync(join(root, "main.ts"), "export function main() {}\n");
+  new ProjectIndex(root).rebuild();
+
+  const index = new ProjectIndex(root);
+  (index as unknown as { rebuild: () => never }).rebuild = () => {
+    throw new Error("rebuild should not run for a current cache");
+  };
+  const result = index.refreshIfStale();
+  assert.equal(result.freshness.state, "CURRENT");
+  assert.equal(result.summary.filesParsed, 0);
+  assert.equal(result.summary.cacheHits, 1);
+});
+
 test("freshness-gated refresh skips unchanged files and notices add/change/delete", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-freshness-"));
   const file = join(root, "main.ts");

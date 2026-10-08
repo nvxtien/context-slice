@@ -77,8 +77,8 @@ export async function startMcpServer(
       const refreshed = refresh();
       const target = one(symbol);
       const level = detail ?? "skeleton";
-      const calls = index.calls
-        .filter((call) => call.callerId === target.id)
+      const calls = index
+        .callsFor(target)
         .map(
           (call) =>
             `${call.receiverText ? `${call.receiverText}.` : ""}${call.calleeName} [${call.confidence}]`,

@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type {
@@ -13,17 +14,20 @@ import { WorkflowError } from "../workflow/errors.js";
 // Bump whenever any language adapter's parse OR resolve output changes: unchanged files and their cached (resolved)
 // call edges are otherwise reused from cache. Rust parse and resolve output is guarded by tests/rust-parse-snapshot.test.ts,
 // which refuses to regenerate its snapshot for changed output without a bump here.
-export const INDEX_VERSION = "1.13.0";
+export const INDEX_VERSION = "1.14.0";
 
 export interface IndexedFileRecord {
   hash: string;
   language: LanguageId;
   parseError: boolean;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
 }
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, content_hash TEXT NOT NULL, language TEXT NOT NULL, parse_error INTEGER NOT NULL, indexing_version TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, content_hash TEXT NOT NULL, language TEXT NOT NULL, parse_error INTEGER NOT NULL, indexing_version TEXT NOT NULL, size INTEGER NOT NULL, mtime_ms REAL NOT NULL, ctime_ms REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS symbols (id TEXT PRIMARY KEY, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY AUTOINCREMENT, caller_id TEXT NOT NULL, callee_name TEXT NOT NULL, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS imports (id INTEGER PRIMARY KEY AUTOINCREMENT, file_path TEXT NOT NULL, language TEXT NOT NULL, payload TEXT NOT NULL);
@@ -84,17 +88,25 @@ export class IndexStorage {
   load() {
     const files = new Map<string, IndexedFileRecord>();
     for (const row of this.db
-      .prepare("SELECT path, content_hash, language, parse_error FROM files")
+      .prepare(
+        "SELECT path, content_hash, language, parse_error, size, mtime_ms, ctime_ms FROM files",
+      )
       .all() as Array<{
       path: string;
       content_hash: string;
       language: string;
       parse_error: number;
+      size: number;
+      mtime_ms: number;
+      ctime_ms: number;
     }>)
       files.set(row.path, {
         hash: row.content_hash,
         language: row.language,
         parseError: row.parse_error !== 0,
+        size: row.size,
+        mtimeMs: row.mtime_ms,
+        ctimeMs: row.ctime_ms,
       });
     const rows = <T>(table: string) =>
       (
@@ -169,7 +181,7 @@ export class IndexStorage {
         this.db.prepare("DELETE FROM exports").run();
       }
       const fileStatement = this.db.prepare(
-        "INSERT OR REPLACE INTO files(path, content_hash, language, parse_error, indexing_version) VALUES (?, ?, ?, ?, ?)",
+        "INSERT OR REPLACE INTO files(path, content_hash, language, parse_error, indexing_version, size, mtime_ms, ctime_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       );
       for (const [path, record] of files)
         if (!incremental || changed.has(path))
@@ -179,6 +191,9 @@ export class IndexStorage {
             record.language,
             record.parseError ? 1 : 0,
             INDEX_VERSION,
+            record.size,
+            record.mtimeMs,
+            record.ctimeMs,
           );
       const symbolStatement = this.db.prepare(
         "INSERT INTO symbols(id, file_path, language, payload) VALUES (?, ?, ?, ?)",
@@ -217,43 +232,58 @@ export class IndexStorage {
       // calls. Instead, diff against what's already stored, by payload, as a MULTISET (two
       // distinct call sites can legitimately produce an identical payload) — so only rows that
       // actually changed cost a write, and everything identical is left untouched.
-      const existingCalls = this.db
-        .prepare("SELECT id, payload FROM calls")
-        .all() as Array<{ id: number; payload: string }>;
-      const existingIdsByPayload = new Map<string, number[]>();
-      for (const row of existingCalls) {
-        const ids = existingIdsByPayload.get(row.payload);
-        if (ids) ids.push(row.id);
-        else existingIdsByPayload.set(row.payload, [row.id]);
-      }
-      const insertCall = this.db.prepare(
-        "INSERT INTO calls(caller_id, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?)",
-      );
-      for (const call of calls) {
-        const payload = JSON.stringify(call);
-        const reusable = existingIdsByPayload.get(payload);
-        if (reusable?.length) {
-          // An identical row already exists in the table; keep it rather than
-          // deleting and reinserting the same bytes.
-          reusable.pop();
-          continue;
+      const digest = createHash("sha256");
+      for (const call of calls) digest.update(JSON.stringify(call));
+      const callsDigest = digest.digest("hex");
+      const previousCallsDigest = (
+        this.db
+          .prepare("SELECT value FROM metadata WHERE key = 'calls_digest'")
+          .get() as { value?: string } | undefined
+      )?.value;
+      if (previousCallsDigest !== callsDigest) {
+        const existingCalls = this.db
+          .prepare("SELECT id, payload FROM calls")
+          .all() as Array<{ id: number; payload: string }>;
+        const existingIdsByPayload = new Map<string, number[]>();
+        for (const row of existingCalls) {
+          const ids = existingIdsByPayload.get(row.payload);
+          if (ids) ids.push(row.id);
+          else existingIdsByPayload.set(row.payload, [row.id]);
         }
-        insertCall.run(
-          call.callerId,
-          call.calleeName,
-          call.filePath,
-          call.language ?? "java",
-          payload,
+        const insertCall = this.db.prepare(
+          "INSERT INTO calls(caller_id, callee_name, file_path, language, payload) VALUES (?, ?, ?, ?, ?)",
         );
+        for (const call of calls) {
+          const payload = JSON.stringify(call);
+          const reusable = existingIdsByPayload.get(payload);
+          if (reusable?.length) {
+            reusable.pop();
+            continue;
+          }
+          insertCall.run(
+            call.callerId,
+            call.calleeName,
+            call.filePath,
+            call.language ?? "java",
+            payload,
+          );
+        }
+        const deleteCallById = this.db.prepare(
+          "DELETE FROM calls WHERE id = ?",
+        );
+        for (const ids of existingIdsByPayload.values())
+          for (const id of ids) deleteCallById.run(id);
       }
-      const deleteCallById = this.db.prepare("DELETE FROM calls WHERE id = ?");
-      for (const ids of existingIdsByPayload.values())
-        for (const id of ids) deleteCallById.run(id);
       this.db
         .prepare(
           "INSERT OR REPLACE INTO metadata(key, value) VALUES ('last_refreshed_at', ?)",
         )
         .run(new Date().toISOString());
+      this.db
+        .prepare(
+          "INSERT OR REPLACE INTO metadata(key, value) VALUES ('calls_digest', ?)",
+        )
+        .run(callsDigest);
     });
     transaction();
   }

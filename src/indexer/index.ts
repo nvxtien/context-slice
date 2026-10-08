@@ -65,6 +65,10 @@ export class ProjectIndex {
   // callers()/dependencies()/composition lookup — those scans previously ran on every
   // preview/query request, not just on index rebuild.
   private symbolIndex = new Map<string, SymbolRecord>();
+  private symbolsByName = new Map<string, SymbolRecord[]>();
+  private symbolsByQualifiedName = new Map<string, SymbolRecord[]>();
+  private symbolsByCanonicalIdentity = new Map<string, SymbolRecord[]>();
+  private symbolsBySignature = new Map<string, SymbolRecord[]>();
   private callsByCaller = new Map<string, CallEdge[]>();
   private callsByTarget = new Map<string, CallEdge[]>();
   private childrenByParent = new Map<string, SymbolRecord[]>();
@@ -133,10 +137,25 @@ export class ProjectIndex {
    * helpers can look symbols up in O(1) instead of scanning the full arrays on every call. */
   private reindex() {
     this.symbolIndex = new Map(this.symbols.map((s) => [s.id, s]));
+    this.symbolsByName = new Map();
+    this.symbolsByQualifiedName = new Map();
+    this.symbolsByCanonicalIdentity = new Map();
+    this.symbolsBySignature = new Map();
     this.childrenByParent = new Map();
     this.moduleScopeSymbolByFile = new Map();
     this.methodCountByName = new Map();
     for (const s of this.symbols) {
+      for (const [key, map] of [
+        [s.name, this.symbolsByName],
+        [s.qualifiedName, this.symbolsByQualifiedName],
+        [s.canonicalIdentity, this.symbolsByCanonicalIdentity],
+        [s.signature, this.symbolsBySignature],
+      ] as const) {
+        if (!key) continue;
+        const matches = map.get(key);
+        if (matches) matches.push(s);
+        else map.set(key, [s]);
+      }
       if (s.parentId) {
         const siblings = this.childrenByParent.get(s.parentId);
         if (siblings) siblings.push(s);
@@ -204,27 +223,20 @@ export class ProjectIndex {
     }
     return this.computeFreshness(files);
   }
-  /** The expensive path: re-reads and sha256-hashes every source file's full contents and
-   * compares against the stored index. Only reached on a cold process (no prior
-   * refresh()/rebuild() yet) or when the cheap stat-based signature in inspect() detects a
-   * real change. */
-  private computeFreshness(files: string[]) {
-    const previous = this.storage.load();
-    const hashes = new Map<string, string>();
-    for (const file of files) {
-      const filePath = relative(this.root, file);
-      hashes.set(
-        filePath,
-        createHash("sha256").update(readFileSync(file, "utf8")).digest("hex"),
-      );
-    }
+  /** Compare filesystem metadata with the persisted index without reading source contents. */
+  private computeFreshness(files: string[], previous = this.storage.load()) {
+    const signatures = this.signatures(files);
     const hasIndex = previous.files.size > 0;
     const stale =
       hasIndex &&
-      (hashes.size !== previous.files.size ||
-        [...hashes].some(
-          ([path, hash]) => previous.files.get(path)?.hash !== hash,
-        ));
+      (signatures.size !== previous.files.size ||
+        [...signatures].some(([path, signature]) => {
+          const file = previous.files.get(path);
+          return (
+            !file ||
+            `${file.size}:${file.mtimeMs}:${file.ctimeMs}` !== signature
+          );
+        }));
     const metadata = this.storage.metadata();
     const counts = this.counts(files);
     return {
@@ -242,6 +254,56 @@ export class ProjectIndex {
       lastRefreshedAt: metadata.last_refreshed_at,
     };
   }
+  private hydrateCached(
+    files: string[],
+    signatures: Map<string, string>,
+    freshness: ReturnType<ProjectIndex["computeFreshness"]>,
+    previous = this.storage.load(),
+  ) {
+    this.hashes = previous.files;
+    this.symbols = previous.symbols;
+    this.calls = previous.calls;
+    this.imports = previous.imports;
+    this.exports = previous.exports;
+    this.enterpriseRelations = [];
+    const symbolsByFile = new Map<string, SymbolRecord[]>();
+    for (const symbol of this.symbols) {
+      const symbols = symbolsByFile.get(symbol.filePath) ?? [];
+      symbols.push(symbol);
+      symbolsByFile.set(symbol.filePath, symbols);
+    }
+    for (const [filePath, symbols] of symbolsByFile)
+      if (symbols.some((symbol) => symbol.language === "java"))
+        this.enterpriseRelations.push(
+          ...extractEnterpriseRelations(symbols, filePath, ""),
+        );
+    this.enterpriseRelations = resolveEnterpriseRelations(
+      this.enterpriseRelations,
+      this.symbols.filter((symbol) => symbol.language === "java"),
+    );
+    this.reindex();
+    const counts = this.counts(files);
+    const summary = {
+      files: files.length,
+      filesScanned: files.length,
+      filesParsed: 0,
+      parseErrors: [...this.hashes.values()].filter((file) => file.parseError)
+        .length,
+      cacheHits: files.length,
+      filesByExtension: counts.byExtension,
+      filesByLanguage: counts.byLanguage,
+      symbols: this.symbols.length,
+      symbolsUpdated: 0,
+      calls: this.calls.length,
+      imports: this.imports.length,
+      exports: this.exports.length,
+      elapsedMs: 0,
+    };
+    const result = { summary, freshness };
+    this.sourceSignatures = signatures;
+    this.cachedRefresh = result;
+    return result;
+  }
   refresh() {
     const summary = this.rebuild();
     // Set before inspect() so its cheap signature check can recognize the index it just
@@ -253,9 +315,16 @@ export class ProjectIndex {
     return result;
   }
   refreshIfStale() {
-    const next = this.signatures(this.files(this.root));
+    const files = this.files(this.root);
+    const next = this.signatures(files);
     if (this.cachedRefresh && this.sameSignatures(next))
       return this.cachedRefresh;
+    if (!this.cachedRefresh) {
+      const previous = this.storage.load();
+      const freshness = this.computeFreshness(files, previous);
+      if (freshness.state === "CURRENT")
+        return this.hydrateCached(files, next, freshness, previous);
+    }
     return this.refresh();
   }
   rebuild() {
@@ -292,12 +361,14 @@ export class ProjectIndex {
       const filePath = relative(this.root, file);
       const adapter = adapterFor(filePath);
       if (!adapter) continue;
-      const source = readFileSync(file, "utf8");
-      sourceCache.set(filePath, source);
-      const hash = createHash("sha256").update(source).digest("hex");
+      const stats = statSync(file);
       let fileSymbols: SymbolRecord[];
       const previousFile = previous.files.get(filePath);
-      if (previousFile?.hash === hash) {
+      if (
+        previousFile?.size === stats.size &&
+        previousFile.mtimeMs === stats.mtimeMs &&
+        previousFile.ctimeMs === stats.ctimeMs
+      ) {
         this.hashes.set(filePath, previousFile);
         if (previousFile.parseError) parseErrors++;
         fileSymbols = previousSymbols.get(filePath) ?? [];
@@ -307,6 +378,9 @@ export class ProjectIndex {
         this.exports.push(...(previousExports.get(filePath) ?? []));
         cacheHits++;
       } else {
+        const source = readFileSync(file, "utf8");
+        sourceCache.set(filePath, source);
+        const hash = createHash("sha256").update(source).digest("hex");
         changedPaths.add(filePath);
         const parsed = adapter.parse(filePath, source);
         fileSymbols = parsed.symbols;
@@ -320,12 +394,19 @@ export class ProjectIndex {
           hash,
           language: adapter.id,
           parseError: parsed.parseError,
+          size: stats.size,
+          mtimeMs: stats.mtimeMs,
+          ctimeMs: stats.ctimeMs,
         });
         filesParsed++;
       }
       if (adapter.id === "java") {
         this.enterpriseRelations.push(
-          ...extractEnterpriseRelations(fileSymbols, filePath, source),
+          ...extractEnterpriseRelations(
+            fileSymbols,
+            filePath,
+            sourceCache.get(filePath) ?? "",
+          ),
         );
       }
     }
@@ -411,12 +492,14 @@ export class ProjectIndex {
       );
       return implementations.length ? implementations : matches;
     };
-    const exact = this.symbols.filter(
-      (s) =>
-        s.id === input ||
-        s.canonicalIdentity === input ||
-        s.qualifiedName === input ||
-        s.signature === input,
+    const exact = [
+      this.symbolIndex.get(input),
+      ...(this.symbolsByCanonicalIdentity.get(input) ?? []),
+      ...(this.symbolsByQualifiedName.get(input) ?? []),
+      ...(this.symbolsBySignature.get(input) ?? []),
+    ].filter(
+      (symbol, index, matches): symbol is SymbolRecord =>
+        Boolean(symbol) && matches.indexOf(symbol) === index,
     );
     if (exact.length) return preferImplementation(exact);
     const qualifiedSuffix = this.symbols.filter((s) =>
@@ -425,7 +508,7 @@ export class ProjectIndex {
     return preferImplementation(
       qualifiedSuffix.length
         ? qualifiedSuffix
-        : this.symbols.filter((s) => s.name === input),
+        : (this.symbolsByName.get(input) ?? []),
     );
   }
   callers(target: SymbolRecord) {
@@ -589,7 +672,13 @@ export class ProjectIndex {
       );
     const cached = sourceCache?.get(symbol.filePath);
     if (cached !== undefined) return cached;
-    return readFileSync(full, "utf8");
+    const source = readFileSync(full, "utf8");
+    sourceCache?.set(symbol.filePath, source);
+    return source;
+  }
+
+  callsFor(caller: SymbolRecord) {
+    return this.callsByCaller.get(caller.id) ?? [];
   }
 }
 

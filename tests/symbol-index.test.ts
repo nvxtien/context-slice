@@ -53,3 +53,12 @@ test("diagnostics expose duplicate names without collisions", () => {
   assert.equal(diagnostics.symbolIdCollisions, 0);
   assert.ok(diagnostics.interfacesIndexed > 0);
 });
+
+test("callsFor uses the caller lookup index", () => {
+  const index = indexFixture();
+  const target = index.symbols.find((symbol) => symbol.name === "run")!;
+  assert.deepEqual(
+    index.callsFor(target),
+    index.calls.filter((call) => call.callerId === target.id),
+  );
+});
