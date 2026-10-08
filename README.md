@@ -339,6 +339,8 @@ Rust support is measured separately across three pinned repositories (walkdir, m
 - Token counts are estimates, not model-provider usage telemetry.
 - Sibling composition uses syntactic evidence (`this.field` and Java field names). State shared through an intermediate object is not detected.
 - The local index is an aid to request context, not a substitute for code review or tests.
+- The Claude Code marketplace plugin needs npm registry access on first use to install `context-slice@1.9.0` and its native dependencies; offline use works only after the npm cache is populated.
+- The Claude plugin is validated with Claude Code 2.1.285 on macOS arm64. Other Claude Code releases and plugin hosts may differ in MCP startup behavior.
 - Validated on macOS arm64 (Node 20.19.5 and 22.12.0). Linux and Windows are unverified.
 - Usability evidence comes from a scripted self clean-room trial; no external developer trial has been run yet.
 
