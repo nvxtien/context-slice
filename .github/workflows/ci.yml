@@ -22,14 +22,26 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npm run format:check
       - run: npm run build
       - run: npm test
+
+  format:
+    name: format
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
 
   package-smoke:
     name: package smoke / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: test
+    needs: [test, format]
     strategy:
       fail-fast: false
       matrix:

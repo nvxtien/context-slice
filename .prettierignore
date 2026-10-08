@@ -9,3 +9,4 @@ tests/fixtures/
 package-lock.json
 # Local agent notes
 .superpowers/
+.claude/settings.local.json
