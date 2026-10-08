@@ -30,14 +30,6 @@ test("package metadata describes an intentional publish-ready runtime", () => {
   assert.ok(packageJson.scripts["package-smoke"]);
 });
 
-test("README install commands name the current tarball", () => {
-  const readme = readFileSync(join(root, "README.md"), "utf8");
-  assert.deepEqual(
-    [...new Set(readme.match(/context-slice-\d+\.\d+\.\d+\.tgz/g))],
-    [`context-slice-${packageJson.version}.tgz`],
-  );
-});
-
 test("version and help work from the source entry point", () => {
   const version = spawnSync(tsx, [cli, "--version"], {
     cwd: root,

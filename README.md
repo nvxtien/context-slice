@@ -101,13 +101,6 @@ npm install -g context-slice@1.9.0
 context-slice --version
 ```
 
-For a local tarball smoke test:
-
-```sh
-npm pack
-npm install -g ./context-slice-1.9.0.tgz
-```
-
 For package/release validation, run `npm run benchmark:v08`.
 
 ### CLI examples
