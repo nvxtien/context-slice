@@ -12,6 +12,7 @@ export interface ResolutionInput {
   symbols: SymbolRecord[];
   root: string;
   calls: CallEdge[];
+  previousSymbols: SymbolRecord[];
   imports: ImportRecord[];
   exports: ExportRecord[];
   snapshots: Map<string, LanguageSnapshot>;
@@ -22,10 +23,63 @@ export interface ResolutionInput {
 
 export class ResolutionPipeline {
   resolve(input: ResolutionInput) {
-    // Adapters inspect project-wide type/import state, so partial invalidation is unsafe until
-    // they expose dependency impact. Keep this full-graph fallback behind one boundary.
     if (input.changedPaths.size === 0 && input.removedPaths.size === 0) return;
-    for (const call of input.calls) resetCallResolution(call);
+    const declarationShape = (symbol: SymbolRecord) =>
+      JSON.stringify([
+        symbol.filePath,
+        symbol.kind,
+        symbol.name,
+        symbol.qualifiedName,
+        symbol.signature,
+        symbol.parentId,
+        symbol.supertypes,
+      ]);
+    const shapesByFile = (symbols: SymbolRecord[]) => {
+      const result = new Map<string, string[]>();
+      for (const symbol of symbols) {
+        const shapes = result.get(symbol.filePath) ?? [];
+        shapes.push(declarationShape(symbol));
+        result.set(symbol.filePath, shapes);
+      }
+      for (const shapes of result.values()) shapes.sort();
+      return result;
+    };
+    const currentShapes = shapesByFile(input.symbols);
+    const previousShapes = shapesByFile(input.previousSymbols);
+    const declarationChanged = [...input.changedPaths].some(
+      (path) =>
+        JSON.stringify(currentShapes.get(path) ?? []) !==
+        JSON.stringify(previousShapes.get(path) ?? []),
+    );
+    const fullResolve = input.removedPaths.size > 0 || declarationChanged;
+    const targetIds = new Set<string>();
+    if (!fullResolve) {
+      for (const symbol of input.previousSymbols)
+        if (input.changedPaths.has(symbol.filePath)) targetIds.add(symbol.id);
+      for (const symbol of input.symbols)
+        if (input.changedPaths.has(symbol.filePath)) targetIds.add(symbol.id);
+    }
+    const affectedPaths = fullResolve
+      ? undefined
+      : new Set(
+          input.calls
+            .filter((call) => {
+              const targets = [
+                call.declaredTargetId,
+                call.resolvedTargetId,
+                ...(call.runtimeTargetIds ?? []),
+              ];
+              return (
+                input.changedPaths.has(call.filePath) ||
+                targets.some((target) => target && targetIds.has(target))
+              );
+            })
+            .map((call) => call.filePath),
+        );
+    const callsToResolve = affectedPaths
+      ? input.calls.filter((call) => affectedPaths.has(call.filePath))
+      : input.calls;
+    for (const call of callsToResolve) resetCallResolution(call);
     for (const adapter of languages()) {
       const snapshot = input.snapshots.get(adapter.id);
       if (!snapshot?.symbols.length) continue;
@@ -33,6 +87,9 @@ export class ResolutionPipeline {
         root: input.root,
         symbols: snapshot.symbols,
         calls: snapshot.calls,
+        callsToResolve: callsToResolve.filter((call) =>
+          snapshot.calls.includes(call),
+        ),
         imports: snapshot.imports,
         exports: snapshot.exports,
         sourceOf: input.sourceOf,

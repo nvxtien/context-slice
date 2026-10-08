@@ -241,6 +241,7 @@ const CALLABLE = new Set([
 ]);
 
 export function resolveTypeScriptCalls(context: ResolveContext) {
+  const calls = context.callsToResolve ?? context.calls;
   const graph = buildGraph(context);
   const { symbolsById, symbolsByFile, importsByFile, exportsByFile } = graph;
 
@@ -334,7 +335,7 @@ export function resolveTypeScriptCalls(context: ResolveContext) {
     call.evidence = [evidence];
   };
 
-  for (const call of context.calls) {
+  for (const call of calls) {
     const caller = symbolsById.get(call.callerId);
     if (!caller) continue;
     const file = caller.filePath;

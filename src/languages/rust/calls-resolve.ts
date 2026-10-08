@@ -177,6 +177,7 @@ const PERSIST = {
 };
 
 export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
+  const calls = context.callsToResolve ?? context.calls;
   const byId = new Map<string, SymbolRecord>();
   const childrenOf = new Map<string, SymbolRecord[]>();
   const topByFile = new Map<string, SymbolRecord[]>();
@@ -2174,7 +2175,7 @@ export function resolveCallsA(context: ResolveContext, deps: CallDeps) {
     return unresolved(call, "no-type:call-shape");
   }
 
-  for (const call of context.calls) {
+  for (const call of calls) {
     const caller = byId.get(call.callerId);
     if (!caller) continue;
     // Recomputed from scratch each rebuild: clear a previous resolution.

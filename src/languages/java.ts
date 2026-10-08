@@ -55,7 +55,7 @@ export const javaAdapter: LanguageAdapter = {
     const parsed = parseJava(filePath, source);
     return { ...parsed, imports: [], exports: [] };
   },
-  resolveCalls({ symbols, calls, sourceOf }: ResolveContext) {
+  resolveCalls({ symbols, calls, callsToResolve, sourceOf }: ResolveContext) {
     const byId = new Map(symbols.map((symbol) => [symbol.id, symbol]));
     const callableByName = new Map<string, SymbolRecord[]>();
     for (const symbol of symbols) {
@@ -64,7 +64,7 @@ export const javaAdapter: LanguageAdapter = {
       if (list) list.push(symbol);
       else callableByName.set(symbol.name, [symbol]);
     }
-    for (const call of calls) {
+    for (const call of callsToResolve ?? calls) {
       const caller = byId.get(call.callerId);
       if (!caller) continue;
       const parent = caller.parentId ? byId.get(caller.parentId) : undefined;

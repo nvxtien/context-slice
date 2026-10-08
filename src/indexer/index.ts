@@ -367,6 +367,7 @@ export class ProjectIndex {
     this.resolutionPipeline.resolve({
       root: this.root,
       symbols: this.symbols,
+      previousSymbols: previous.symbols,
       calls: this.calls,
       imports: this.imports,
       exports: this.exports,

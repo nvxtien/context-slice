@@ -19,6 +19,8 @@ export interface ResolveContext {
   root: string;
   symbols: SymbolRecord[];
   calls: CallEdge[];
+  /** Calls whose derived resolution is stale; omitted means all calls. */
+  callsToResolve?: CallEdge[];
   imports: ImportRecord[];
   exports: ExportRecord[];
   /** Full text of the file a symbol was parsed from. */

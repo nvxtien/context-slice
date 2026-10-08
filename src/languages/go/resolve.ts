@@ -250,6 +250,7 @@ function settle(
 }
 
 export function resolveGoCalls(context: ResolveContext): void {
+  const calls = context.callsToResolve ?? context.calls;
   const symbolsById = new Map(context.symbols.map((s) => [s.id, s]));
   const byDirectory = new Map<string, SymbolRecord[]>();
   for (const symbol of context.symbols) {
@@ -417,7 +418,7 @@ export function resolveGoCalls(context: ResolveContext): void {
     }
   };
 
-  for (const call of context.calls) {
+  for (const call of calls) {
     const caller = symbolsById.get(call.callerId);
     if (!caller) continue;
     if (!call.receiverText) {

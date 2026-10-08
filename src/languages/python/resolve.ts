@@ -229,6 +229,7 @@ export function resolvePythonCalls(
   context: ResolveContext,
   rules: PythonRules = ALL_PYTHON_RULES,
 ) {
+  const calls = context.callsToResolve ?? context.calls;
   const graph = pythonGraph(context);
   const { symbolsById, symbolsByFile, importsByFile, lookup } = graph;
 
@@ -331,7 +332,7 @@ export function resolvePythonCalls(
     call.evidence = [evidence];
   };
 
-  for (const call of context.calls) {
+  for (const call of calls) {
     const caller = symbolsById.get(call.callerId);
     if (!caller) continue;
     const file = caller.filePath;

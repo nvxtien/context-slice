@@ -231,6 +231,36 @@ test("re-resolves cached calls when a target file changes", () => {
   assert.equal(after?.confidence, "unresolved");
 });
 
+test("body-only changes keep unrelated call resolutions cached", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-ts-"));
+  writeFileSync(
+    join(root, "caller.ts"),
+    'import { target } from "./target.js";\nexport function caller() { return target(); }\n',
+  );
+  writeFileSync(
+    join(root, "unrelated.ts"),
+    "function helper() { return 1; }\nexport function unrelated() { return helper(); }\n",
+  );
+  writeFileSync(
+    join(root, "target.ts"),
+    "export function target() { return 1; }\n",
+  );
+
+  const index = new ProjectIndex(root);
+  index.rebuild();
+  const before = index.calls.find((call) => call.filePath === "unrelated.ts");
+  writeFileSync(
+    join(root, "target.ts"),
+    "export function target() { return 2; }\n",
+  );
+  const result = index.rebuild();
+
+  assert.equal(result.filesParsed, 1);
+  assert.equal(result.cacheHits, 2);
+  const after = index.calls.find((call) => call.filePath === "unrelated.ts");
+  assert.equal(after?.resolvedTargetId, before?.resolvedTargetId);
+});
+
 test("cache directory ignores itself so the target repository stays clean", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
   cpSync(join(process.cwd(), "test-fixtures/java"), root, {

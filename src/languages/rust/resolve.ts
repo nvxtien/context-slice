@@ -315,6 +315,6 @@ export function resolveRustCalls(context: ResolveContext) {
     });
   } catch {
     // A throw outside the per-edge guard (impl pre-pass): no Rust edge is trusted, the rebuild continues.
-    context.calls.forEach(leaveUnresolvedOnError);
+    (context.callsToResolve ?? context.calls).forEach(leaveUnresolvedOnError);
   }
 }
