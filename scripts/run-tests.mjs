@@ -7,9 +7,11 @@ const testFiles = readdirSync(resolve("tests"))
   .sort()
   .map((file) => resolve("tests", file));
 
+const concurrency =
+  process.platform === "win32" ? ["--test-concurrency=1"] : [];
 const result = spawnSync(
   process.execPath,
-  ["--import", "tsx", "--test", ...testFiles],
+  ["--import", "tsx", "--test", ...concurrency, ...testFiles],
   { stdio: "inherit" },
 );
 
