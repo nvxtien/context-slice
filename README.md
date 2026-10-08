@@ -82,16 +82,6 @@ One repository can hold all of them. See [docs/typescript-support.md](docs/types
 
 ## Installation
 
-### Local development
-
-For local development, install and link the executable from this checkout:
-
-```sh
-npm ci
-npm run build
-npm link
-```
-
 ### npm package
 
 Node.js 20 or newer is required. Install the published package with:
