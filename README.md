@@ -127,17 +127,6 @@ Use `--repo /absolute/path` to select a repository. `--json` provides a stable a
 
 Exit codes are `0` for success, `2` for user or configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
 
-## MCP verification
-
-The marketplace plugins configure MCP automatically. Verify Claude with:
-
-```sh
-claude mcp list
-```
-
-The expected result is `plugin:context-slice:context-slice - ✔ Connected`.
-Codex can verify the same server with `codex mcp list`.
-
 ## Benchmarks
 
 Run benchmarks locally:
