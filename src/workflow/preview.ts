@@ -238,6 +238,7 @@ export function buildPreview(
     explanation: string,
     extra: Pick<PreviewItem, "evidence" | "score" | "confidence"> = {},
     label?: string,
+    filePath?: string,
   ) => {
     const tokens = estimateTokens(rendered);
     if (estimatedTokens + tokens > budget) {
@@ -252,7 +253,7 @@ export function buildPreview(
     included.push({
       symbolId: symbol?.id,
       symbol: label ?? symbol?.qualifiedName ?? symbol?.name ?? explanation,
-      filePath: symbol?.filePath ?? target.filePath,
+      filePath: filePath ?? symbol?.filePath ?? target.filePath,
       reason,
       explanation,
       estimatedTokens: tokens,
@@ -369,6 +370,7 @@ export function buildPreview(
         evidence: candidate.evidence,
       },
       candidate.label,
+      candidate.filePath,
     );
   }
 
