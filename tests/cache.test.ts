@@ -36,6 +36,33 @@ test("cold cache, warm cache, and updating a single file", () => {
   assert.equal(third.cacheHits, 3);
 });
 
+test("re-resolves cached calls when a target file changes", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-ts-"));
+  writeFileSync(
+    join(root, "caller.ts"),
+    'import { target } from "./target.js";\nexport function caller() { return target(); }\n',
+  );
+  writeFileSync(
+    join(root, "target.ts"),
+    "export function target() { return 1; }\n",
+  );
+
+  const index = new ProjectIndex(root);
+  index.rebuild();
+  const before = index.calls.find((call) => call.calleeName === "target");
+  assert.ok(before?.resolvedTargetId);
+
+  writeFileSync(
+    join(root, "target.ts"),
+    "export function replacement() { return 2; }\n",
+  );
+  index.rebuild();
+
+  const after = index.calls.find((call) => call.calleeName === "target");
+  assert.equal(after?.resolvedTargetId, undefined);
+  assert.equal(after?.confidence, "unresolved");
+});
+
 test("cache directory ignores itself so the target repository stays clean", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
   cpSync(join(process.cwd(), "test-fixtures/java"), root, {

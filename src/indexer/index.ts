@@ -156,6 +156,19 @@ export class ProjectIndex {
     this.hashes = new Map();
     let filesParsed = 0;
     let cacheHits = 0;
+    const previousByFile = <T extends { filePath: string }>(records: T[]) => {
+      const grouped = new Map<string, T[]>();
+      for (const record of records) {
+        const items = grouped.get(record.filePath) ?? [];
+        items.push(record);
+        grouped.set(record.filePath, items);
+      }
+      return grouped;
+    };
+    const previousSymbols = previousByFile(previous.symbols);
+    const previousCalls = previousByFile(previous.calls);
+    const previousImports = previousByFile(previous.imports);
+    const previousExports = previousByFile(previous.exports);
     let parseErrors = 0;
     for (const file of files) {
       const filePath = relative(this.root, file);
@@ -166,19 +179,11 @@ export class ProjectIndex {
       this.hashes.set(filePath, { hash, language: adapter.id });
       let fileSymbols: SymbolRecord[];
       if (previous.files.get(filePath)?.hash === hash) {
-        fileSymbols = previous.symbols.filter(
-          (symbol) => symbol.filePath === filePath,
-        );
+        fileSymbols = previousSymbols.get(filePath) ?? [];
         this.symbols.push(...fileSymbols);
-        this.calls.push(
-          ...previous.calls.filter((call) => call.filePath === filePath),
-        );
-        this.imports.push(
-          ...previous.imports.filter((record) => record.filePath === filePath),
-        );
-        this.exports.push(
-          ...previous.exports.filter((record) => record.filePath === filePath),
-        );
+        this.calls.push(...(previousCalls.get(filePath) ?? []));
+        this.imports.push(...(previousImports.get(filePath) ?? []));
+        this.exports.push(...(previousExports.get(filePath) ?? []));
         cacheHits++;
       } else {
         const parsed = adapter.parse(filePath, source);
@@ -201,6 +206,13 @@ export class ProjectIndex {
       this.symbols.filter((symbol) => symbol.language === "java"),
     );
     // Each language resolves only its own edges; cross-language calls stay unresolved.
+    // Resolution depends on the complete current symbol graph, so cached edges must be
+    // invalidated even when their caller file did not change.
+    for (const call of this.calls) {
+      call.declaredTargetId = undefined;
+      call.resolvedTargetId = undefined;
+      call.confidence = "unresolved";
+    }
     for (const adapter of languages()) {
       const context: ResolveContext = {
         root: this.root,
@@ -208,8 +220,7 @@ export class ProjectIndex {
           (symbol) => symbol.language === adapter.id,
         ),
         calls: this.calls.filter(
-          (call) =>
-            (call.language ?? "java") === adapter.id && !call.resolvedTargetId,
+          (call) => (call.language ?? "java") === adapter.id,
         ),
         imports: this.imports.filter(
           (record) => record.language === adapter.id,
