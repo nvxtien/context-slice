@@ -182,12 +182,6 @@ claude mcp list
 The expected result is `plugin:context-slice:context-slice - ✔ Connected`.
 Codex can verify the same server with `codex mcp list`.
 
-## Behavior
-
-- Call resolution distinguishes exact, probable, and unresolved edges; it does not invent runtime dispatch targets.
-- Preview, status, doctor, and MCP lookup operations are read-only except for the local `.context-slice/` cache.
-- The target repository is not edited.
-
 ## Benchmarks
 
 Run benchmarks locally:
