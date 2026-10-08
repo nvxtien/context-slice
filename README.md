@@ -154,23 +154,6 @@ Use `--repo /absolute/path` to select a repository. `--json` provides a stable a
 
 Exit codes are `0` for success, `2` for user or configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
 
-## Example
-
-```text
-Target: demo.PaymentService.retryPayment
-Context: 286/1200 tokens; 3 items included
-
-Included:
-- task target: demo.PaymentService.retryPayment — Selected because the task names retryPayment.
-- direct caller: demo.PaymentController.retry — Direct caller of demo.PaymentService.retryPayment.
-- direct callee: demo.PaymentService.audit — Direct callee of demo.PaymentService.retryPayment.
-```
-
-ContextSlice may include relevant sibling members and a compact enclosing-type
-skeleton. See [docs/context-composition.md](docs/context-composition.md).
-
-The target body is always first. Related symbols use compact skeletons. The command never silently exceeds its budget; skipped candidates are reported as `context budget`, and unresolved calls remain unresolved rather than being guessed.
-
 ## MCP verification
 
 The marketplace plugins configure MCP automatically. Verify Claude with:
