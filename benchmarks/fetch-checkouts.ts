@@ -16,6 +16,7 @@ const manifests = [
   "benchmarks/typescript-repositories.json",
   "benchmarks/python-repositories.json",
   "benchmarks/rust-repositories.json",
+  "benchmarks/rust-repositories-extra.json",
   "benchmarks/go-repositories.json",
   "benchmarks/javascript-repositories.json",
 ];

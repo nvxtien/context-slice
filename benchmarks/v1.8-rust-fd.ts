@@ -18,10 +18,14 @@ import { ProjectIndex } from "../src/indexer/index.js";
 
 type Repository = { id: string; source: string };
 const repositories: Repository[] = JSON.parse(
-  readFileSync(resolve(process.cwd(), "benchmarks/rust-repositories.json"), "utf8"),
+  readFileSync(
+    resolve(process.cwd(), "benchmarks/rust-repositories-extra.json"),
+    "utf8",
+  ),
 ) as Repository[];
 const repo = repositories.find((r) => r.id === "fd");
-if (!repo) throw new Error("fd entry missing from benchmarks/rust-repositories.json");
+if (!repo)
+  throw new Error("fd entry missing from benchmarks/rust-repositories-extra.json");
 
 type OracleSymbol = { name: string; kind: string; file: string; line: number };
 

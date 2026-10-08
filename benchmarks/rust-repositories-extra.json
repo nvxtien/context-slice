@@ -1,0 +1,11 @@
+[
+  {
+    "id": "fd",
+    "scale": "medium",
+    "url": "https://github.com/sharkdp/fd.git",
+    "commit": "14dcd92fb76ca0ebc2e82671a275f67c790d25fc",
+    "source": "benchmarks/checkouts/fd",
+    "scope": "whole repository (CLI application, ~5200 lines across src/*.rs)",
+    "kind": "application"
+  }
+]
