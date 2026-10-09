@@ -43,6 +43,7 @@ export function selectMcpRoot(options: {
   if (options.explicitRoot)
     return resolveRepositoryRoot({ repository: options.explicitRoot });
   const candidates = [
+    options.envRoot,
     ...(options.clientRoots ?? []).flatMap((root) => {
       try {
         return new URL(root.uri).protocol === "file:"
@@ -52,7 +53,6 @@ export function selectMcpRoot(options: {
         return [];
       }
     }),
-    options.envRoot,
     options.cwd ?? process.cwd(),
   ].filter((candidate): candidate is string => Boolean(candidate));
   let lastError: unknown;

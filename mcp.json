@@ -9,7 +9,10 @@
         "--package=context-slice@latest",
         "context-slice",
         "mcp"
-      ]
+      ],
+      "env": {
+        "CONTEXT_SLICE_ROOT": "${CLAUDE_PROJECT_DIR}"
+      }
     }
   }
 }

@@ -199,7 +199,7 @@ test("context.diff rejects revisions that look like git flags", () => {
   assert.throws(() => gitDiffArgs("main", "-x"), /Invalid git revision/);
 });
 
-test("MCP root selection prefers client roots and falls back to env then cwd", () => {
+test("MCP root selection prefers explicit and env roots before client roots and cwd", () => {
   const clientRoot = javaRepository();
   const envRoot = javaRepository();
   const cwdRoot = javaRepository();
@@ -210,7 +210,7 @@ test("MCP root selection prefers client roots and falls back to env then cwd", (
       envRoot,
       cwd: cwdRoot,
     }),
-    clientRoot,
+    envRoot,
   );
   assert.equal(
     selectMcpRoot({
@@ -219,6 +219,15 @@ test("MCP root selection prefers client roots and falls back to env then cwd", (
       cwd: cwdRoot,
     }),
     envRoot,
+  );
+  assert.equal(
+    selectMcpRoot({
+      explicitRoot: clientRoot,
+      clientRoots: [{ uri: `file://${cwdRoot}` }],
+      envRoot,
+      cwd: cwdRoot,
+    }),
+    clientRoot,
   );
   assert.equal(
     selectMcpRoot({ clientRoots: [], cwd: cwdRoot }),
