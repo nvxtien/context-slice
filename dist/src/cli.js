@@ -117,15 +117,15 @@ async function execute(args) {
         "mcp",
     ].includes(command))
         throw new WorkflowError("INVALID_ARGUMENT", `Unknown command: ${command}`, usage());
+    if (command === "mcp") {
+        const { startMcpServer } = await import("./server/mcp-server.js");
+        await startMcpServer(args.repository);
+        return;
+    }
     const repository = resolveRepositoryRoot({
         cwd: process.cwd(),
         repository: args.repository,
     });
-    if (command === "mcp") {
-        const { startMcpServer } = await import("./server/mcp-server.js");
-        await startMcpServer(repository);
-        return;
-    }
     if (command === "mark-dirty") {
         markDirty(repository, args.positional);
         return print({ repository, paths: args.positional }, args, command, `Marked ${repository} dirty for MCP refresh.`);

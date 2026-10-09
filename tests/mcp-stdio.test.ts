@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { gitDiffArgs } from "../src/server/mcp-server.js";
+import { gitDiffArgs, selectMcpRoot } from "../src/server/mcp-server.js";
 
 const workspace = process.cwd();
 const cli = join(workspace, "src/cli.ts");
@@ -20,10 +20,12 @@ function javaRepository() {
   return root;
 }
 
-function startMcp(root: string) {
+function startMcp(root?: string, clientRoots: string[] = []) {
+  const args = ["--import", "tsx", cli, "mcp"];
+  if (root) args.push("--repo", root);
   const child = spawn(
     process.execPath,
-    ["--import", "tsx", cli, "mcp", "--repo", root],
+    args,
     {
       cwd: workspace,
       stdio: ["pipe", "pipe", "pipe"],
@@ -39,7 +41,14 @@ function startMcp(root: string) {
     buffer = lines.pop() ?? "";
     for (const line of lines.filter(Boolean)) {
       try {
-        messages.push(JSON.parse(line));
+        const message = JSON.parse(line) as Record<string, any>;
+        if (message.method === "roots/list") {
+          child.stdin.write(
+            `${JSON.stringify({ jsonrpc: "2.0", id: message.id, result: { roots: clientRoots.map((rootPath) => ({ uri: `file://${rootPath}` })) } })}\n`,
+          );
+        } else {
+          messages.push(message);
+        }
       } catch {
         invalidStdout.push(line);
       }
@@ -144,6 +153,33 @@ test(
   },
 );
 
+test(
+  "mcp uses a client-provided root when no repository argument is supplied",
+  { timeout: 15_000 },
+  async () => {
+    const root = javaRepository();
+    const mcp = startMcp(undefined, [root]);
+    try {
+      await mcp.request("initialize", {
+        protocolVersion: "2025-03-26",
+        capabilities: { roots: { listChanged: true } },
+        clientInfo: { name: "test", version: "1" },
+      });
+      mcp.child.stdin.write(
+        `${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} })}\n`,
+      );
+      const response = await mcp.request("tools/call", {
+        name: "context.search",
+        arguments: { query: "retryPayment" },
+      });
+      const body = JSON.parse(response.result.content[0].text);
+      assert.equal(body.results[0].filePath, "src/main/java/Payment.java");
+    } finally {
+      await stopMcp(mcp.child);
+    }
+  },
+);
+
 test("context.diff uses the working tree when only base is supplied", () => {
   assert.deepEqual(gitDiffArgs(), ["HEAD", "--"]);
   assert.deepEqual(gitDiffArgs("main"), ["main", "--"]);
@@ -161,4 +197,31 @@ test("context.diff rejects revisions that look like git flags", () => {
     /Invalid git revision/,
   );
   assert.throws(() => gitDiffArgs("main", "-x"), /Invalid git revision/);
+});
+
+test("MCP root selection prefers client roots and falls back to env then cwd", () => {
+  const clientRoot = javaRepository();
+  const envRoot = javaRepository();
+  const cwdRoot = javaRepository();
+
+  assert.equal(
+    selectMcpRoot({
+      clientRoots: [{ uri: `file://${clientRoot}` }],
+      envRoot,
+      cwd: cwdRoot,
+    }),
+    clientRoot,
+  );
+  assert.equal(
+    selectMcpRoot({
+      clientRoots: [{ uri: "file:///does-not-exist" }],
+      envRoot,
+      cwd: cwdRoot,
+    }),
+    envRoot,
+  );
+  assert.equal(
+    selectMcpRoot({ clientRoots: [], cwd: cwdRoot }),
+    cwdRoot,
+  );
 });

@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -32,27 +32,85 @@ export function gitDiffArgs(base?: string, head?: string) {
   return [...revisions, "--"];
 }
 
+type McpRoot = { uri: string };
+
+export function selectMcpRoot(options: {
+  explicitRoot?: string;
+  clientRoots?: McpRoot[];
+  envRoot?: string;
+  cwd?: string;
+}) {
+  if (options.explicitRoot)
+    return resolveRepositoryRoot({ repository: options.explicitRoot });
+  const candidates = [
+    ...(options.clientRoots ?? []).flatMap((root) => {
+      try {
+        return new URL(root.uri).protocol === "file:"
+          ? [fileURLToPath(new URL(root.uri))]
+          : [];
+      } catch {
+        return [];
+      }
+    }),
+    options.envRoot,
+    options.cwd ?? process.cwd(),
+  ].filter((candidate): candidate is string => Boolean(candidate));
+  let lastError: unknown;
+  for (const candidate of candidates) {
+    try {
+      return resolveRepositoryRoot({ repository: candidate });
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError ?? new Error("No MCP repository root is available");
+}
+
 export async function startMcpServer(
-  root = process.env.CONTEXT_SLICE_ROOT ?? process.cwd(),
+  root?: string,
 ) {
-  const resolvedRoot = resolveRepositoryRoot({ repository: root });
-  const index = new ProjectIndex(resolvedRoot);
-  const watcher = new ProjectFileWatcher(resolvedRoot);
-  process.stdin.once("end", () => {
-    watcher.close();
-    index.close();
-  });
   const server = new McpServer({
     name: packageInfo.name,
     version: packageInfo.version,
   });
+  let index!: ProjectIndex;
+  let watcher!: ProjectFileWatcher;
   const refresh = () => index.refreshIfStale();
-  let warmup: Promise<void> = Promise.resolve();
+  let rootReady: Promise<void> | undefined;
   let warmupResult: ReturnType<typeof refresh> | undefined;
   let warmupError: unknown;
   let warmupConsumed = false;
+  const initializeRoot = async () => {
+    const capabilities = server.server.getClientCapabilities();
+    let clientRoots: McpRoot[] = [];
+    if (capabilities?.roots) {
+      try {
+        clientRoots = (await server.server.listRoots()).roots;
+      } catch {
+        // Fall back to the environment or working directory when roots are unavailable.
+      }
+    }
+    const resolvedRoot = selectMcpRoot({
+      explicitRoot: root,
+      clientRoots,
+      envRoot: process.env.CONTEXT_SLICE_ROOT,
+      cwd: process.cwd(),
+    });
+    index = new ProjectIndex(resolvedRoot);
+    watcher = new ProjectFileWatcher(resolvedRoot);
+    process.stdin.once("end", () => {
+      watcher.close();
+      index.close();
+    });
+    try {
+      warmupResult = refresh();
+    } catch (error) {
+      warmupError = error;
+    }
+  };
   const ready = async () => {
-    await warmup;
+    rootReady ??= initializeRoot();
+    await rootReady;
     if (warmupError) throw warmupError;
     if (!warmupConsumed && warmupResult) {
       warmupConsumed = true;
@@ -190,7 +248,7 @@ export async function startMcpServer(
       let diff = "";
       try {
         diff = execFileSync("git", ["diff", ...args], {
-          cwd: resolvedRoot,
+          cwd: index.root,
           encoding: "utf8",
           maxBuffer: 2_000_000,
         });
@@ -218,13 +276,6 @@ export async function startMcpServer(
   );
 
   const connected = server.connect(new StdioServerTransport());
-  warmup = connected.then(() => {
-    try {
-      warmupResult = refresh();
-    } catch (error) {
-      warmupError = error;
-    }
-  });
   await connected;
   return server;
 }

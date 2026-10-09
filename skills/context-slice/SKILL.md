@@ -16,6 +16,20 @@ relevant code instead of re-reading entire files to find it.
 For any other language, or a question with no clear target symbol (e.g.
 "what does this project do overall"), fall back to normal file reading.
 
+## When to call Context Slice
+
+Call Context Slice automatically when the request requires understanding the
+checked-out codebase, such as finding a symbol, tracing callers, explaining a
+flow, fixing a bug, implementing a change, reviewing a module, or inspecting
+the current Git diff. Do not call it for general programming questions,
+commands that do not require code understanding (such as formatting or
+committing), or when the relevant code is already fully available in context.
+
+Before reading source files, use `ToolSearch` to load the deferred Context
+Slice tools. Then call `context.preview` before using Bash, grep, Read, or
+other direct file tools. Fall back to direct file tools only when Context Slice
+cannot answer, the repository is unsupported, or the tool is unavailable.
+
 ## Workflow
 
 1. **Start with `context.preview`** for any implementation or explanation

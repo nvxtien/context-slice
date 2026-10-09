@@ -3,14 +3,13 @@
   "mcpServers": {
     "context-slice": {
       "type": "stdio",
-      "command": "sh",
+      "command": "npx",
       "args": [
-        "-c",
-        "cd /tmp && exec npx -y --package=context-slice@1.9.0 context-slice mcp"
-      ],
-      "env": {
-        "CONTEXT_SLICE_ROOT": "${CLAUDE_PROJECT_DIR}"
-      }
+        "-y",
+        "--package=context-slice@1.9.0",
+        "context-slice",
+        "mcp"
+      ]
     }
   }
 }
