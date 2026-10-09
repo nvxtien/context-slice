@@ -7,7 +7,6 @@ import test from "node:test";
 import { gitDiffArgs } from "../src/server/mcp-server.js";
 
 const workspace = process.cwd();
-const tsx = join(workspace, "node_modules/.bin/tsx");
 const cli = join(workspace, "src/cli.ts");
 
 function javaRepository() {
@@ -22,10 +21,14 @@ function javaRepository() {
 }
 
 function startMcp(root: string) {
-  const child = spawn(tsx, [cli, "mcp", "--repo", root], {
-    cwd: workspace,
-    stdio: ["pipe", "pipe", "pipe"],
-  });
+  const child = spawn(
+    process.execPath,
+    ["--import", "tsx", cli, "mcp", "--repo", root],
+    {
+      cwd: workspace,
+      stdio: ["pipe", "pipe", "pipe"],
+    },
+  );
   const messages: Array<Record<string, unknown>> = [];
   const invalidStdout: string[] = [];
   let buffer = "";
@@ -67,6 +70,18 @@ function startMcp(root: string) {
       poll();
     });
   return { child, request, invalidStdout, messages };
+}
+
+async function stopMcp(child: ReturnType<typeof spawn>) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, 2_000);
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+    child.kill();
+  });
 }
 
 test(
@@ -124,10 +139,7 @@ test(
       assert.equal(secondBody.refresh.summary.filesParsed, 1);
       assert.equal(secondBody.results[0].name, "settle");
     } finally {
-      mcp.child.kill("SIGTERM");
-      await new Promise<void>((resolve) =>
-        mcp.child.once("exit", () => resolve()),
-      );
+      await stopMcp(mcp.child);
     }
   },
 );
