@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.9.4
+
+- Fixed a crash in context composition when a cache-reused symbol's `source`/`body`
+  stayed `undefined` instead of resolving lazily (`declarationLine`, `javaFieldDeclarations`).
+- Closed two bypass gaps in the source-read guard: a `Grep` call with no `path`/`glob`
+  searched the whole project without being checked, and the `Bash` detector only
+  recognized `cat|head|tail|sed|awk|grep|rg`, missing `less`, `bat`, and interpreter
+  one-liners (`python3 -c`, `node -e`, ...) that dump a file's content the same way.
+- Removed an unreachable fallback branch in `ResolutionPipeline.resolve()`.
+- Removed a dead `source` parameter from two Java enterprise extractors.
+
 ## 1.9.3
 
 - Bumped package and plugin metadata to `1.9.3`.
