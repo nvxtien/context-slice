@@ -59,16 +59,6 @@ Then open `/plugins`, choose `Context Slice Marketplace`, and install
 `context-slice`. The plugin includes the same ContextSlice skill and stdio MCP
 server for the project Codex has open.
 
-### CLI and MCP
-
-```sh
-npm install -g context-slice
-context-slice init
-context-slice preview "explain the payment retry flow" --explain
-```
-
-The CLI requires Node.js 20 or newer.
-
 ## How it works
 
 1. Discover a repository and scan supported source while ignoring common generated/build directories.
@@ -92,34 +82,6 @@ Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `
 
 One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md), [docs/python-support.md](docs/python-support.md) and [docs/rust-support.md](docs/rust-support.md) for what each language's resolution does and does not cover.
 
-## CLI workflow
-
-```sh
-context-slice init
-context-slice status
-context-slice doctor
-context-slice preview "explain retryPayment" --budget 1200 --explain
-context-slice preview "explain retryPayment" --json
-context-slice mcp
-```
-
-| Command          | Purpose                                                          |
-| ---------------- | ---------------------------------------------------------------- |
-| `init`           | Discover the repository and create/refresh the local index.      |
-| `index`          | Refresh the index explicitly.                                    |
-| `status`         | Show readiness, schema, cache freshness, and last refresh.       |
-| `doctor`         | Check repository, Java source, cache, and MCP command readiness. |
-| `preview <task>` | Return a deterministic, strict-budget context preview.           |
-| `mark-dirty`     | Force hash verification for changed files.                       |
-| `mcp`            | Start the stdio MCP server with the stable public command.       |
-
-Use `--repo /absolute/path` to select a repository. `--json` provides a stable automation-oriented result. Normal commands are quiet; `--explain` displays why each item was included or omitted.
-
-The local cache is `<repository>/.context-slice/`. Remove it and run `init` to
-rebuild from scratch.
-
-Exit codes are `0` for success, `2` for user or configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
-
 ## Benchmarks
 
 Run benchmarks locally:
@@ -134,34 +96,6 @@ available with `npm run benchmark:v08`.
 On the current macOS arm64 Java fixture, the workflow benchmark measured a
 median 6.309 ms one-file incremental refresh; this is local evidence, not a
 universal latency guarantee.
-
-### Context-window evidence
-
-We also ran five paired, fresh-session trials on the Emporia repository: one
-direct-read run using `grep`/`Read`, and one ContextSlice run. The numbers below
-measure source context returned to the model, not provider billing telemetry.
-
-| Trial | Task | ContextSlice result | Evidence quality |
-| --- | --- | ---: | --- |
-| 1 | Authentication flow | ~12–17% fewer tokens | Measured, but the two runs used slightly different baselines. |
-| 2 | Portfolio authorization | ~44% fewer tokens vs. actual direct-read output | Measured; whole-file comparison would overstate this as ~77%. |
-| 3 | `PortfolioAdminController.provision` impact/call graph | ~77% fewer tokens | Strongest paired result: 4,675 direct-read vs. 1,066 sliced tokens. |
-| 4 | Login failure root cause | ~1,470 sliced tokens | Reduction estimate of 75–85% is hypothetical; the direct-read run stopped to clarify the premise. |
-| 5 | Audit event after portfolio provisioning | 1,218 sliced tokens | No valid reduction number: direct-read already answered the narrow question with little measured context. |
-
-These trials show the expected pattern: ContextSlice is most useful for
-cross-layer flows, impact analysis, and caller/callee tracing. It is less useful
-for a narrow existence check or when the relevant implementation is already a
-small number of files. A result only counts as a measured reduction when both
-runs count the actual tool output; a hypothetical whole-file baseline is not a
-measured context cost.
-
-The ContextSlice runs also exposed a retrieval limitation: broad natural-language
-tasks can select an off-target symbol. Naming a method, class, or entry point
-explicitly, then using `context_slice` with a budget, produces more reliable
-comparisons. Full-file reads and unused tool output must be counted when
-estimating context size; index files scanned inside the MCP server do not count
-unless their contents are returned to the model.
 
 ## Limitations
 
