@@ -13,7 +13,7 @@ export interface ResolutionInput {
   root: string;
   calls: CallEdge[];
   declarationChangedPaths: ReadonlySet<string>;
-  affectedPaths?: ReadonlySet<string>;
+  affectedPaths: ReadonlySet<string>;
   imports: ImportRecord[];
   exports: ExportRecord[];
   snapshots: Map<string, LanguageSnapshot>;
@@ -28,29 +28,13 @@ export class ResolutionPipeline {
       return new Set<string>();
     const fullResolve =
       input.removedPaths.size > 0 || input.declarationChangedPaths.size > 0;
-    const targetIds = new Set<string>();
-    if (!fullResolve) {
-      for (const symbol of input.symbols)
-        if (input.changedPaths.has(symbol.filePath)) targetIds.add(symbol.id);
-    }
-    const affectedPaths = fullResolve
-      ? undefined
-      : (input.affectedPaths ??
-        new Set(
-          input.calls
-            .filter((call) => {
-              const targets = [
-                call.declaredTargetId,
-                call.resolvedTargetId,
-                ...(call.runtimeTargetIds ?? []),
-              ];
-              return (
-                input.changedPaths.has(call.filePath) ||
-                targets.some((target) => target && targetIds.has(target))
-              );
-            })
-            .map((call) => call.filePath),
-        ));
+    // A file's declaration shape unchanged means every symbol it declares kept the same
+    // name/signature/parent/supertypes, so a call elsewhere that already resolved to one of
+    // those symbols is still correctly resolved -- only calls IN the changed files themselves
+    // (and only when the project needs re-scoping, i.e. the caller's own affectedPaths) need
+    // re-resolving. The caller (ProjectIndex.rebuild()) always supplies affectedPaths, so this
+    // never falls back to a looser project-wide guess.
+    const affectedPaths = fullResolve ? undefined : input.affectedPaths;
     const callsToResolve = affectedPaths
       ? input.calls.filter((call) => affectedPaths.has(call.filePath))
       : input.calls;
