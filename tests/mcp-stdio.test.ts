@@ -23,14 +23,10 @@ function javaRepository() {
 function startMcp(root?: string, clientRoots: string[] = []) {
   const args = ["--import", "tsx", cli, "mcp"];
   if (root) args.push("--repo", root);
-  const child = spawn(
-    process.execPath,
-    args,
-    {
-      cwd: workspace,
-      stdio: ["pipe", "pipe", "pipe"],
-    },
-  );
+  const child = spawn(process.execPath, args, {
+    cwd: workspace,
+    stdio: ["pipe", "pipe", "pipe"],
+  });
   const messages: Array<Record<string, unknown>> = [];
   const invalidStdout: string[] = [];
   let buffer = "";
@@ -121,6 +117,13 @@ test(
         0,
         `non-protocol stdout: ${mcp.invalidStdout.join("\n")}`,
       );
+
+      const preview = await mcp.request("tools/call", {
+        name: "context.preview",
+        arguments: { task: "explain retryPayment" },
+      });
+      const previewBody = JSON.parse(preview.result.content[0].text);
+      assert.equal(previewBody.repositoryRoot, root);
 
       const unchanged = await mcp.request("tools/call", {
         name: "context.search",
@@ -229,8 +232,5 @@ test("MCP root selection prefers explicit and env roots before client roots and 
     }),
     clientRoot,
   );
-  assert.equal(
-    selectMcpRoot({ clientRoots: [], cwd: cwdRoot }),
-    cwdRoot,
-  );
+  assert.equal(selectMcpRoot({ clientRoots: [], cwd: cwdRoot }), cwdRoot);
 });

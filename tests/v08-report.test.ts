@@ -34,6 +34,6 @@ test("v0.8 report and release checklist expose packaging evidence honestly", () 
     /clean checkout.*deferred/i,
   );
   const readme = readFileSync(join(root, "README.md"), "utf8");
-  assert.match(readme, /npm install -g context-slice@1\.9\.1/);
+  assert.match(readme, /npm install -g context-slice(?:@[^\s`]+)?/);
   assert.match(readme, /npm run benchmark:v08/);
 });

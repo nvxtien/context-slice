@@ -66,9 +66,7 @@ export function selectMcpRoot(options: {
   throw lastError ?? new Error("No MCP repository root is available");
 }
 
-export async function startMcpServer(
-  root?: string,
-) {
+export async function startMcpServer(root?: string) {
   const server = new McpServer({
     name: packageInfo.name,
     version: packageInfo.version,
@@ -211,6 +209,7 @@ export async function startMcpServer(
       const refreshed = await ready();
       return result({
         refresh: refreshed,
+        repositoryRoot: index.root,
         ...buildPreview(index, task, { budget, depth }),
       });
     },
@@ -229,6 +228,7 @@ export async function startMcpServer(
       const target = one(symbol);
       return result({
         refresh: refreshed,
+        repositoryRoot: index.root,
         ...buildPreview(index, target.id, { budget, depth, intent }),
         intent,
       });
