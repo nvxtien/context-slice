@@ -141,7 +141,12 @@ if (event !== "PreToolUse") process.exit(0);
 const toolInput = input.tool_input ?? {};
 const raw = JSON.stringify(toolInput);
 const supportedSource = /\.(?:java|ts|tsx|js|mjs|cjs|py|rs|go)$/i;
-const readCommand = /\b(?:cat|head|tail|sed|awk|grep|rg)\b/i;
+// Any command that can dump a file's own content to stdout/stderr, not just the few most
+// common ones: cat/head/tail/sed/awk/grep/rg, pager/viewer tools, and interpreter one-liners
+// (python/node/ruby/perl -c/-e, which can trivially read+print a file) all leak source the
+// same way `cat` does.
+const readCommand =
+  /\b(?:cat|head|tail|sed|awk|grep|rg|less|more|bat|strings|view|vim|nvim|nano|emacs|python3?|node|ruby|perl)\b/i;
 const sourcePath = (value) => {
   if (typeof value !== "string") return null;
   return value.trim().replace(/:\d+(?::\d+)?$/, "");
@@ -155,9 +160,19 @@ const isProjectSource = (value) => {
   return outside === "" || (!outside.startsWith("..") && !isAbsolute(outside));
 };
 const inputPath = toolInput.file_path ?? toolInput.path ?? toolInput.glob;
+// A Grep call with no path/glob searches recursively from the project root, which can surface
+// matching source lines just as directly as reading a named file -- unless its own output_mode
+// only lists filenames/counts, never file content.
+const grepOutputMode = String(toolInput.output_mode ?? "content");
+const grepSearchesWholeProjectContent =
+  toolName === "Grep" &&
+  !inputPath &&
+  grepOutputMode !== "files_with_matches" &&
+  grepOutputMode !== "count";
 const readsSupportedSource =
   ((toolName === "Read" || toolName === "Grep") &&
     isProjectSource(inputPath)) ||
+  grepSearchesWholeProjectContent ||
   (toolName === "Bash" &&
     readCommand.test(raw) &&
     !/\b(?:rg\s+--files|grep\s+-[lL])\b/i.test(raw) &&

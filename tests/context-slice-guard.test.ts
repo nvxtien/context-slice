@@ -162,6 +162,54 @@ test("does not block source file listing commands", () => {
   }
 });
 
+test("blocks a Grep with no path/glob searching the whole project for content", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-guard-"));
+  run(root, base("UserPromptSubmit"));
+
+  const blocked = run(
+    root,
+    base("PreToolUse", {
+      tool_name: "Grep",
+      tool_input: { pattern: "class LoginService" },
+    }),
+  );
+  assert.equal(blocked.status, 2);
+});
+
+test("does not block a Grep with no path when it only lists matching files", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-guard-"));
+  run(root, base("UserPromptSubmit"));
+
+  for (const output_mode of ["files_with_matches", "count"]) {
+    const allowed = run(
+      root,
+      base("PreToolUse", {
+        tool_name: "Grep",
+        tool_input: { pattern: "class LoginService", output_mode },
+      }),
+    );
+    assert.equal(allowed.status, 0);
+  }
+});
+
+test("blocks other content-dumping commands, not just cat/head/tail/sed/awk/grep/rg", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-guard-"));
+  run(root, base("UserPromptSubmit"));
+
+  for (const command of [
+    "less src/LoginService.java",
+    "bat src/LoginService.java",
+    "python3 -c \"print(open('src/LoginService.java').read())\"",
+    "node -e \"console.log(require('fs').readFileSync('src/LoginService.java', 'utf8'))\"",
+  ]) {
+    const blocked = run(
+      root,
+      base("PreToolUse", { tool_name: "Bash", tool_input: { command } }),
+    );
+    assert.equal(blocked.status, 2, `expected "${command}" to be blocked`);
+  }
+});
+
 test("does not guard source files outside the project root", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-guard-"));
   run(root, base("UserPromptSubmit"));
