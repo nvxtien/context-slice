@@ -133,6 +133,34 @@ On the current macOS arm64 Java fixture, the workflow benchmark measured a
 median 6.309 ms one-file incremental refresh; this is local evidence, not a
 universal latency guarantee.
 
+### Context-window evidence
+
+We also ran five paired, fresh-session trials on the Emporia repository: one
+direct-read run using `grep`/`Read`, and one ContextSlice run. The numbers below
+measure source context returned to the model, not provider billing telemetry.
+
+| Trial | Task | ContextSlice result | Evidence quality |
+| --- | --- | ---: | --- |
+| 1 | Authentication flow | ~12–17% fewer tokens | Measured, but the two runs used slightly different baselines. |
+| 2 | Portfolio authorization | ~44% fewer tokens vs. actual direct-read output | Measured; whole-file comparison would overstate this as ~77%. |
+| 3 | `PortfolioAdminController.provision` impact/call graph | ~77% fewer tokens | Strongest paired result: 4,675 direct-read vs. 1,066 sliced tokens. |
+| 4 | Login failure root cause | ~1,470 sliced tokens | Reduction estimate of 75–85% is hypothetical; the direct-read run stopped to clarify the premise. |
+| 5 | Audit event after portfolio provisioning | 1,218 sliced tokens | No valid reduction number: direct-read already answered the narrow question with little measured context. |
+
+These trials show the expected pattern: ContextSlice is most useful for
+cross-layer flows, impact analysis, and caller/callee tracing. It is less useful
+for a narrow existence check or when the relevant implementation is already a
+small number of files. A result only counts as a measured reduction when both
+runs count the actual tool output; a hypothetical whole-file baseline is not a
+measured context cost.
+
+The ContextSlice runs also exposed a retrieval limitation: broad natural-language
+tasks can select an off-target symbol. Naming a method, class, or entry point
+explicitly, then using `context_slice` with a budget, produces more reliable
+comparisons. Full-file reads and unused tool output must be counted when
+estimating context size; index files scanned inside the MCP server do not count
+unless their contents are returned to the model.
+
 ## Limitations
 
 - Java, TypeScript, TSX, JavaScript, Python, Rust and Go only; this is not a semantic search or build tool: it does not use vector embeddings, a vector database, a compiler, a type checker, or LSP services such as `tsserver`, `rust-analyzer`, or `rustc`.
