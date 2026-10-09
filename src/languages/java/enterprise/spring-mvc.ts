@@ -120,7 +120,7 @@ function describeAnnotation(
 function extractSpringMvcRelations(
   symbols: SymbolRecord[],
   filePath: string,
-  source: string,
+  _source: string,
 ): EnterpriseRelation[] {
   const relations: EnterpriseRelation[] = [];
   const classes = symbols.filter((s) => s.kind === "class");

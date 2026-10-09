@@ -24,7 +24,7 @@ const ground = JSON.parse(
 ) as GroundTask[];
 const fixtureRoot = resolve(root, "tests/fixtures/semantic-calls");
 function targetSuffix(
-  index: ProjectIndex,
+  _index: ProjectIndex,
   target: string | null,
   expected: string | null,
 ) {

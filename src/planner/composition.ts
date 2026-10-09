@@ -172,7 +172,7 @@ export function composeDependencyContext(
   index: ProjectIndex,
   target: SymbolRecord,
   relatedIds: ReadonlySet<string>,
-  alreadyIncluded: ReadonlySet<string>,
+  _alreadyIncluded: ReadonlySet<string>,
 ): CompositionCandidate[] {
   if (target.language !== "java") return [];
 
@@ -236,7 +236,7 @@ export function composeTransactionContext(
   index: ProjectIndex,
   target: SymbolRecord,
   relatedIds: ReadonlySet<string>,
-  alreadyIncluded: ReadonlySet<string>,
+  _alreadyIncluded: ReadonlySet<string>,
 ): CompositionCandidate[] {
   if (target.language !== "java") return [];
   const candidateIds = new Set([target.id, ...relatedIds]);
@@ -301,7 +301,7 @@ export function composeJpaContext(
   index: ProjectIndex,
   target: SymbolRecord,
   relatedIds: ReadonlySet<string>,
-  alreadyIncluded: ReadonlySet<string>,
+  _alreadyIncluded: ReadonlySet<string>,
 ): CompositionCandidate[] {
   if (target.language !== "java") return [];
 
@@ -381,7 +381,7 @@ export function composeRouteContext(
   index: ProjectIndex,
   target: SymbolRecord,
   relatedIds: ReadonlySet<string>,
-  alreadyIncluded: ReadonlySet<string>,
+  _alreadyIncluded: ReadonlySet<string>,
 ): CompositionCandidate[] {
   if (target.language !== "java") return [];
   const candidateIds = new Set([target.id, ...relatedIds]);

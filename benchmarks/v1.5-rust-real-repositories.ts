@@ -10,7 +10,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { basename, dirname, join, posix, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { modulePathFor } from "../src/languages/rust/parse.js";
 import {

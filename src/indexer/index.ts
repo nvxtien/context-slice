@@ -20,7 +20,6 @@ import {
   adapterFor,
   ignoredDirectories,
   languages,
-  type ResolveContext,
 } from "../languages/adapter.js";
 import { ensureLanguageBootstrap } from "../languages/bootstrap.js";
 import { QueryIndex } from "./query-index.js";

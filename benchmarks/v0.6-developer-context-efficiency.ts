@@ -419,21 +419,6 @@ function evaluateTask(
     representative.preserved === task.requiredFacts.length
       ? 0
       : baseline.files.length;
-  const metrics = calculateContextMetrics({
-    manualTokens: manual.tokens,
-    contextSliceTokens: representative.selected.tokens,
-    requiredFactsTotal: task.requiredFacts.length,
-    requiredFactsPreserved: representative.preserved,
-    requiredFactTokens: requiredFactTokens(
-      task.requiredFacts,
-      representative.selected.text,
-      target,
-    ),
-    manualWholeFiles: manual.wholeFiles,
-    contextSliceWholeFiles: fallbackFiles,
-    fallbackFiles,
-    contextBudget: 8_192,
-  });
   const manualFacts = task.requiredFacts.map((fact) =>
     factCheck(fact, manual.text, target, groundTruthText),
   );
@@ -452,9 +437,6 @@ function evaluateTask(
     fallbackFiles: 0,
     contextBudget: 8_192,
   });
-  const sliceFiles = fallbackFiles
-    ? [...new Set([...representative.selected.files, ...baseline.files])]
-    : representative.selected.files;
   const sliceTokens =
     representative.selected.tokens + (fallbackFiles ? manual.tokens : 0);
   return {

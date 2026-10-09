@@ -5,14 +5,13 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
-  readdirSync,
   realpathSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 
 type CommandResult = { status: number; stdout: string; stderr: string };
 type SmokeReport = {
@@ -175,15 +174,6 @@ function rustRepo(root: string) {
     env: { ...process.env, ...gitEnv },
   });
   return repository;
-}
-
-function filesUnder(root: string): string[] {
-  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(root, entry.name);
-    return entry.isDirectory()
-      ? filesUnder(path).map((child) => join(entry.name, child))
-      : [entry.name];
-  });
 }
 
 function requestMcp(binary: string, cwd: string) {
@@ -456,7 +446,7 @@ export async function runPackageSmoke(
       ["preview", "retryPayment"],
       nested,
     );
-    const uninstall = run(
+    run(
       "npm",
       [
         "uninstall",

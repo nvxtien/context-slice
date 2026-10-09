@@ -28,7 +28,7 @@ function transactionalArgsRegex(): RegExp {
 function extractTransactionRelations(
   symbols: SymbolRecord[],
   filePath: string,
-  source: string,
+  _source: string,
 ): EnterpriseRelation[] {
   const relations: EnterpriseRelation[] = [];
 
