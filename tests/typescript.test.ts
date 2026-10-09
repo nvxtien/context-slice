@@ -39,6 +39,18 @@ const callTo = (calls: CallEdge[], callee: string, receiver?: string) =>
       (receiver === undefined || call.receiverText === receiver),
   );
 
+async function stopMcp(child: ReturnType<typeof spawn>) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, 2_000);
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+    child.kill();
+  });
+}
+
 test("typescript symbol identities are canonical and stable", () => {
   const { index } = indexed("typescript");
   for (const id of [
@@ -382,8 +394,15 @@ test(
   async () => {
     const root = fixture("tsx");
     const child = spawn(
-      join(process.cwd(), "node_modules/.bin/tsx"),
-      [join(process.cwd(), "src/cli.ts"), "mcp", "--repo", root],
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        join(process.cwd(), "src/cli.ts"),
+        "mcp",
+        "--repo",
+        root,
+      ],
       { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] },
     );
     const messages: Array<Record<string, any>> = [];
@@ -457,8 +476,7 @@ test(
       );
       assert.deepEqual(invalid, []);
     } finally {
-      child.kill("SIGTERM");
-      await new Promise((resolve) => child.once("exit", resolve));
+      await stopMcp(child);
       rmSync(root, { recursive: true, force: true });
     }
   },

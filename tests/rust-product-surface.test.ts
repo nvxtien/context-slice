@@ -7,8 +7,8 @@ import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
 
 const workspace = process.cwd();
-const tsx = join(workspace, "node_modules/.bin/tsx");
 const cli = join(workspace, "src/cli.ts");
+const tsxLoader = join(workspace, "node_modules/tsx/dist/loader.mjs");
 const gitEnv = {
   GIT_AUTHOR_NAME: "t",
   GIT_AUTHOR_EMAIL: "t@example.com",
@@ -29,7 +29,10 @@ function rustRepository() {
 }
 
 function run(args: string[], cwd: string) {
-  return spawnSync(tsx, [cli, ...args], { cwd, encoding: "utf8" });
+  return spawnSync(process.execPath, ["--import", tsxLoader, cli, ...args], {
+    cwd,
+    encoding: "utf8",
+  });
 }
 
 test("Rust and Python sources coexist without id collisions", () => {
@@ -90,10 +93,14 @@ test("preview returns Rust context and leaves git status clean apart from the ca
 });
 
 function startMcp(root: string) {
-  const child = spawn(tsx, [cli, "mcp", "--repo", root], {
-    cwd: workspace,
-    stdio: ["pipe", "pipe", "pipe"],
-  });
+  const child = spawn(
+    process.execPath,
+    ["--import", tsxLoader, cli, "mcp", "--repo", root],
+    {
+      cwd: workspace,
+      stdio: ["pipe", "pipe", "pipe"],
+    },
+  );
   const messages: Array<Record<string, unknown>> = [];
   const invalidStdout: string[] = [];
   let buffer = "";
@@ -135,6 +142,18 @@ function startMcp(root: string) {
       poll();
     });
   return { child, request, invalidStdout };
+}
+
+async function stopMcp(child: ReturnType<typeof spawn>) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, 2_000);
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+    child.kill();
+  });
 }
 
 test(
@@ -186,10 +205,7 @@ test(
 
       assert.equal(mcp.invalidStdout.length, 0, mcp.invalidStdout.join("\n"));
     } finally {
-      mcp.child.kill("SIGTERM");
-      await new Promise<void>((resolve) =>
-        mcp.child.once("exit", () => resolve()),
-      );
+      await stopMcp(mcp.child);
     }
   },
 );
