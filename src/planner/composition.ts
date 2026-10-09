@@ -44,7 +44,7 @@ export function declarationLine(symbol: SymbolRecord) {
 function javaFieldDeclarations(parent: SymbolRecord) {
   if (parent.language !== "java") return [];
   return [
-    ...(parent.body ?? parent.source).matchAll(
+    ...(parent.body ?? parent.source ?? "").matchAll(
       /^\s*(?:(?:public|protected|private|static|final|transient|volatile)\s+)*[A-Za-z_$][\w$<>,.[\]\s]*?\s+[A-Za-z_$][\w$]*\s*(?:=[^;]*)?;/gm,
     ),
   ]

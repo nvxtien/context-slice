@@ -505,6 +505,11 @@ export class ProjectIndex {
         this.hashes.set(filePath, previousFile);
         if (previousFile.parseError) parseErrors++;
         fileSymbols = previousSymbols.get(filePath) ?? [];
+        // `previous` came from a "lean" load (source/body stripped for a cheap comparison
+        // pass), so these reused symbols need the same lazy source/body getters
+        // hydrateCached() attaches, or every consumer that reads .source/.body on an
+        // unchanged, cache-hit file would see undefined instead of real text.
+        this.makeSymbolsLazy(fileSymbols);
         this.symbols.push(...fileSymbols);
         this.calls.push(...(previousCalls.get(filePath) ?? []));
         this.imports.push(...(previousImports.get(filePath) ?? []));

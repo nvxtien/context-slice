@@ -80,6 +80,26 @@ test("preview composes the skeleton with evidence and respects the budget", () =
   assert.ok(tight.estimatedTokens <= 30);
 });
 
+test("a Java skeleton survives a cold-start rebuild that reuses cached (lean) symbols", () => {
+  // A brand-new ProjectIndex has no in-memory snapshot, so its first rebuild() loads the
+  // persisted index "lean" (source/body stripped) for its cache-hit comparison, then reuses
+  // those cached symbol objects directly for any file whose mtime/size didn't change.
+  // composeSiblings() reads parent.source/parent.body on exactly this kind of reused symbol,
+  // so this covers that path end to end (observed failing in production as "Cannot read
+  // properties of undefined (reading 'matchAll')" after a process restart, though this
+  // fixture is too small to force the same lean-object shape on demand).
+  const cold = new ProjectIndex(root);
+  const result = cold.rebuild();
+  assert.ok(result.cacheHits > 0, "expected the cold rebuild to reuse cached files");
+  const target = cold.symbols.find(
+    (symbol) => symbol.qualifiedName === "demo.Counter.increment",
+  );
+  assert.ok(target, "missing target demo.Counter.increment");
+  assert.doesNotThrow(() => composeSiblings(cold, target!));
+  const [skeleton] = composeSiblings(cold, target!);
+  assert.match(skeleton.rendered, /private int count;/);
+});
+
 test("CompositionReason accepts 'enterprise relation' (type-level, no runtime producer yet)", () => {
   const reason: import("../src/planner/composition.js").CompositionReason =
     "enterprise relation";
