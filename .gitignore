@@ -2,7 +2,7 @@ node_modules/
 dist/
 .context-slice/
 .benchmarks/
-benchmarks/checkouts/
+benchmarks/checkouts
 .DS_Store
 .worktrees/
 *.tgz
