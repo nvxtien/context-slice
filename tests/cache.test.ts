@@ -15,7 +15,8 @@ import test from "node:test";
 import Database from "better-sqlite3";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { markDirty } from "../src/storage/dirty-marker.js";
-import { INDEX_VERSION } from "../src/storage/sqlite.js";
+import { IndexStorage, INDEX_VERSION } from "../src/storage/sqlite.js";
+import type { SymbolRecord } from "../src/types/model.js";
 
 test("cold cache, warm cache, and updating a single file", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-"));
@@ -401,4 +402,127 @@ test("corrupt cache fails with an actionable INDEX_CORRUPT error", () => {
       error.code === "INDEX_CORRUPT" &&
       /rm -rf \.context-slice/.test(error.remediation),
   );
+});
+
+function bigSymbol(filePath: string, name: string): SymbolRecord {
+  return {
+    id: `${filePath}::${name}`,
+    language: "typescript",
+    kind: "function",
+    name,
+    filePath,
+    range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+    annotations: [],
+    modifiers: [],
+    // A large source string is what inflates the sqlite file's page count below;
+    // real files reach this size through genuine code, this is just the cheapest way
+    // to get there without parsing hundreds of real files in a test.
+    source: "x".repeat(20_000),
+  };
+}
+
+test("VACUUM reclaims space after most files are removed, but not for a small cache", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-vacuum-"));
+  const dbPath = join(root, ".context-slice/index.sqlite");
+  const storage = new IndexStorage(root);
+
+  const files = new Map(
+    Array.from({ length: 300 }, (_, i) => [
+      `f${i}.ts`,
+      {
+        hash: `h${i}`,
+        language: "typescript" as const,
+        parseError: false,
+        size: 1,
+        mtimeMs: 1,
+        ctimeMs: 1,
+      },
+    ]),
+  );
+  const symbols = Array.from({ length: 300 }, (_, i) =>
+    bigSymbol(`f${i}.ts`, `fn${i}`),
+  );
+  storage.save({ files, symbols, calls: [], imports: [], exports: [] });
+  const sizeBeforeRemoval = statSync(dbPath).size;
+  assert.ok(
+    sizeBeforeRemoval > 1_000_000,
+    `expected a multi-MB cache, got ${sizeBeforeRemoval}`,
+  );
+
+  // Removing 280 of the 300 files' rows in one incremental save leaves a large freelist;
+  // maybeVacuum() should detect that and shrink the file back down in the same save() call.
+  const remainingPaths = ["f280.ts", "f281.ts", "f282.ts"];
+  const removedPaths = new Set(
+    [...files.keys()].filter((path) => !remainingPaths.includes(path)),
+  );
+  const remainingFiles = new Map(
+    remainingPaths.map((path) => [path, files.get(path)!]),
+  );
+  const remainingSymbols = symbols.filter((s) =>
+    remainingPaths.includes(s.filePath),
+  );
+  storage.save(
+    {
+      files: remainingFiles,
+      symbols: remainingSymbols,
+      calls: [],
+      imports: [],
+      exports: [],
+    },
+    new Set(remainingPaths),
+    removedPaths,
+  );
+
+  const sizeAfterRemoval = statSync(dbPath).size;
+  assert.ok(
+    sizeAfterRemoval < sizeBeforeRemoval / 4,
+    `expected VACUUM to shrink the file well below a quarter of ${sizeBeforeRemoval}, got ${sizeAfterRemoval}`,
+  );
+  const db = new Database(dbPath, { readonly: true });
+  assert.ok(
+    db.prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'").get(),
+    "expected a last_vacuumed_at metadata row after VACUUM ran",
+  );
+  db.close();
+  storage.close();
+});
+
+test("VACUUM does not run for a cache too small to be worth reclaiming", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-vacuum-small-"));
+  const dbPath = join(root, ".context-slice/index.sqlite");
+  const storage = new IndexStorage(root);
+
+  storage.save({
+    files: new Map([
+      [
+        "a.ts",
+        {
+          hash: "h",
+          language: "typescript" as const,
+          parseError: false,
+          size: 1,
+          mtimeMs: 1,
+          ctimeMs: 1,
+        },
+      ],
+    ]),
+    symbols: [bigSymbol("a.ts", "fn")],
+    calls: [],
+    imports: [],
+    exports: [],
+  });
+  storage.save(
+    { files: new Map(), symbols: [], calls: [], imports: [], exports: [] },
+    new Set(),
+    new Set(["a.ts"]),
+  );
+
+  const db = new Database(dbPath, { readonly: true });
+  assert.equal(
+    db.prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'").get(),
+    undefined,
+    "a cache this small should never trigger VACUUM",
+  );
+  db.close();
+  storage.close();
 });

@@ -410,9 +410,42 @@ export class IndexStorage implements IndexStore {
         .run(new Date().toISOString());
     });
     transaction();
+    this.maybeVacuum();
   }
   close() {
     this.db.close();
+  }
+
+  /**
+   * VACUUM reclaims the free pages that incremental save()'s own DELETE+INSERT per changed
+   * file leaves behind — SQLite never shrinks the file on its own, it only keeps freed pages
+   * on an internal freelist for reuse, so a cache refreshed very often (e.g. on every prompt
+   * via a hook) can otherwise grow file size far past its live data over time. VACUUM must
+   * run outside any transaction, and it rewrites the whole file, so this only runs when
+   * reclaiming is actually worthwhile: a meaningful fraction of the file is free, the file is
+   * past a trivial size, and it has been a few minutes since the last VACUUM (so heavy,
+   * sustained churn from frequent refreshes doesn't trigger a VACUUM on every single save).
+   */
+  private maybeVacuum() {
+    const pageCount = this.db.pragma("page_count", { simple: true }) as number;
+    if (pageCount < 1000) return;
+    const freelistCount = this.db.pragma("freelist_count", {
+      simple: true,
+    }) as number;
+    if (freelistCount / pageCount < 0.25) return;
+    const lastVacuumedAt = (
+      this.db
+        .prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'")
+        .get() as { value?: string } | undefined
+    )?.value;
+    if (lastVacuumedAt && Date.now() - Date.parse(lastVacuumedAt) < 5 * 60_000)
+      return;
+    this.db.exec("VACUUM");
+    this.db
+      .prepare(
+        "INSERT OR REPLACE INTO metadata(key, value) VALUES ('last_vacuumed_at', ?)",
+      )
+      .run(new Date().toISOString());
   }
 
   private insertCall(
