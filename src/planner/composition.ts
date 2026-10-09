@@ -28,7 +28,7 @@ const MAX_SKELETON_MEMBERS = 12;
 
 /** The first line of a declaration, exactly as written, without its opening brace. */
 export function declarationLine(symbol: SymbolRecord) {
-  return symbol.source
+  return (symbol.source ?? "")
     .split("\n")[0]
     .trim()
     .replace(/\s*\{\s*$/, "")
