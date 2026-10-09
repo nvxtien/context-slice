@@ -34,6 +34,8 @@ test("v0.8 report and release checklist expose packaging evidence honestly", () 
     /clean checkout.*deferred/i,
   );
   const readme = readFileSync(join(root, "README.md"), "utf8");
-  assert.match(readme, /npm install -g context-slice(?:@[^\s`]+)?/);
+  // Installation is plugin-only now (README no longer documents a direct `npm install -g`
+  // CLI path), so check the install instructions that actually exist.
+  assert.match(readme, /\/plugin install context-slice@context-slice-marketplace/);
   assert.match(readme, /npm run benchmark:v08/);
 });
