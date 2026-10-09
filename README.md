@@ -40,7 +40,7 @@ Install it directly from the GitHub marketplace:
 The plugin provides a skill that tells Claude Code to request a focused
 ContextSlice preview before reading source files. The MCP server then targets
 the project Claude Code has open. The plugin starts the published
-`context-slice@1.9.0` npm runtime, so Claude needs npm registry access on first
+`context-slice@1.9.1` npm runtime, so Claude needs npm registry access on first
 use. The package installs native dependencies for the current platform; later
 runs use the local npm cache.
 
@@ -60,7 +60,7 @@ server for the project Codex has open.
 ### CLI and MCP
 
 ```sh
-npm install -g context-slice@1.9.0
+npm install -g context-slice@1.9.1
 context-slice init
 context-slice preview "explain the payment retry flow" --explain
 ```
