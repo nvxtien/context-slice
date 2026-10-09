@@ -6,7 +6,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "--package=context-slice@1.9.1",
+        "--package=context-slice@latest",
         "context-slice",
         "mcp"
       ]
