@@ -38,8 +38,10 @@ Install it directly from the GitHub marketplace:
 ```
 
 The plugin provides a skill that tells Claude Code to request a focused
-ContextSlice preview before reading source files. The MCP server then targets
-the project Claude Code has open. The plugin starts the published
+ContextSlice preview before reading source files. Its `PreToolUse` hook also
+blocks supported source reads until `context.preview` has completed, so this
+is enforced at runtime rather than relying only on prompt compliance. The MCP
+server then targets the project Claude Code has open. The plugin starts the published
 the latest published `context-slice` npm runtime, so Claude needs npm registry access on first
 use. The package installs native dependencies for the current platform; later
 runs use the local npm cache.
@@ -176,6 +178,7 @@ unless their contents are returned to the model.
 - The local index provides focused request context; verify behavior with normal code review and tests.
 - Metadata is the fast freshness path. Watcher or `mark-dirty` notifications verify file content hashes when source changes need confirmation.
 - The Claude plugin is validated with Claude Code 2.1.285 on macOS arm64. Other Claude Code releases and plugin hosts may differ in MCP startup behavior.
+- The source-read guard depends on Claude Code plugin hook support; hosts that install only the MCP server or skill do not enforce it.
 - Validated on macOS arm64 (Node 20.19.5 and 22.12.0); Linux and Windows use a directory-tree watcher fallback but are not CI-validated.
 
 ## Development

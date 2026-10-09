@@ -13,7 +13,7 @@ const cli = join(root, "src/cli.ts");
 
 test("package metadata describes an intentional publish-ready runtime", () => {
   assert.equal(packageJson.name, "context-slice");
-  assert.equal(packageJson.version, "1.9.1");
+  assert.equal(packageJson.version, "1.9.2");
   assert.equal(packageJson.license, "MIT");
   assert.ok(packageJson.repository);
   assert.match(packageJson.engines.node, />=20/);
@@ -21,6 +21,7 @@ test("package metadata describes an intentional publish-ready runtime", () => {
     "dist/src",
     "queries",
     "skills",
+    "hooks",
     "plugin.json",
     "mcp.json",
     "README.md",

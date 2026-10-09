@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.2 — Mandatory source-read guard
+
+- Added a Claude Code `PreToolUse` hook that requires `context.preview` before supported source reads, with direct-read fallback when the MCP preview is unavailable.
+- Packaged the hook in the plugin and documented the runtime enforcement boundary.
+
 ## 1.9.0 — Index lifecycle and release hardening (unpublished)
 
 - **Incremental indexing.** File watchers and dirty markers refresh changed source without requiring an external notification tool.
