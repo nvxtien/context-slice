@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.5
+
+- Removed generated `dist/` files from Git tracking; releases build them during `prepack`.
+
 ## 1.9.4
 
 - Fixed a crash in context composition when a cache-reused symbol's `source`/`body`
