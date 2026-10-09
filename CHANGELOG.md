@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.3
+
+- Bumped package and plugin metadata to `1.9.3`.
+
 ## 1.9.2 — Mandatory source-read guard
 
 - Added a Claude Code `PreToolUse` hook that requires `context.preview` before supported source reads, with direct-read fallback when the MCP preview is unavailable.
