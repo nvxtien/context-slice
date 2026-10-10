@@ -102,4 +102,7 @@ test("a transactional method's own attributes surface via composeTransactionCont
   assert.ok(!text.includes("intercept"));
 });
 
-test.after(() => rmSync(root, { recursive: true, force: true }));
+test.after(() => {
+  index.close();
+  rmSync(root, { recursive: true, force: true });
+});

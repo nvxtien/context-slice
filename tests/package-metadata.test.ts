@@ -8,7 +8,10 @@ const root = process.cwd();
 const packageJson = JSON.parse(
   readFileSync(join(root, "package.json"), "utf8"),
 );
-const tsx = join(root, "node_modules/.bin/tsx");
+const tsx = join(
+  root,
+  process.platform === "win32" ? "node_modules/.bin/tsx.cmd" : "node_modules/.bin/tsx",
+);
 const cli = join(root, "src/cli.ts");
 
 test("package metadata describes an intentional publish-ready runtime", () => {

@@ -106,4 +106,7 @@ test("CompositionReason accepts 'enterprise relation' (type-level, no runtime pr
   assert.equal(reason, "enterprise relation");
 });
 
-test.after(() => rmSync(root, { recursive: true, force: true }));
+test.after(() => {
+  index.close();
+  rmSync(root, { recursive: true, force: true });
+});

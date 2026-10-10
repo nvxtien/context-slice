@@ -62,4 +62,7 @@ test("constant-route: a same-class static final String constant resolves through
   assert.equal(routes[0].confidence, "probable");
 });
 
-test.after(() => rmSync(root, { recursive: true, force: true }));
+test.after(() => {
+  index.close();
+  rmSync(root, { recursive: true, force: true });
+});

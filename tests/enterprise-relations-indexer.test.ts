@@ -16,6 +16,7 @@ test("enterpriseRelations is empty when no extractor is registered", () => {
   const index = new ProjectIndex(dir);
   index.rebuild();
   assert.deepEqual(index.enterpriseRelations, []);
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -43,6 +44,7 @@ test("collects relations a registered extractor emits for a Java file", () => {
   assert.equal(index.enterpriseRelations.length, 1);
   assert.equal(index.enterpriseRelations[0].kind, "TESTS_SYMBOL");
   __resetEnterpriseExtractorsForTests();
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -70,5 +72,6 @@ test("relations survive a second rebuild that hits the parse cache", () => {
   index.rebuild(); // second call: this file now hits the cache-hit branch
   assert.equal(index.enterpriseRelations.length, 1);
   __resetEnterpriseExtractorsForTests();
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });

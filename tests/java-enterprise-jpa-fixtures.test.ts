@@ -136,4 +136,7 @@ test("JpaEntityCommentedWidget: @Entity/@OneToMany mentioned only in comments pr
   assert.equal(relations.length, 0);
 });
 
-test.after(() => rmSync(root, { recursive: true, force: true }));
+test.after(() => {
+  index.close();
+  rmSync(root, { recursive: true, force: true });
+});

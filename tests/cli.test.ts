@@ -6,7 +6,10 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 const workspace = process.cwd();
-const tsx = join(workspace, "node_modules/.bin/tsx");
+const tsx = join(
+  workspace,
+  process.platform === "win32" ? "node_modules/.bin/tsx.cmd" : "node_modules/.bin/tsx",
+);
 const cli = join(workspace, "src/cli.ts");
 
 function javaRepository() {

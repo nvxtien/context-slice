@@ -62,4 +62,7 @@ test("comment-negative: an @Autowired mentioned only in a comment produces no re
   assert.equal(relations.length, 0);
 });
 
-test.after(() => rmSync(root, { recursive: true, force: true }));
+test.after(() => {
+  index.close();
+  rmSync(root, { recursive: true, force: true });
+});
