@@ -12,6 +12,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { commandInvocation } from "./platform-command.js";
 
 type CommandResult = { status: number; stdout: string; stderr: string };
 type SmokeReport = {
@@ -111,7 +112,8 @@ function command(
   cwd: string,
   env?: NodeJS.ProcessEnv,
 ): CommandResult {
-  const result = spawnSync(file, args, {
+  const invocation = commandInvocation(file, args);
+  const result = spawnSync(invocation.file, invocation.args, {
     cwd,
     env: { ...process.env, ...env },
     encoding: "utf8",
@@ -181,7 +183,8 @@ function rustRepo(root: string) {
 }
 
 function requestMcp(binary: string, cwd: string) {
-  const child = spawn(binary, ["mcp"], {
+  const invocation = commandInvocation(binary, ["mcp"]);
+  const child = spawn(invocation.file, invocation.args, {
     cwd,
     stdio: ["pipe", "pipe", "pipe"],
   });

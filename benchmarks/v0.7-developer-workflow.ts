@@ -9,6 +9,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { commandInvocation } from "../scripts/platform-command.js";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { buildPreview } from "../src/workflow/preview.js";
 
@@ -107,7 +108,8 @@ function startMcp(sourceRoot: string, repository: string): McpSession {
     process.platform === "win32" ? "tsx.cmd" : "tsx",
   );
   const cli = join(sourceRoot, "src/cli.ts");
-  const child = spawn(tsx, [cli, "mcp", "--repo", repository], {
+  const invocation = commandInvocation(tsx, [cli, "mcp", "--repo", repository]);
+  const child = spawn(invocation.file, invocation.args, {
     cwd: sourceRoot,
     stdio: ["pipe", "pipe", "pipe"],
   });

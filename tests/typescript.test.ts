@@ -338,12 +338,14 @@ test("incremental refresh reparses only the changed TypeScript file", () => {
   const warmIndex = new ProjectIndex(root);
   const warm = warmIndex.rebuild();
   assert.equal(warm.filesParsed, 0);
+  warmIndex.close();
   const file = join(root, "utils/math.ts");
   writeFileSync(file, `// touched\n${readFileSync(file, "utf8")}`);
   const updateIndex = new ProjectIndex(root);
   const update = updateIndex.rebuild();
   assert.equal(update.filesParsed, 1);
   assert.equal(update.cacheHits, warm.cacheHits - 1);
+  updateIndex.close();
   // Cross-file resolution survives a partial reparse.
   const index = new ProjectIndex(root);
   index.rebuild();
