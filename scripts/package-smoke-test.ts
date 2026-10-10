@@ -352,7 +352,10 @@ export async function runPackageSmoke(
   mkdirSync(prefix, { recursive: true });
   let tarball = "";
   try {
-    const pack = JSON.parse(run(npmCommand, ["pack", "--json"], root))[0] as {
+    run(npmCommand, ["run", "build"], root);
+    const pack = JSON.parse(
+      run(npmCommand, ["pack", "--json", "--ignore-scripts"], root),
+    )[0] as {
       filename: string;
       files?: Array<{ path: string }>;
     };
