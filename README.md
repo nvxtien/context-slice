@@ -8,10 +8,10 @@
   <img src="assets/context-slice-hero.png" alt="Source files converging into a focused ContextSlice context" width="100%" />
 </p>
 
-When you vibe code, the model does not spend tokens only on writing the final
-answer. A large part of the cost is often the code it has to read first: the
-target file, its callers, callees, dependencies, tests, and configuration.
-The larger the repository, the more unrelated code can enter the context.
+When you use AI to write code, the model doesn’t spend tokens just writing the
+final answer. A large part of the cost often comes from the code it has to
+read first: the target file, its callers and callees, dependencies, tests, and
+configuration.
 
 Reading more code means more tokens, slower responses, and more noise around
 the detail that actually matters. The practical way to reduce that cost is to
