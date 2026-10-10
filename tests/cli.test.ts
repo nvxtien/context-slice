@@ -3,11 +3,14 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 import test from "node:test";
 
 const workspace = process.cwd();
 const cli = join(workspace, "src/cli.ts");
-const tsxLoader = join(workspace, "node_modules/tsx/dist/loader.mjs");
+const tsxLoader = pathToFileURL(
+  join(workspace, "node_modules/tsx/dist/loader.mjs"),
+).href;
 
 function javaRepository() {
   const root = mkdtempSync(join(tmpdir(), "context-slice-cli-"));

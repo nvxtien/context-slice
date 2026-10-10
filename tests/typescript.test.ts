@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { parseTypeScript } from "../src/languages/typescript/parse.js";
 import { typeScriptDiagnostics } from "../src/languages/typescript/index.js";
@@ -366,7 +367,9 @@ test("CLI preview works in a TypeScript repository", () => {
       process.execPath,
       [
         "--import",
-        join(process.cwd(), "node_modules/tsx/dist/loader.mjs"),
+        pathToFileURL(
+          join(process.cwd(), "node_modules/tsx/dist/loader.mjs"),
+        ).href,
         join(process.cwd(), "src/cli.ts"),
         ...args,
         "--repo",

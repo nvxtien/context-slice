@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 import test from "node:test";
 
 const root = process.cwd();
@@ -9,7 +10,9 @@ const packageJson = JSON.parse(
   readFileSync(join(root, "package.json"), "utf8"),
 );
 const cli = join(root, "src/cli.ts");
-const tsxLoader = join(root, "node_modules/tsx/dist/loader.mjs");
+const tsxLoader = pathToFileURL(
+  join(root, "node_modules/tsx/dist/loader.mjs"),
+).href;
 
 test("package metadata describes an intentional publish-ready runtime", () => {
   assert.equal(packageJson.name, "context-slice");
