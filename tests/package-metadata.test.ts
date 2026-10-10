@@ -8,11 +8,8 @@ const root = process.cwd();
 const packageJson = JSON.parse(
   readFileSync(join(root, "package.json"), "utf8"),
 );
-const tsx = join(
-  root,
-  process.platform === "win32" ? "node_modules/.bin/tsx.cmd" : "node_modules/.bin/tsx",
-);
 const cli = join(root, "src/cli.ts");
+const tsxLoader = join(root, "node_modules/tsx/dist/loader.mjs");
 
 test("package metadata describes an intentional publish-ready runtime", () => {
   assert.equal(packageJson.name, "context-slice");
@@ -35,11 +32,14 @@ test("package metadata describes an intentional publish-ready runtime", () => {
 });
 
 test("version and help work from the source entry point", () => {
-  const version = spawnSync(tsx, [cli, "--version"], {
+  const version = spawnSync(process.execPath, ["--import", tsxLoader, cli, "--version"], {
     cwd: root,
     encoding: "utf8",
   });
-  const help = spawnSync(tsx, [cli, "--help"], { cwd: root, encoding: "utf8" });
+  const help = spawnSync(process.execPath, ["--import", tsxLoader, cli, "--help"], {
+    cwd: root,
+    encoding: "utf8",
+  });
 
   assert.equal(version.status, 0, version.stderr);
   assert.equal(version.stdout.trim(), packageJson.version);

@@ -6,11 +6,8 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 const workspace = process.cwd();
-const tsx = join(
-  workspace,
-  process.platform === "win32" ? "node_modules/.bin/tsx.cmd" : "node_modules/.bin/tsx",
-);
 const cli = join(workspace, "src/cli.ts");
+const tsxLoader = join(workspace, "node_modules/tsx/dist/loader.mjs");
 
 function javaRepository() {
   const root = mkdtempSync(join(tmpdir(), "context-slice-cli-"));
@@ -24,7 +21,10 @@ function javaRepository() {
 }
 
 function run(args: string[], cwd = workspace) {
-  return spawnSync(tsx, [cli, ...args], { cwd, encoding: "utf8" });
+  return spawnSync(process.execPath, ["--import", tsxLoader, cli, ...args], {
+    cwd,
+    encoding: "utf8",
+  });
 }
 
 test("init finds the enclosing repository from a nested directory", () => {

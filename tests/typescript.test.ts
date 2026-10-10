@@ -363,13 +363,15 @@ test("CLI preview works in a TypeScript repository", () => {
   const root = fixture("typescript");
   const cli = (args: string[]) =>
     spawnSync(
-      join(
-        process.cwd(),
-        process.platform === "win32"
-          ? "node_modules/.bin/tsx.cmd"
-          : "node_modules/.bin/tsx",
-      ),
-      [join(process.cwd(), "src/cli.ts"), ...args, "--repo", root],
+      process.execPath,
+      [
+        "--import",
+        join(process.cwd(), "node_modules/tsx/dist/loader.mjs"),
+        join(process.cwd(), "src/cli.ts"),
+        ...args,
+        "--repo",
+        root,
+      ],
       { cwd: process.cwd(), encoding: "utf8" },
     );
   const init = cli(["init"]);
