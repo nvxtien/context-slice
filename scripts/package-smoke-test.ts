@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { commandInvocation } from "./platform-command.js";
 
 type CommandResult = { status: number; stdout: string; stderr: string };
@@ -104,7 +104,10 @@ export interface PackageSmokeOptions {
   outputDir?: string;
 }
 
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const npmCommand =
+  process.platform === "win32"
+    ? join(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js")
+    : "npm";
 
 function command(
   file: string,
@@ -134,10 +137,12 @@ function run(
   env?: NodeJS.ProcessEnv,
 ) {
   const result = command(file, args, cwd, env);
-  if (result.status !== 0)
+  if (result.status !== 0) {
+    const output = [result.stderr, result.stdout].filter(Boolean).join("\\n");
     throw new Error(
-      `${file} ${args.join(" ")} failed (${result.status}): ${result.stderr || result.stdout}`,
+      `${file} ${args.join(" ")} failed in ${cwd} (${result.status}): ${output}`,
     );
+  }
   return result.stdout;
 }
 
