@@ -115,11 +115,14 @@ function command(
     cwd,
     env: { ...process.env, ...env },
     encoding: "utf8",
+    shell: process.platform === "win32",
   });
   return {
     status: result.status ?? 1,
     stdout: result.stdout ?? "",
-    stderr: result.stderr ?? "",
+    stderr: result.error
+      ? `${result.stderr ?? ""}${result.error.message}`
+      : (result.stderr ?? ""),
   };
 }
 

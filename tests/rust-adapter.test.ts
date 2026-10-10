@@ -17,6 +17,7 @@ test("ProjectIndex indexes a .rs file via the Rust adapter", () => {
     (s) => s.name === "add" && s.language === "rust",
   );
   assert.ok(add, "Rust function 'add' was not indexed");
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -35,6 +36,7 @@ test("target/ directory is ignored", () => {
     index.symbols.some((s) => s.name === "should_be_ignored"),
     false,
   );
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -60,6 +62,7 @@ test("duplicate impl blocks for the same type do not crash indexing", () => {
     b!.parentId,
     "the two impl blocks should be distinct parent symbols",
   );
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -72,5 +75,6 @@ test("a mixed Java + Rust repository indexes both languages without crashing", (
   assert.equal(summary.parseErrors, 0);
   assert.ok(index.symbols.some((s) => s.language === "java"));
   assert.ok(index.symbols.some((s) => s.language === "rust"));
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });

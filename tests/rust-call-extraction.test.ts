@@ -401,6 +401,9 @@ test("ProjectIndex: calls persist and are stable across warm rebuild and one-fil
     const fresh = new ProjectIndex(dir);
     fresh.rebuild();
     assert.equal(snap(fresh), snap(reopened));
+    cold.close();
+    reopened.close();
+    fresh.close();
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

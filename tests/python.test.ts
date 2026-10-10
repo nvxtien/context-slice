@@ -213,6 +213,7 @@ test("mixed-language repositories keep languages separate", () => {
   );
   assert.equal(mixedIndex.inspect().filesByExtension[".py"], 1);
   assert.ok(mixedIndex.search("retry").length >= 2);
+  mixedIndex.close();
   rmSync(mixed, { recursive: true, force: true });
 });
 
