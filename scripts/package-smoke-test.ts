@@ -185,6 +185,7 @@ function requestMcp(binary: string, cwd: string) {
   const child = spawn(binary, ["mcp"], {
     cwd,
     stdio: ["pipe", "pipe", "pipe"],
+    shell: process.platform === "win32",
   });
   const messages: Array<Record<string, any>> = [];
   const invalid: string[] = [];
@@ -393,7 +394,11 @@ export async function runPackageSmoke(
       ["install", "--prefix", prefix, tarball, "--no-audit", "--no-fund"],
       root,
     );
-    const binary = join(prefix, "node_modules/.bin/context-slice");
+    const binary = join(
+      prefix,
+      "node_modules/.bin",
+      process.platform === "win32" ? "context-slice.cmd" : "context-slice",
+    );
     const repository = javaRepo(workspace);
     const nested = join(repository, "src/main/java");
     const version = run(binary, ["--version"], nested).trim();

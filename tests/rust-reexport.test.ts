@@ -45,6 +45,7 @@ test("crate:: and super:: imports resolve to the right files", () => {
     superImport!.resolvedFile?.endsWith("repository/mod.rs"),
     `expected repository/mod.rs, got ${superImport!.resolvedFile}`,
   );
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
 
@@ -71,5 +72,6 @@ test("pub use re-exports resolve to the file they point at", () => {
     postgresExport!.resolvedFile?.endsWith("repository/postgres.rs"),
     `expected repository/postgres.rs, got ${postgresExport!.resolvedFile}`,
   );
+  index.close();
   rmSync(dir, { recursive: true, force: true });
 });
