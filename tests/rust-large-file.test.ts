@@ -75,6 +75,7 @@ test("ProjectIndex indexes a large file next to a small one", () => {
     );
     assert.equal(fns.length, count);
     assert.ok(index.symbols.some((s) => s.name === "tiny"));
+    index.close();
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

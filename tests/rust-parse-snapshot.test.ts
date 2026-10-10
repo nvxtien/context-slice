@@ -93,7 +93,7 @@ function resolvedSummary() {
     const index = new ProjectIndex(dir);
     index.rebuild();
     const byId = new Map(index.symbols.map((s) => [s.id, s]));
-    return index.calls
+    const result = index.calls
       .map((c) => {
         const t = c.resolvedTargetId ? byId.get(c.resolvedTargetId) : undefined;
         return [
@@ -109,6 +109,8 @@ function resolvedSummary() {
         ];
       })
       .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    index.close();
+    return result;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

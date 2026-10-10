@@ -234,4 +234,7 @@ test("parse errors are reported without throwing", () => {
   assert.ok(Array.isArray(broken.symbols));
 });
 
-test.after(() => rmSync(root, { recursive: true, force: true }));
+test.after(() => {
+  index.close();
+  rmSync(root, { recursive: true, force: true });
+});

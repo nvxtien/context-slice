@@ -507,6 +507,7 @@ test("cfg-gated duplicate fns: context composition reaches every alternative, no
       assert.deepEqual(deps.map((s) => s.range.startLine).sort(), [2, 4]);
       const unixVariant = deps.find((s) => s.range.startLine === 2)!;
       assert.ok(index.callers(unixVariant).some((s) => s.name === "t"));
+      index.close();
     },
   );
 });
@@ -610,6 +611,8 @@ test("warm rebuild reproduces cold edges; unresolved edges are re-resolved after
       fresh.rebuild();
       assert.equal(snap(reopened), snap(fresh));
       assert.equal(summarize(reopened, "n", "S::c")[0].target, "b::S::n");
+      cold.close();
+      fresh.close();
     },
   );
 });

@@ -3,12 +3,15 @@ import { spawn, spawnSync } from "node:child_process";
 import { cpSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
 
 const workspace = process.cwd();
 const cli = join(workspace, "src/cli.ts");
-const tsxLoader = join(workspace, "node_modules/tsx/dist/loader.mjs");
+const tsxLoader = pathToFileURL(
+  join(workspace, "node_modules/tsx/dist/loader.mjs"),
+).href;
 const gitEnv = {
   GIT_AUTHOR_NAME: "t",
   GIT_AUTHOR_EMAIL: "t@example.com",
@@ -52,6 +55,7 @@ test("Rust and Python sources coexist without id collisions", () => {
   assert.equal(new Set(ids).size, ids.length);
   assert.ok(index.symbols.some((s) => s.filePath.endsWith(".rs")));
   assert.ok(index.symbols.some((s) => s.filePath.endsWith(".py")));
+  index.close();
 });
 
 test("init, index, status succeed on a Rust repository", () => {
@@ -229,4 +233,5 @@ test("a >40KB Rust file with a syntax error gets parseError without aborting sib
   assert.ok(
     index.symbols.some((s) => s.filePath === "big.rs" && s.name === "f0"),
   );
+  index.close();
 });

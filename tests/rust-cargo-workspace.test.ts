@@ -33,6 +33,7 @@ test("a use path into a sibling workspace crate (block members list) resolves to
       index.rebuild();
       const record = index.imports.find((r) => r.importedName === "Store")!;
       assert.equal(record.resolvedFile, "store/src/lib.rs");
+      index.close();
     },
   );
 });
@@ -52,6 +53,7 @@ test("a use path into a nested module of a sibling crate resolves correctly", ()
       index.rebuild();
       const record = index.imports.find((r) => r.importedName === "Repo")!;
       assert.equal(record.resolvedFile, "store/src/repository.rs");
+      index.close();
     },
   );
 });
@@ -70,6 +72,7 @@ test("two workspace crates each with their own src/lib.rs are NOT ambiguous with
       index.rebuild();
       const record = index.imports.find((r) => r.importedName === "run")!;
       assert.equal(record.resolvedFile, "api/src/lib.rs");
+      index.close();
     },
   );
 });
@@ -87,6 +90,7 @@ test("a use path naming a crate NOT in the workspace stays external", () => {
       const record = index.imports.find((r) => r.importedName === "Serialize")!;
       assert.equal(record.resolvedFile, undefined);
       assert.equal(record.externalPackage, "serde");
+      index.close();
     },
   );
 });
@@ -105,6 +109,7 @@ test("workspace members listed via a simple glob (dir/*) are discovered", () => 
       index.rebuild();
       const record = index.imports.find((r) => r.importedName === "Store")!;
       assert.equal(record.resolvedFile, "crates/store/src/lib.rs");
+      index.close();
     },
   );
 });
@@ -120,6 +125,7 @@ test("without a Cargo.toml, single-crate module resolution still works (no regre
       index.rebuild();
       const record = index.imports.find((r) => r.importedName === "run")!;
       assert.equal(record.resolvedFile, "src/service.rs");
+      index.close();
     },
   );
 });
