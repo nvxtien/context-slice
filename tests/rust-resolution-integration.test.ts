@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { ProjectIndex } from "../src/indexer/index.js";
+const activeIndexes = new Set<ProjectIndex>();
 
 function withRepo(files: Record<string, string>, run: (dir: string) => void) {
   const dir = mkdtempSync(join(tmpdir(), "cs-rust-int-"));
@@ -14,6 +15,8 @@ function withRepo(files: Record<string, string>, run: (dir: string) => void) {
     }
     run(dir);
   } finally {
+    for (const index of activeIndexes) index.close();
+    activeIndexes.clear();
     rmSync(dir, { recursive: true, force: true });
   }
 }
@@ -21,6 +24,7 @@ function withRepo(files: Record<string, string>, run: (dir: string) => void) {
 const build = (dir: string) => {
   const index = new ProjectIndex(dir);
   index.rebuild();
+  activeIndexes.add(index);
   return index;
 };
 

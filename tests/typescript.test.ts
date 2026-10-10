@@ -260,6 +260,7 @@ test("tsconfig path aliases resolve, and unknown aliases are not external", () =
   );
   assert.equal(missing?.resolvedFile, undefined);
   assert.equal(missing?.externalPackage, undefined);
+  index.close();
   rmSync(root, { recursive: true, force: true });
 });
 
@@ -334,11 +335,13 @@ test("mixed Java and TypeScript repositories coexist", () => {
 
 test("incremental refresh reparses only the changed TypeScript file", () => {
   const { root } = indexed("typescript");
-  const warm = new ProjectIndex(root).rebuild();
+  const warmIndex = new ProjectIndex(root);
+  const warm = warmIndex.rebuild();
   assert.equal(warm.filesParsed, 0);
   const file = join(root, "utils/math.ts");
   writeFileSync(file, `// touched\n${readFileSync(file, "utf8")}`);
-  const update = new ProjectIndex(root).rebuild();
+  const updateIndex = new ProjectIndex(root);
+  const update = updateIndex.rebuild();
   assert.equal(update.filesParsed, 1);
   assert.equal(update.cacheHits, warm.cacheHits - 1);
   // Cross-file resolution survives a partial reparse.
@@ -351,6 +354,9 @@ test("incremental refresh reparses only the changed TypeScript file", () => {
     )?.confidence,
     "exact",
   );
+  warmIndex.close();
+  updateIndex.close();
+  index.close();
   rmSync(root, { recursive: true, force: true });
 });
 

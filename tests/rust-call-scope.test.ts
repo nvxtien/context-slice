@@ -27,7 +27,7 @@ function edges(dir: string, callee: string, caller?: string) {
   const index = new ProjectIndex(dir);
   index.rebuild();
   const byId = new Map(index.symbols.map((s) => [s.id, s]));
-  return index.calls
+  const result = index.calls
     .filter(
       (c) =>
         c.calleeName === callee &&
@@ -45,6 +45,8 @@ function edges(dir: string, callee: string, caller?: string) {
       ev: c.evidence,
       pkg: c.externalPackage,
     }));
+  index.close();
+  return result;
 }
 const one = (dir: string, callee: string, caller?: string) => {
   const list = edges(dir, callee, caller);

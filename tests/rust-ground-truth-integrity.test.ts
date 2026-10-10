@@ -15,7 +15,7 @@ test("frozen ground truth hashes match FROZEN.sha256 (why excluded)", () => {
   const p = join(FROZEN_DIR, "FROZEN.sha256");
   const committed = existsSync(p)
     ? readFileSync(p, "utf8")
-        .split("\n")
+        .split(/\r?\n/)
         .filter((l) => l.trim() && !l.startsWith("#"))
     : [];
   assert.deepEqual(frozenLines(), committed, MSG);

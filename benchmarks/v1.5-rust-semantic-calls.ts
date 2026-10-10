@@ -117,7 +117,7 @@ export function assertFrozen(dir = FROZEN_DIR): void {
   const p = join(dir, "FROZEN.sha256");
   const committed = existsSync(p)
     ? readFileSync(p, "utf8")
-        .split("\n")
+        .split(/\r?\n/)
         .filter((l) => l.trim() && !l.startsWith("#"))
     : [];
   const actual = frozenLines(dir);

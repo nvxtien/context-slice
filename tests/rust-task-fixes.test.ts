@@ -19,7 +19,7 @@ function edges(files: Record<string, string>, callee: string) {
     const byId = new Map(index.symbols.map((s) => [s.id, s]));
     const line = (id?: string) =>
       id ? byId.get(id)?.range.startLine : undefined;
-    return index.calls
+    const result = index.calls
       .filter((c) => c.calleeName === callee)
       .map((c) => ({
         caller: byId.get(c.callerId)?.name,
@@ -28,6 +28,8 @@ function edges(files: Record<string, string>, callee: string) {
         conf: c.confidence,
         ev: c.evidence,
       }));
+    index.close();
+    return result;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

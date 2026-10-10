@@ -258,19 +258,20 @@ export async function runWorkflowBenchmark(
         recursive: true,
         force: true,
       });
-      return {
-        filesReparsed: new ProjectIndex(repository).refresh().summary
-          .filesParsed,
-      };
+      const index = new ProjectIndex(repository);
+      const filesReparsed = index.refresh().summary.filesParsed;
+      index.close();
+      return { filesReparsed };
     });
     const coldIndex = measure("cold-index", iterations, () => {
       rmSync(join(repository, ".context-slice"), {
         recursive: true,
         force: true,
       });
-      return {
-        filesReparsed: new ProjectIndex(repository).rebuild().filesParsed,
-      };
+      const index = new ProjectIndex(repository);
+      const filesReparsed = index.rebuild().filesParsed;
+      index.close();
+      return { filesReparsed };
     });
     const index = new ProjectIndex(repository);
     index.refresh();
@@ -293,6 +294,7 @@ export async function runWorkflowBenchmark(
       return { filesReparsed: refreshed.summary.filesParsed };
     });
     const mcp = await mcpPhases(root, repository);
+    index.close();
     const phases: Phase[] = [
       freshInit,
       coldIndex,
