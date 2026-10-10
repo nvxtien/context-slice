@@ -14,6 +14,7 @@ cpSync(join(process.cwd(), "tests/fixtures/context-composition"), root, {
 });
 const index = new ProjectIndex(root);
 index.rebuild();
+let coldIndex: ProjectIndex | undefined;
 const targetOf = (qualified: string) => {
   const found = index.symbols.find(
     (symbol) => symbol.qualifiedName === qualified,
@@ -88,15 +89,15 @@ test("a Java skeleton survives a cold-start rebuild that reuses cached (lean) sy
   // so this covers that path end to end (observed failing in production as "Cannot read
   // properties of undefined (reading 'matchAll')" after a process restart, though this
   // fixture is too small to force the same lean-object shape on demand).
-  const cold = new ProjectIndex(root);
-  const result = cold.rebuild();
+  coldIndex = new ProjectIndex(root);
+  const result = coldIndex.rebuild();
   assert.ok(result.cacheHits > 0, "expected the cold rebuild to reuse cached files");
-  const target = cold.symbols.find(
+  const target = coldIndex.symbols.find(
     (symbol) => symbol.qualifiedName === "demo.Counter.increment",
   );
   assert.ok(target, "missing target demo.Counter.increment");
-  assert.doesNotThrow(() => composeSiblings(cold, target!));
-  const [skeleton] = composeSiblings(cold, target!);
+  assert.doesNotThrow(() => composeSiblings(coldIndex!, target!));
+  const [skeleton] = composeSiblings(coldIndex, target!);
   assert.match(skeleton.rendered, /private int count;/);
 });
 
@@ -108,5 +109,6 @@ test("CompositionReason accepts 'enterprise relation' (type-level, no runtime pr
 
 test.after(() => {
   index.close();
+  coldIndex?.close();
   rmSync(root, { recursive: true, force: true });
 });
