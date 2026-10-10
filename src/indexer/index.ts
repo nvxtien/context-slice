@@ -51,6 +51,10 @@ const coreIgnored = new Set([
 ]);
 const ignored = new Set([...coreIgnored, ...ignoredDirectories()]);
 
+function repositoryRelative(root: string, file: string): string {
+  return relative(root, file).split(sep).join("/");
+}
+
 interface LazySymbolContext {
   root: string;
 }
@@ -62,10 +66,10 @@ function lazySource(symbol: LazySymbol, range: SymbolRecord["range"]) {
   const context = symbol[lazyContextKey];
   if (!context) return "";
   const fullPath = resolve(context.root, symbol.filePath);
-  const fromRoot = relative(context.root, fullPath);
+  const fromRoot = repositoryRelative(context.root, fullPath);
   if (
     fromRoot === ".." ||
-    fromRoot.startsWith(`..${sep}`) ||
+    fromRoot.startsWith("../") ||
     isAbsolute(fromRoot)
   )
     throw new WorkflowError(
@@ -182,7 +186,7 @@ export class ProjectIndex {
       files.map((file) => {
         const stats = statSync(file);
         return [
-          relative(this.root, file),
+          repositoryRelative(this.root, file),
           `${stats.size}:${stats.mtimeMs}:${stats.ctimeMs}`,
         ];
       }),
@@ -358,7 +362,7 @@ export class ProjectIndex {
     const previous = this.storage.load({ calls: false, symbols: "lean" });
     const candidates = paths.length ? paths : [...previous.files.keys()];
     const currentFiles = new Map(
-      files.map((file) => [relative(this.root, file), file]),
+      files.map((file) => [repositoryRelative(this.root, file), file]),
     );
     const changed = new Set<string>();
     for (const filePath of candidates) {
@@ -489,7 +493,7 @@ export class ProjectIndex {
     let symbolsUpdated = 0;
     const sourceCache = new Map<string, string>();
     for (const file of files) {
-      const filePath = relative(this.root, file);
+      const filePath = repositoryRelative(this.root, file);
       const adapter = adapterFor(filePath);
       if (!adapter) continue;
       const stats = statSync(file);
@@ -787,10 +791,10 @@ export class ProjectIndex {
   }
   sourceFor(symbol: SymbolRecord, sourceCache?: Map<string, string>) {
     const full = resolve(this.root, symbol.filePath);
-    const fromRoot = relative(this.root, full);
+    const fromRoot = repositoryRelative(this.root, full);
     if (
       fromRoot === ".." ||
-      fromRoot.startsWith(`..${sep}`) ||
+      fromRoot.startsWith("../") ||
       isAbsolute(fromRoot)
     )
       throw new WorkflowError(

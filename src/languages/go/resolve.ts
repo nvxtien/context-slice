@@ -10,7 +10,7 @@ import type { ResolveContext } from "../adapter.js";
 /** Go's package boundary is per-directory, never by matching package-clause name strings. */
 function directoryOf(filePath: string): string {
   const dir = dirname(filePath);
-  return dir === "." ? "" : dir;
+  return (dir === "." ? "" : dir).replaceAll("\\", "/");
 }
 
 /** A single module known to this project: its declared module path, and its directory relative

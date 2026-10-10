@@ -103,6 +103,8 @@ export interface PackageSmokeOptions {
   outputDir?: string;
 }
 
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+
 function command(
   file: string,
   args: string[],
@@ -345,7 +347,7 @@ export async function runPackageSmoke(
   mkdirSync(prefix, { recursive: true });
   let tarball = "";
   try {
-    const pack = JSON.parse(run("npm", ["pack", "--json"], root))[0] as {
+    const pack = JSON.parse(run(npmCommand, ["pack", "--json"], root))[0] as {
       filename: string;
     };
     tarball = join(root, pack.filename);
@@ -384,7 +386,7 @@ export async function runPackageSmoke(
       repository: { url: string };
     };
     run(
-      "npm",
+      npmCommand,
       ["install", "--prefix", prefix, tarball, "--no-audit", "--no-fund"],
       root,
     );
@@ -436,7 +438,7 @@ export async function runPackageSmoke(
       );
 
     run(
-      "npm",
+      npmCommand,
       ["install", "--prefix", prefix, tarball, "--no-audit", "--no-fund"],
       root,
     );
@@ -447,7 +449,7 @@ export async function runPackageSmoke(
       nested,
     );
     run(
-      "npm",
+      npmCommand,
       [
         "uninstall",
         "--prefix",
@@ -463,7 +465,7 @@ export async function runPackageSmoke(
       generatedAt: new Date().toISOString(),
       environment: {
         node: process.version,
-        npm: run("npm", ["--version"], root).trim(),
+        npm: run(npmCommand, ["--version"], root).trim(),
         platform: process.platform,
       },
       package: {
@@ -556,7 +558,7 @@ export async function runPackageSmoke(
       },
       packageDryRun: (() => {
         const dryRun = command(
-          "npm",
+          npmCommand,
           ["pack", "--dry-run", "--json", "--ignore-scripts"],
           root,
         );
