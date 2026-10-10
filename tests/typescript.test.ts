@@ -334,7 +334,8 @@ test("mixed Java and TypeScript repositories coexist", () => {
 });
 
 test("incremental refresh reparses only the changed TypeScript file", () => {
-  const { root } = indexed("typescript");
+  const { root, index: seedIndex } = indexed("typescript");
+  seedIndex.close();
   const warmIndex = new ProjectIndex(root);
   const warm = warmIndex.rebuild();
   assert.equal(warm.filesParsed, 0);

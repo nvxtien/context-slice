@@ -354,12 +354,11 @@ export async function runPackageSmoke(
   try {
     const pack = JSON.parse(run(npmCommand, ["pack", "--json"], root))[0] as {
       filename: string;
+      files?: Array<{ path: string }>;
     };
     tarball = join(root, pack.filename);
-    const files = run("tar", ["-tzf", tarball], root)
-      .trim()
-      .split("\n")
-      .filter(Boolean);
+    const files = (pack.files ?? []).map(({ path }) => `package/${path}`);
+    if (!files.length) throw new Error("npm pack returned no file manifest");
     const requiredFiles = [
       "package/dist/src/cli.js",
       "package/dist/src/server/mcp-server.js",

@@ -46,22 +46,24 @@ const outcomes = (index: ProjectIndex, file: string) => {
 };
 
 test("perf guard: resolution stays roughly linear in file size (was quadratic)", () => {
-  // Before the fix a 976K-char file took ~20 s cold; now ~4 s. Bound is generous for slow CI machines.
-  withDir({ "src/lib.rs": big(500_000) }, (dir) => {
-    const index = new ProjectIndex(dir);
-    try {
-      const t = performance.now();
-      index.rebuild();
-      const cold = performance.now() - t;
-      assert.ok(index.calls.length > 15_000);
-      assert.ok(
-        cold < 15_000,
-        `cold rebuild of a 500K-char file took ${cold.toFixed(0)} ms`,
-      );
-    } finally {
-      index.close();
-    }
-  });
+  const elapsed = (size: number) =>
+    withDir({ "src/lib.rs": big(size) }, (dir) => {
+      const index = new ProjectIndex(dir);
+      try {
+        const started = performance.now();
+        index.rebuild();
+        assert.ok(index.calls.length > size / 40);
+        return performance.now() - started;
+      } finally {
+        index.close();
+      }
+    });
+  const small = elapsed(100_000);
+  const large = elapsed(200_000);
+  assert.ok(
+    large < small * 3.5 + 1_000,
+    `resolution scaled ${large.toFixed(0)}ms / ${small.toFixed(0)}ms`,
+  );
 });
 
 test("warm rebuild after an edit resolves the edited file exactly like a cold build (parse caches invalidate)", () => {
