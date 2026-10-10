@@ -115,7 +115,6 @@ function command(
     cwd,
     env: { ...process.env, ...env },
     encoding: "utf8",
-    shell: process.platform === "win32",
   });
   return {
     status: result.status ?? 1,
@@ -185,7 +184,6 @@ function requestMcp(binary: string, cwd: string) {
   const child = spawn(binary, ["mcp"], {
     cwd,
     stdio: ["pipe", "pipe", "pipe"],
-    shell: process.platform === "win32",
   });
   const messages: Array<Record<string, any>> = [];
   const invalid: string[] = [];

@@ -810,6 +810,7 @@ export function indexRepo(dir: string) {
   for (const f of rsFiles(dir))
     if (parseRust(f, readFileSync(join(dir, f), "utf8")).parseError)
       parseErrorFiles.add(f);
+  index.close();
   return {
     calls,
     symbols,

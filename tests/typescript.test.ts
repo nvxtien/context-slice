@@ -357,7 +357,7 @@ test("incremental refresh reparses only the changed TypeScript file", () => {
   warmIndex.close();
   updateIndex.close();
   index.close();
-  rmSync(root, { recursive: true, force: true });
+  rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test("parse errors are reported without throwing", () => {

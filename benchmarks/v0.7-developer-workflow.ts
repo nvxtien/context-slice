@@ -101,7 +101,11 @@ function measure(
 }
 
 function startMcp(sourceRoot: string, repository: string): McpSession {
-  const tsx = join(sourceRoot, "node_modules/.bin/tsx");
+  const tsx = join(
+    sourceRoot,
+    "node_modules/.bin",
+    process.platform === "win32" ? "tsx.cmd" : "tsx",
+  );
   const cli = join(sourceRoot, "src/cli.ts");
   const child = spawn(tsx, [cli, "mcp", "--repo", repository], {
     cwd: sourceRoot,
@@ -293,8 +297,8 @@ export async function runWorkflowBenchmark(
       writeFileSync(edited, original);
       return { filesReparsed: refreshed.summary.filesParsed };
     });
-    const mcp = await mcpPhases(root, repository);
     index.close();
+    const mcp = await mcpPhases(root, repository);
     const phases: Phase[] = [
       freshInit,
       coldIndex,
@@ -380,7 +384,12 @@ export async function runWorkflowBenchmark(
     );
     return report;
   } finally {
-    rmSync(repository, { recursive: true, force: true });
+    rmSync(repository, {
+      recursive: true,
+      force: true,
+      maxRetries: 10,
+      retryDelay: 100,
+    });
   }
 }
 

@@ -49,14 +49,18 @@ test("perf guard: resolution stays roughly linear in file size (was quadratic)",
   // Before the fix a 976K-char file took ~20 s cold; now ~4 s. Bound is generous for slow CI machines.
   withDir({ "src/lib.rs": big(500_000) }, (dir) => {
     const index = new ProjectIndex(dir);
-    const t = performance.now();
-    index.rebuild();
-    const cold = performance.now() - t;
-    assert.ok(index.calls.length > 15_000);
-    assert.ok(
-      cold < 15_000,
-      `cold rebuild of a 500K-char file took ${cold.toFixed(0)} ms`,
-    );
+    try {
+      const t = performance.now();
+      index.rebuild();
+      const cold = performance.now() - t;
+      assert.ok(index.calls.length > 15_000);
+      assert.ok(
+        cold < 15_000,
+        `cold rebuild of a 500K-char file took ${cold.toFixed(0)} ms`,
+      );
+    } finally {
+      index.close();
+    }
   });
 });
 
@@ -66,21 +70,29 @@ test("warm rebuild after an edit resolves the edited file exactly like a cold bu
   const after = big(20_000, "let s = 3u8; ");
   withDir({ "src/lib.rs": before }, (dir) => {
     const warm = new ProjectIndex(dir);
-    warm.rebuild();
-    writeFileSync(join(dir, "src/lib.rs"), after);
-    warm.rebuild();
-    withDir({ "src/lib.rs": after }, (dir2) => {
-      const cold = new ProjectIndex(dir2);
-      cold.rebuild();
-      assert.equal(outcomes(warm, "src/lib.rs"), outcomes(cold, "src/lib.rs"));
-      assert.ok(
-        cold.calls.some(
-          (c) =>
-            c.calleeName === "m" &&
-            c.evidence.some((e) => e.startsWith("no-type:")),
-        ),
-      );
-    });
+    try {
+      warm.rebuild();
+      writeFileSync(join(dir, "src/lib.rs"), after);
+      warm.rebuild();
+      withDir({ "src/lib.rs": after }, (dir2) => {
+        const cold = new ProjectIndex(dir2);
+        try {
+          cold.rebuild();
+          assert.equal(outcomes(warm, "src/lib.rs"), outcomes(cold, "src/lib.rs"));
+          assert.ok(
+            cold.calls.some(
+              (c) =>
+                c.calleeName === "m" &&
+                c.evidence.some((e) => e.startsWith("no-type:")),
+            ),
+          );
+        } finally {
+          cold.close();
+        }
+      });
+    } finally {
+      warm.close();
+    }
   });
 });
 
