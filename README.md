@@ -8,12 +8,22 @@
   <img src="assets/context-slice-hero.png" alt="Source files converging into a focused ContextSlice context" width="100%" />
 </p>
 
-You just joined a codebase with hundreds of files. Where do you start without
-feeding an entire repository to an AI assistant?
+When you vibe code, the model does not spend tokens only on writing the final
+answer. A large part of the cost is often the code it has to read first: the
+target file, its callers, callees, dependencies, tests, and configuration.
+The larger the repository, the more unrelated code can enter the context.
 
-ContextSlice builds a small, task-specific context from Java, TypeScript, TSX,
-JavaScript, Python, Rust, and Go source. It finds the target symbol, follows
-relevant callers and callees, and reports what was included or left out.
+Reading more code means more tokens, slower responses, and more noise around
+the detail that actually matters. The practical way to reduce that cost is to
+reduce how much code the agent has to read in the first place.
+
+ContextSlice does exactly that. It builds a small, task-specific context from
+Java, TypeScript, TSX, JavaScript, Python, Rust, and Go source. It finds the
+target symbol, follows relevant callers and callees, and reports what was
+included or left out.
+
+In short: instead of giving an AI assistant the whole repository, give it the
+smallest useful slice of the codebase.
 
 It is local, read-only, and deterministic: Tree-sitter performs the structural
 analysis, SQLite stores the index, and no source code is sent to a hosted
@@ -21,7 +31,7 @@ service by ContextSlice.
 
 The result is:
 
-- Less context to read and pay for: return the target symbol plus the most relevant callers and callees instead of whole files.
+- Less code to read and pay for: return the target symbol plus the most relevant callers and callees instead of whole files.
 - Better signal: rank results by task relevance and keep unresolved runtime dispatch explicit instead of guessing.
 - Predictable output: enforce a token budget and explain why items were included or omitted.
 - Local control: keep source analysis and the SQLite index in the repository; the target source is never edited.
