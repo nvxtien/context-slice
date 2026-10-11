@@ -67,6 +67,15 @@ test("a class's base_list entry is recorded as a supertype", () => {
   assert.deepEqual(derived?.supertypes, ["IGreeter"]);
 });
 
+test("a record's primary-constructor base call (`: Base(x)`) is recorded as a supertype", () => {
+  const parsed = parseCsharp(
+    "Point.cs",
+    `public record Base(int X);\npublic record Point(int X, int Y) : Base(X);\n`,
+  );
+  const point = parsed.symbols.find((s) => s.name === "Point");
+  assert.deepEqual(point?.supertypes, ["Base"]);
+});
+
 test("a nested class's qualifiedName is prefixed with its owner, two levels deep", () => {
   const parsed = parseCsharp(
     "Outer.cs",

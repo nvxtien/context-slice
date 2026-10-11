@@ -60,6 +60,13 @@ function baseTypeName(node: Node): string | undefined {
   if (node.type === "identifier") return node.text;
   if (node.type === "qualified_name") return field(node, "name")?.text;
   if (node.type === "generic_name") return node.namedChildren[0]?.text;
+  // A primary constructor's base call (`: Base(x)` on a record, or a C# 12 class/struct
+  // primary constructor) wraps the base type in its own "type" field rather than exposing
+  // it as a direct base_list entry.
+  if (node.type === "primary_constructor_base_type") {
+    const type = field(node, "type");
+    return type ? baseTypeName(type) : undefined;
+  }
   return undefined;
 }
 
