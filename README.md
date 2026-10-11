@@ -78,6 +78,32 @@ server for the project Codex has open.
 
 Available MCP tools are `context.search`, `context.symbol`, `context.callers`, `context.preview`, `context.slice`, and `context.diff`. MCP stdout contains protocol messages only; diagnostics must not corrupt stdio framing.
 
+## CLI
+
+```sh
+context-slice init
+context-slice status
+context-slice doctor
+context-slice preview "explain retryPayment" --budget 1200 --explain
+context-slice preview "explain retryPayment" --json
+context-slice mark-dirty src/PaymentService.java
+context-slice mcp
+```
+
+| Command             | Purpose                                                     |
+| ------------------- | ----------------------------------------------------------- |
+| `init`              | Discover the repository and create/refresh the local index. |
+| `index`             | Refresh the index explicitly.                               |
+| `status`            | Show readiness, schema, cache freshness, and last refresh.  |
+| `doctor`            | Check repository, source, cache, and MCP command readiness. |
+| `preview <task>`    | Return a deterministic, strict-budget context preview.      |
+| `mark-dirty [file]` | Tell a running MCP index that source changed.               |
+| `mcp`               | Start the stdio MCP server with the stable public command.  |
+
+Use `--repo /absolute/path` to select a repository (defaults to the nearest Git root). `--json` emits a stable, automation-oriented result; normal output is quiet, `--explain` adds why each item was included or omitted. `--budget <tokens>` sets the strict token budget for `preview`. `context-slice --version` and `context-slice --help` work without a repository checkout.
+
+Exit codes are `0` for success, `2` for user/configuration errors, and `1` for unexpected failures. Errors include a remediation, for example increasing `--budget` when the selected target cannot fit.
+
 ## Supported languages
 
 | Language   | Extensions                     | Notes                                                                                                                                                                             |

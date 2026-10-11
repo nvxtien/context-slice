@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.9.6
+
+- Fixed `.cmd` shim invocation on Windows: the `cmd.exe /s /c` command line was
+  missing its outer quote wrapper and `windowsVerbatimArguments`, so the npm
+  tarball install smoke test (and any `.cmd` binary run through
+  `commandInvocation`) failed with "is not recognized as an internal or
+  external command".
+- Raised the MCP `initialize` timeout in the Rust product-surface test to
+  match the margin already used for TypeScript, fixing a flake when the full
+  suite runs under load on Windows.
+
 ## 1.9.5
 
 - Removed generated `dist/` files from Git tracking; releases build them during `prepack`.

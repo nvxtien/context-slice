@@ -120,6 +120,7 @@ function command(
     cwd,
     env: { ...process.env, ...env },
     encoding: "utf8",
+    windowsVerbatimArguments: invocation.windowsVerbatimArguments,
   });
   return {
     status: result.status ?? 1,
@@ -192,6 +193,7 @@ function requestMcp(binary: string, cwd: string) {
   const child = spawn(invocation.file, invocation.args, {
     cwd,
     stdio: ["pipe", "pipe", "pipe"],
+    windowsVerbatimArguments: invocation.windowsVerbatimArguments,
   });
   const messages: Array<Record<string, any>> = [];
   const invalid: string[] = [];

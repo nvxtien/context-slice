@@ -127,7 +127,7 @@ function startMcp(root: string) {
       const id = nextId++;
       const timer = setTimeout(
         () => reject(new Error(`Timed out waiting for MCP ${method}`)),
-        5_000,
+        20_000,
       );
       const poll = () => {
         const index = messages.findIndex((message) => message.id === id);

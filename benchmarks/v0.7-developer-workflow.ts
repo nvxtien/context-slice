@@ -112,6 +112,7 @@ function startMcp(sourceRoot: string, repository: string): McpSession {
   const child = spawn(invocation.file, invocation.args, {
     cwd: sourceRoot,
     stdio: ["pipe", "pipe", "pipe"],
+    windowsVerbatimArguments: invocation.windowsVerbatimArguments,
   });
   const messages: Array<Record<string, any>> = [];
   let buffer = "";
