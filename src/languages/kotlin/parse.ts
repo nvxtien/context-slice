@@ -178,6 +178,41 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
     return { name, typeText: typeNode?.text };
   }
 
+  /** Shared by secondary_constructor and anonymous_initializer: both are "constructor"-kind
+   * symbols whose body must be queued in `callables` so collectCalls can see calls inside them. */
+  function emitConstructor(
+    node: Node,
+    ownerId: string,
+    name: string,
+    qualifiedName: string,
+    idKey: string,
+    parameters: string | undefined,
+    signature: string,
+    modifiers: string[],
+  ) {
+    const body = named(node, "statements");
+    const id = uniqueId(canonicalId(filePath, "constructor", idKey, parameters));
+    const symbol: SymbolRecord = {
+      id,
+      language: LANGUAGE_ID,
+      kind: "constructor",
+      name,
+      qualifiedName,
+      canonicalIdentity: id,
+      signature,
+      filePath,
+      range: range(node),
+      bodyRange: body ? range(body) : undefined,
+      parentId: ownerId,
+      annotations: [],
+      modifiers,
+      source: node.text,
+      body: body?.text,
+    };
+    symbols.push(symbol);
+    callables.push({ symbol, body });
+  }
+
   /** Walks one class/interface/object/companion body, emitting member symbols with
    * `parentId: ownerId` and queuing nested declarations (e.g. a companion object, a
    * nested class) through the same entry point so arbitrary nesting depth works. */
@@ -190,31 +225,17 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
       if (child.type === "function_declaration") {
         emitFunction(child, ownerId, ownerName);
       } else if (child.type === "secondary_constructor") {
-        const params = named(child, "function_value_parameters");
-        const parameters = paramListText(params);
-        const id = uniqueId(
-          canonicalId(filePath, "constructor", ownerName, parameters),
+        const parameters = paramListText(named(child, "function_value_parameters"));
+        emitConstructor(
+          child,
+          ownerId,
+          ownerName,
+          `${ownerName}.${ownerName}`,
+          ownerName,
+          parameters,
+          `constructor${parameters}`,
+          modifiersOf(child),
         );
-        const body = named(child, "statements");
-        const symbol: SymbolRecord = {
-          id,
-          language: LANGUAGE_ID,
-          kind: "constructor",
-          name: ownerName,
-          qualifiedName: `${ownerName}.${ownerName}`,
-          canonicalIdentity: id,
-          signature: `constructor${parameters}`,
-          filePath,
-          range: range(child),
-          bodyRange: body ? range(body) : undefined,
-          parentId: ownerId,
-          annotations: [],
-          modifiers: modifiersOf(child),
-          source: child.text,
-          body: body?.text,
-        };
-        symbols.push(symbol);
-        callables.push({ symbol, body });
       } else if (
         child.type === "property_declaration" ||
         child.type === "class_declaration" ||
@@ -227,27 +248,16 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
         // synthetic module-scope owner for top-level statements: without an owner symbol here,
         // every call inside it (a very common Kotlin pattern) would be silently invisible to
         // collectCalls, which only walks bodies already queued in `callables`.
-        const body = named(child, "statements");
-        const id = uniqueId(canonicalId(filePath, "constructor", `${ownerName}.<init>`));
-        const symbol: SymbolRecord = {
-          id,
-          language: LANGUAGE_ID,
-          kind: "constructor",
-          name: "<init>",
-          qualifiedName: `${ownerName}.<init>`,
-          canonicalIdentity: id,
-          signature: "init",
-          filePath,
-          range: range(child),
-          bodyRange: body ? range(body) : undefined,
-          parentId: ownerId,
-          annotations: [],
-          modifiers: [],
-          source: child.text,
-          body: body?.text,
-        };
-        symbols.push(symbol);
-        callables.push({ symbol, body });
+        emitConstructor(
+          child,
+          ownerId,
+          "<init>",
+          `${ownerName}.<init>`,
+          `${ownerName}.<init>`,
+          undefined,
+          "init",
+          [],
+        );
       }
     }
   }
