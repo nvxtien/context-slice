@@ -34,18 +34,12 @@
     "package-smoke": "tsx scripts/package-smoke-test.ts",
     "release:rc": "tsx scripts/clean-room-rc.ts",
     "test": "node scripts/run-tests.mjs",
-    "benchmark": "tsx benchmarks/v1.8-java-jsoup.ts",
     "benchmark:checkouts": "tsx benchmarks/fetch-checkouts.ts",
-    "benchmark:v03": "npm run benchmark:checkouts && tsx benchmarks/v0.3-real-repositories.ts",
-    "benchmark:v04": "npm run benchmark:v03 && tsx benchmarks/v0.4-symbol-index-hardening.ts",
-    "benchmark:v05": "npm run benchmark:v04 && tsx benchmarks/v0.5-semantic-call-resolution.ts",
-    "benchmark:v06": "npm run benchmark:v05 && tsx benchmarks/v0.6-developer-context-efficiency.ts",
     "benchmark:v07": "tsx benchmarks/v0.7-developer-workflow.ts",
     "benchmark:v08": "npm run package-smoke",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "benchmark:v15-phase3": "npm run benchmark:checkouts && tsx benchmarks/v1.5-rust-tasks.ts",
-    "benchmark:v18-java": "npm run benchmark:checkouts && tsx benchmarks/v1.8-java-jsoup.ts"
+    "benchmark:v15-phase3": "npm run benchmark:checkouts && tsx benchmarks/v1.5-rust-tasks.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

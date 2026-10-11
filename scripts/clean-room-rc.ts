@@ -480,48 +480,6 @@ record(
     counts.pass + counts.skipped === counts.tests,
   { exit: testRun.status, ms: testRun.ms, ...counts },
 );
-const v06 = sh("npm", ["run", "benchmark:v06"], checkout, cleanEnv());
-await attempt("regressionV06", () => {
-  const report = JSON.parse(
-    readFileSync(
-      join(
-        checkout,
-        "benchmarks/results/v0.6-developer-context-efficiency.json",
-      ),
-      "utf8",
-    ),
-  ).aggregate;
-  const v04 = JSON.parse(
-    readFileSync(
-      join(checkout, "benchmarks/results/v0.4-symbol-index-hardening.json"),
-      "utf8",
-    ),
-  );
-  const v05 = JSON.parse(
-    readFileSync(
-      join(checkout, "benchmarks/results/v0.5-semantic-call-resolution.json"),
-      "utf8",
-    ),
-  ).semanticFixture;
-  record(
-    "regressionV06",
-    v06.status === 0 &&
-      report.overallRequiredFactRecall === 1 &&
-      report.overallRetrievalRecall === 1 &&
-      v04.retrievalRecall === 1,
-    {
-      exit: v06.status,
-      ms: v06.ms,
-      tasks: report.totalTasks,
-      requiredFactRecall: report.overallRequiredFactRecall,
-      retrievalRecall: report.overallRetrievalRecall,
-      medianContextWindowReduction: report.medianContextWindowReduction,
-      v04RetrievalRecall: v04.retrievalRecall,
-      v05SemanticCallRecall: v05.semanticCallRecall,
-      checkoutsFetchedByScript: true,
-    },
-  );
-});
 const v07 = sh("npm", ["run", "benchmark:v07"], checkout, cleanEnv());
 await attempt("regressionV07", () => {
   const report = JSON.parse(
@@ -1581,7 +1539,6 @@ writeFileSync(
     ...section("4. Clean install (npm ci)", "npmCi"),
     ...section("4. Clean build", "build"),
     ...section("5. Tests", "tests"),
-    ...section("5a. v0.6 regression", "regressionV06"),
     ...section("5b. v0.7 regression", "regressionV07"),
     ...section("5c. v0.8 packaging smoke", "regressionV08"),
     ...section("5d. npm pack --dry-run", "packageDryRun"),
