@@ -185,17 +185,20 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
    * symbols whose body must be queued in `callables` so collectCalls can see calls inside them. */
   function emitConstructor(
     node: Node,
-    ownerId: string,
-    name: string,
-    qualifiedName: string,
-    idKey: string,
-    parameters: string | undefined,
-    signature: string,
-    modifiers: string[],
+    options: {
+      ownerId: string;
+      name: string;
+      qualifiedName: string;
+      parameters?: string;
+      signature: string;
+      modifiers: string[];
+    },
   ) {
+    const { ownerId, name, qualifiedName, parameters, signature, modifiers } =
+      options;
     const body = named(node, "statements");
     const id = uniqueId(
-      canonicalId(filePath, "constructor", idKey, parameters),
+      canonicalId(filePath, "constructor", qualifiedName, parameters),
     );
     const symbol: SymbolRecord = {
       id,
@@ -232,17 +235,14 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
         // ownerName is the owner's full qualifiedName (e.g. "Outer.Inner"), not its simple
         // name, so the constructor's own name must be split back out of it.
         const simpleName = ownerName.split(".").pop()!;
-        const ctorQualifiedName = `${ownerName}.${simpleName}`;
-        emitConstructor(
-          child,
+        emitConstructor(child, {
           ownerId,
-          simpleName,
-          ctorQualifiedName,
-          ctorQualifiedName,
+          name: simpleName,
+          qualifiedName: `${ownerName}.${simpleName}`,
           parameters,
-          `constructor${parameters}`,
-          modifiersOf(child),
-        );
+          signature: `constructor${parameters}`,
+          modifiers: modifiersOf(child),
+        });
       } else if (
         child.type === "property_declaration" ||
         child.type === "class_declaration" ||
@@ -255,16 +255,13 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
         // synthetic module-scope owner for top-level statements: without an owner symbol here,
         // every call inside it (a very common Kotlin pattern) would be silently invisible to
         // collectCalls, which only walks bodies already queued in `callables`.
-        emitConstructor(
-          child,
+        emitConstructor(child, {
           ownerId,
-          "<init>",
-          `${ownerName}.<init>`,
-          `${ownerName}.<init>`,
-          undefined,
-          "init",
-          [],
-        );
+          name: "<init>",
+          qualifiedName: `${ownerName}.<init>`,
+          signature: "init",
+          modifiers: [],
+        });
       }
     }
   }
