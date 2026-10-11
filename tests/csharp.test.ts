@@ -206,3 +206,19 @@ test("a method inherited from a base class resolves across files", () => {
   assert.equal(call.resolutionKind, "inherited");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a top-level statement file (C# 9+ minimal Program.cs) has its calls captured, not silently dropped", () => {
+  const parsed = parseCsharp(
+    "Program.cs",
+    `var builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.MapGet("/", () => "Hello World!");\napp.Run();\n`,
+  );
+  assert.equal(parsed.parseError, false);
+  const calleeNames = parsed.calls.map((c) => c.calleeName).sort();
+  assert.deepEqual(calleeNames, ["Build", "CreateBuilder", "MapGet", "Run"]);
+  const owner = parsed.symbols.find((s) => s.metadata?.moduleScope === true);
+  assert.ok(owner, "expected a synthetic module-scope owner symbol");
+  assert.ok(
+    parsed.calls.every((c) => c.callerId === owner!.id),
+    "every top-level call should be owned by the synthetic module-scope symbol",
+  );
+});

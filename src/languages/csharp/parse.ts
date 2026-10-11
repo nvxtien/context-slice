@@ -181,7 +181,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
     kind: SymbolKind,
     name: string,
     qualifiedName: string,
-    idKey: string,
     parameters: string | undefined,
     signature: string,
     modifiers: string[],
@@ -192,7 +191,7 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
       packageName?: string;
     } = {},
   ): SymbolRecord {
-    const id = uniqueId(canonicalId(filePath, kind, idKey, parameters));
+    const id = uniqueId(canonicalId(filePath, kind, qualifiedName, parameters));
     const body = options.body;
     const symbol: SymbolRecord = {
       id,
@@ -238,7 +237,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
         "property",
         paramName,
         `${ownerQualifiedName}.${paramName}`,
-        `${ownerQualifiedName}.${paramName}`,
         undefined,
         param.text,
         [],
@@ -282,7 +280,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
       "method",
       name,
       qualifiedName,
-      qualifiedName,
       parameters,
       `${returnType ? `${returnType} ` : ""}${name}${parameters}`,
       modifiersOf(node),
@@ -308,7 +305,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
       ownerId,
       "constructor",
       ownerSimpleName,
-      qualifiedName,
       qualifiedName,
       parameters,
       `${ownerSimpleName}${parameters}`,
@@ -338,7 +334,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
         "field",
         name,
         `${ownerQualifiedName}.${name}`,
-        `${ownerQualifiedName}.${name}`,
         undefined,
         declarator.text,
         modifiers,
@@ -365,7 +360,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
       ownerId,
       "property",
       name,
-      `${ownerQualifiedName}.${name}`,
       `${ownerQualifiedName}.${name}`,
       undefined,
       node.text,
@@ -414,7 +408,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
           ownerId,
           "field",
           name,
-          `${ownerQualifiedName}.${name}`,
           `${ownerQualifiedName}.${name}`,
           undefined,
           child.text,
@@ -474,7 +467,6 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
       kind,
       name,
       qualifiedName,
-      qualifiedName,
       undefined,
       `${node.type.replace("_declaration", "")} ${name}`,
       modifiers,
@@ -496,12 +488,44 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
     if (body) walkTypeBody(body, symbol.id, qualifiedName, name, packageName);
   }
 
+  // C# 9+ top-level statements (the default `Program.cs` shape for minimal APIs and simple
+  // console apps) place real, call-bearing code directly at the file root, each wrapped in a
+  // `global_statement` — not inside any method. Without an owner symbol for it, every call in
+  // such a file (e.g. `app.MapGet(...)`, `app.Run()`) would be silently invisible to
+  // collectCalls, which only walks bodies already queued in `callables` — same reasoning as
+  // Python's/TypeScript's synthetic module-scope owner for the same situation.
+  let moduleScopeSymbol: SymbolRecord | undefined;
+  function moduleScopeOwner(): SymbolRecord {
+    if (!moduleScopeSymbol) {
+      const id = `${filePath}::module::${filePath}`;
+      moduleScopeSymbol = {
+        id,
+        language: LANGUAGE_ID,
+        kind: "namespace",
+        name: filePath,
+        qualifiedName: filePath,
+        canonicalIdentity: id,
+        signature: `top-level statements ${filePath}`,
+        filePath,
+        range: range(tree.rootNode),
+        annotations: [],
+        modifiers: [],
+        metadata: { moduleScope: true },
+        source: "",
+      };
+      symbols.push(moduleScopeSymbol);
+    }
+    return moduleScopeSymbol;
+  }
+
   function walkNamespaceMembers(
     members: Node[],
     packageName: string | undefined,
   ) {
     for (const child of members) {
-      if (child.type === "using_directive") {
+      if (child.type === "global_statement") {
+        callables.push({ symbol: moduleScopeOwner(), body: child });
+      } else if (child.type === "using_directive") {
         const alias = field(child, "name")?.text;
         const target = child.namedChildren.at(-1);
         const module = target ? text(target) : "";
