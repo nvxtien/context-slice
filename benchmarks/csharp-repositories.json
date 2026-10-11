@@ -1,0 +1,40 @@
+[
+  {
+    "id": "serilog",
+    "scale": "small",
+    "url": "https://github.com/serilog/serilog.git",
+    "commit": "bebc7719004f76187ae72e64ce138ec2540f2070",
+    "source": "benchmarks/checkouts/serilog",
+    "scope": "whole repository (single-purpose structured logging library)",
+    "kind": "library"
+  },
+  {
+    "id": "polly",
+    "scale": "medium",
+    "url": "https://github.com/App-vNext/Polly.git",
+    "commit": "e4476096da5be34e1ec32c024c24289af3ef72e6",
+    "sparse": [
+      "src/Polly",
+      "src/Polly.Core",
+      "src/Polly.Extensions",
+      "src/Polly.RateLimiting"
+    ],
+    "source": "benchmarks/checkouts/polly",
+    "scope": "src/Polly, Polly.Core, Polly.Extensions, Polly.RateLimiting (resilience/transient-fault-handling library)",
+    "kind": "library"
+  },
+  {
+    "id": "aspnetcore-http",
+    "scale": "large",
+    "url": "https://github.com/dotnet/aspnetcore.git",
+    "commit": "5c7435fed2e17a0f82f432e1dc40b695af31c531",
+    "sparse": [
+      "src/Http/Routing/src",
+      "src/Http/Http/src",
+      "src/Mvc/Mvc.Core/src"
+    ],
+    "source": "benchmarks/checkouts/aspnetcore-http",
+    "scope": "src/Http/Routing/src, src/Http/Http/src, src/Mvc/Mvc.Core/src (HTTP/routing/MVC core, bounded subsystem of a workspace)",
+    "kind": "web-framework"
+  }
+]

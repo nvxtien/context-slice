@@ -20,6 +20,7 @@ const manifests = [
   "benchmarks/go-repositories.json",
   "benchmarks/javascript-repositories.json",
   "benchmarks/kotlin-repositories.json",
+  "benchmarks/csharp-repositories.json",
 ];
 const repositories = manifests.flatMap(
   (manifest) =>
