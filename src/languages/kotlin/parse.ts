@@ -226,12 +226,16 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
         emitFunction(child, ownerId, ownerName);
       } else if (child.type === "secondary_constructor") {
         const parameters = paramListText(named(child, "function_value_parameters"));
+        // ownerName is the owner's full qualifiedName (e.g. "Outer.Inner"), not its simple
+        // name, so the constructor's own name must be split back out of it.
+        const simpleName = ownerName.split(".").pop()!;
+        const ctorQualifiedName = `${ownerName}.${simpleName}`;
         emitConstructor(
           child,
           ownerId,
-          ownerName,
-          `${ownerName}.${ownerName}`,
-          ownerName,
+          simpleName,
+          ctorQualifiedName,
+          ctorQualifiedName,
           parameters,
           `constructor${parameters}`,
           modifiersOf(child),
@@ -386,14 +390,14 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
         if (!paramName) continue;
         const typeNode = named(param, "user_type") ?? named(param, "nullable_type");
         const fieldId = uniqueId(
-          canonicalId(filePath, "field", `${name}.${paramName}`),
+          canonicalId(filePath, "field", `${qualifiedName}.${paramName}`),
         );
         symbols.push({
           id: fieldId,
           language: LANGUAGE_ID,
           kind: "field",
           name: paramName,
-          qualifiedName: `${name}.${paramName}`,
+          qualifiedName: `${qualifiedName}.${paramName}`,
           canonicalIdentity: fieldId,
           signature: param.text,
           filePath,
