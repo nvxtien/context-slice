@@ -1,0 +1,31 @@
+[
+  {
+    "id": "kotlin-csv",
+    "scale": "small",
+    "url": "https://github.com/doyaaaaaken/kotlin-csv.git",
+    "commit": "ba44dab2490fd1c1ca371562910a232563943361",
+    "source": "benchmarks/checkouts/kotlin-csv",
+    "scope": "whole repository (single-purpose CSV read/write library)",
+    "kind": "library"
+  },
+  {
+    "id": "koin-core",
+    "scale": "medium",
+    "url": "https://github.com/InsertKoinIO/koin.git",
+    "commit": "dc86ef8dd8fbe8564fb7453c03f5b738da3450bb",
+    "sparse": ["projects/core/koin-core"],
+    "source": "benchmarks/checkouts/koin-core",
+    "scope": "projects/core/koin-core (dependency-injection framework core, Kotlin Multiplatform)",
+    "kind": "library"
+  },
+  {
+    "id": "ktor-http-server",
+    "scale": "large",
+    "url": "https://github.com/ktorio/ktor.git",
+    "commit": "4717dd5fe8270a40fc97ba0b03bb63f722717786",
+    "sparse": ["ktor-http", "ktor-server/ktor-server-core"],
+    "source": "benchmarks/checkouts/ktor-http-server",
+    "scope": "ktor-http, ktor-server/ktor-server-core (HTTP framework core, bounded subsystem of a workspace)",
+    "kind": "web-framework"
+  }
+]

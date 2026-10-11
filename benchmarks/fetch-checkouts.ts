@@ -19,6 +19,7 @@ const manifests = [
   "benchmarks/rust-repositories-extra.json",
   "benchmarks/go-repositories.json",
   "benchmarks/javascript-repositories.json",
+  "benchmarks/kotlin-repositories.json",
 ];
 const repositories = manifests.flatMap(
   (manifest) =>

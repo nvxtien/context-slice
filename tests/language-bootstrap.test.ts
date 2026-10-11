@@ -17,6 +17,7 @@ test("one bootstrap exposes every adapter to indexing and workflow", () => {
     "go",
     "java",
     "javascript",
+    "kotlin",
     "python",
     "rust",
     "typescript",
