@@ -35,14 +35,22 @@ test("package metadata describes an intentional publish-ready runtime", () => {
 });
 
 test("version and help work from the source entry point", () => {
-  const version = spawnSync(process.execPath, ["--import", tsxLoader, cli, "--version"], {
-    cwd: root,
-    encoding: "utf8",
-  });
-  const help = spawnSync(process.execPath, ["--import", tsxLoader, cli, "--help"], {
-    cwd: root,
-    encoding: "utf8",
-  });
+  const version = spawnSync(
+    process.execPath,
+    ["--import", tsxLoader, cli, "--version"],
+    {
+      cwd: root,
+      encoding: "utf8",
+    },
+  );
+  const help = spawnSync(
+    process.execPath,
+    ["--import", tsxLoader, cli, "--help"],
+    {
+      cwd: root,
+      encoding: "utf8",
+    },
+  );
 
   assert.equal(version.status, 0, version.stderr);
   assert.equal(version.stdout.trim(), packageJson.version);

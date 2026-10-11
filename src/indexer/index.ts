@@ -67,11 +67,7 @@ function lazySource(symbol: LazySymbol, range: SymbolRecord["range"]) {
   if (!context) return "";
   const fullPath = resolve(context.root, symbol.filePath);
   const fromRoot = repositoryRelative(context.root, fullPath);
-  if (
-    fromRoot === ".." ||
-    fromRoot.startsWith("../") ||
-    isAbsolute(fromRoot)
-  )
+  if (fromRoot === ".." || fromRoot.startsWith("../") || isAbsolute(fromRoot))
     throw new WorkflowError(
       "INVALID_ARGUMENT",
       `Path escapes repository root: ${symbol.filePath}`,
@@ -792,11 +788,7 @@ export class ProjectIndex {
   sourceFor(symbol: SymbolRecord, sourceCache?: Map<string, string>) {
     const full = resolve(this.root, symbol.filePath);
     const fromRoot = repositoryRelative(this.root, full);
-    if (
-      fromRoot === ".." ||
-      fromRoot.startsWith("../") ||
-      isAbsolute(fromRoot)
-    )
+    if (fromRoot === ".." || fromRoot.startsWith("../") || isAbsolute(fromRoot))
       throw new WorkflowError(
         "INVALID_ARGUMENT",
         `Path escapes repository root: ${symbol.filePath}`,

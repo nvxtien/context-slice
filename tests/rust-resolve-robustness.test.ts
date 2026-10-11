@@ -80,7 +80,10 @@ test("warm rebuild after an edit resolves the edited file exactly like a cold bu
         const cold = new ProjectIndex(dir2);
         try {
           cold.rebuild();
-          assert.equal(outcomes(warm, "src/lib.rs"), outcomes(cold, "src/lib.rs"));
+          assert.equal(
+            outcomes(warm, "src/lib.rs"),
+            outcomes(cold, "src/lib.rs"),
+          );
           assert.ok(
             cold.calls.some(
               (c) =>

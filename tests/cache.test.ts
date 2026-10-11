@@ -480,7 +480,9 @@ test("VACUUM reclaims space after most files are removed, but not for a small ca
   );
   const db = new Database(dbPath, { readonly: true });
   assert.ok(
-    db.prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'").get(),
+    db
+      .prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'")
+      .get(),
     "expected a last_vacuumed_at metadata row after VACUUM ran",
   );
   db.close();
@@ -519,7 +521,9 @@ test("VACUUM does not run for a cache too small to be worth reclaiming", () => {
 
   const db = new Database(dbPath, { readonly: true });
   assert.equal(
-    db.prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'").get(),
+    db
+      .prepare("SELECT value FROM metadata WHERE key = 'last_vacuumed_at'")
+      .get(),
     undefined,
     "a cache this small should never trigger VACUUM",
   );

@@ -91,7 +91,10 @@ test("a Java skeleton survives a cold-start rebuild that reuses cached (lean) sy
   // fixture is too small to force the same lean-object shape on demand).
   coldIndex = new ProjectIndex(root);
   const result = coldIndex.rebuild();
-  assert.ok(result.cacheHits > 0, "expected the cold rebuild to reuse cached files");
+  assert.ok(
+    result.cacheHits > 0,
+    "expected the cold rebuild to reuse cached files",
+  );
   const target = coldIndex.symbols.find(
     (symbol) => symbol.qualifiedName === "demo.Counter.increment",
   );

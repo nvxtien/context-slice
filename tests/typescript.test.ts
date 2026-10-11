@@ -360,7 +360,12 @@ test("incremental refresh reparses only the changed TypeScript file", () => {
   warmIndex.close();
   updateIndex.close();
   index.close();
-  rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  rmSync(root, {
+    recursive: true,
+    force: true,
+    maxRetries: 10,
+    retryDelay: 100,
+  });
 });
 
 test("parse errors are reported without throwing", () => {
@@ -376,9 +381,8 @@ test("CLI preview works in a TypeScript repository", () => {
       process.execPath,
       [
         "--import",
-        pathToFileURL(
-          join(process.cwd(), "node_modules/tsx/dist/loader.mjs"),
-        ).href,
+        pathToFileURL(join(process.cwd(), "node_modules/tsx/dist/loader.mjs"))
+          .href,
         join(process.cwd(), "src/cli.ts"),
         ...args,
         "--repo",
