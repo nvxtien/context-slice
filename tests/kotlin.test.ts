@@ -66,10 +66,7 @@ test("a data class's primary-constructor val/var parameters become fields; a pla
   const cls = parsed.symbols.find((s) => s.kind === "class")!;
   assert.ok(cls.modifiers.includes("data"));
   const fields = parsed.symbols.filter((s) => s.kind === "field");
-  assert.deepEqual(
-    fields.map((f) => f.name).sort(),
-    ["count", "id"],
-  );
+  assert.deepEqual(fields.map((f) => f.name).sort(), ["count", "id"]);
   assert.ok(fields.find((f) => f.name === "id")!.modifiers.includes("private"));
 });
 
@@ -87,7 +84,10 @@ test("a nested class's qualifiedName is prefixed with its owner, two levels deep
 });
 
 test("an object declaration is a 'class' symbol modified 'object'", () => {
-  const parsed = parseKotlin("Singleton.kt", `object Singleton {\n    fun foo() {}\n}\n`);
+  const parsed = parseKotlin(
+    "Singleton.kt",
+    `object Singleton {\n    fun foo() {}\n}\n`,
+  );
   const obj = parsed.symbols.find((s) => s.kind === "class")!;
   assert.ok(obj.modifiers.includes("object"));
 });
@@ -129,7 +129,10 @@ test("a call inside an init block is captured, not silently dropped", () => {
   assert.ok(call, "expected a call edge for setup() inside the init block");
   const owner = parsed.symbols.find((s) => s.id === call!.callerId);
   assert.equal(owner?.kind, "constructor");
-  assert.equal(owner?.parentId, parsed.symbols.find((s) => s.kind === "class")!.id);
+  assert.equal(
+    owner?.parentId,
+    parsed.symbols.find((s) => s.kind === "class")!.id,
+  );
 });
 
 test("`fun interface` (SAM interface) is a known tree-sitter-kotlin grammar gap: reported as a parse error, not silently misread", () => {
@@ -158,7 +161,9 @@ test("a call to a top-level function resolves, unlike a method/constructor-only 
     "Util.kt": `fun add(a: Int, b: Int): Int = a + b\n`,
     "Main.kt": `fun main() {\n    add(1, 2)\n}\n`,
   });
-  const callee = index.symbols.find((s) => s.kind === "function" && s.name === "add")!;
+  const callee = index.symbols.find(
+    (s) => s.kind === "function" && s.name === "add",
+  )!;
   const call = index.calls.find((c) => c.calleeName === "add")!;
   assert.equal(call.resolvedTargetId, callee.id);
   assert.equal(call.resolutionKind, "same-file");

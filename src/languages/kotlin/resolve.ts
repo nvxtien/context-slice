@@ -12,7 +12,11 @@ export function resolveKotlinCalls({
   const byId = new Map(symbols.map((s) => [s.id, s]));
   const byName = new Map<string, SymbolRecord[]>();
   const byOwnerAndName = new Map<string, SymbolRecord[]>();
-  const add = (map: Map<string, SymbolRecord[]>, key: string, s: SymbolRecord) => {
+  const add = (
+    map: Map<string, SymbolRecord[]>,
+    key: string,
+    s: SymbolRecord,
+  ) => {
     const list = map.get(key);
     if (list) list.push(s);
     else map.set(key, [s]);
@@ -37,11 +41,12 @@ export function resolveKotlinCalls({
     if (!caller) continue;
     const parent = caller.parentId ? byId.get(caller.parentId) : undefined;
     const sameType = parent
-      ? byOwnerAndName.get(`${parent.name}\0${call.calleeName}`) ?? []
+      ? (byOwnerAndName.get(`${parent.name}\0${call.calleeName}`) ?? [])
       : [];
     const inherited =
       parent?.supertypes?.flatMap(
-        (supertype) => byOwnerAndName.get(`${supertype}\0${call.calleeName}`) ?? [],
+        (supertype) =>
+          byOwnerAndName.get(`${supertype}\0${call.calleeName}`) ?? [],
       ) ?? [];
     // receiverText capitalized (Kotlin's object/class naming convention) names a type directly,
     // e.g. "Singleton.foo()" or "Companion.foo()" — a lowercase receiver is a local variable
@@ -52,7 +57,7 @@ export function resolveKotlinCalls({
         ? call.receiverText
         : undefined;
     const typed = receiverType
-      ? byOwnerAndName.get(`${receiverType}\0${call.calleeName}`) ?? []
+      ? (byOwnerAndName.get(`${receiverType}\0${call.calleeName}`) ?? [])
       : [];
     const candidates = byName.get(call.calleeName) ?? [];
 
@@ -74,10 +79,12 @@ export function resolveKotlinCalls({
           ? "inherited"
           : sameType.includes(target)
             ? "same-type"
-            // Resolved through the global name fallback (no owner/receiver involved) — a
-            // same-file or same-module direct call, e.g. a top-level function.
-            : "same-file";
-      call.evidence = [`unique ${call.resolutionKind} target ${target.qualifiedName}`];
+            : // Resolved through the global name fallback (no owner/receiver involved) — a
+              // same-file or same-module direct call, e.g. a top-level function.
+              "same-file";
+      call.evidence = [
+        `unique ${call.resolutionKind} target ${target.qualifiedName}`,
+      ];
     } else if (options.length > 1) {
       call.confidence = "unresolved";
       call.evidence = [`${options.length} plausible targets remain`];

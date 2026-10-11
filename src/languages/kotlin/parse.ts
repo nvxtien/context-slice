@@ -81,7 +81,9 @@ function buildCallEdge(
 ): CallEdge | undefined {
   const target = callNode.namedChildren[0];
   const callSuffix = named(callNode, "call_suffix");
-  const valueArgs = callSuffix ? named(callSuffix, "value_arguments") : undefined;
+  const valueArgs = callSuffix
+    ? named(callSuffix, "value_arguments")
+    : undefined;
   const argumentCount = valueArgs
     ? namedAll(valueArgs, "value_argument").length
     : 0;
@@ -96,7 +98,8 @@ function buildCallEdge(
     if (suffix?.type !== "navigation_suffix") return undefined;
     calleeName = text(suffix.namedChildren.at(-1));
     const receiver = target.namedChildren[0];
-    receiverText = receiver?.type === "this_expression" ? "this" : receiver?.text;
+    receiverText =
+      receiver?.type === "this_expression" ? "this" : receiver?.text;
   } else {
     return undefined;
   }
@@ -191,7 +194,9 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
     modifiers: string[],
   ) {
     const body = named(node, "statements");
-    const id = uniqueId(canonicalId(filePath, "constructor", idKey, parameters));
+    const id = uniqueId(
+      canonicalId(filePath, "constructor", idKey, parameters),
+    );
     const symbol: SymbolRecord = {
       id,
       language: LANGUAGE_ID,
@@ -216,16 +221,14 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
   /** Walks one class/interface/object/companion body, emitting member symbols with
    * `parentId: ownerId` and queuing nested declarations (e.g. a companion object, a
    * nested class) through the same entry point so arbitrary nesting depth works. */
-  function walkClassBody(
-    bodyNode: Node,
-    ownerId: string,
-    ownerName: string,
-  ) {
+  function walkClassBody(bodyNode: Node, ownerId: string, ownerName: string) {
     for (const child of bodyNode.namedChildren) {
       if (child.type === "function_declaration") {
         emitFunction(child, ownerId, ownerName);
       } else if (child.type === "secondary_constructor") {
-        const parameters = paramListText(named(child, "function_value_parameters"));
+        const parameters = paramListText(
+          named(child, "function_value_parameters"),
+        );
         // ownerName is the owner's full qualifiedName (e.g. "Outer.Inner"), not its simple
         // name, so the constructor's own name must be split back out of it.
         const simpleName = ownerName.split(".").pop()!;
@@ -270,7 +273,9 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
     if (node.type === "property_declaration") {
       const { name, typeText } = propertyNameAndType(node);
       if (!name) return;
-      const id = uniqueId(canonicalId(filePath, "field", `${ownerName}.${name}`));
+      const id = uniqueId(
+        canonicalId(filePath, "field", `${ownerName}.${name}`),
+      );
       symbols.push({
         id,
         language: LANGUAGE_ID,
@@ -292,7 +297,11 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
     }
   }
 
-  function emitFunction(node: Node, ownerId: string | undefined, ownerName: string | undefined) {
+  function emitFunction(
+    node: Node,
+    ownerId: string | undefined,
+    ownerName: string | undefined,
+  ) {
     const name = text(named(node, "simple_identifier"));
     if (!name) return;
     const params = named(node, "function_value_parameters");
@@ -325,7 +334,9 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
       parentId: ownerId,
       annotations: [],
       modifiers: modifiersOf(node),
-      metadata: returnTypeNode ? { returnType: returnTypeNode.text } : undefined,
+      metadata: returnTypeNode
+        ? { returnType: returnTypeNode.text }
+        : undefined,
       source: node.text,
       body: body?.text,
     };
@@ -341,11 +352,12 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
     const isObject = node.type === "object_declaration";
     const isCompanion = node.type === "companion_object";
     const name = isCompanion
-      ? (text(named(node, "type_identifier")) || "Companion")
+      ? text(named(node, "type_identifier")) || "Companion"
       : text(named(node, "type_identifier"));
     if (!name) return;
 
-    const isInterface = !isObject && !isCompanion && hasKeyword(node, "interface");
+    const isInterface =
+      !isObject && !isCompanion && hasKeyword(node, "interface");
     const kind: SymbolKind = isInterface ? "interface" : "class";
     const qualifiedName = ownerName ? `${ownerName}.${name}` : name;
     const id = uniqueId(canonicalId(filePath, kind, qualifiedName));
@@ -359,7 +371,11 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
     if (isCompanion) modifiers.push("companion");
     if (hasKeyword(node, "enum")) modifiers.push("enum");
 
-    const keywordLabel = isInterface ? "interface" : isObject ? "object" : "class";
+    const keywordLabel = isInterface
+      ? "interface"
+      : isObject
+        ? "object"
+        : "class";
     const symbol: SymbolRecord = {
       id,
       language: LANGUAGE_ID,
@@ -388,7 +404,8 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
         if (!bindingKind) continue;
         const paramName = text(named(param, "simple_identifier"));
         if (!paramName) continue;
-        const typeNode = named(param, "user_type") ?? named(param, "nullable_type");
+        const typeNode =
+          named(param, "user_type") ?? named(param, "nullable_type");
         const fieldId = uniqueId(
           canonicalId(filePath, "field", `${qualifiedName}.${paramName}`),
         );
