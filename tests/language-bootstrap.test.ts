@@ -14,6 +14,7 @@ test("one bootstrap exposes every adapter to indexing and workflow", () => {
     .map((adapter) => adapter.id)
     .sort();
   assert.deepEqual(ids, [
+    "csharp",
     "go",
     "java",
     "javascript",
