@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ProjectIndex } from "../indexer/index.js";
 import { estimateTokens } from "../planner/budget.js";
-import { rankSymbol } from "../planner/rank.js";
+import { rankSymbol, rankText } from "../planner/rank.js";
 import { renderSkeleton } from "../render/compact-context.js";
 import type { SymbolRecord } from "../types/model.js";
 import {
@@ -12,6 +12,7 @@ import {
   composeRouteContext,
   composeSiblings,
   composeTransactionContext,
+  type CompositionCandidate,
   type CompositionReason,
 } from "../planner/composition.js";
 import { WorkflowError } from "./errors.js";
@@ -189,6 +190,21 @@ function ranked(symbols: SymbolRecord[], task: string) {
   );
 }
 
+/** A composition candidate's relevance to the task: rankSymbol against its own symbol when it
+ * has one (a sibling member, an imported symbol), or a text match against its label/evidence/
+ * filePath when it doesn't (a dependency-injection or enterprise-relation edge, which has no
+ * single SymbolRecord to speak for it). Used to fill the composition budget share by relevance
+ * instead of by which of the six composition sources happened to produce the candidate. */
+function rankCandidate(
+  candidate: CompositionCandidate,
+  task: string,
+  intent: string,
+) {
+  if (candidate.symbol) return rankSymbol(candidate.symbol, task, intent);
+  const text = `${candidate.label} ${candidate.evidence.join(" ")} ${candidate.filePath}`;
+  return rankText(text, task, intent);
+}
+
 export function buildPreview(
   index: ProjectIndex,
   task: string,
@@ -340,14 +356,24 @@ export function buildPreview(
     options.composition === false
       ? []
       : composeJpaContext(index, target, relatedIds, includedIds);
-  for (const candidate of [
+  // Ranked by relevance to the task across all six composition sources together, not by
+  // which source happened to produce the candidate — otherwise an early, weakly-relevant
+  // sibling could claim the composition share ahead of a highly relevant enterprise relation
+  // discovered later purely because of processing order.
+  const compositionCandidates = [
     ...siblings,
     ...importCandidates,
     ...routeCandidates,
     ...dependencyCandidates,
     ...transactionCandidates,
     ...jpaCandidates,
-  ]) {
+  ].sort(
+    (a, b) =>
+      rankCandidate(b, task, options.intent ?? "") -
+        rankCandidate(a, task, options.intent ?? "") ||
+      a.label.localeCompare(b.label),
+  );
+  for (const candidate of compositionCandidates) {
     if (candidate.symbol && includedIds.has(candidate.symbol.id)) continue;
     if (compositionTokens + candidate.estimatedTokens > compositionAllowance) {
       omitted.push({
@@ -368,6 +394,7 @@ export function buildPreview(
       candidate.evidence.join("; "),
       {
         evidence: candidate.evidence,
+        score: rankCandidate(candidate, task, options.intent ?? ""),
       },
       candidate.label,
       candidate.filePath,
