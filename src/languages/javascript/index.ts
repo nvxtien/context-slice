@@ -27,5 +27,3 @@ export const javaScriptAdapter: LanguageAdapter = {
 };
 
 registerLanguage(javaScriptAdapter);
-
-export { JAVASCRIPT_LANGUAGE_ID };

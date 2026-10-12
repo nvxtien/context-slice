@@ -15,5 +15,3 @@ export const cAdapter: LanguageAdapter = {
 };
 
 registerLanguage(cAdapter);
-
-export { LANGUAGE_ID as C_LANGUAGE_ID };

@@ -17,5 +17,3 @@ export const csharpAdapter: LanguageAdapter = {
 };
 
 registerLanguage(csharpAdapter);
-
-export { LANGUAGE_ID as CSHARP_LANGUAGE_ID };

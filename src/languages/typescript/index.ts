@@ -25,4 +25,3 @@ export const typeScriptAdapter: LanguageAdapter = {
 registerLanguage(typeScriptAdapter);
 
 export { typeScriptDiagnostics };
-export { LANGUAGE_ID as TYPESCRIPT_LANGUAGE_ID };

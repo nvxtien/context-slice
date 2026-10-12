@@ -14,5 +14,3 @@ export const goAdapter: LanguageAdapter = {
 };
 
 registerLanguage(goAdapter);
-
-export { LANGUAGE_ID as GO_LANGUAGE_ID };

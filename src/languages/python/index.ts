@@ -29,4 +29,3 @@ export const pythonAdapter: LanguageAdapter = {
 registerLanguage(pythonAdapter);
 
 export { pythonDiagnostics };
-export { LANGUAGE_ID as PYTHON_LANGUAGE_ID };

@@ -11,5 +11,3 @@ export const cppAdapter: LanguageAdapter = {
 };
 
 registerLanguage(cppAdapter);
-
-export { LANGUAGE_ID as CPP_LANGUAGE_ID };

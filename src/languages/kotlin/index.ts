@@ -12,5 +12,3 @@ export const kotlinAdapter: LanguageAdapter = {
 };
 
 registerLanguage(kotlinAdapter);
-
-export { LANGUAGE_ID as KOTLIN_LANGUAGE_ID };
