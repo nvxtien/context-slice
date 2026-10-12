@@ -402,6 +402,25 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
   ) {
     let visibility = defaultVisibility;
     for (const child of bodyNode.namedChildren) {
+      if (
+        child.type === "preproc_ifdef" ||
+        child.type === "preproc_if" ||
+        child.type === "preproc_elif" ||
+        child.type === "preproc_else"
+      ) {
+        // Same conditional-compilation gap as walkNamespaceMembers, one level down: a
+        // platform-guarded member (`#ifdef _WIN32 ... #endif` inside a class body) must be
+        // walked as if its declarations sat directly in the class body.
+        walkTypeBody(
+          child,
+          ownerId,
+          ownerQualifiedName,
+          ownerSimpleName,
+          packageName,
+          visibility,
+        );
+        continue;
+      }
       if (child.type === "access_specifier") {
         visibility = child.text;
         continue;
@@ -519,6 +538,21 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
     for (const rawChild of members) {
       const child = unwrapTemplate(rawChild);
       if (!child) continue;
+      if (
+        child.type === "preproc_ifdef" ||
+        child.type === "preproc_if" ||
+        child.type === "preproc_elif" ||
+        child.type === "preproc_else"
+      ) {
+        // The grammar nests an #if/#ifdef/#elif/#else block's body as this node's own
+        // children (its own leading condition/identifier child just matches nothing below),
+        // with any #elif/#else alternative chained in as the last child of the same shape.
+        // Without this, every declaration behind a conditional-compilation guard — routinely
+        // the whole file, e.g. fmt's `#ifndef FMT_BEGIN_NAMESPACE ... #endif` — is silently
+        // dropped instead of walked.
+        walkNamespaceMembers(child.namedChildren, packageName);
+        continue;
+      }
       if (child.type === "preproc_include") {
         const path = field(child, "path");
         if (!path) continue;

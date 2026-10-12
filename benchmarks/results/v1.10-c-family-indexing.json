@@ -1,6 +1,6 @@
 {
   "version": "1.10-c-family-indexing",
-  "generatedAt": "2026-10-12T18:08:03.815Z",
+  "generatedAt": "2026-10-12T19:18:42.082Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -22,13 +22,13 @@
             ".py": 2
           },
           "parseErrors": 38,
-          "symbols": 1032,
-          "callEdges": 3839,
+          "symbols": 1050,
+          "callEdges": 3851,
           "callEdgesExact": 1636,
-          "callEdgesUnresolved": 2203,
-          "callEdgesExactRate": 0.4261526439176869,
-          "coldIndexMs": 464,
-          "warmIndexMs": 36
+          "callEdgesUnresolved": 2215,
+          "callEdgesExactRate": 0.42482472085172684,
+          "coldIndexMs": 382,
+          "warmIndexMs": 18
         }
       ]
     },
@@ -49,13 +49,13 @@
             ".c": 1
           },
           "parseErrors": 39,
-          "symbols": 2209,
-          "callEdges": 9579,
-          "callEdgesExact": 1278,
-          "callEdgesUnresolved": 8236,
-          "callEdgesExactRate": 0.13341684935797057,
-          "coldIndexMs": 1210,
-          "warmIndexMs": 41
+          "symbols": 5166,
+          "callEdges": 15221,
+          "callEdgesExact": 2936,
+          "callEdgesUnresolved": 12198,
+          "callEdgesExactRate": 0.19289140003941924,
+          "coldIndexMs": 1147,
+          "warmIndexMs": 59
         }
       ]
     },
@@ -77,7 +77,7 @@
           "callEdgesExact": 516,
           "callEdgesUnresolved": 3183,
           "callEdgesExactRate": 0.12573099415204678,
-          "coldIndexMs": 972,
+          "coldIndexMs": 713,
           "warmIndexMs": 31
         },
         {
@@ -95,8 +95,8 @@
           "callEdgesExact": 310,
           "callEdgesUnresolved": 2542,
           "callEdgesExactRate": 0.09900990099009901,
-          "coldIndexMs": 983,
-          "warmIndexMs": 39
+          "coldIndexMs": 866,
+          "warmIndexMs": 30
         },
         {
           "repository": "aspnetcore-http",
@@ -113,8 +113,8 @@
           "callEdgesExact": 1526,
           "callEdgesUnresolved": 6064,
           "callEdgesExactRate": 0.19705578512396693,
-          "coldIndexMs": 1879,
-          "warmIndexMs": 86
+          "coldIndexMs": 2032,
+          "warmIndexMs": 80
         }
       ]
     },
@@ -137,8 +137,8 @@
           "callEdgesExact": 320,
           "callEdgesUnresolved": 2260,
           "callEdgesExactRate": 0.12364760432766615,
-          "coldIndexMs": 297,
-          "warmIndexMs": 25
+          "coldIndexMs": 272,
+          "warmIndexMs": 20
         },
         {
           "repository": "koin-core",
@@ -157,8 +157,8 @@
           "callEdgesExact": 773,
           "callEdgesUnresolved": 5569,
           "callEdgesExactRate": 0.12173228346456692,
-          "coldIndexMs": 496,
-          "warmIndexMs": 45
+          "coldIndexMs": 531,
+          "warmIndexMs": 38
         },
         {
           "repository": "ktor-http-server",
@@ -176,8 +176,8 @@
           "callEdgesExact": 3287,
           "callEdgesUnresolved": 7185,
           "callEdgesExactRate": 0.3133759176279912,
-          "coldIndexMs": 1188,
-          "warmIndexMs": 93
+          "coldIndexMs": 1229,
+          "warmIndexMs": 71
         }
       ]
     }

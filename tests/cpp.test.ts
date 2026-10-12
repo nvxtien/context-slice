@@ -246,3 +246,26 @@ test("a method inherited from a base class resolves across files", () => {
   assert.equal(call.resolutionKind, "inherited");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a function behind a macro-guarded #ifndef/#endif block is still indexed", () => {
+  // The common versioned-namespace idiom (`FMT_BEGIN_NAMESPACE` expanding to `namespace fmt {
+  // ...`) wraps a whole header's content this way: the macro's own #ifndef guard, not a real
+  // `namespace` keyword, is what the grammar sees at that point in the file.
+  const { root, index } = indexedCppProject({
+    "guarded.h": `#ifndef FMT_BEGIN_NAMESPACE\n#define FMT_BEGIN_NAMESPACE namespace fmt {\nFMT_BEGIN_NAMESPACE\nint guarded_function() { return 1; }\n}\n#endif\n`,
+  });
+  assert.ok(index.symbols.some((s) => s.name === "guarded_function"));
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a class member behind #ifdef/#else is still indexed on both branches", () => {
+  const { root, index } = indexedCppProject({
+    "platform.h": `class Platform {\n public:\n#ifdef _WIN32\n  void WindowsOnly() {}\n#else\n  void PosixOnly() {}\n#endif\n};\n`,
+  });
+  const names = index.symbols
+    .filter((s) => s.qualifiedName?.startsWith("Platform."))
+    .map((s) => s.name);
+  assert.ok(names.includes("WindowsOnly"));
+  assert.ok(names.includes("PosixOnly"));
+  rmSync(root, { recursive: true, force: true });
+});

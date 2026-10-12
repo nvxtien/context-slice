@@ -1,6 +1,6 @@
 {
   "version": "1.10-cpp-tasks",
-  "generatedAt": "2026-10-12T18:01:33.660Z",
+  "generatedAt": "2026-10-12T19:18:44.492Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -22,15 +22,15 @@
         ".c": 1
       },
       "parseErrors": 39,
-      "symbols": 2209,
-      "callEdges": 9579,
-      "callEdgesExact": 1278,
-      "callEdgesUnresolved": 8236,
+      "symbols": 5166,
+      "callEdges": 15221,
+      "callEdgesExact": 2936,
+      "callEdgesUnresolved": 12198,
       "performance": {
-        "coldIndexMs": 930,
-        "warmIndexMs": 41,
-        "singleFileRefreshMs": 45,
-        "previewMs": 23,
+        "coldIndexMs": 1026,
+        "warmIndexMs": 67,
+        "singleFileRefreshMs": 80,
+        "previewMs": 32,
         "filesIndexed": 79
       }
     }
@@ -51,19 +51,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 2852,
       "manualFiles": 1,
-      "suppliedContextTokens": 121,
-      "contextItems": 3,
+      "suppliedContextTokens": 167,
+      "contextItems": 4,
       "minimumSufficientBudget": 256,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9575736325385694,
+      "reduction": 0.9414446002805049,
       "metrics": {
-        "contextWindowReduction": 0.9575736325385694,
-        "inputTokenReduction": 0.9575736325385694,
+        "contextWindowReduction": 0.9414446002805049,
+        "inputTokenReduction": 0.9414446002805049,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.008264462809917356,
+        "developerContextEfficiency": 0.005988023952095809,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0147705078125,
+        "contextBudgetPressure": 0.0203857421875,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -88,19 +88,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 2852,
       "manualFiles": 1,
-      "suppliedContextTokens": 97,
-      "contextItems": 1,
+      "suppliedContextTokens": 250,
+      "contextItems": 2,
       "minimumSufficientBudget": 256,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9659887798036466,
+      "reduction": 0.9123422159887798,
       "metrics": {
-        "contextWindowReduction": 0.9659887798036466,
-        "inputTokenReduction": 0.9659887798036466,
+        "contextWindowReduction": 0.9123422159887798,
+        "inputTokenReduction": 0.9123422159887798,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.010309278350515464,
+        "developerContextEfficiency": 0.004,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0118408203125,
+        "contextBudgetPressure": 0.030517578125,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -116,9 +116,9 @@
       "tasks": 2,
       "requiredFactRecall": 1,
       "retrievalRecall": 1,
-      "medianContextReduction": 0.9659887798036466,
+      "medianContextReduction": 0.9414446002805049,
       "medianManualTokens": 2852,
-      "medianContextTokens": 121,
+      "medianContextTokens": 250,
       "medianMinimumSufficientBudget": 256,
       "wholeFileFallbackRate": 0,
       "wholeModuleFallbackRate": 0
@@ -128,9 +128,9 @@
         "tasks": 2,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9659887798036466,
+        "medianContextReduction": 0.9414446002805049,
         "medianManualTokens": 2852,
-        "medianContextTokens": 121,
+        "medianContextTokens": 250,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -141,9 +141,9 @@
         "tasks": 1,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9575736325385694,
+        "medianContextReduction": 0.9414446002805049,
         "medianManualTokens": 2852,
-        "medianContextTokens": 121,
+        "medianContextTokens": 167,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -152,9 +152,9 @@
         "tasks": 1,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9659887798036466,
+        "medianContextReduction": 0.9123422159887798,
         "medianManualTokens": 2852,
-        "medianContextTokens": 97,
+        "medianContextTokens": 250,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -166,10 +166,10 @@
   "performance": [
     {
       "repository": "fmt",
-      "coldIndexMs": 930,
-      "warmIndexMs": 41,
-      "singleFileRefreshMs": 45,
-      "previewMs": 23,
+      "coldIndexMs": 1026,
+      "warmIndexMs": 67,
+      "singleFileRefreshMs": 80,
+      "previewMs": 32,
       "filesIndexed": 79
     }
   ]
