@@ -1,6 +1,6 @@
 {
   "version": "1.10-c-family-indexing",
-  "generatedAt": "2026-10-12T19:38:32.781Z",
+  "generatedAt": "2026-10-12T19:44:09.912Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -27,8 +27,8 @@
           "callEdgesExact": 1636,
           "callEdgesUnresolved": 2215,
           "callEdgesExactRate": 0.42482472085172684,
-          "coldIndexMs": 469,
-          "warmIndexMs": 19
+          "coldIndexMs": 416,
+          "warmIndexMs": 20
         }
       ]
     },
@@ -54,8 +54,8 @@
           "callEdgesExact": 2936,
           "callEdgesUnresolved": 12198,
           "callEdgesExactRate": 0.19289140003941924,
-          "coldIndexMs": 1277,
-          "warmIndexMs": 61
+          "coldIndexMs": 1207,
+          "warmIndexMs": 62
         }
       ]
     },
@@ -77,8 +77,8 @@
           "callEdgesExact": 787,
           "callEdgesUnresolved": 2888,
           "callEdgesExactRate": 0.19176413255360625,
-          "coldIndexMs": 420,
-          "warmIndexMs": 28
+          "coldIndexMs": 757,
+          "warmIndexMs": 30
         },
         {
           "repository": "polly",
@@ -95,8 +95,8 @@
           "callEdgesExact": 381,
           "callEdgesUnresolved": 2459,
           "callEdgesExactRate": 0.12168636218460556,
-          "coldIndexMs": 481,
-          "warmIndexMs": 30
+          "coldIndexMs": 954,
+          "warmIndexMs": 37
         },
         {
           "repository": "aspnetcore-http",
@@ -113,8 +113,8 @@
           "callEdgesExact": 1833,
           "callEdgesUnresolved": 5735,
           "callEdgesExactRate": 0.23669938016528927,
-          "coldIndexMs": 1081,
-          "warmIndexMs": 73
+          "coldIndexMs": 2084,
+          "warmIndexMs": 82
         }
       ]
     },
@@ -134,11 +134,11 @@
           "parseErrors": 0,
           "symbols": 734,
           "callEdges": 2588,
-          "callEdgesExact": 320,
-          "callEdgesUnresolved": 2260,
-          "callEdgesExactRate": 0.12364760432766615,
-          "coldIndexMs": 311,
-          "warmIndexMs": 23
+          "callEdgesExact": 428,
+          "callEdgesUnresolved": 2152,
+          "callEdgesExactRate": 0.16537867078825347,
+          "coldIndexMs": 201,
+          "warmIndexMs": 21
         },
         {
           "repository": "koin-core",
@@ -154,11 +154,11 @@
           "parseErrors": 1,
           "symbols": 2442,
           "callEdges": 6350,
-          "callEdgesExact": 773,
-          "callEdgesUnresolved": 5569,
-          "callEdgesExactRate": 0.12173228346456692,
-          "coldIndexMs": 641,
-          "warmIndexMs": 40
+          "callEdgesExact": 1538,
+          "callEdgesUnresolved": 4804,
+          "callEdgesExactRate": 0.24220472440944882,
+          "coldIndexMs": 418,
+          "warmIndexMs": 42
         },
         {
           "repository": "ktor-http-server",
@@ -173,11 +173,11 @@
           "parseErrors": 21,
           "symbols": 4385,
           "callEdges": 10489,
-          "callEdgesExact": 3287,
-          "callEdgesUnresolved": 7185,
-          "callEdgesExactRate": 0.3133759176279912,
-          "coldIndexMs": 1356,
-          "warmIndexMs": 77
+          "callEdgesExact": 3796,
+          "callEdgesUnresolved": 6676,
+          "callEdgesExactRate": 0.36190294594336925,
+          "coldIndexMs": 878,
+          "warmIndexMs": 79
         }
       ]
     }

@@ -181,3 +181,23 @@ test("a method inherited from a supertype resolves across files", () => {
   assert.equal(call.resolutionKind, "inherited");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("an overloaded method call resolves to the overload matching the call site's argument count", () => {
+  const { root, index } = indexedKotlinProject({
+    "C.kt": `class C {\n    fun run() {\n        write(1)\n    }\n    fun write(a: Int) {}\n    fun write(a: Int, b: Int) {}\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "write")!;
+  const target = index.symbols.find((s) => s.id === call.resolvedTargetId);
+  assert.ok(target?.signature?.includes("write(a: Int)"));
+  assert.equal(call.confidence, "exact");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a call that still matches 2+ overloads by argument count stays unresolved", () => {
+  const { root, index } = indexedKotlinProject({
+    "C.kt": `class C {\n    fun run() {\n        write(1, 2)\n    }\n    fun write(a: Int, b: Int) {}\n    fun write(a: String, b: String) {}\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "write")!;
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});

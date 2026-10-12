@@ -1,6 +1,6 @@
 {
   "version": "1.10-kotlin-tasks",
-  "generatedAt": "2026-10-12T18:01:41.907Z",
+  "generatedAt": "2026-10-12T19:44:01.231Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -21,13 +21,13 @@
       "parseErrors": 0,
       "symbols": 734,
       "callEdges": 2588,
-      "callEdgesExact": 320,
-      "callEdgesUnresolved": 2260,
+      "callEdgesExact": 428,
+      "callEdgesUnresolved": 2152,
       "performance": {
-        "coldIndexMs": 217,
-        "warmIndexMs": 28,
-        "singleFileRefreshMs": 32,
-        "previewMs": 34,
+        "coldIndexMs": 388,
+        "warmIndexMs": 33,
+        "singleFileRefreshMs": 37,
+        "previewMs": 31,
         "filesIndexed": 83
       }
     },
@@ -45,12 +45,12 @@
       "parseErrors": 1,
       "symbols": 2442,
       "callEdges": 6350,
-      "callEdgesExact": 773,
-      "callEdgesUnresolved": 5569,
+      "callEdgesExact": 1538,
+      "callEdgesUnresolved": 4804,
       "performance": {
-        "coldIndexMs": 561,
-        "warmIndexMs": 51,
-        "singleFileRefreshMs": 51,
+        "coldIndexMs": 1292,
+        "warmIndexMs": 46,
+        "singleFileRefreshMs": 56,
         "previewMs": null,
         "filesIndexed": 191
       }
@@ -68,12 +68,12 @@
       "parseErrors": 21,
       "symbols": 4385,
       "callEdges": 10489,
-      "callEdgesExact": 3287,
-      "callEdgesUnresolved": 7185,
+      "callEdgesExact": 3796,
+      "callEdgesUnresolved": 6676,
       "performance": {
-        "coldIndexMs": 1291,
-        "warmIndexMs": 87,
-        "singleFileRefreshMs": 100,
+        "coldIndexMs": 1229,
+        "warmIndexMs": 104,
+        "singleFileRefreshMs": 87,
         "previewMs": null,
         "filesIndexed": 337
       }
@@ -240,25 +240,25 @@
   "performance": [
     {
       "repository": "kotlin-csv",
-      "coldIndexMs": 217,
-      "warmIndexMs": 28,
-      "singleFileRefreshMs": 32,
-      "previewMs": 34,
+      "coldIndexMs": 388,
+      "warmIndexMs": 33,
+      "singleFileRefreshMs": 37,
+      "previewMs": 31,
       "filesIndexed": 83
     },
     {
       "repository": "koin-core",
-      "coldIndexMs": 561,
-      "warmIndexMs": 51,
-      "singleFileRefreshMs": 51,
+      "coldIndexMs": 1292,
+      "warmIndexMs": 46,
+      "singleFileRefreshMs": 56,
       "previewMs": null,
       "filesIndexed": 191
     },
     {
       "repository": "ktor-http-server",
-      "coldIndexMs": 1291,
-      "warmIndexMs": 87,
-      "singleFileRefreshMs": 100,
+      "coldIndexMs": 1229,
+      "warmIndexMs": 104,
+      "singleFileRefreshMs": 87,
       "previewMs": null,
       "filesIndexed": 337
     }
