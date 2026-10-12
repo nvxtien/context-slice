@@ -8,6 +8,31 @@
   source-processing order.
 - Removed unreferenced version-tagged benchmark scripts and the
   release-rc regression step.
+- Fixed the C resolver giving up on a `static` helper whenever a
+  same-named one existed in another file, instead of preferring the
+  candidate in the caller's own file (which is the only one actually
+  reachable from there).
+- Fixed the C++ adapter silently dropping every declaration behind a
+  `#if`/`#ifdef`/`#elif`/`#else` block — including the very common
+  `#ifndef FOO_BEGIN_NAMESPACE ... #endif` versioned-namespace idiom,
+  which could wrap an entire header's content.
+- Fixed the C# and Kotlin resolvers treating every overload of a
+  method as permanently ambiguous (their `Owner\0Name` index key
+  carries no signature); candidates are now narrowed by comparing the
+  call site's argument count against each candidate's declared
+  parameter count first.
+- Fixed Kotlin primary constructors having no symbol of their own, so
+  a plain `ClassName(...)` construction call — the ordinary way to
+  create anything in Kotlin — had nothing in the index to resolve to.
+- Added repository fixtures, an indexing benchmark, and hand-verified
+  ground-truth task benchmarks for C, C++, C#, and Kotlin
+  (`npm run benchmark:v110-c-family`, `benchmark:v110-c-tasks`,
+  `benchmark:v110-cpp-tasks`, `benchmark:v110-csharp-tasks`,
+  `benchmark:v110-kotlin-tasks`).
+- CI: Windows jobs now run on `windows-2022` (avoids a node-gyp/Visual
+  Studio detection bug on `windows-latest`), and the Windows
+  package-smoke job runs automatically on every push instead of only
+  via manual dispatch.
 
 ## 1.9.6
 
