@@ -6,6 +6,7 @@ import "./rust/index.js";
 import "./go/index.js";
 import "./kotlin/index.js";
 import "./csharp/index.js";
+import "./cpp/index.js";
 import "./java/enterprise/spring-mvc.js";
 import "./java/enterprise/dependency-injection.js";
 import "./java/enterprise/transactions.js";
