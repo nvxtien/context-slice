@@ -52,27 +52,12 @@ jobs:
   package-smoke:
     name: package smoke / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     needs: [test, format]
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run benchmark:v08
-
-  package-smoke-windows:
-    name: package smoke / windows-2022 (manual)
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: windows-2022
-    timeout-minutes: 20
-    needs: [test, format]
+        os: [ubuntu-latest, macos-latest, windows-2022]
 
     steps:
       - uses: actions/checkout@v4
