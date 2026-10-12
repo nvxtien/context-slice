@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.10.0
+
+- Added C, C++, C#, and Kotlin language support.
+- Widened default caller/callee discovery from 1 hop to 2.
+- Composition candidates are now ranked by task relevance instead of
+  source-processing order.
+- Removed unreferenced version-tagged benchmark scripts and the
+  release-rc regression step.
+
 ## 1.9.6
 
 - Fixed `.cmd` shim invocation on Windows: the `cmd.exe /s /c` command line was
