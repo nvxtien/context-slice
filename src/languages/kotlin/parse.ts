@@ -423,6 +423,20 @@ export function parseKotlin(filePath: string, source: string): ParsedFile {
           source: param.text,
         });
       }
+      // A class is invoked by its own name (`RowParser(dialect, cursor)`), same as any other
+      // callable — without a constructor symbol here, that call site has nothing to resolve
+      // to (the class symbol itself is kind "class", not indexed as callable by the resolver).
+      if (kind === "class") {
+        const parameters = paramListText(primaryCtor);
+        emitConstructor(primaryCtor, {
+          ownerId: id,
+          name,
+          qualifiedName: `${qualifiedName}.${name}`,
+          parameters,
+          signature: `constructor${parameters}`,
+          modifiers: modifiersOf(primaryCtor),
+        });
+      }
     }
 
     const body = named(node, "class_body") ?? named(node, "enum_class_body");

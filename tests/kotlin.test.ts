@@ -201,3 +201,20 @@ test("a call that still matches 2+ overloads by argument count stays unresolved"
   assert.equal(call.confidence, "unresolved");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a primary constructor gets its own symbol, so calling the class by name resolves", () => {
+  const { root, index } = indexedKotlinProject({
+    "Point.kt": `class Point(val x: Int, val y: Int) {\n    fun sum(): Int = x + y\n}\nfun makePoint(): Point {\n    return Point(1, 2)\n}\n`,
+  });
+  const ctor = index.symbols.find(
+    (s) => s.kind === "constructor" && s.qualifiedName === "Point.Point",
+  );
+  assert.ok(
+    ctor,
+    "expected a constructor symbol for Point's primary constructor",
+  );
+  const call = index.calls.find((c) => c.calleeName === "Point")!;
+  assert.equal(call.resolvedTargetId, ctor!.id);
+  assert.equal(call.confidence, "exact");
+  rmSync(root, { recursive: true, force: true });
+});

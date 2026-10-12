@@ -1,6 +1,6 @@
 {
   "version": "1.10-kotlin-tasks",
-  "generatedAt": "2026-10-12T19:44:01.231Z",
+  "generatedAt": "2026-10-12T19:56:45.256Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -19,15 +19,15 @@
         ".kt": 77
       },
       "parseErrors": 0,
-      "symbols": 734,
+      "symbols": 760,
       "callEdges": 2588,
-      "callEdgesExact": 428,
-      "callEdgesUnresolved": 2152,
+      "callEdgesExact": 776,
+      "callEdgesUnresolved": 1804,
       "performance": {
-        "coldIndexMs": 388,
-        "warmIndexMs": 33,
-        "singleFileRefreshMs": 37,
-        "previewMs": 31,
+        "coldIndexMs": 238,
+        "warmIndexMs": 24,
+        "singleFileRefreshMs": 32,
+        "previewMs": 29,
         "filesIndexed": 83
       }
     },
@@ -43,14 +43,14 @@
         ".java": 3
       },
       "parseErrors": 1,
-      "symbols": 2442,
+      "symbols": 2841,
       "callEdges": 6350,
-      "callEdgesExact": 1538,
-      "callEdgesUnresolved": 4804,
+      "callEdgesExact": 1664,
+      "callEdgesUnresolved": 4678,
       "performance": {
-        "coldIndexMs": 1292,
-        "warmIndexMs": 46,
-        "singleFileRefreshMs": 56,
+        "coldIndexMs": 615,
+        "warmIndexMs": 42,
+        "singleFileRefreshMs": 50,
         "previewMs": null,
         "filesIndexed": 191
       }
@@ -66,14 +66,14 @@
         ".kt": 331
       },
       "parseErrors": 21,
-      "symbols": 4385,
+      "symbols": 4664,
       "callEdges": 10489,
-      "callEdgesExact": 3796,
-      "callEdgesUnresolved": 6676,
+      "callEdgesExact": 4207,
+      "callEdgesUnresolved": 6265,
       "performance": {
-        "coldIndexMs": 1229,
-        "warmIndexMs": 104,
-        "singleFileRefreshMs": 87,
+        "coldIndexMs": 1238,
+        "warmIndexMs": 87,
+        "singleFileRefreshMs": 100,
         "previewMs": null,
         "filesIndexed": 337
       }
@@ -136,19 +136,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 1590,
       "manualFiles": 1,
-      "suppliedContextTokens": 379,
-      "contextItems": 3,
+      "suppliedContextTokens": 423,
+      "contextItems": 4,
       "minimumSufficientBudget": 512,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.7616352201257861,
+      "reduction": 0.7339622641509433,
       "metrics": {
-        "contextWindowReduction": 0.7616352201257861,
-        "inputTokenReduction": 0.7616352201257861,
+        "contextWindowReduction": 0.7339622641509433,
+        "inputTokenReduction": 0.7339622641509433,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.005277044854881266,
+        "developerContextEfficiency": 0.004728132387706856,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.0462646484375,
+        "contextBudgetPressure": 0.0516357421875,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -170,7 +170,7 @@
       "retrievalRecall": 1,
       "medianContextReduction": 0.8959402706486235,
       "medianManualTokens": 2143,
-      "medianContextTokens": 379,
+      "medianContextTokens": 423,
       "medianMinimumSufficientBudget": 512,
       "wholeFileFallbackRate": 0,
       "wholeModuleFallbackRate": 0
@@ -182,7 +182,7 @@
         "retrievalRecall": 1,
         "medianContextReduction": 0.8959402706486235,
         "medianManualTokens": 2143,
-        "medianContextTokens": 379,
+        "medianContextTokens": 423,
         "medianMinimumSufficientBudget": 512,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -226,9 +226,9 @@
         "tasks": 1,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.7616352201257861,
+        "medianContextReduction": 0.7339622641509433,
         "medianManualTokens": 1590,
-        "medianContextTokens": 379,
+        "medianContextTokens": 423,
         "medianMinimumSufficientBudget": 512,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -240,25 +240,25 @@
   "performance": [
     {
       "repository": "kotlin-csv",
-      "coldIndexMs": 388,
-      "warmIndexMs": 33,
-      "singleFileRefreshMs": 37,
-      "previewMs": 31,
+      "coldIndexMs": 238,
+      "warmIndexMs": 24,
+      "singleFileRefreshMs": 32,
+      "previewMs": 29,
       "filesIndexed": 83
     },
     {
       "repository": "koin-core",
-      "coldIndexMs": 1292,
-      "warmIndexMs": 46,
-      "singleFileRefreshMs": 56,
+      "coldIndexMs": 615,
+      "warmIndexMs": 42,
+      "singleFileRefreshMs": 50,
       "previewMs": null,
       "filesIndexed": 191
     },
     {
       "repository": "ktor-http-server",
-      "coldIndexMs": 1229,
-      "warmIndexMs": 104,
-      "singleFileRefreshMs": 87,
+      "coldIndexMs": 1238,
+      "warmIndexMs": 87,
+      "singleFileRefreshMs": 100,
       "previewMs": null,
       "filesIndexed": 337
     }
