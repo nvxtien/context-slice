@@ -23,7 +23,7 @@ jobs:
             node: 20
           - os: macos-latest
             node: 22
-          - os: windows-latest
+          - os: windows-2022
             node: 20
 
     steps:
@@ -68,9 +68,9 @@ jobs:
       - run: npm run benchmark:v08
 
   package-smoke-windows:
-    name: package smoke / windows-latest (manual)
+    name: package smoke / windows-2022 (manual)
     if: github.event_name == 'workflow_dispatch'
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 20
     needs: [test, format]
 
