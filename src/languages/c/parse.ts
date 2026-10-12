@@ -8,8 +8,20 @@ import type {
   SymbolRecord,
 } from "../../types/model.js";
 import type { ParsedFile } from "../adapter.js";
-
-type Node = Parser.SyntaxNode;
+import {
+  DECLARATOR_NODE_TYPES,
+  canonicalId,
+  collectCalls,
+  field,
+  isTypeDeclaration,
+  modifiersOf,
+  paramListText,
+  range,
+  simpleName,
+  text,
+  unwrapDeclarator,
+  type Node,
+} from "../c-family/syntax.js";
 
 export const LANGUAGE_ID = "c";
 
@@ -21,145 +33,6 @@ function cParser() {
   }
   return parser;
 }
-
-const range = (node: Node) => ({
-  startLine: node.startPosition.row + 1,
-  startColumn: node.startPosition.column,
-  endLine: node.endPosition.row + 1,
-  endColumn: node.endPosition.column,
-});
-const text = (node: Node | null | undefined) => node?.text ?? "";
-const field = (node: Node, name: string) =>
-  node.childForFieldName(name) ?? undefined;
-const namedAll = (node: Node, type: string) =>
-  node.namedChildren.filter((c) => c.type === type);
-
-function canonicalId(
-  filePath: string,
-  kind: SymbolKind,
-  name: string,
-  parameters?: string,
-) {
-  return [filePath, kind, name, parameters].filter(Boolean).join("::");
-}
-
-/** C has no classes/namespaces, so unlike the cpp/csharp/kotlin adapters there is nothing to
- * recurse through here — a declarator's name is always already a plain node. Kept as a named
- * function (rather than inlined `.text`) so every call site reads the same as those adapters. */
-function simpleName(node: Node | undefined): string {
-  return node?.text ?? "";
-}
-
-/** "static"/"extern"/"register" get a named storage_class_specifier node; "inline" is a bare
- * anonymous keyword token. C has no access specifiers, no virtual/friend/constexpr. */
-const KEYWORD_MODIFIERS = new Set(["inline"]);
-function modifiersOf(node: Node): string[] {
-  const mods: string[] = [];
-  for (const c of node.children) {
-    if (c.type === "storage_class_specifier") mods.push(c.text);
-    else if (!c.isNamed && KEYWORD_MODIFIERS.has(c.text)) mods.push(c.text);
-  }
-  return mods;
-}
-
-/** Follows a declarator through pointer/array/init wrappers (`int* x`, `int x[]`, `int x = 1`)
- * down to either a function_declarator (this member is callable) or the terminal name-bearing
- * node (identifier/field_identifier). Unlike C++, there is no reference_declarator — C has no
- * references. */
-function unwrapDeclarator(node: Node | undefined): Node | undefined {
-  let current = node;
-  while (current) {
-    if (current.type === "function_declarator") return current;
-    if (
-      current.type === "pointer_declarator" ||
-      current.type === "array_declarator" ||
-      current.type === "init_declarator"
-    ) {
-      current = field(current, "declarator");
-      continue;
-    }
-    return current;
-  }
-  return undefined;
-}
-
-function paramListText(params: Node | undefined): string {
-  if (!params) return "()";
-  const parts = namedAll(params, "parameter_declaration").map((p) => p.text);
-  return `(${parts.join(", ")})`;
-}
-
-/** A call_expression's callee name and (when syntactically simple) receiver text: a bare call,
- * or a member access (`a.b()` / `a->b()` — most often a function-pointer struct field used as
- * a callback/vtable dispatch; the grammar unifies both operators under field_expression). C has
- * no namespaces or classes, so there is no qualified_identifier callee shape to handle. */
-function buildCallEdge(
-  callNode: Node,
-  filePath: string,
-  callerId: string,
-): CallEdge | undefined {
-  const callee = field(callNode, "function");
-  const args = field(callNode, "arguments");
-  const argumentCount = args ? args.namedChildren.length : 0;
-  if (!callee) return undefined;
-
-  let calleeName = "";
-  let receiverText: string | undefined;
-  if (callee.type === "identifier" || callee.type === "field_identifier") {
-    calleeName = callee.text;
-  } else if (callee.type === "field_expression") {
-    calleeName = text(field(callee, "field"));
-    receiverText = field(callee, "argument")?.text;
-  } else {
-    return undefined;
-  }
-  if (!calleeName) return undefined;
-
-  return {
-    callerId,
-    calleeName,
-    receiverText,
-    argumentCount,
-    filePath,
-    language: LANGUAGE_ID,
-    range: range(callNode),
-    confidence: "unresolved",
-    resolutionKind: "unresolved",
-    evidence: ["syntactic call"],
-  };
-}
-
-function collectCalls(
-  node: Node,
-  ownerId: string,
-  filePath: string,
-  calls: CallEdge[],
-) {
-  for (const child of node.namedChildren) {
-    if (child.type === "call_expression") {
-      const edge = buildCallEdge(child, filePath, ownerId);
-      if (edge) calls.push(edge);
-    }
-    collectCalls(child, ownerId, filePath, calls);
-  }
-}
-
-function isTypeDeclaration(node: Node): boolean {
-  return (
-    node.type === "struct_specifier" ||
-    node.type === "union_specifier" ||
-    node.type === "enum_specifier"
-  );
-}
-
-const DECLARATOR_NODE_TYPES = new Set([
-  "identifier",
-  "field_identifier",
-  "pointer_declarator",
-  "array_declarator",
-  "function_declarator",
-  "init_declarator",
-]);
 
 export function parseC(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
@@ -237,7 +110,7 @@ export function parseC(filePath: string, source: string): ParsedFile {
    * function_declarator among them is a function-pointer field, modeled as a plain field since
    * there is no call-target to point to (it's assigned at runtime, never statically known). An
    * anonymous nested struct/union member (`union { int i; float f; };` with no name of its
-   * own — a common tagged-union idiom) has no declarator at all; real C/C++ semantics fold its
+   * own — a common tagged-union idiom) has no declarator at all; real C semantics fold its
    * members into the enclosing type directly, so they are walked in rather than dropped. */
   function emitFieldDeclaration(
     node: Node,
@@ -416,7 +289,7 @@ export function parseC(filePath: string, source: string): ParsedFile {
   }
 
   for (const { symbol, body } of callables) {
-    if (body) collectCalls(body, symbol.id, filePath, calls);
+    if (body) collectCalls(body, symbol.id, filePath, calls, LANGUAGE_ID);
   }
 
   return { symbols, calls, imports, exports, parseError };

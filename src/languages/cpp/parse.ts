@@ -8,8 +8,20 @@ import type {
   SymbolRecord,
 } from "../../types/model.js";
 import type { ParsedFile } from "../adapter.js";
-
-type Node = Parser.SyntaxNode;
+import {
+  DECLARATOR_NODE_TYPES,
+  canonicalId,
+  collectCalls,
+  field,
+  isTypeDeclaration,
+  modifiersOf,
+  paramListText,
+  range,
+  simpleName,
+  text,
+  unwrapDeclarator,
+  type Node,
+} from "../c-family/syntax.js";
 
 export const LANGUAGE_ID = "cpp";
 
@@ -20,80 +32,6 @@ function cppParser() {
     parser.setLanguage(Cpp as any);
   }
   return parser;
-}
-
-const range = (node: Node) => ({
-  startLine: node.startPosition.row + 1,
-  startColumn: node.startPosition.column,
-  endLine: node.endPosition.row + 1,
-  endColumn: node.endPosition.column,
-});
-const text = (node: Node | null | undefined) => node?.text ?? "";
-const field = (node: Node, name: string) =>
-  node.childForFieldName(name) ?? undefined;
-const namedAll = (node: Node, type: string) =>
-  node.namedChildren.filter((c) => c.type === type);
-
-function canonicalId(
-  filePath: string,
-  kind: SymbolKind,
-  name: string,
-  parameters?: string,
-) {
-  return [filePath, kind, name, parameters].filter(Boolean).join("::");
-}
-
-/** A node's own short name, unwrapping a template specialization (`Box<int>` -> "Box") to its
- * base identifier. Template arguments are deliberately dropped, not modeled. */
-function simpleName(node: Node | undefined): string {
-  if (!node) return "";
-  if (node.type === "template_type") return text(field(node, "name"));
-  return node.text;
-}
-
-/** "virtual"/"inline"/etc. appear as bare anonymous keyword tokens rather than a named modifier
- * node (unlike C#'s "modifier"); "static"/"extern" do get a named storage_class_specifier. */
-const KEYWORD_MODIFIERS = new Set([
-  "virtual",
-  "inline",
-  "explicit",
-  "friend",
-  "constexpr",
-  "mutable",
-]);
-function modifiersOf(node: Node): string[] {
-  const mods: string[] = [];
-  for (const c of node.children) {
-    if (c.type === "storage_class_specifier" || c.type === "virtual_specifier")
-      mods.push(c.text);
-    else if (!c.isNamed && KEYWORD_MODIFIERS.has(c.text)) mods.push(c.text);
-  }
-  return mods;
-}
-
-/** Follows a declarator through pointer/reference/array/init wrappers (`int* x`, `int& x`,
- * `int x[]`, `int x = 1`) down to either a function_declarator (this member is callable) or
- * the terminal name-bearing node (identifier/field_identifier/destructor_name/operator_name/
- * qualified_identifier). */
-function unwrapDeclarator(node: Node | undefined): Node | undefined {
-  let current = node;
-  while (current) {
-    if (current.type === "function_declarator") return current;
-    if (
-      current.type === "pointer_declarator" ||
-      current.type === "array_declarator" ||
-      current.type === "init_declarator"
-    ) {
-      current = field(current, "declarator");
-      continue;
-    }
-    if (current.type === "reference_declarator") {
-      current = current.namedChildren[0];
-      continue;
-    }
-    return current;
-  }
-  return undefined;
 }
 
 /** Splits an out-of-class definition's qualified name (`Class::Method`, or `Ns::Class::Method`)
@@ -132,78 +70,6 @@ function baseTypeName(node: Node): string | undefined {
   return undefined;
 }
 
-function paramListText(params: Node | undefined): string {
-  if (!params) return "()";
-  const parts = namedAll(params, "parameter_declaration").map((p) => p.text);
-  return `(${parts.join(", ")})`;
-}
-
-/** A call_expression's callee name and (when syntactically simple) receiver text: a bare call,
- * a namespace/class-qualified call (`Base::Foo()`, `ns::Func()`), or a member access (`a.b()` /
- * `a->b()` — the grammar already unifies both operators under field_expression). */
-function buildCallEdge(
-  callNode: Node,
-  filePath: string,
-  callerId: string,
-): CallEdge | undefined {
-  const callee = field(callNode, "function");
-  const args = field(callNode, "arguments");
-  const argumentCount = args ? args.namedChildren.length : 0;
-  if (!callee) return undefined;
-
-  let calleeName = "";
-  let receiverText: string | undefined;
-  if (callee.type === "identifier" || callee.type === "field_identifier") {
-    calleeName = callee.text;
-  } else if (callee.type === "qualified_identifier") {
-    calleeName = simpleName(field(callee, "name"));
-    receiverText = field(callee, "scope")?.text;
-  } else if (callee.type === "field_expression") {
-    calleeName = text(field(callee, "field"));
-    receiverText = field(callee, "argument")?.text;
-  } else {
-    return undefined;
-  }
-  if (!calleeName) return undefined;
-
-  return {
-    callerId,
-    calleeName,
-    receiverText,
-    argumentCount,
-    filePath,
-    language: LANGUAGE_ID,
-    range: range(callNode),
-    confidence: "unresolved",
-    resolutionKind: "unresolved",
-    evidence: ["syntactic call"],
-  };
-}
-
-function collectCalls(
-  node: Node,
-  ownerId: string,
-  filePath: string,
-  calls: CallEdge[],
-) {
-  for (const child of node.namedChildren) {
-    if (child.type === "call_expression") {
-      const edge = buildCallEdge(child, filePath, ownerId);
-      if (edge) calls.push(edge);
-    }
-    collectCalls(child, ownerId, filePath, calls);
-  }
-}
-
-function isTypeDeclaration(node: Node): boolean {
-  return (
-    node.type === "class_specifier" ||
-    node.type === "struct_specifier" ||
-    node.type === "union_specifier" ||
-    node.type === "enum_specifier"
-  );
-}
-
 /** `template<...> class/function ...` wraps the real declaration as an untagged sibling of
  * the type-parameter list. Type parameters are deliberately dropped, not modeled — the
  * wrapped declaration is parsed exactly as if it were not templated. */
@@ -211,18 +77,6 @@ function unwrapTemplate(node: Node): Node | undefined {
   if (node.type !== "template_declaration") return node;
   return node.namedChildren.find((c) => c.type !== "template_parameter_list");
 }
-
-const DECLARATOR_NODE_TYPES = new Set([
-  "identifier",
-  "field_identifier",
-  "pointer_declarator",
-  "reference_declarator",
-  "array_declarator",
-  "function_declarator",
-  "destructor_name",
-  "operator_name",
-  "init_declarator",
-]);
 
 export function parseCpp(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
@@ -735,7 +589,11 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
         // itself is still not modeled (a known accepted gap), but the struct/class/union/enum
         // it defines is real and would otherwise be silently lost entirely.
         const typeNode = field(child, "type");
-        if (typeNode && isTypeDeclaration(typeNode) && field(typeNode, "body")) {
+        if (
+          typeNode &&
+          isTypeDeclaration(typeNode) &&
+          field(typeNode, "body")
+        ) {
           emitTypeDeclaration(typeNode, undefined, undefined, packageName);
         }
       }
@@ -745,7 +603,7 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
   walkNamespaceMembers(tree.rootNode.namedChildren, undefined);
 
   for (const { symbol, body } of callables) {
-    if (body) collectCalls(body, symbol.id, filePath, calls);
+    if (body) collectCalls(body, symbol.id, filePath, calls, LANGUAGE_ID);
   }
 
   return { symbols, calls, imports, exports, parseError };

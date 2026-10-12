@@ -66,7 +66,10 @@ test("struct S { ... } g; (type defined and a variable declared together) still 
 });
 
 test("the same struct+variable pattern inside a namespace still gets the namespace as packageName", () => {
-  const parsed = parseCpp("s.h", `namespace N {\n  struct S {\n    int x;\n  } g;\n}\n`);
+  const parsed = parseCpp(
+    "s.h",
+    `namespace N {\n  struct S {\n    int x;\n  } g;\n}\n`,
+  );
   const type = parsed.symbols.find((s) => s.kind === "class");
   assert.equal(type?.packageName, "N");
 });
@@ -94,13 +97,12 @@ test("an anonymous nested union's own members fold into the enclosing class, not
   );
   const fields = parsed.symbols.filter((s) => s.kind === "field");
   const outer = parsed.symbols.find((s) => s.kind === "class");
-  assert.deepEqual(
-    fields.map((f) => f.name).sort(),
-    ["f", "i", "tag"],
-  );
+  assert.deepEqual(fields.map((f) => f.name).sort(), ["f", "i", "tag"]);
   assert.ok(fields.every((f) => f.parentId === outer?.id));
   assert.ok(fields.find((f) => f.name === "i")!.modifiers.includes("public"));
-  assert.ok(fields.find((f) => f.name === "tag")!.modifiers.includes("private"));
+  assert.ok(
+    fields.find((f) => f.name === "tag")!.modifiers.includes("private"),
+  );
 });
 
 test("an access_specifier switches visibility for every member after it, not just the next one", () => {

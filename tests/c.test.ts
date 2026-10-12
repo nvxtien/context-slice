@@ -92,10 +92,7 @@ test("an anonymous nested union's own members fold into the enclosing struct, no
   );
   const fields = parsed.symbols.filter((s) => s.kind === "field");
   const outer = parsed.symbols.find((s) => s.kind === "class");
-  assert.deepEqual(
-    fields.map((f) => f.name).sort(),
-    ["f", "i", "tag"],
-  );
+  assert.deepEqual(fields.map((f) => f.name).sort(), ["f", "i", "tag"]);
   assert.ok(fields.every((f) => f.parentId === outer?.id));
 });
 
