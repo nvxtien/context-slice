@@ -207,6 +207,26 @@ test("a method inherited from a base class resolves across files", () => {
   rmSync(root, { recursive: true, force: true });
 });
 
+test("an overloaded method call resolves to the overload matching the call site's argument count", () => {
+  const { root, index } = indexedCsharpProject({
+    "C.cs": `public class C {\n    public void Run() {\n        Write(1);\n    }\n    public void Write(int a) {}\n    public void Write(int a, int b) {}\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Write")!;
+  const target = index.symbols.find((s) => s.id === call.resolvedTargetId);
+  assert.ok(target?.signature?.includes("Write(int a)"));
+  assert.equal(call.confidence, "exact");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a call that still matches 2+ overloads by argument count stays unresolved", () => {
+  const { root, index } = indexedCsharpProject({
+    "C.cs": `public class C {\n    public void Run() {\n        Write(1, 2);\n    }\n    public void Write(int a, int b) {}\n    public void Write(string a, string b) {}\n}\n`,
+  });
+  const call = index.calls.find((c) => c.calleeName === "Write")!;
+  assert.equal(call.confidence, "unresolved");
+  rmSync(root, { recursive: true, force: true });
+});
+
 test("a top-level statement file (C# 9+ minimal Program.cs) has its calls captured, not silently dropped", () => {
   const parsed = parseCsharp(
     "Program.cs",

@@ -1,6 +1,43 @@
 import type { SymbolRecord } from "../../types/model.js";
 import type { ResolveContext } from "../adapter.js";
 
+/** Declared parameter count from a rendered signature's parameter list (the one trailing,
+ * outermost-parenthesized group — `void Write(LogEventLevel level, string messageTemplate)`
+ * or a constructor's `Logger(ILogEventSink sink)`). Nesting depth (parens, angle brackets for
+ * generics, brackets) is tracked so a comma inside `Dictionary<string, int>` is not mistaken
+ * for a parameter separator. Returns undefined when the signature has no parameter list to
+ * read at all, never a wrong count — an overload-count mismatch only narrows candidates, so
+ * a missed count is just a missed disambiguation, not a wrong one. */
+function declaredParameterCount(signature: string | undefined) {
+  if (!signature) return undefined;
+  const open = signature.indexOf("(");
+  if (open < 0) return undefined;
+  let depth = 0;
+  let end = -1;
+  for (let i = open; i < signature.length; i++) {
+    const c = signature[i];
+    if (c === "(" || c === "<" || c === "[") depth++;
+    else if (c === ")" || c === ">" || c === "]") {
+      depth--;
+      if (depth === 0 && c === ")") {
+        end = i;
+        break;
+      }
+    }
+  }
+  if (end < 0) return undefined;
+  const inner = signature.slice(open + 1, end).trim();
+  if (!inner) return 0;
+  let count = 1;
+  depth = 0;
+  for (const c of inner) {
+    if (c === "(" || c === "<" || c === "[") depth++;
+    else if (c === ")" || c === ">" || c === "]") depth--;
+    else if (c === "," && depth === 0) count++;
+  }
+  return count;
+}
+
 /** Mirrors java.ts's (and kotlin/resolve.ts's) resolver: no cross-file import resolution —
  * C#'s namespaces don't map to directories any more reliably than Kotlin's packages do — just
  * same-type/inherited/global name matching, the heuristic this project's resolvers for
@@ -56,13 +93,24 @@ export function resolveCsharpCalls({
       : [];
     const candidates = byName.get(call.calleeName) ?? [];
 
-    const options = receiverType
+    let options = receiverType
       ? typed
       : sameType.length
         ? sameType
         : inherited.length
           ? inherited
           : candidates;
+
+    // Overloads share one Owner\0Name key (no signature in it), so same-name resolution alone
+    // cannot tell them apart; narrow by declared parameter count when the call site's argument
+    // count says only one candidate could actually be the target.
+    if (options.length > 1 && call.argumentCount !== undefined) {
+      const byArity = options.filter(
+        (option) =>
+          declaredParameterCount(option.signature) === call.argumentCount,
+      );
+      if (byArity.length) options = byArity;
+    }
 
     if (options.length === 1) {
       const target = options[0];

@@ -1,6 +1,6 @@
 {
   "version": "1.10-csharp-tasks",
-  "generatedAt": "2026-10-12T18:01:38.225Z",
+  "generatedAt": "2026-10-12T19:38:25.074Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -20,13 +20,13 @@
       "parseErrors": 31,
       "symbols": 2043,
       "callEdges": 4104,
-      "callEdgesExact": 516,
-      "callEdgesUnresolved": 3183,
+      "callEdgesExact": 787,
+      "callEdgesUnresolved": 2888,
       "performance": {
-        "coldIndexMs": 721,
+        "coldIndexMs": 703,
         "warmIndexMs": 31,
-        "singleFileRefreshMs": 39,
-        "previewMs": 32,
+        "singleFileRefreshMs": 38,
+        "previewMs": 29,
         "filesIndexed": 216
       }
     },
@@ -42,12 +42,12 @@
       "parseErrors": 29,
       "symbols": 2818,
       "callEdges": 3131,
-      "callEdgesExact": 310,
-      "callEdgesUnresolved": 2542,
+      "callEdgesExact": 381,
+      "callEdgesUnresolved": 2459,
       "performance": {
-        "coldIndexMs": 754,
-        "warmIndexMs": 40,
-        "singleFileRefreshMs": 42,
+        "coldIndexMs": 1026,
+        "warmIndexMs": 33,
+        "singleFileRefreshMs": 37,
         "previewMs": null,
         "filesIndexed": 369
       }
@@ -64,12 +64,12 @@
       "parseErrors": 57,
       "symbols": 6369,
       "callEdges": 7744,
-      "callEdgesExact": 1526,
-      "callEdgesUnresolved": 6064,
+      "callEdgesExact": 1833,
+      "callEdgesUnresolved": 5735,
       "performance": {
-        "coldIndexMs": 1666,
-        "warmIndexMs": 83,
-        "singleFileRefreshMs": 100,
+        "coldIndexMs": 2389,
+        "warmIndexMs": 86,
+        "singleFileRefreshMs": 88,
         "previewMs": null,
         "filesIndexed": 783
       }
@@ -232,25 +232,25 @@
   "performance": [
     {
       "repository": "serilog",
-      "coldIndexMs": 721,
+      "coldIndexMs": 703,
       "warmIndexMs": 31,
-      "singleFileRefreshMs": 39,
-      "previewMs": 32,
+      "singleFileRefreshMs": 38,
+      "previewMs": 29,
       "filesIndexed": 216
     },
     {
       "repository": "polly",
-      "coldIndexMs": 754,
-      "warmIndexMs": 40,
-      "singleFileRefreshMs": 42,
+      "coldIndexMs": 1026,
+      "warmIndexMs": 33,
+      "singleFileRefreshMs": 37,
       "previewMs": null,
       "filesIndexed": 369
     },
     {
       "repository": "aspnetcore-http",
-      "coldIndexMs": 1666,
-      "warmIndexMs": 83,
-      "singleFileRefreshMs": 100,
+      "coldIndexMs": 2389,
+      "warmIndexMs": 86,
+      "singleFileRefreshMs": 88,
       "previewMs": null,
       "filesIndexed": 783
     }
