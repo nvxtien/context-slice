@@ -18,9 +18,9 @@ the detail that actually matters. The practical way to reduce that cost is to
 reduce how much code the agent has to read in the first place.
 
 ContextSlice does exactly that. It builds a small, task-specific context from
-Java, TypeScript, TSX, JavaScript, Python, Rust, and Go source. It finds the
-target symbol, follows relevant callers and callees, and reports what was
-included or left out.
+Java, TypeScript, TSX, JavaScript, Python, Rust, Go, C, C++, C#, and Kotlin
+source. It finds the target symbol, follows relevant callers and callees,
+and reports what was included or left out.
 
 In short: instead of giving an AI assistant the whole repository, give it the
 smallest useful slice of the codebase.

@@ -3,7 +3,7 @@
   "interface": {
     "displayName": "Context Slice Marketplace"
   },
-  "description": "Local marketplace for the context-slice plugin (structural code-context slicing for Java, TypeScript/TSX, JavaScript, Python, Rust, and Go)",
+  "description": "Local marketplace for the context-slice plugin (structural code-context slicing for Java, TypeScript/TSX, JavaScript, Python, Rust, Go, C, C++, C#, and Kotlin)",
   "owner": {
     "name": "tien.nguyen"
   },
