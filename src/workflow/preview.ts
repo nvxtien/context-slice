@@ -57,6 +57,14 @@ export interface OmittedPreviewItem {
  */
 export const COMPOSITION_BUDGET_SHARE = 0.35;
 
+/** callersAtDepth/dependenciesAtDepth's default hop count when the caller doesn't ask for a
+ * specific depth. 1 hop only finds a bug's immediate neighbors — a caller-of-a-caller two
+ * steps away from the target is invisible by default. Widening the candidate pool to 2 hops
+ * is safe to do unconditionally: every candidate it finds still goes through the same
+ * relevance ranking and budget fill as a 1-hop one, so a 2-hop symbol only displaces a weaker
+ * 1-hop one, it never grows the slice past budget on its own. */
+export const DEFAULT_CALL_GRAPH_DEPTH = 2;
+
 export interface UnresolvedPreviewCall {
   calleeName: string;
   evidence: string[];
@@ -287,20 +295,25 @@ export function buildPreview(
     `Selected because the task names ${target.name}.`,
   );
   const related = [
-    ...ranked(index.callersAtDepth(target, options.depth ?? 1), task).map(
-      (symbol) => ({
-        symbol,
-        reason: "direct caller" as const,
-        relation: "Direct caller",
-      }),
-    ),
-    ...ranked(index.dependenciesAtDepth(target, options.depth ?? 1), task).map(
-      (symbol) => ({
-        symbol,
-        reason: "direct callee" as const,
-        relation: "Direct callee",
-      }),
-    ),
+    ...ranked(
+      index.callersAtDepth(target, options.depth ?? DEFAULT_CALL_GRAPH_DEPTH),
+      task,
+    ).map((symbol) => ({
+      symbol,
+      reason: "direct caller" as const,
+      relation: "Direct caller",
+    })),
+    ...ranked(
+      index.dependenciesAtDepth(
+        target,
+        options.depth ?? DEFAULT_CALL_GRAPH_DEPTH,
+      ),
+      task,
+    ).map((symbol) => ({
+      symbol,
+      reason: "direct callee" as const,
+      relation: "Direct callee",
+    })),
   ].sort(
     (a, b) =>
       rankSymbol(b.symbol, task, options.intent ?? "") -
