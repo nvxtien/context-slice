@@ -1,0 +1,22 @@
+[
+  {
+    "taskId": "kotlin-csv-next-row",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt",
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt": "calls RowParser.nextRow from its sequence builder",
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "defines nextRow and the parseField it calls"
+    }
+  },
+  {
+    "taskId": "kotlin-csv-escape",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "defines appendUnquotedEscape, its caller parseUnquotedField, and the next() it calls"
+    }
+  }
+]

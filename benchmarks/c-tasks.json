@@ -1,0 +1,52 @@
+[
+  {
+    "id": "cjson-parse-dispatch",
+    "repository": "cjson",
+    "category": "explain",
+    "task": "How does cJSON_ParseWithLengthOpts allocate the root item and dispatch value parsing?",
+    "targetSymbol": "cJSON_ParseWithLengthOpts",
+    "groundTruthFiles": ["cJSON.c"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "alloc-hook",
+        "description": "cJSON_New_Item allocates the item via the hooks' allocate function",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["hooks->allocate(sizeof(cJSON))"]
+        }
+      },
+      {
+        "id": "null-literal-dispatch",
+        "description": "parse_value recognizes the literal token \"null\" before trying other types",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "strncmp((const char*)buffer_at_offset(input_buffer), \"null\", 4)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": ["cJSON.c"]
+  },
+  {
+    "id": "cjson-parse-length",
+    "repository": "cjson",
+    "category": "locate",
+    "task": "Where does cJSON_Parse compute the buffer length before delegating to the length-aware parser?",
+    "targetSymbol": "cJSON_Parse",
+    "groundTruthFiles": ["cJSON.c"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "buffer-length",
+        "description": "cJSON_ParseWithOpts derives buffer_length from strlen plus the null terminator",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["strlen(value) + sizeof(\"\")"]
+        }
+      }
+    ],
+    "baselineFiles": ["cJSON.c"]
+  }
+]

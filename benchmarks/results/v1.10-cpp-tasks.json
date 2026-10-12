@@ -1,0 +1,176 @@
+{
+  "version": "1.10-cpp-tasks",
+  "generatedAt": "2026-10-12T18:01:33.660Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
+  "note": "Small sample (n=2 tasks, fmt only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
+  "repositories": [
+    {
+      "repository": "fmt",
+      "scale": "small",
+      "kind": "library",
+      "commit": "b4ffa39b9994c961418406f47358791d89a5aa48",
+      "scope": "whole repository (single-purpose formatting library)",
+      "files": {
+        ".js": 1,
+        ".h": 26,
+        ".cc": 47,
+        ".py": 4,
+        ".c": 1
+      },
+      "parseErrors": 39,
+      "symbols": 2209,
+      "callEdges": 9579,
+      "callEdgesExact": 1278,
+      "callEdgesUnresolved": 8236,
+      "performance": {
+        "coldIndexMs": 930,
+        "warmIndexMs": 41,
+        "singleFileRefreshMs": 45,
+        "previewMs": 23,
+        "filesIndexed": 79
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task": "fmt-buffered-file-close",
+      "repository": "fmt",
+      "category": "locate",
+      "targetSymbol": "buffered_file.close",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 2852,
+      "manualFiles": 1,
+      "suppliedContextTokens": 121,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9575736325385694,
+      "metrics": {
+        "contextWindowReduction": 0.9575736325385694,
+        "inputTokenReduction": 0.9575736325385694,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008264462809917356,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0147705078125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "fclose-call",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "fmt-buffered-file-descriptor",
+      "repository": "fmt",
+      "category": "explain",
+      "targetSymbol": "buffered_file.descriptor",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 2852,
+      "manualFiles": 1,
+      "suppliedContextTokens": 97,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9659887798036466,
+      "metrics": {
+        "contextWindowReduction": 0.9659887798036466,
+        "inputTokenReduction": 0.9659887798036466,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.010309278350515464,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0118408203125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "throw-message",
+          "attribution": "PRESERVED"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "overall": {
+      "tasks": 2,
+      "requiredFactRecall": 1,
+      "retrievalRecall": 1,
+      "medianContextReduction": 0.9659887798036466,
+      "medianManualTokens": 2852,
+      "medianContextTokens": 121,
+      "medianMinimumSufficientBudget": 256,
+      "wholeFileFallbackRate": 0,
+      "wholeModuleFallbackRate": 0
+    },
+    "byRepository": {
+      "fmt": {
+        "tasks": 2,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9659887798036466,
+        "medianManualTokens": 2852,
+        "medianContextTokens": 121,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    },
+    "byCategory": {
+      "locate": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9575736325385694,
+        "medianManualTokens": 2852,
+        "medianContextTokens": 121,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "explain": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9659887798036466,
+        "medianManualTokens": 2852,
+        "medianContextTokens": 97,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    }
+  },
+  "failureAttribution": {},
+  "findings": [],
+  "performance": [
+    {
+      "repository": "fmt",
+      "coldIndexMs": 930,
+      "warmIndexMs": 41,
+      "singleFileRefreshMs": 45,
+      "previewMs": 23,
+      "filesIndexed": 79
+    }
+  ]
+}

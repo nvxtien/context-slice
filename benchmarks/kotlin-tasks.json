@@ -1,0 +1,68 @@
+[
+  {
+    "id": "kotlin-csv-next-row",
+    "repository": "kotlin-csv",
+    "category": "explain",
+    "task": "How does the sequence-based CSV reader pull rows from RowParser.nextRow, and how does nextRow dispatch a field?",
+    "targetSymbol": "RowParser.nextRow",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt",
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "caller-break",
+        "description": "parseRowsWithMetadata breaks out of its sequence builder loop when nextRow returns null",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["parser.nextRow() ?: break"]
+        }
+      },
+      {
+        "id": "callee-quote-dispatch",
+        "description": "parseField enters the quoted-field path when the cursor sits on the quote character",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["next()\n            parseQuotedField()"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt",
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  },
+  {
+    "id": "kotlin-csv-escape",
+    "repository": "kotlin-csv",
+    "category": "locate",
+    "task": "Where does the unquoted-field parser handle an escape character, and what does the escape handler advance?",
+    "targetSymbol": "RowParser.appendUnquotedEscape",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "caller-dispatch",
+        "description": "parseUnquotedField calls appendUnquotedEscape when the current char is the escape code",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["c == escapeCode -> appendUnquotedEscape()"]
+        }
+      },
+      {
+        "id": "callee-advance",
+        "description": "next() advances the cursor by delegating to CharCursor.advance",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["return cursor.advance()"]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  }
+]

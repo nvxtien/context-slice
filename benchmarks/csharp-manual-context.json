@@ -1,0 +1,16 @@
+[
+  {
+    "taskId": "serilog-emit-dispatch",
+    "files": ["src/Serilog/Core/Logger.cs"],
+    "reasoning": {
+      "src/Serilog/Core/Logger.cs": "defines Logger.Emit and the PostLevelCheckEmit helper it calls"
+    }
+  },
+  {
+    "taskId": "serilog-dispose",
+    "files": ["src/Serilog/Core/Logger.cs"],
+    "reasoning": {
+      "src/Serilog/Core/Logger.cs": "defines Logger.Dispose"
+    }
+  }
+]

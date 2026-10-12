@@ -1,0 +1,258 @@
+{
+  "version": "1.10-csharp-tasks",
+  "generatedAt": "2026-10-12T18:01:38.225Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
+  "note": "Small sample (n=2 tasks, serilog only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
+  "repositories": [
+    {
+      "repository": "serilog",
+      "scale": "small",
+      "kind": "library",
+      "commit": "bebc7719004f76187ae72e64ce138ec2540f2070",
+      "scope": "whole repository (single-purpose structured logging library)",
+      "files": {
+        ".cs": 216
+      },
+      "parseErrors": 31,
+      "symbols": 2043,
+      "callEdges": 4104,
+      "callEdgesExact": 516,
+      "callEdgesUnresolved": 3183,
+      "performance": {
+        "coldIndexMs": 721,
+        "warmIndexMs": 31,
+        "singleFileRefreshMs": 39,
+        "previewMs": 32,
+        "filesIndexed": 216
+      }
+    },
+    {
+      "repository": "polly",
+      "scale": "medium",
+      "kind": "library",
+      "commit": "e4476096da5be34e1ec32c024c24289af3ef72e6",
+      "scope": "src/Polly, Polly.Core, Polly.Extensions, Polly.RateLimiting (resilience/transient-fault-handling library)",
+      "files": {
+        ".cs": 369
+      },
+      "parseErrors": 29,
+      "symbols": 2818,
+      "callEdges": 3131,
+      "callEdgesExact": 310,
+      "callEdgesUnresolved": 2542,
+      "performance": {
+        "coldIndexMs": 754,
+        "warmIndexMs": 40,
+        "singleFileRefreshMs": 42,
+        "previewMs": null,
+        "filesIndexed": 369
+      }
+    },
+    {
+      "repository": "aspnetcore-http",
+      "scale": "large",
+      "kind": "web-framework",
+      "commit": "5c7435fed2e17a0f82f432e1dc40b695af31c531",
+      "scope": "src/Http/Routing/src, src/Http/Http/src, src/Mvc/Mvc.Core/src (HTTP/routing/MVC core, bounded subsystem of a workspace)",
+      "files": {
+        ".cs": 783
+      },
+      "parseErrors": 57,
+      "symbols": 6369,
+      "callEdges": 7744,
+      "callEdgesExact": 1526,
+      "callEdgesUnresolved": 6064,
+      "performance": {
+        "coldIndexMs": 1666,
+        "warmIndexMs": 83,
+        "singleFileRefreshMs": 100,
+        "previewMs": null,
+        "filesIndexed": 783
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task": "serilog-emit-dispatch",
+      "repository": "serilog",
+      "category": "explain",
+      "targetSymbol": "Logger.Emit",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 17232,
+      "manualFiles": 1,
+      "suppliedContextTokens": 252,
+      "contextItems": 2,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9853760445682451,
+      "metrics": {
+        "contextWindowReduction": 0.9853760445682451,
+        "inputTokenReduction": 0.9853760445682451,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.007936507936507936,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.03076171875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "enrich-call",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "sink-call",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "serilog-dispose",
+      "repository": "serilog",
+      "category": "locate",
+      "targetSymbol": "Logger.Dispose",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 17232,
+      "manualFiles": 1,
+      "suppliedContextTokens": 16,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9990714948932219,
+      "metrics": {
+        "contextWindowReduction": 0.9990714948932219,
+        "inputTokenReduction": 0.9990714948932219,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0625,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.001953125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "dispose-invoke",
+          "attribution": "PRESERVED"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "overall": {
+      "tasks": 2,
+      "requiredFactRecall": 1,
+      "retrievalRecall": 1,
+      "medianContextReduction": 0.9990714948932219,
+      "medianManualTokens": 17232,
+      "medianContextTokens": 252,
+      "medianMinimumSufficientBudget": 256,
+      "wholeFileFallbackRate": 0,
+      "wholeModuleFallbackRate": 0
+    },
+    "byRepository": {
+      "serilog": {
+        "tasks": 2,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9990714948932219,
+        "medianManualTokens": 17232,
+        "medianContextTokens": 252,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "polly": {
+        "tasks": 0,
+        "requiredFactRecall": 0,
+        "retrievalRecall": 0,
+        "medianContextReduction": 0,
+        "medianManualTokens": 0,
+        "medianContextTokens": 0,
+        "medianMinimumSufficientBudget": 0,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "aspnetcore-http": {
+        "tasks": 0,
+        "requiredFactRecall": 0,
+        "retrievalRecall": 0,
+        "medianContextReduction": 0,
+        "medianManualTokens": 0,
+        "medianContextTokens": 0,
+        "medianMinimumSufficientBudget": 0,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    },
+    "byCategory": {
+      "explain": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9853760445682451,
+        "medianManualTokens": 17232,
+        "medianContextTokens": 252,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "locate": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9990714948932219,
+        "medianManualTokens": 17232,
+        "medianContextTokens": 16,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    }
+  },
+  "failureAttribution": {},
+  "findings": [],
+  "performance": [
+    {
+      "repository": "serilog",
+      "coldIndexMs": 721,
+      "warmIndexMs": 31,
+      "singleFileRefreshMs": 39,
+      "previewMs": 32,
+      "filesIndexed": 216
+    },
+    {
+      "repository": "polly",
+      "coldIndexMs": 754,
+      "warmIndexMs": 40,
+      "singleFileRefreshMs": 42,
+      "previewMs": null,
+      "filesIndexed": 369
+    },
+    {
+      "repository": "aspnetcore-http",
+      "coldIndexMs": 1666,
+      "warmIndexMs": 83,
+      "singleFileRefreshMs": 100,
+      "previewMs": null,
+      "filesIndexed": 783
+    }
+  ]
+}

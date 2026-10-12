@@ -1,0 +1,178 @@
+{
+  "version": "1.10-c-tasks",
+  "generatedAt": "2026-10-12T18:01:29.913Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
+  "note": "Small sample (n=2 tasks, cJSON only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
+  "repositories": [
+    {
+      "repository": "cjson",
+      "scale": "small",
+      "kind": "library",
+      "commit": "6d9f2443ab071f86e5d9b43025a40929ec41c46c",
+      "scope": "whole repository (single-purpose JSON parsing library)",
+      "files": {
+        ".c": 76,
+        ".h": 23,
+        ".py": 2
+      },
+      "parseErrors": 38,
+      "symbols": 1032,
+      "callEdges": 3839,
+      "callEdgesExact": 1579,
+      "callEdgesUnresolved": 2260,
+      "performance": {
+        "coldIndexMs": 484,
+        "warmIndexMs": 23,
+        "singleFileRefreshMs": 77,
+        "previewMs": 25,
+        "filesIndexed": 101
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task": "cjson-parse-dispatch",
+      "repository": "cjson",
+      "category": "explain",
+      "targetSymbol": "cJSON_ParseWithLengthOpts",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 20173,
+      "manualFiles": 1,
+      "suppliedContextTokens": 1527,
+      "contextItems": 8,
+      "minimumSufficientBudget": 2048,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9243047637931889,
+      "metrics": {
+        "contextWindowReduction": 0.9243047637931889,
+        "inputTokenReduction": 0.9243047637931889,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0013097576948264572,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.1864013671875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "alloc-hook",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "null-literal-dispatch",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "cjson-parse-length",
+      "repository": "cjson",
+      "category": "locate",
+      "targetSymbol": "cJSON_Parse",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 20173,
+      "manualFiles": 1,
+      "suppliedContextTokens": 6144,
+      "contextItems": 24,
+      "minimumSufficientBudget": 8192,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.6954344916472512,
+      "metrics": {
+        "contextWindowReduction": 0.6954344916472512,
+        "inputTokenReduction": 0.6954344916472512,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.00016276041666666666,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.75,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "buffer-length",
+          "attribution": "PRESERVED"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "overall": {
+      "tasks": 2,
+      "requiredFactRecall": 1,
+      "retrievalRecall": 1,
+      "medianContextReduction": 0.9243047637931889,
+      "medianManualTokens": 20173,
+      "medianContextTokens": 6144,
+      "medianMinimumSufficientBudget": 8192,
+      "wholeFileFallbackRate": 0,
+      "wholeModuleFallbackRate": 0
+    },
+    "byRepository": {
+      "cjson": {
+        "tasks": 2,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9243047637931889,
+        "medianManualTokens": 20173,
+        "medianContextTokens": 6144,
+        "medianMinimumSufficientBudget": 8192,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    },
+    "byCategory": {
+      "explain": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9243047637931889,
+        "medianManualTokens": 20173,
+        "medianContextTokens": 1527,
+        "medianMinimumSufficientBudget": 2048,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "locate": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.6954344916472512,
+        "medianManualTokens": 20173,
+        "medianContextTokens": 6144,
+        "medianMinimumSufficientBudget": 8192,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    }
+  },
+  "failureAttribution": {},
+  "findings": [],
+  "performance": [
+    {
+      "repository": "cjson",
+      "coldIndexMs": 484,
+      "warmIndexMs": 23,
+      "singleFileRefreshMs": 77,
+      "previewMs": 25,
+      "filesIndexed": 101
+    }
+  ]
+}

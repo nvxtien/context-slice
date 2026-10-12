@@ -1,0 +1,16 @@
+[
+  {
+    "taskId": "fmt-buffered-file-close",
+    "files": ["src/os.cc"],
+    "reasoning": {
+      "src/os.cc": "defines buffered_file::close out of class"
+    }
+  },
+  {
+    "taskId": "fmt-buffered-file-descriptor",
+    "files": ["src/os.cc"],
+    "reasoning": {
+      "src/os.cc": "defines buffered_file::descriptor out of class"
+    }
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "fmt-buffered-file-close",
+    "repository": "fmt",
+    "category": "locate",
+    "task": "How does buffered_file::close release the underlying FILE handle?",
+    "targetSymbol": "buffered_file.close",
+    "groundTruthFiles": ["src/os.cc"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "fclose-call",
+        "description": "close() releases the FILE* via fclose through the FMT_SYSTEM wrapper",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["FMT_SYSTEM(fclose(file_))"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/os.cc"]
+  },
+  {
+    "id": "fmt-buffered-file-descriptor",
+    "repository": "fmt",
+    "category": "explain",
+    "task": "What does buffered_file::descriptor throw when it cannot get the file descriptor?",
+    "targetSymbol": "buffered_file.descriptor",
+    "groundTruthFiles": ["src/os.cc"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "throw-message",
+        "description": "descriptor() throws a system_error with the message \"cannot get file descriptor\" when fd is -1",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "FMT_THROW(system_error(errno, FMT_STRING(\"cannot get file descriptor\")))"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": ["src/os.cc"]
+  }
+]

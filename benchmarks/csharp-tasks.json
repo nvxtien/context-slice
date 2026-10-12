@@ -1,0 +1,50 @@
+[
+  {
+    "id": "serilog-emit-dispatch",
+    "repository": "serilog",
+    "category": "explain",
+    "task": "What does Logger's ILogEventSink.Emit do before handing the event to the configured sink?",
+    "targetSymbol": "Logger.Emit",
+    "groundTruthFiles": ["src/Serilog/Core/Logger.cs"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "enrich-call",
+        "description": "PostLevelCheckEmit enriches the event via the enricher and message template processor",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["_enricher.Enrich(logEvent, _messageTemplateProcessor)"]
+        }
+      },
+      {
+        "id": "sink-call",
+        "description": "PostLevelCheckEmit forwards the enriched event to the configured sink",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["_sink.Emit(logEvent)"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/Serilog/Core/Logger.cs"]
+  },
+  {
+    "id": "serilog-dispose",
+    "repository": "serilog",
+    "category": "locate",
+    "task": "How does Logger.Dispose release its resources?",
+    "targetSymbol": "Logger.Dispose",
+    "groundTruthFiles": ["src/Serilog/Core/Logger.cs"],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "dispose-invoke",
+        "description": "Dispose invokes the stored dispose delegate through a null-conditional call",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": ["_dispose?.Invoke()"]
+        }
+      }
+    ],
+    "baselineFiles": ["src/Serilog/Core/Logger.cs"]
+  }
+]
