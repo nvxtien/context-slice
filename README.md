@@ -106,15 +106,19 @@ Exit codes are `0` for success, `2` for user/configuration errors, and `1` for u
 
 ## Supported languages
 
-| Language   | Extensions                     | Notes                                                                                                                                                                             |
-| ---------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Java       | `.java`                        | Classes, interfaces, records, enums, methods, constructors                                                                                                                        |
-| TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts` | Imports, re-exports and barrels, overloads, arrow functions                                                                                                                       |
-| TSX        | `.tsx`                         | React components, handlers, JSX component references                                                                                                                              |
-| JavaScript | `.js`, `.jsx`, `.mjs`, `.cjs`  | Same adapter as TypeScript (JS is parsed as untyped TS); CommonJS (`require`/`module.exports`) is not recognized as imports/exports — see Known limitations below                 |
-| Python     | `.py`, `.pyi`                  | Packages and `__init__` re-exports, decorators, `self`/`cls`, dataclasses                                                                                                         |
-| Rust       | `.rs`                          | Functions, structs, enums, traits, impls, modules; `use`/re-export resolution; self/associated/trait call resolution                                                              |
-| Go         | `.go`                          | Functions, methods (incl. generic receivers), structs, interfaces, struct embedding and interface satisfaction; same-package, import-qualified and receiver-typed call resolution |
+| Language   | Extensions                                  | Notes                                                                                                                                                                             |
+| ---------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Java       | `.java`                                     | Classes, interfaces, records, enums, methods, constructors                                                                                                                        |
+| TypeScript | `.ts`, `.mts`, `.cts`, `.d.ts`              | Imports, re-exports and barrels, overloads, arrow functions                                                                                                                       |
+| TSX        | `.tsx`                                      | React components, handlers, JSX component references                                                                                                                              |
+| JavaScript | `.js`, `.jsx`, `.mjs`, `.cjs`               | Same adapter as TypeScript (JS is parsed as untyped TS); CommonJS (`require`/`module.exports`) is not recognized as imports/exports — see Known limitations below                 |
+| Python     | `.py`, `.pyi`                               | Packages and `__init__` re-exports, decorators, `self`/`cls`, dataclasses                                                                                                         |
+| Rust       | `.rs`                                       | Functions, structs, enums, traits, impls, modules; `use`/re-export resolution; self/associated/trait call resolution                                                              |
+| Go         | `.go`                                       | Functions, methods (incl. generic receivers), structs, interfaces, struct embedding and interface satisfaction; same-package, import-qualified and receiver-typed call resolution |
+| C          | `.c`                                        | Functions at global scope (no classes/namespaces); global name-based call resolution; calls through function pointers are left unresolved rather than guessed                     |
+| C++        | `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hxx`, `.h` | Classes, structs, namespaces; same-type/inherited call resolution, including out-of-class method definitions (`Class::method`); a `.h` file is parsed as C++, not C               |
+| C#         | `.cs`                                       | Classes, structs, records, methods, constructors; same-type/inherited/global name-based call resolution (no namespace-to-directory import resolution)                             |
+| Kotlin     | `.kt`, `.kts`                               | Classes, objects, top-level functions, constructors; same-type/inherited/global name-based call resolution (no package-to-directory import resolution)                            |
 
 One repository can hold all of them. See [docs/typescript-support.md](docs/typescript-support.md), [docs/python-support.md](docs/python-support.md) and [docs/rust-support.md](docs/rust-support.md) for what each language's resolution does and does not cover.
 
