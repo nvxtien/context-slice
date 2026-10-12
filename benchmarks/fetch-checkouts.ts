@@ -21,6 +21,8 @@ const manifests = [
   "benchmarks/javascript-repositories.json",
   "benchmarks/kotlin-repositories.json",
   "benchmarks/csharp-repositories.json",
+  "benchmarks/c-repositories.json",
+  "benchmarks/cpp-repositories.json",
 ];
 const repositories = manifests.flatMap(
   (manifest) =>

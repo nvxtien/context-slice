@@ -1,0 +1,11 @@
+[
+  {
+    "id": "fmt",
+    "scale": "small",
+    "url": "https://github.com/fmtlib/fmt.git",
+    "commit": "b4ffa39b9994c961418406f47358791d89a5aa48",
+    "source": "benchmarks/checkouts/fmt",
+    "scope": "whole repository (single-purpose formatting library)",
+    "kind": "library"
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "cjson",
+    "scale": "small",
+    "url": "https://github.com/DaveGamble/cJSON.git",
+    "commit": "6d9f2443ab071f86e5d9b43025a40929ec41c46c",
+    "source": "benchmarks/checkouts/cjson",
+    "scope": "whole repository (single-purpose JSON parsing library)",
+    "kind": "library"
+  }
+]

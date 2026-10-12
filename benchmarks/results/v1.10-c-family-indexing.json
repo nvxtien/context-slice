@@ -1,0 +1,185 @@
+{
+  "version": "1.10-c-family-indexing",
+  "generatedAt": "2026-10-12T17:46:55.044Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "note": "Indexing performance and call-edge resolution rate only; no hand-verified ground-truth facts yet for these four languages.",
+  "results": [
+    {
+      "language": "C",
+      "repositories": [
+        {
+          "repository": "cjson",
+          "scale": "small",
+          "kind": "library",
+          "commit": "6d9f2443ab071f86e5d9b43025a40929ec41c46c",
+          "scope": "whole repository (single-purpose JSON parsing library)",
+          "files": {
+            ".c": 76,
+            ".h": 23,
+            ".py": 2
+          },
+          "parseErrors": 38,
+          "symbols": 1032,
+          "callEdges": 3839,
+          "callEdgesExact": 1579,
+          "callEdgesUnresolved": 2260,
+          "callEdgesExactRate": 0.4113050273508726,
+          "coldIndexMs": 472,
+          "warmIndexMs": 22
+        }
+      ]
+    },
+    {
+      "language": "C++",
+      "repositories": [
+        {
+          "repository": "fmt",
+          "scale": "small",
+          "kind": "library",
+          "commit": "b4ffa39b9994c961418406f47358791d89a5aa48",
+          "scope": "whole repository (single-purpose formatting library)",
+          "files": {
+            ".js": 1,
+            ".h": 26,
+            ".cc": 47,
+            ".py": 4,
+            ".c": 1
+          },
+          "parseErrors": 39,
+          "symbols": 2209,
+          "callEdges": 9579,
+          "callEdgesExact": 1278,
+          "callEdgesUnresolved": 8236,
+          "callEdgesExactRate": 0.13341684935797057,
+          "coldIndexMs": 966,
+          "warmIndexMs": 36
+        }
+      ]
+    },
+    {
+      "language": "C#",
+      "repositories": [
+        {
+          "repository": "serilog",
+          "scale": "small",
+          "kind": "library",
+          "commit": "bebc7719004f76187ae72e64ce138ec2540f2070",
+          "scope": "whole repository (single-purpose structured logging library)",
+          "files": {
+            ".cs": 216
+          },
+          "parseErrors": 31,
+          "symbols": 2043,
+          "callEdges": 4104,
+          "callEdgesExact": 516,
+          "callEdgesUnresolved": 3183,
+          "callEdgesExactRate": 0.12573099415204678,
+          "coldIndexMs": 57,
+          "warmIndexMs": 29
+        },
+        {
+          "repository": "polly",
+          "scale": "medium",
+          "kind": "library",
+          "commit": "e4476096da5be34e1ec32c024c24289af3ef72e6",
+          "scope": "src/Polly, Polly.Core, Polly.Extensions, Polly.RateLimiting (resilience/transient-fault-handling library)",
+          "files": {
+            ".cs": 369
+          },
+          "parseErrors": 29,
+          "symbols": 2818,
+          "callEdges": 3131,
+          "callEdgesExact": 310,
+          "callEdgesUnresolved": 2542,
+          "callEdgesExactRate": 0.09900990099009901,
+          "coldIndexMs": 73,
+          "warmIndexMs": 29
+        },
+        {
+          "repository": "aspnetcore-http",
+          "scale": "large",
+          "kind": "web-framework",
+          "commit": "5c7435fed2e17a0f82f432e1dc40b695af31c531",
+          "scope": "src/Http/Routing/src, src/Http/Http/src, src/Mvc/Mvc.Core/src (HTTP/routing/MVC core, bounded subsystem of a workspace)",
+          "files": {
+            ".cs": 783
+          },
+          "parseErrors": 57,
+          "symbols": 6369,
+          "callEdges": 7744,
+          "callEdgesExact": 1526,
+          "callEdgesUnresolved": 6064,
+          "callEdgesExactRate": 0.19705578512396693,
+          "coldIndexMs": 127,
+          "warmIndexMs": 73
+        }
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "repositories": [
+        {
+          "repository": "kotlin-csv",
+          "scale": "small",
+          "kind": "library",
+          "commit": "ba44dab2490fd1c1ca371562910a232563943361",
+          "scope": "whole repository (single-purpose CSV read/write library)",
+          "files": {
+            ".kts": 6,
+            ".kt": 77
+          },
+          "parseErrors": 0,
+          "symbols": 734,
+          "callEdges": 2588,
+          "callEdgesExact": 320,
+          "callEdgesUnresolved": 2260,
+          "callEdgesExactRate": 0.12364760432766615,
+          "coldIndexMs": 35,
+          "warmIndexMs": 21
+        },
+        {
+          "repository": "koin-core",
+          "scale": "medium",
+          "kind": "library",
+          "commit": "dc86ef8dd8fbe8564fb7453c03f5b738da3450bb",
+          "scope": "projects/core/koin-core (dependency-injection framework core, Kotlin Multiplatform)",
+          "files": {
+            ".kts": 3,
+            ".kt": 185,
+            ".java": 3
+          },
+          "parseErrors": 1,
+          "symbols": 2442,
+          "callEdges": 6350,
+          "callEdgesExact": 773,
+          "callEdgesUnresolved": 5569,
+          "callEdgesExactRate": 0.12173228346456692,
+          "coldIndexMs": 74,
+          "warmIndexMs": 42
+        },
+        {
+          "repository": "ktor-http-server",
+          "scale": "large",
+          "kind": "web-framework",
+          "commit": "4717dd5fe8270a40fc97ba0b03bb63f722717786",
+          "scope": "ktor-http, ktor-server/ktor-server-core (HTTP framework core, bounded subsystem of a workspace)",
+          "files": {
+            ".kts": 6,
+            ".kt": 331
+          },
+          "parseErrors": 21,
+          "symbols": 4385,
+          "callEdges": 10489,
+          "callEdgesExact": 3280,
+          "callEdgesUnresolved": 7192,
+          "callEdgesExactRate": 0.3127085518161884,
+          "coldIndexMs": 130,
+          "warmIndexMs": 86
+        }
+      ]
+    }
+  ]
+}
