@@ -199,6 +199,7 @@ function isTypeDeclaration(node: Node): boolean {
   return (
     node.type === "class_specifier" ||
     node.type === "struct_specifier" ||
+    node.type === "union_specifier" ||
     node.type === "enum_specifier"
   );
 }
@@ -325,15 +326,35 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
   }
 
   /** A field_declaration can hold a data field OR a method prototype (its declarator is a
-   * function_declarator), and — like `int a, b;` — several comma-separated declarators. */
+   * function_declarator), and — like `int a, b;` — several comma-separated declarators. An
+   * anonymous nested struct/union member (`union { int i; float f; };`, a common tagged-union
+   * idiom) has no declarator at all; real C++ semantics fold its members into the enclosing
+   * type directly, so they are walked in here rather than silently dropped. */
   function emitFieldDeclaration(
     node: Node,
     ownerId: string,
     ownerQualifiedName: string,
+    ownerSimpleName: string,
     packageName: string | undefined,
     visibility: string,
   ) {
     const typeNode = field(node, "type");
+    const hasDeclarator = node.namedChildren.some((c) =>
+      DECLARATOR_NODE_TYPES.has(c.type),
+    );
+    if (!hasDeclarator && typeNode && isTypeDeclaration(typeNode)) {
+      const anonBody = field(typeNode, "body");
+      if (anonBody)
+        walkTypeBody(
+          anonBody,
+          ownerId,
+          ownerQualifiedName,
+          ownerSimpleName,
+          packageName,
+          visibility,
+        );
+      return;
+    }
     const baseModifiers = [...modifiersOf(node), visibility];
     for (const child of node.namedChildren) {
       if (!DECLARATOR_NODE_TYPES.has(child.type)) continue;
@@ -555,6 +576,7 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
           actual,
           ownerId,
           ownerQualifiedName,
+          ownerSimpleName,
           packageName,
           visibility,
         );
@@ -607,7 +629,9 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
 
     const modifiers = modifiersOf(node);
     const isStruct = node.type === "struct_specifier";
+    const isUnion = node.type === "union_specifier";
     if (isStruct) modifiers.push("struct");
+    if (isUnion) modifiers.push("union");
 
     const symbol = emitSymbol(
       node,
@@ -630,7 +654,7 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
         qualifiedName,
         name,
         packageName,
-        isStruct || kind === "enum" ? "public" : "private",
+        isStruct || isUnion || kind === "enum" ? "public" : "private",
       );
   }
 
@@ -705,6 +729,15 @@ export function parseCpp(filePath: string, source: string): ParsedFile {
           undefined,
           packageName,
         );
+      } else if (child.type === "declaration") {
+        // `struct S { int x; } g;` is one `declaration` node, not a sibling struct/class
+        // specifier — the type definition is embedded in its "type" field. The variable `g`
+        // itself is still not modeled (a known accepted gap), but the struct/class/union/enum
+        // it defines is real and would otherwise be silently lost entirely.
+        const typeNode = field(child, "type");
+        if (typeNode && isTypeDeclaration(typeNode) && field(typeNode, "body")) {
+          emitTypeDeclaration(typeNode, undefined, undefined, packageName);
+        }
       }
     }
   }

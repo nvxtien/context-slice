@@ -70,10 +70,33 @@ test("a plain (non-typedef'd) struct keeps its tag name", () => {
   assert.equal(type?.name, "Shape");
 });
 
+test("struct S { ... } g; (type defined and a variable declared together) still produces the struct and its fields", () => {
+  const parsed = parseC("s.c", `struct S {\n  int x;\n} g = { 0 };\n`);
+  const type = parsed.symbols.find((s) => s.kind === "class");
+  assert.equal(type?.name, "S");
+  const field = parsed.symbols.find((s) => s.kind === "field");
+  assert.equal(field?.name, "x");
+  assert.equal(field?.parentId, type?.id);
+});
+
 test("a union is a 'class'-kind symbol tagged with the 'union' modifier", () => {
   const parsed = parseC("v.c", `union Value {\n  int i;\n  float f;\n};\n`);
   const type = parsed.symbols.find((s) => s.kind === "class");
   assert.ok(type?.modifiers.includes("union"));
+});
+
+test("an anonymous nested union's own members fold into the enclosing struct, not dropped", () => {
+  const parsed = parseC(
+    "o.c",
+    `struct Outer {\n  union {\n    int i;\n    float f;\n  };\n  int tag;\n};\n`,
+  );
+  const fields = parsed.symbols.filter((s) => s.kind === "field");
+  const outer = parsed.symbols.find((s) => s.kind === "class");
+  assert.deepEqual(
+    fields.map((f) => f.name).sort(),
+    ["f", "i", "tag"],
+  );
+  assert.ok(fields.every((f) => f.parentId === outer?.id));
 });
 
 test("an enum's members become 'field' symbols owned by it", () => {

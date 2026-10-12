@@ -235,13 +235,24 @@ export function parseC(filePath: string, source: string): ParsedFile {
 
   /** A field_declaration can hold several comma-separated declarators (`int a, b;`); a
    * function_declarator among them is a function-pointer field, modeled as a plain field since
-   * there is no call-target to point to (it's assigned at runtime, never statically known). */
+   * there is no call-target to point to (it's assigned at runtime, never statically known). An
+   * anonymous nested struct/union member (`union { int i; float f; };` with no name of its
+   * own — a common tagged-union idiom) has no declarator at all; real C/C++ semantics fold its
+   * members into the enclosing type directly, so they are walked in rather than dropped. */
   function emitFieldDeclaration(
     node: Node,
     ownerId: string,
     ownerQualifiedName: string,
   ) {
     const typeNode = field(node, "type");
+    const hasDeclarator = node.namedChildren.some((c) =>
+      DECLARATOR_NODE_TYPES.has(c.type),
+    );
+    if (!hasDeclarator && typeNode && isTypeDeclaration(typeNode)) {
+      const anonBody = field(typeNode, "body");
+      if (anonBody) walkTypeBody(anonBody, ownerId, ownerQualifiedName);
+      return;
+    }
     for (const child of node.namedChildren) {
       if (!DECLARATOR_NODE_TYPES.has(child.type)) continue;
       const resolved = unwrapDeclarator(child);
@@ -392,9 +403,16 @@ export function parseC(filePath: string, source: string): ParsedFile {
       emitTypeDeclaration(child, undefined, undefined, undefined);
     } else if (child.type === "function_definition") {
       emitFunctionDefinition(child);
+    } else if (child.type === "declaration") {
+      // `struct S { int x; } g;` is one `declaration` node, not a sibling struct_specifier —
+      // the type definition is embedded in its "type" field. The variable `g` itself is still
+      // not modeled (a known accepted gap), but the struct/union/enum it defines is real and
+      // would otherwise be silently lost entirely.
+      const typeNode = field(child, "type");
+      if (typeNode && isTypeDeclaration(typeNode) && field(typeNode, "body")) {
+        emitTypeDeclaration(typeNode, undefined, undefined, undefined);
+      }
     }
-    // A bare top-level `declaration` (a function prototype or a global variable) produces no
-    // symbol — a known accepted gap, matching the cpp adapter's own scope.
   }
 
   for (const { symbol, body } of callables) {

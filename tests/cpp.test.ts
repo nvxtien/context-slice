@@ -56,12 +56,51 @@ test("a class's base_class_clause with multiple bases is recorded as supertypes"
   assert.deepEqual(derived?.supertypes, ["Base", "Mid"]);
 });
 
+test("struct S { ... } g; (type defined and a variable declared together) still produces the struct and its fields", () => {
+  const parsed = parseCpp("s.h", `struct S {\n  int x;\n} g;\n`);
+  const type = parsed.symbols.find((s) => s.kind === "class");
+  assert.equal(type?.name, "S");
+  const field = parsed.symbols.find((s) => s.kind === "field");
+  assert.equal(field?.name, "x");
+  assert.equal(field?.parentId, type?.id);
+});
+
+test("the same struct+variable pattern inside a namespace still gets the namespace as packageName", () => {
+  const parsed = parseCpp("s.h", `namespace N {\n  struct S {\n    int x;\n  } g;\n}\n`);
+  const type = parsed.symbols.find((s) => s.kind === "class");
+  assert.equal(type?.packageName, "N");
+});
+
 test("a class defaults members to private visibility; a struct defaults to public", () => {
   const parsed = parseCpp("s.h", `class C { int a; };\nstruct S { int b; };\n`);
   const a = parsed.symbols.find((s) => s.name === "a");
   const b = parsed.symbols.find((s) => s.name === "b");
   assert.ok(a?.modifiers.includes("private"));
   assert.ok(b?.modifiers.includes("public"));
+});
+
+test("a union is a 'class'-kind symbol tagged with the 'union' modifier, members default to public", () => {
+  const parsed = parseCpp("v.h", `union Value {\n  int i;\n  float f;\n};\n`);
+  const type = parsed.symbols.find((s) => s.kind === "class");
+  assert.ok(type?.modifiers.includes("union"));
+  const i = parsed.symbols.find((s) => s.name === "i");
+  assert.ok(i?.modifiers.includes("public"));
+});
+
+test("an anonymous nested union's own members fold into the enclosing class, not dropped", () => {
+  const parsed = parseCpp(
+    "o.h",
+    `class Outer {\n public:\n  union {\n    int i;\n    float f;\n  };\n private:\n  int tag;\n};\n`,
+  );
+  const fields = parsed.symbols.filter((s) => s.kind === "field");
+  const outer = parsed.symbols.find((s) => s.kind === "class");
+  assert.deepEqual(
+    fields.map((f) => f.name).sort(),
+    ["f", "i", "tag"],
+  );
+  assert.ok(fields.every((f) => f.parentId === outer?.id));
+  assert.ok(fields.find((f) => f.name === "i")!.modifiers.includes("public"));
+  assert.ok(fields.find((f) => f.name === "tag")!.modifiers.includes("private"));
 });
 
 test("an access_specifier switches visibility for every member after it, not just the next one", () => {
