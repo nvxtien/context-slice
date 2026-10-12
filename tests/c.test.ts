@@ -171,3 +171,39 @@ test("a call to a uniquely-named function resolves across files", () => {
   assert.equal(call.resolutionKind, "same-file");
   rmSync(root, { recursive: true, force: true });
 });
+
+test("a static helper reused by name across files resolves to the caller's own file", () => {
+  const { root, index } = indexedCProject({
+    "a.c": `static int helper(int x) {\n  return x + 1;\n}\nint run_a(void) {\n  return helper(1);\n}\n`,
+    "b.c": `static int helper(int x) {\n  return x * 2;\n}\nint run_b(void) {\n  return helper(2);\n}\n`,
+  });
+  const callInA = index.calls.find(
+    (c) => c.calleeName === "helper" && c.filePath === "a.c",
+  )!;
+  const targetInA = index.symbols.find(
+    (s) => s.id === callInA.resolvedTargetId,
+  );
+  assert.equal(targetInA?.filePath, "a.c");
+  const callInB = index.calls.find(
+    (c) => c.calleeName === "helper" && c.filePath === "b.c",
+  )!;
+  const targetInB = index.symbols.find(
+    (s) => s.id === callInB.resolvedTargetId,
+  );
+  assert.equal(targetInB?.filePath, "b.c");
+  rmSync(root, { recursive: true, force: true });
+});
+
+test("a same-named function left undefined in the caller's own file stays unresolved", () => {
+  const { root, index } = indexedCProject({
+    "a.c": `static int helper(int x) {\n  return x + 1;\n}\n`,
+    "b.c": `static int helper(int x) {\n  return x * 2;\n}\n`,
+    "c.c": `int helper(int x);\nint run_c(void) {\n  return helper(3);\n}\n`,
+  });
+  const call = index.calls.find(
+    (c) => c.calleeName === "helper" && c.filePath === "c.c",
+  )!;
+  assert.equal(call.confidence, "unresolved");
+  assert.equal(call.resolvedTargetId, undefined);
+  rmSync(root, { recursive: true, force: true });
+});

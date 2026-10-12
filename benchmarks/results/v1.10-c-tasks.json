@@ -1,6 +1,6 @@
 {
   "version": "1.10-c-tasks",
-  "generatedAt": "2026-10-12T18:01:29.913Z",
+  "generatedAt": "2026-10-12T18:08:05.982Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -22,13 +22,13 @@
       "parseErrors": 38,
       "symbols": 1032,
       "callEdges": 3839,
-      "callEdgesExact": 1579,
-      "callEdgesUnresolved": 2260,
+      "callEdgesExact": 1636,
+      "callEdgesUnresolved": 2203,
       "performance": {
-        "coldIndexMs": 484,
+        "coldIndexMs": 353,
         "warmIndexMs": 23,
-        "singleFileRefreshMs": 77,
-        "previewMs": 25,
+        "singleFileRefreshMs": 65,
+        "previewMs": 36,
         "filesIndexed": 101
       }
     }
@@ -168,10 +168,10 @@
   "performance": [
     {
       "repository": "cjson",
-      "coldIndexMs": 484,
+      "coldIndexMs": 353,
       "warmIndexMs": 23,
-      "singleFileRefreshMs": 77,
-      "previewMs": 25,
+      "singleFileRefreshMs": 65,
+      "previewMs": 36,
       "filesIndexed": 101
     }
   ]
