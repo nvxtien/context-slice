@@ -1,6 +1,6 @@
 ---
 name: context-slice
-description: Use before reading source files to understand, implement, or explain something in a Java, TypeScript/TSX, JavaScript, Python, Rust, or Go repository. Serves a budget-bounded, relevance-ranked slice of the codebase (target symbol plus ranked callers/callees) through MCP tools instead of whole-file reads, shrinking how much context window the task consumes.
+description: Use before reading source files to understand, implement, or explain something in a Java, TypeScript/TSX, JavaScript, Python, Rust, Go, C, C++, C#, or Kotlin repository. Serves a budget-bounded, relevance-ranked slice of the codebase (target symbol plus ranked callers/callees) through MCP tools instead of whole-file reads, shrinking how much context window the task consumes.
 ---
 
 # Context Slice
@@ -12,9 +12,10 @@ files whenever the task is about a specific symbol, function, class, or
 behavior in a supported repository, so the model spends tokens on the
 relevant code instead of re-reading entire files to find it.
 
-**Supported languages:** Java, TypeScript, TSX, JavaScript, Python, Rust, Go.
-For any other language, or a question with no clear target symbol (e.g.
-"what does this project do overall"), fall back to normal file reading.
+**Supported languages:** Java, TypeScript, TSX, JavaScript, Python, Rust, Go,
+C, C++, C#, Kotlin. For any other language, or a question with no clear
+target symbol (e.g. "what does this project do overall"), fall back to
+normal file reading.
 
 ## When to call Context Slice
 
