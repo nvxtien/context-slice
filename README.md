@@ -139,7 +139,7 @@ universal latency guarantee.
 
 ## Limitations
 
-- Java, TypeScript, TSX, JavaScript, Python, Rust and Go only; this is not a semantic search or build tool: it does not use vector embeddings, a vector database, a compiler, a type checker, or LSP services such as `tsserver`, `rust-analyzer`, or `rustc`.
+- Java, TypeScript, TSX, JavaScript, Python, Rust, Go, C, C++, C#, and Kotlin only; this is not a semantic search or build tool: it does not use vector embeddings, a vector database, a compiler, a type checker, or LSP services such as `tsserver`, `rust-analyzer`, or `rustc`.
 - The index is syntax-based, so runtime dispatch, framework-generated implementations, and some generic or fluent call chains may remain unresolved.
 - Python analysis is AST-based and conservative: when a receiver or target cannot be determined from syntax alone—such as with factory-created receivers, `getattr`, dynamic imports, or monkey patching—the edge remains unresolved rather than guessed.
 - Rust analysis is syntax-based and conservative: macro-expanded semantics and trait dispatch that require expansion or type checking may remain unresolved; `rust-analyzer` and `rustc` are not required.
