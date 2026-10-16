@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.1
+
+- Mentioned C, C++, C#, and Kotlin in the README intro and plugin
+  descriptions, and in the context-slice skill's supported-language list.
+
 ## 1.10.0
 
 - Added C, C++, C#, and Kotlin language support.
