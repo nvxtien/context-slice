@@ -1,5 +1,5 @@
 {
- "indexVersion": "1.18.0",
+ "indexVersion": "1.18.1",
  "files": {
   "functions.rs": {
    "parseError": false,
@@ -585,7 +585,8 @@
       "endColumn": 0
      },
      "metadata": {
-      "moduleScope": true
+      "moduleScope": true,
+      "sourceText": "use std::collections::{HashMap, hash_map::{self, Entry as E}};\nuse crate::{a::b::{c, d as dd}, e::*};\npub use self::inner::Thing;"
      }
     }
    ],
@@ -1048,7 +1049,7 @@
     "imports": 2,
     "calls": 1385
    },
-   "sha256": "cdf855da1e0241eb5ee3641bbf191f43e4afe7af7d41062dec5a1735bf9dc0e2"
+   "sha256": "90e70051ad8ee7c9b1eee4c5d5247d06e318c2c451ec163a7e6fe603e7418778"
   },
   "resolved edges (fixtures indexed together)": [
    [

@@ -140,6 +140,24 @@ function collectCalls(
   }
 }
 
+/** Blanks every preprocessor directive line and the `#elif`/`#else` arms of each conditional,
+ * keeping only the first arm. Newlines are preserved so every position stays unchanged. */
+function keepFirstConditionalArm(source: string): string {
+  const skipping: boolean[] = [];
+  return source
+    .split("\n")
+    .map((line) => {
+      const directive = /^\s*#\s*(if|elif|else|endif)\b/.exec(line)?.[1];
+      if (directive === "if") skipping.push(false);
+      else if (directive === "elif" || directive === "else")
+        skipping[skipping.length - 1] = true;
+      const dropped = directive !== undefined || skipping.includes(true);
+      if (directive === "endif") skipping.pop();
+      return dropped ? line.replace(/[^\r]/g, " ") : line;
+    })
+    .join("\n");
+}
+
 export function parseCsharp(filePath: string, source: string): ParsedFile {
   const symbols: SymbolRecord[] = [];
   const calls: CallEdge[] = [];
@@ -151,6 +169,15 @@ export function parseCsharp(filePath: string, source: string): ParsedFile {
     tree = csharpParser().parse((index: number) =>
       source.slice(index, index + 4_096),
     );
+    // tree-sitter-c-sharp sees both arms of an `#if`/`#else` inside a parameter list or
+    // expression, so the construct fails to parse. Retry with only the first arm kept.
+    if (tree.rootNode.hasError && /^\s*#\s*(else|elif)\b/m.test(source)) {
+      const firstArm = keepFirstConditionalArm(source);
+      const retry = csharpParser().parse((index: number) =>
+        firstArm.slice(index, index + 4_096),
+      );
+      if (!retry.rootNode.hasError) tree = retry;
+    }
   } catch {
     return { symbols, calls, imports, exports, parseError: true };
   }

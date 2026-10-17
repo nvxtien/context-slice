@@ -634,6 +634,7 @@ export function parseRust(filePath: string, source: string): ParsedFile {
     (child) => child.type === "use_declaration",
   );
   if (topLevelUses.length) {
+    const useBlock = topLevelUses.map((node) => node.text).join("\n");
     const moduleId = `${filePath}::module::${filePath}`;
     symbols.push({
       id: moduleId,
@@ -647,8 +648,8 @@ export function parseRust(filePath: string, source: string): ParsedFile {
       range: range(tree.rootNode),
       annotations: [],
       modifiers: [],
-      metadata: { moduleScope: true },
-      source: topLevelUses.map((node) => node.text).join("\n"),
+      source: useBlock,
+      metadata: { moduleScope: true, sourceText: useBlock },
     });
   }
   return { symbols, calls, imports, exports, parseError };

@@ -93,7 +93,7 @@ Object.defineProperties(lazySymbolPrototype, {
   source: {
     enumerable: true,
     get(this: LazySymbol) {
-      return lazySource(this, this.range);
+      return this.metadata?.sourceText ?? lazySource(this, this.range);
     },
   },
   body: {

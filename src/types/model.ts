@@ -57,6 +57,8 @@ export interface SymbolMetadata {
   async?: boolean;
   /** Synthetic owner for a file's top-level statements. */
   moduleScope?: boolean;
+  /** Source text of a synthetic symbol whose range does not delimit it (Rust's file-level `use` block spans the whole file). */
+  sourceText?: string;
   /** Python `@classmethod` / `@staticmethod`. */
   classMethod?: boolean;
   staticMethod?: boolean;
