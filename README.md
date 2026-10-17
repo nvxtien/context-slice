@@ -25,16 +25,32 @@ and reports what was included or left out.
 In short: instead of giving an AI assistant the whole repository, give it the
 smallest useful slice of the codebase.
 
-It is local, read-only, and deterministic: Tree-sitter performs the structural
-analysis, SQLite stores the index, and no source code is sent to a hosted
-service by ContextSlice.
+## Results
 
-The result is:
+Measured on pinned open-source repositories, per task (locate, explain,
+change, impact), against the whole files a developer would otherwise read by
+hand. Reduction is the median across tasks; recall is the share of required
+source facts still present in the slice at an 8192-token budget.
 
-- Less code to read and pay for: return the target symbol plus the most relevant callers and callees instead of whole files.
-- Better signal: rank results by task relevance and keep unresolved runtime dispatch explicit instead of guessing.
-- Predictable output: enforce a token budget and explain why items were included or omitted.
-- Local control: keep source analysis and the SQLite index in the repository; the target source is never edited.
+| Language   | Tasks | Median context reduction | Required-fact recall |
+| ---------- | ----- | ------------------------ | -------------------- |
+| Java       | 15    | 94.55%                   | 100%                 |
+| Python     | 15    | 94.14%                   | 100%                 |
+| Rust       | 15    | 93.52%                   | 100%                 |
+| Go         | 8     | 94.48%                   | 100%                 |
+| TypeScript | 15    | 86.39%                   | 100%                 |
+| JavaScript | 8     | 92.80%                   | 100%                 |
+| C          | 8     | 97.78%                   | 100%                 |
+| C++        | 8     | 94.00%                   | 100%                 |
+| C#         | 8     | 98.54%                   | 100%                 |
+| Kotlin     | 8     | 84.78%                   | 100%                 |
+
+Roughly 9 of every 10 tokens of source reading are removed, with every
+required fact kept on all 108 tasks. Tasks differ per language and the
+samples are small (8 tasks on one to two repositories for Go, JavaScript, C,
+C++, C# and Kotlin), so rows are not comparable with each other. Per-task numbers and method are in
+[`benchmarks/results/`](benchmarks/results/); the `benchmark:*` scripts in
+`package.json` reproduce them.
 
 ## Quick start
 
