@@ -103,7 +103,8 @@ const toolName = String(input.tool_name ?? "");
 
 if (event === "UserPromptSubmit") {
   cleanupExpiredStates();
-  const prompt = String(input.user_prompt ?? "");
+  // Claude Code sends the text as `prompt`; `user_prompt` is kept for older callers and tests.
+  const prompt = String(input.prompt ?? input.user_prompt ?? "");
   const codeTask =
     /\b(?:explain|trace|debug|fix|implement|review|refactor|flow|caller|callee|source|code|class|method|function|repository|repo)\b|\.(?:java|ts|tsx|js|mjs|cjs|py|rs|go)\b|giải thích|luồng|mã nguồn|sửa lỗi/i.test(
       prompt,

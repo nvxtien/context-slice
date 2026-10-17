@@ -29,7 +29,7 @@ function base(event: string, extra: Record<string, unknown> = {}) {
     session_id: "test-session",
     prompt_id: "prompt-1",
     cwd: "/repo",
-    user_prompt: "Explain the source flow",
+    prompt: "Explain the source flow",
     ...extra,
   };
 }
@@ -103,7 +103,7 @@ test("falls back to direct reads when preview is unavailable", () => {
 
 test("does not enable the guard for non-code prompts", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-guard-"));
-  run(root, base("UserPromptSubmit", { user_prompt: "Commit the changes" }));
+  run(root, base("UserPromptSubmit", { prompt: "Commit the changes" }));
 
   const allowed = run(
     root,
@@ -119,7 +119,7 @@ test("enables the guard when the prompt names a source file", () => {
   const root = mkdtempSync(join(tmpdir(), "context-slice-guard-"));
   run(
     root,
-    base("UserPromptSubmit", { user_prompt: "Inspect LoginService.java" }),
+    base("UserPromptSubmit", { prompt: "Inspect LoginService.java" }),
   );
 
   const blocked = run(
