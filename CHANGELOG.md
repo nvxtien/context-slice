@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.10.2
+
+- Fixed Rust file-level `use` blocks losing their text after the 1.9
+  indexing change: the import context for a file was read back as the
+  whole file instead of just its `use` declarations, so it blew the
+  budget and the import line was dropped from slices.
+- Fixed C# files with `#if`/`#else` inside a parameter list failing to
+  parse, which dropped the whole method from the index.
+- Added Go and JavaScript task benchmarks, grew the C, C++, C#, and
+  Kotlin task benchmarks to 8 tasks each, and added a results table to
+  the README.
+
 ## 1.10.1
 
 - Mentioned C, C++, C#, and Kotlin in the README intro and plugin

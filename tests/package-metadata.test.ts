@@ -16,7 +16,7 @@ const tsxLoader = pathToFileURL(
 
 test("package metadata describes an intentional publish-ready runtime", () => {
   assert.equal(packageJson.name, "context-slice");
-  assert.equal(packageJson.version, "1.10.1");
+  assert.equal(packageJson.version, "1.10.2");
   assert.equal(packageJson.license, "MIT");
   assert.ok(packageJson.repository);
   assert.match(packageJson.engines.node, />=20/);
