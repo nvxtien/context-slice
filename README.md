@@ -1,8 +1,8 @@
 # ContextSlice
 
-> Less context. Unchanged signal.
->
-> Give your coding assistant the smallest useful slice of your codebase.
+> A local, deterministic code index that serves a small, ranked slice of a
+> codebase — a target symbol plus its callers and callees — instead of whole
+> files.
 
 <p align="center">
   <img src="assets/context-slice-hero.png" alt="Source files converging into a focused ContextSlice context" width="100%" />
@@ -14,23 +14,31 @@ read first: the target file, its callers and callees, dependencies, tests, and
 configuration.
 
 Reading more code means more tokens, slower responses, and more noise around
-the detail that actually matters. The practical way to reduce that cost is to
-reduce how much code the agent has to read in the first place.
+the detail that actually matters. One way to cut that cost is to reduce how
+much code the agent has to read in the first place.
 
-ContextSlice does exactly that. It builds a small, task-specific context from
+ContextSlice is an attempt at that. It builds a small, task-specific context from
 Java, TypeScript, TSX, JavaScript, Python, Rust, Go, C, C++, C#, and Kotlin
 source. It finds the target symbol, follows relevant callers and callees,
 and reports what was included or left out.
 
-In short: instead of giving an AI assistant the whole repository, give it the
-smallest useful slice of the codebase.
+In short: instead of giving an AI assistant the whole repository, give it a
+small slice of the codebase.
 
-## Results
+> **Read the results below before expecting savings.** Slices are 85-98%
+> smaller than the whole files they come from, but in end-to-end tests with
+> Claude Code an agent that uses Grep and ranged reads was as accurate and
+> cheaper without ContextSlice. See [What the measurements show](#what-the-measurements-show).
+
+## What the measurements show
+
+### Slice size versus whole files
 
 Measured on pinned open-source repositories, per task (locate, explain,
-change, impact), against the whole files a developer would otherwise read by
-hand. Reduction is the median across tasks; recall is the share of required
-source facts still present in the slice at an 8192-token budget.
+change, impact). The baseline is the whole files a developer would read to
+answer the task by hand. Reduction is the median across tasks; recall is the
+share of required source facts still present in the slice at an 8192-token
+budget.
 
 | Language   | Tasks | Median context reduction | Required-fact recall |
 | ---------- | ----- | ------------------------ | -------------------- |
@@ -45,12 +53,40 @@ source facts still present in the slice at an 8192-token budget.
 | C#         | 8     | 98.54%                   | 100%                 |
 | Kotlin     | 8     | 84.78%                   | 100%                 |
 
-Roughly 9 of every 10 tokens of source reading are removed, with every
-required fact kept on all 108 tasks. Tasks differ per language and the
-samples are small (8 tasks on one to two repositories for Go, JavaScript, C,
-C++, C# and Kotlin), so rows are not comparable with each other. Per-task numbers and method are in
+This shows the slice keeps the required facts and is much smaller than whole
+files. It does **not** show that an agent spends less, because an agent rarely
+reads whole files. Tasks differ per language and the samples are small (8
+tasks on one to two repositories for Go, JavaScript, C, C++, C# and Kotlin),
+so rows are not comparable with each other. Per-task numbers are in
 [`benchmarks/results/`](benchmarks/results/); the `benchmark:*` scripts in
 `package.json` reproduce them.
+
+### End to end with Claude Code
+
+The same agent (Claude Code, Sonnet 5.5, read-only tools) answered the same
+code questions on real repositories with and without the ContextSlice plugin.
+A separate Claude call graded each answer against a rubric written beforehand.
+Eleven questions on Flask, zod, Spring PetClinic, ripgrep `ignore`, cobra,
+Serilog, NestJS, Django, Excalidraw, Keycloak and jsoup, two runs each:
+
+|                                   | Rubric score | Tool-result tokens (mean) | Turns (mean) | Cost per run (mean) |
+| --------------------------------- | ------------ | ------------------------- | ------------ | ------------------- |
+| Without ContextSlice (Grep, Read) | 92.5%        | 2,598                     | 5.6          | $0.066              |
+| With ContextSlice                 | 92.5%        | 5,593                     | 7.7          | $0.099              |
+
+(Weighted over the two rounds: six questions with the earlier, larger
+response format, five harder ones with the compact one.)
+
+Accuracy was the same within noise. ContextSlice did not reduce tokens or
+cost for this agent: Grep followed by a ranged read already finds the right
+code, and the agent usually still read files after calling the preview. This
+held on a 14,000-line file and on "which code calls this function" questions.
+
+Limits of this evidence: 11 questions, two runs each, rubrics written by the
+tool's author, one agent and one model, repositories up to a few hundred
+files of the kind covered above. It says nothing about weaker agents, agents
+without a search tool, very large monorepos, or tasks that edit code. The
+method and raw results are in [`benchmarks/e2e/`](benchmarks/e2e/).
 
 ## Quick start
 
