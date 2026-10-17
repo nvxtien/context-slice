@@ -1,0 +1,699 @@
+{
+  "model": "sonnet",
+  "reps": 2,
+  "rows": [
+    {
+      "task": "nest-dependency-lookup",
+      "language": "TypeScript",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 3,
+      "costUsd": 0.07076659999999999,
+      "durationMs": 11510,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 12609,
+        "cacheRead": 74441,
+        "output": 1273
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 1
+      },
+      "toolResultTokens": 3854,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Item 1 is missed: the answer names resolveConstructorParams and resolveSingleParam but never mentions concurrent resolution or the Barrier. Items 2-5 are clearly covered.",
+      "judgeCostUsd": 0.017464999999999998,
+      "wallMs": 17490
+    },
+    {
+      "task": "nest-dependency-lookup",
+      "language": "TypeScript",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 7,
+      "costUsd": 0.1301947,
+      "durationMs": 26285,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 22342,
+        "cacheRead": 214557,
+        "output": 1920
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 3,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 9231,
+      "isError": false,
+      "score": 3,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      "notes": "Item 1 is missed because the answer doesn't mention concurrent resolution or the Barrier. Items 2-4 are covered: UndefinedDependencyException, forwardRef unwrapping, own-module check, imports with exports, visited set. Item 5 is missed because the answer says UnknownDependenciesException is thrown and that optional params return undefined, but it puts the optional handling in resolveParam's catch and never states that the exception is swallowed for optional params; this is borderline.",
+      "judgeCostUsd": 0.0119065,
+      "wallMs": 33306
+    },
+    {
+      "task": "nest-dependency-lookup",
+      "language": "TypeScript",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 7,
+      "costUsd": 0.0786417,
+      "durationMs": 15783,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 11505,
+        "cacheRead": 143087,
+        "output": 1815
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 5
+      },
+      "toolResultTokens": 4230,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Answer covers resolveConstructorParams/resolveSingleParam (Barrier not mentioned but core is stated), UndefinedDependencyException and forwardRef unwrapping, own-provider check, imports search with exports and visited registry, and UnknownDependenciesException with optional swallowing.",
+      "judgeCostUsd": 0.0112785,
+      "wallMs": 21733
+    },
+    {
+      "task": "nest-dependency-lookup",
+      "language": "TypeScript",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 6,
+      "costUsd": 0.1015422,
+      "durationMs": 19144,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 16569,
+        "cacheRead": 165592,
+        "output": 1854
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 2,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 6951,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Item 1 is missed because the answer never mentions the concurrent resolution or the Barrier; the other items are clearly covered, including forwardRef unwrapping, the own-providers check, exports and cycle handling, and the optional swallow.",
+      "judgeCostUsd": 0.0111581,
+      "wallMs": 25428
+    },
+    {
+      "task": "django-bulk-create",
+      "language": "Python",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 5,
+      "costUsd": 0.0690779,
+      "durationMs": 13126,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 11515,
+        "cacheRead": 74227,
+        "output": 1544
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 2
+      },
+      "toolResultTokens": 3561,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Item 1 is missed because the answer never says bulk_create rejects a non-positive batch_size or multi-table inherited models; the other four items are covered.",
+      "judgeCostUsd": 0.011082,
+      "wallMs": 19010
+    },
+    {
+      "task": "django-bulk-create",
+      "language": "Python",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 6,
+      "costUsd": 0.0911057,
+      "durationMs": 17783,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 15002,
+        "cacheRead": 138845,
+        "output": 1705
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "mcp__context-slice__context_slice": 2
+      },
+      "toolResultTokens": 6298,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Item 1 is missed because the answer never mentions rejecting a non-positive batch_size or multi-table inherited models (it does cover the partition). Items 2-5 are clearly covered.",
+      "judgeCostUsd": 0.011473400000000002,
+      "wallMs": 23070
+    },
+    {
+      "task": "django-bulk-create",
+      "language": "Python",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 5,
+      "costUsd": 0.0587269,
+      "durationMs": 12503,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 8894,
+        "cacheRead": 76657,
+        "output": 1533
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 2
+      },
+      "toolResultTokens": 3425,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer omits the rejection of non-positive batch_size and multi-table inherited models (item 1 fails), but covers the other items: the transaction wrapping, the batch size computation, the per-batch atomic, and the write-back with _state.",
+      "judgeCostUsd": 0.0112833,
+      "wallMs": 17815
+    },
+    {
+      "task": "django-bulk-create",
+      "language": "Python",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 5,
+      "costUsd": 0.0646946,
+      "durationMs": 16147,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 9014,
+        "cacheRead": 135454,
+        "output": 1493
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 2980,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Item 1 missed because the answer mentions the non-positive batch_size ValueError but never says multi-table inherited models are rejected; the other items are clearly covered.",
+      "judgeCostUsd": 0.01081,
+      "wallMs": 26208
+    },
+    {
+      "task": "excalidraw-double-click",
+      "language": "TypeScript",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 5,
+      "costUsd": 0.0701369,
+      "durationMs": 16020,
+      "tokens": {
+        "input": 8,
+        "cacheCreation": 10793,
+        "cacheRead": 104564,
+        "output": 1635
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 2
+      },
+      "toolResultTokens": 2481,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers every rubric item: the early-return conditions, linear editor toggle with elbow segment deletion, image cropping, group entry, embeddable activation, and container lookup with startTextEditing, centering and the Alt behavior.",
+      "judgeCostUsd": 0.0116842,
+      "wallMs": 21903
+    },
+    {
+      "task": "excalidraw-double-click",
+      "language": "TypeScript",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 5,
+      "costUsd": 0.07326769999999999,
+      "durationMs": 18877,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 11424,
+        "cacheRead": 130392,
+        "output": 1437
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 2709,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all six items: the early-return conditions, linear editor toggle with elbow segment deletion, image cropping, entering a group, the iframe-like embeddable becoming active outside view mode, and container lookup with startTextEditing, centering and the Alt behavior.",
+      "judgeCostUsd": 0.011280100000000001,
+      "wallMs": 24616
+    },
+    {
+      "task": "excalidraw-double-click",
+      "language": "TypeScript",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 5,
+      "costUsd": 0.06054960000000001,
+      "durationMs": 13126,
+      "tokens": {
+        "input": 8,
+        "cacheCreation": 8635,
+        "cacheRead": 106311,
+        "output": 1522
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 2
+      },
+      "toolResultTokens": 2621,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers every rubric item: the early-return conditions, linear editor toggle and elbow segment deletion, image cropping, group entry, the iframe active-and-return case, and startTextEditing with container, Ctrl/Cmd skip and Alt handling.",
+      "judgeCostUsd": 0.0112959,
+      "wallMs": 18755
+    },
+    {
+      "task": "excalidraw-double-click",
+      "language": "TypeScript",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 8,
+      "costUsd": 0.0821265,
+      "durationMs": 18904,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 10790,
+        "cacheRead": 194860,
+        "output": 1931
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 3,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 3045,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers every rubric item: the ignore conditions, linear editor toggle and elbow segment deletion, image cropping, entering a group, embeddable activation, and startTextEditing with container lookup, Ctrl/Cmd skip and Alt-disabled insertAtParentCenter.",
+      "judgeCostUsd": 0.0112253,
+      "wallMs": 24788
+    },
+    {
+      "task": "keycloak-cookie-callers",
+      "language": "Java",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 3,
+      "costUsd": 0.0525787,
+      "durationMs": 15544,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 8040,
+        "cacheRead": 74923,
+        "output": 1277
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Bash": 1
+      },
+      "toolResultTokens": 1032,
+      "isError": false,
+      "score": 7,
+      "maxScore": 7,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer names all seven items: AccountConsole, AuthenticationSessionManager, redirectAfterSuccessfulFlow with checkActive=false, the two-argument overload delegating with true, LoginActionsServiceChecks, SessionCodeChecks, IdentityBrokerService, and the AppAuthManager override that calls super.",
+      "judgeCostUsd": 0.0107209,
+      "wallMs": 21393
+    },
+    {
+      "task": "keycloak-cookie-callers",
+      "language": "Java",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 8,
+      "costUsd": 0.0810619,
+      "durationMs": 27488,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 9269,
+        "cacheRead": 195335,
+        "output": 2428
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Bash": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_callers": 3
+      },
+      "toolResultTokens": 1963,
+      "isError": false,
+      "score": 7,
+      "maxScore": 7,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer lists all seven items: AccountConsole, AuthenticationSessionManager, redirectAfterSuccessfulFlow with checkActive=false plus the 2-arg overload delegating with true, LoginActionsServiceChecks, SessionCodeChecks, IdentityBrokerService, and the AppAuthManager override calling super.",
+      "judgeCostUsd": 0.010543,
+      "wallMs": 33576
+    },
+    {
+      "task": "keycloak-cookie-callers",
+      "language": "Java",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 3,
+      "costUsd": 0.0411567,
+      "durationMs": 12289,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 5325,
+        "cacheRead": 77303,
+        "output": 1197
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Bash": 1
+      },
+      "toolResultTokens": 860,
+      "isError": false,
+      "score": 7,
+      "maxScore": 7,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "All seven items are stated: the six callers are listed by class, redirectAfterSuccessfulFlow has checkActive=false, the two-arg overload delegates to the three-arg one with true, and AppAuthManager's override calls super.",
+      "judgeCostUsd": 0.0100317,
+      "wallMs": 18195
+    },
+    {
+      "task": "keycloak-cookie-callers",
+      "language": "Java",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 13,
+      "costUsd": 0.11385500000000001,
+      "durationMs": 28296,
+      "tokens": {
+        "input": 16,
+        "cacheCreation": 15485,
+        "cacheRead": 244986,
+        "output": 2724
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "mcp__context-slice__context_callers": 4,
+        "Bash": 1,
+        "Read": 3
+      },
+      "toolResultTokens": 5593,
+      "isError": false,
+      "score": 7,
+      "maxScore": 7,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "All seven items are clearly stated, including the redirectAfterSuccessfulFlow caller with checkActive=false, the 2-arg overload delegating with true, and the AppAuthManager override calling super.",
+      "judgeCostUsd": 0.010023,
+      "wallMs": 35782
+    },
+    {
+      "task": "jsoup-implicit-p-close",
+      "language": "Java",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 8,
+      "costUsd": 0.07310789999999999,
+      "durationMs": 22793,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 9691,
+        "cacheRead": 133082,
+        "output": 2063
+      },
+      "toolCalls": {
+        "Grep": 3,
+        "Read": 4
+      },
+      "toolResultTokens": 1464,
+      "isError": false,
+      "score": 3,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "notes": "Covers InBody/InBodyStartPClosers, inButtonScope check with processEndTag then insertElementFor, and stray </p> creating empty p; omits scope-boundary details of inButtonScope, and the implied-end-tag steps are described only in the stray-</p> reprocess path, not clearly as the p-closing mechanism for the div case.",
+      "judgeCostUsd": 0.010178700000000002,
+      "wallMs": 29409
+    },
+    {
+      "task": "jsoup-implicit-p-close",
+      "language": "Java",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 11,
+      "costUsd": 0.1108638,
+      "durationMs": 29688,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 15989,
+        "cacheRead": 216276,
+        "output": 2497
+      },
+      "toolCalls": {
+        "Grep": 5,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "Read": 3
+      },
+      "toolResultTokens": 5752,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "notes": "Covers InBody/InBodyStartPClosers, the inButtonScope check plus processEndTag and insertElementFor, implied end tags with popStackToClose, and the stray </p> handling; it never describes how inButtonScope searches the stack or its scope boundaries, only where the method lives.",
+      "judgeCostUsd": 0.0094994,
+      "wallMs": 35854
+    },
+    {
+      "task": "jsoup-implicit-p-close",
+      "language": "Java",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 8,
+      "costUsd": 0.0609978,
+      "durationMs": 20737,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 7016,
+        "cacheRead": 136141,
+        "output": 1916
+      },
+      "toolCalls": {
+        "Grep": 3,
+        "Read": 4
+      },
+      "toolResultTokens": 1359,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "notes": "Covers InBody/InBodyStartPClosers, inButtonScope check then processEndTag and insertElementFor, implied end tags with popStackToClose, and the stray </p> creating an empty p; does not explain that inButtonScope searches the stack from the top for p and stops at scope boundaries via inSpecificScope.",
+      "judgeCostUsd": 0.0100309,
+      "wallMs": 27822
+    },
+    {
+      "task": "jsoup-implicit-p-close",
+      "language": "Java",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 10,
+      "costUsd": 0.093156,
+      "durationMs": 22805,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 12983,
+        "cacheRead": 175303,
+        "output": 2353
+      },
+      "toolCalls": {
+        "Grep": 5,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "Read": 2
+      },
+      "toolResultTokens": 4198,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "notes": "Covers InBody/InBodyStartPClosers, inButtonScope check with processEndTag and insertElementFor, implied end tags with popStackToClose, and the stray </p> empty paragraph; it never explains that inButtonScope scans the stack for p and stops at scope boundaries.",
+      "judgeCostUsd": 0.0100879,
+      "wallMs": 28877
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "nest-dependency-lookup",
+    "repository": "nest-core",
+    "language": "TypeScript",
+    "question": "In NestJS core, when the container instantiates a provider whose constructor depends on a service provided by an imported module (not its own module), how is that dependency found? Describe the lookup order, what makes the lookup succeed or fail (exports), how forwardRef and optional parameters are handled, and which error is raised when nothing is found.",
+    "rubric": [
+      "States that constructor parameters are resolved by Injector.resolveConstructorParams, resolving each parameter through resolveSingleParam (concurrently, synchronised with a Barrier).",
+      "States that an undefined parameter token raises UndefinedDependencyException (circular import or missing declaration), and that a forwardRef parameter is unwrapped by calling forwardRef() and marks the wrapper as forwardRef.",
+      "States that lookupComponent first checks the module's own providers and returns the wrapper if the token is found there.",
+      "States that otherwise lookupComponentInParentModules/lookupComponentInImports searches the imported modules recursively, and a provider in an imported module is only used if that module both provides and exports the token (nested imports are followed only if re-exported), with a visited-module registry preventing cycles.",
+      "States that when nothing is found UnknownDependenciesException is thrown, unless the parameter is optional (@Optional), in which case the error is swallowed and undefined is injected."
+    ]
+  },
+  {
+    "id": "django-bulk-create",
+    "repository": "django-orm",
+    "language": "Python",
+    "question": "In Django's ORM, when you call Model.objects.bulk_create(objs) with thousands of objects, some with explicitly set primary keys and some without, how is the work split into SQL INSERT statements? Cover how the objects are partitioned, how the batch size is determined, how transactions are used, and how primary keys and state are written back to the objects.",
+    "rubric": [
+      "States that bulk_create rejects a non-positive batch_size and multi-table inherited models, and that _prepare_for_bulk_create partitions the objects into those with a primary key set and those without (a DatabaseDefault or unset pk).",
+      "States that when both groups exist the whole operation runs inside transaction.atomic(savepoint=False), and that each group is inserted with its own _batched_insert call (the group without pks excludes AutoField fields).",
+      "States that _batched_insert gets the backend maximum from connection.ops.bulk_batch_size(fields, objs) (at least 1) and uses min(batch_size, max) when the caller gave a batch_size, otherwise the backend maximum.",
+      "States that objects are sliced into batches and, when there is more than one batch, the batches run in a transaction.atomic(savepoint=False); each batch is inserted with self._insert.",
+      "States that returned columns (db_returning_fields) are set back on the objects only if the backend can return rows from bulk insert (and on_conflict is None or UPDATE), and that _state.adding is set to False and _state.db to the database alias."
+    ]
+  },
+  {
+    "id": "excalidraw-double-click",
+    "repository": "excalidraw",
+    "language": "TypeScript",
+    "question": "In Excalidraw's main canvas component, what happens when the user double-clicks on the canvas? Cover when the double click is ignored, what it does with a selected linear element, an image or a group, how iframe/embeddable elements are handled, and when it starts text editing and whether the text gets bound to a container shape.",
+    "rubric": [
+      "States that the double click is ignored when interaction is disabled or text is already being edited, when a multi-element (arrow/line) is in progress, and unless the active tool is the selection tool (or the autoshape tool).",
+      "States that with a single selected linear element it toggles the linear editor (actionToggleLinearEditor) for lines, or for simple arrows when Ctrl/Cmd is held; for an elbow arrow, double clicking a segment midpoint deletes the fixed segment; nothing happens if that line is already being edited.",
+      "States that a single selected image element starts image cropping (startImageCropping).",
+      "States that when a group is selected, double clicking an element of that group enters the group (sets editingGroupId and selects that element) instead of creating text.",
+      "States that outside view mode an iframe-like (embeddable) element becomes active if it is interactive and the handler returns.",
+      "States that otherwise, when not editing a linear element, it looks for a text-bindable container at the position (skipped with Ctrl/Cmd) and calls startTextEditing with that container (centering on the container in some cases, and insertAtParentCenter disabled by Alt)."
+    ]
+  },
+  {
+    "id": "keycloak-cookie-callers",
+    "repository": "keycloak",
+    "language": "Java",
+    "question": "We plan to change the behavior of AuthenticationManager.authenticateIdentityCookie in Keycloak. Which production (non-test) code calls it, directly or through an overload or override, so we know what to re-check? List the classes and methods.",
+    "rubric": [
+      "Lists AccountConsole (services/resources/account/AccountConsole.java) as a caller.",
+      "Lists AuthenticationSessionManager (services/managers/AuthenticationSessionManager.java) as a caller.",
+      "Lists AuthenticationManager.redirectAfterSuccessfulFlow, which calls it with checkActive=false, and notes the two-argument overload delegating to the three-argument one with checkActive=true.",
+      "Lists LoginActionsServiceChecks (services/resources/LoginActionsServiceChecks.java) as a caller.",
+      "Lists SessionCodeChecks (services/resources/SessionCodeChecks.java) as a caller.",
+      "Lists IdentityBrokerService (services/resources/IdentityBrokerService.java) as a caller.",
+      "Lists AppAuthManager, whose override of authenticateIdentityCookie calls super."
+    ]
+  },
+  {
+    "id": "jsoup-implicit-p-close",
+    "repository": "jsoup",
+    "language": "Java",
+    "question": "In jsoup's HTML parser, in body mode with an open <p> element, what happens when a <div> start tag is seen? And what happens later if a stray </p> end tag is seen when no <p> is open?",
+    "rubric": [
+      "States that this is handled in the InBody state of HtmlTreeBuilderState, where div belongs to the InBodyStartPClosers set of start tags (address, article, ..., ul, p).",
+      "States that for these tags the builder checks inButtonScope(\"p\") and, if a p is open, processes an end tag for p before inserting the new element (insertElementFor).",
+      "States that inButtonScope searches the open-elements stack from the top for an HTML element named p and stops at scope boundary elements (inSpecificScope with the Scope and ButtonScope options).",
+      "States that the implied end tag for p generates implied end tags, reports an error if the current element is not p, then pops the stack up to p (popStackToClose).",
+      "States that a stray </p> with no p in button scope records a parse error, starts an empty p element (processStartTag(\"p\")) and reprocesses the end tag, producing an empty <p></p>."
+    ]
+  }
+]

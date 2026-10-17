@@ -1,0 +1,828 @@
+{
+  "model": "sonnet",
+  "reps": 2,
+  "rows": [
+    {
+      "task": "flask-unhandled-error",
+      "language": "Python",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 4,
+      "costUsd": 0.0549278,
+      "durationMs": 11363,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 8212,
+        "cacheRead": 76870,
+        "output": 1424
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 2
+      },
+      "toolResultTokens": 2845,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: full_dispatch_request passing to handle_user_exception, the re-raise when no handler is found, PROPAGATE_EXCEPTIONS with the got_request_exception signal, the 500 path with finalize_request(from_error_handler=True), and ctx.pop(error) in the finally block.",
+      "judgeCostUsd": 0.0111954,
+      "wallMs": 17667
+    },
+    {
+      "task": "flask-unhandled-error",
+      "language": "Python",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 11,
+      "costUsd": 0.1004248,
+      "durationMs": 25431,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 14111,
+        "cacheRead": 205025,
+        "output": 2331
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 7,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 5273,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: full_dispatch_request passing to handle_user_exception, the bare re-raise, handle_exception with got_request_exception and PROPAGATE_EXCEPTIONS (testing or debug default), the 500 path through finalize_request(from_error_handler=True), and ctx.pop(error) in finally.",
+      "judgeCostUsd": 0.0111214,
+      "wallMs": 33521
+    },
+    {
+      "task": "flask-unhandled-error",
+      "language": "Python",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 5,
+      "costUsd": 0.060740800000000005,
+      "durationMs": 14149,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 9255,
+        "cacheRead": 76880,
+        "output": 1588
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 3
+      },
+      "toolResultTokens": 3472,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: handle_user_exception call, re-raise when no handler, propagate logic with signal, 500 path via finalize_request(from_error_handler=True), and teardown in finally via ctx.pop(error).",
+      "judgeCostUsd": 0.0110132,
+      "wallMs": 20599
+    },
+    {
+      "task": "flask-unhandled-error",
+      "language": "Python",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 9,
+      "costUsd": 0.09927330000000002,
+      "durationMs": 28490,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 15442,
+        "cacheRead": 169805,
+        "output": 2036
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 5,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 6223,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: full_dispatch_request passing the exception to handle_user_exception, the bare re-raise when no handler is found, propagation controlled by PROPAGATE_EXCEPTIONS (falling back to testing or debug), the 500 path through finalize_request with from_error_handler=True, and ctx.pop(error) in the finally block.",
+      "judgeCostUsd": 0.010787600000000001,
+      "wallMs": 35356
+    },
+    {
+      "task": "zod-object-parse",
+      "language": "TypeScript",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 7,
+      "costUsd": 0.08250400000000001,
+      "durationMs": 25862,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 11607,
+        "cacheRead": 163316,
+        "output": 1958
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Bash": 4
+      },
+      "toolResultTokens": 2504,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all six items: invalid_type returning INVALID, strip/passthrough/strict handling with unrecognized_keys and dirty, catchall validation of extra keys, ParseInputLazyPath building the path, issues accumulated in ctx.common.issues with mergeObjectSync aborting or marking dirty, and the alwaysSet/undefined/__proto__ rules.",
+      "judgeCostUsd": 0.011510600000000001,
+      "wallMs": 31418
+    },
+    {
+      "task": "zod-object-parse",
+      "language": "TypeScript",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 7,
+      "costUsd": 0.1376679,
+      "durationMs": 19603,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 25133,
+        "cacheRead": 170600,
+        "output": 1991
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "mcp__context-slice__context_slice": 3
+      },
+      "toolResultTokens": 10147,
+      "isError": false,
+      "score": 5,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "notes": "Item 5 is 0 because the answer never says issues accumulate in ctx.common.issues rather than being thrown, although it does cover the INVALID-versus-dirty behavior of mergeObjectSync; the other items are clearly stated.",
+      "judgeCostUsd": 0.0112159,
+      "wallMs": 25273
+    },
+    {
+      "task": "zod-object-parse",
+      "language": "TypeScript",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 8,
+      "costUsd": 0.069556,
+      "durationMs": 16844,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 8856,
+        "cacheRead": 133401,
+        "output": 2063
+      },
+      "toolCalls": {
+        "Grep": 4,
+        "Read": 3
+      },
+      "toolResultTokens": 2285,
+      "isError": false,
+      "score": 4,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      "notes": "Covers items 1-4; for item 5 it says issues go through addIssueToContext and mergeObjectSync returns INVALID on aborted or dirties on dirty, but never states that issues are accumulated in ctx.common.issues rather than thrown; item 6 (alwaysSet condition, __proto__ skip) is absent, as alwaysSet is only recorded and its use in merging is not described.",
+      "judgeCostUsd": 0.0116341,
+      "wallMs": 24566
+    },
+    {
+      "task": "zod-object-parse",
+      "language": "TypeScript",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 7,
+      "costUsd": 0.0906476,
+      "durationMs": 26878,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 13108,
+        "cacheRead": 172912,
+        "output": 2066
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 2,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 4346,
+      "isError": false,
+      "score": 5,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "notes": "Item 5 scores 0 because the answer never says issues are accumulated in ctx.common.issues rather than thrown, though it covers the aborted/dirty merge behaviour; item 4 gets credit as it states the lazy path extends the parent path with the key, despite being flagged as from memory.",
+      "judgeCostUsd": 0.011367599999999999,
+      "wallMs": 34024
+    },
+    {
+      "task": "petclinic-pet-form",
+      "language": "Java",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 4,
+      "costUsd": 0.0671146,
+      "durationMs": 12361,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 11473,
+        "cacheRead": 76863,
+        "output": 1338
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Glob": 1,
+        "Read": 1
+      },
+      "toolResultTokens": 2835,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: the binder with PetValidator and disallowed id, the duplicate-name rejection, the future birth date rejection, the form view with no save or redirect, and the DataIntegrityViolationException handling via isDuplicatePetNameViolation.",
+      "judgeCostUsd": 0.011187200000000001,
+      "wallMs": 18081
+    },
+    {
+      "task": "petclinic-pet-form",
+      "language": "Java",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 9,
+      "costUsd": 0.10204169999999999,
+      "durationMs": 23230,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 14760,
+        "cacheRead": 211199,
+        "output": 2171
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 4,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 5156,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: the binder and validator, the duplicate check, the future birth date check, the form return with no save, and the saveAndFlush DataIntegrityViolationException handling with isDuplicatePetNameViolation and rethrow.",
+      "judgeCostUsd": 0.0108726,
+      "wallMs": 28756
+    },
+    {
+      "task": "petclinic-pet-form",
+      "language": "Java",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 4,
+      "costUsd": 0.052242,
+      "durationMs": 12951,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 7899,
+        "cacheRead": 77507,
+        "output": 1274
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 2
+      },
+      "toolResultTokens": 2178,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: the binder installs PetValidator and blocks id binding, the duplicate and future-date rejections, the form view returned with nothing saved, and the DataIntegrityViolationException handling via isDuplicatePetNameViolation.",
+      "judgeCostUsd": 0.0106902,
+      "wallMs": 18800
+    },
+    {
+      "task": "petclinic-pet-form",
+      "language": "Java",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 7,
+      "costUsd": 0.09200349999999999,
+      "durationMs": 26657,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 14265,
+        "cacheRead": 174867,
+        "output": 1729
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 3,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 5316,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: binder and validator setup, both rejectValue checks, the form return with no save, and the DataIntegrityViolationException handling via isDuplicatePetNameViolation, with a rethrow for other violations.",
+      "judgeCostUsd": 0.010729800000000001,
+      "wallMs": 36540
+    },
+    {
+      "task": "ignore-precedence",
+      "language": "Rust",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 3,
+      "costUsd": 0.0638421,
+      "durationMs": 18751,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 11041,
+        "cacheRead": 75530,
+        "output": 1197
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 1
+      },
+      "toolResultTokens": 3157,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all six items: immediate override return, the .or() ordering, nearest-parent-wins, type matching after ignores with a remembered whitelist, hidden filtering only when no match and opts.hidden is set, and the any_git/require_git gating.",
+      "judgeCostUsd": 0.0103431,
+      "wallMs": 26675
+    },
+    {
+      "task": "ignore-precedence",
+      "language": "Rust",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 5,
+      "costUsd": 0.1037981,
+      "durationMs": 26176,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 18565,
+        "cacheRead": 143030,
+        "output": 1507
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "Read": 1
+      },
+      "toolResultTokens": 8112,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all six items: override short-circuit, the .or() ordering, nearest-directory wins, whitelist remembered while ignores return immediately, hidden only on no match, and the any_git condition.",
+      "judgeCostUsd": 0.010597,
+      "wallMs": 32890
+    },
+    {
+      "task": "ignore-precedence",
+      "language": "Rust",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 3,
+      "costUsd": 0.0572496,
+      "durationMs": 17969,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 9357,
+        "cacheRead": 78745,
+        "output": 1169
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 1
+      },
+      "toolResultTokens": 3631,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all six items: override short-circuit, the .or() order, nearest-directory-wins, type matcher with whitelist remembered, hidden only when None, and the any_git/require_git condition.",
+      "judgeCostUsd": 0.0104928,
+      "wallMs": 24100
+    },
+    {
+      "task": "ignore-precedence",
+      "language": "Rust",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 5,
+      "costUsd": 0.1370884,
+      "durationMs": 22833,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 25571,
+        "cacheRead": 143213,
+        "output": 2032
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1,
+        "mcp__context-slice__context_slice": 1
+      },
+      "toolResultTokens": 12562,
+      "isError": false,
+      "score": 6,
+      "maxScore": 6,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers each rubric item: override-first, the .or chain order, nearest-dir first match, type whitelist held back after an ignore result, hidden only when no match, and any_git gating.",
+      "judgeCostUsd": 0.0107968,
+      "wallMs": 28866
+    },
+    {
+      "task": "cobra-run-order",
+      "language": "Go",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 3,
+      "costUsd": 0.0571021,
+      "durationMs": 13890,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 9193,
+        "cacheRead": 75277,
+        "output": 1265
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "Read": 1
+      },
+      "toolResultTokens": 1533,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers flag parsing first with help/version handling, ValidateArgs before hooks, required-flag validation between PreRun and Run, the full hook order, nearest-only persistent hooks with the EnableTraverseRunHooks exception (root-first pre hooks), E precedence, and error short-circuiting.",
+      "judgeCostUsd": 0.010879500000000002,
+      "wallMs": 19735
+    },
+    {
+      "task": "cobra-run-order",
+      "language": "Go",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 4,
+      "costUsd": 0.0880094,
+      "durationMs": 18442,
+      "tokens": {
+        "input": 8,
+        "cacheCreation": 16123,
+        "cacheRead": 105110,
+        "output": 1285
+      },
+      "toolCalls": {
+        "Grep": 1,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 6279,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "Answer covers all five items: flag parsing and help/version handled first, ValidateArgs before hooks with required-flag validation between PreRun and Run, the full hook order, nearest-only persistent hooks versus EnableTraverseRunHooks with root-first pre hooks, and E-variant precedence with errors halting later steps.",
+      "judgeCostUsd": 0.0111017,
+      "wallMs": 25095
+    },
+    {
+      "task": "cobra-run-order",
+      "language": "Go",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 4,
+      "costUsd": 0.0469661,
+      "durationMs": 13076,
+      "tokens": {
+        "input": 6,
+        "cacheCreation": 6419,
+        "cacheRead": 77077,
+        "output": 1343
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "Read": 1
+      },
+      "toolResultTokens": 1263,
+      "isError": false,
+      "score": 4,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      "notes": "Covers parse-first with help/version, ValidateArgs before hooks, required-flag after PreRun, hook order, and nearest-only vs traverse; but states E-variant precedence and error stopping, yet the 'later hooks do not run' is stated only for E hooks generally, and precedence is not stated for Run-level/all hooks explicitly beyond per-step, so item 5 is marked not clearly met due to the claim that deferred finalizers still run and no explicit statement that errors from any step stop later hooks.",
+      "judgeCostUsd": 0.0114104,
+      "wallMs": 20745
+    },
+    {
+      "task": "cobra-run-order",
+      "language": "Go",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 5,
+      "costUsd": 0.0680018,
+      "durationMs": 18201,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 9626,
+        "cacheRead": 135974,
+        "output": 1574
+      },
+      "toolCalls": {
+        "Grep": 2,
+        "ToolSearch": 1,
+        "mcp__context-slice__context_preview": 1
+      },
+      "toolResultTokens": 2576,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers flag parsing first with help/version handling, ValidateArgs before hooks, required-flag checks after PreRun, the hook order, nearest-only persistent hooks with EnableTraverseRunHooks, and E precedence with error short-circuiting.",
+      "judgeCostUsd": 0.010785200000000002,
+      "wallMs": 24018
+    },
+    {
+      "task": "serilog-write-path",
+      "language": "C#",
+      "condition": "baseline",
+      "rep": 1,
+      "turns": 14,
+      "costUsd": 0.11031560000000001,
+      "durationMs": 33870,
+      "tokens": {
+        "input": 12,
+        "cacheCreation": 14449,
+        "cacheRead": 169845,
+        "output": 3537
+      },
+      "toolCalls": {
+        "Grep": 6,
+        "Read": 6,
+        "Bash": 1
+      },
+      "toolResultTokens": 3431,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers delegation to Write with the IsEnabled/null-template early return, the MessageTemplateCache limits (1000 entries, 1024 chars), PropertyBinder.ConstructProperties, LogEvent creation with trace and span ids, and PostLevelCheckEmit's try/catch to SelfLog before _sink.Emit.",
+      "judgeCostUsd": 0.0121061,
+      "wallMs": 42316
+    },
+    {
+      "task": "serilog-write-path",
+      "language": "C#",
+      "condition": "context-slice",
+      "rep": 1,
+      "turns": 10,
+      "costUsd": 0.10753280000000001,
+      "durationMs": 33470,
+      "tokens": {
+        "input": 16,
+        "cacheCreation": 13890,
+        "cacheRead": 235697,
+        "output": 2823
+      },
+      "toolCalls": {
+        "Grep": 3,
+        "Read": 1,
+        "Bash": 5
+      },
+      "toolResultTokens": 3430,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers the Write delegation and early return on level, though it omits the null-template check, plus the cache limits, PropertyBinder, LogEvent creation with Activity ids, and the enricher try/catch to SelfLog followed by sink.Emit.",
+      "judgeCostUsd": 0.0115525,
+      "wallMs": 40454
+    },
+    {
+      "task": "serilog-write-path",
+      "language": "C#",
+      "condition": "baseline",
+      "rep": 2,
+      "turns": 13,
+      "costUsd": 0.09662200000000001,
+      "durationMs": 24028,
+      "tokens": {
+        "input": 14,
+        "cacheCreation": 11134,
+        "cacheRead": 206469,
+        "output": 3127
+      },
+      "toolCalls": {
+        "Grep": 9,
+        "Read": 2,
+        "Glob": 1
+      },
+      "toolResultTokens": 3130,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers each item: Information forwarding to Write is stated as assumed, with early return on IsEnabled or null template; MessageTemplateCache with a 1000-entry cap; PropertyBinder.ConstructProperties; LogEvent with Activity trace/span ids then PostLevelCheckEmit; enricher try/catch to SelfLog then _sink.Emit. It omits the 1024-char limit and clearing when full, but states the core cache behavior.",
+      "judgeCostUsd": 0.012455700000000002,
+      "wallMs": 30167
+    },
+    {
+      "task": "serilog-write-path",
+      "language": "C#",
+      "condition": "context-slice",
+      "rep": 2,
+      "turns": 12,
+      "costUsd": 0.10093370000000002,
+      "durationMs": 22300,
+      "tokens": {
+        "input": 10,
+        "cacheCreation": 13912,
+        "cacheRead": 147151,
+        "output": 3041
+      },
+      "toolCalls": {
+        "Grep": 7,
+        "Read": 4
+      },
+      "toolResultTokens": 4899,
+      "isError": false,
+      "score": 5,
+      "maxScore": 5,
+      "scores": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "notes": "The answer covers all five items: delegation to Write with the level and null-template early return, MessageTemplateCache limits (1000 entries, cleared when full, no caching over 1024 chars), PropertyBinder.ConstructProperties, LogEvent creation with Activity trace and span ids, and PostLevelCheckEmit with the enricher try/catch to SelfLog followed by _sink.Emit.",
+      "judgeCostUsd": 0.012240999999999998,
+      "wallMs": 28191
+    }
+  ]
+}

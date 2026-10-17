@@ -1,0 +1,82 @@
+[
+  {
+    "id": "flask-unhandled-error",
+    "repository": "flask",
+    "language": "Python",
+    "question": "In Flask, a view function raises an exception for which no error handler is registered. Walk through what happens from wsgi_app to the response: which methods run, whether the exception is propagated or turned into a 500, whether after_request processing and teardown still happen, and what decides re-raise vs 500.",
+    "rubric": [
+      "States that full_dispatch_request catches the exception from the view and passes it to handle_user_exception.",
+      "States that handle_user_exception re-raises the exception when no error handler is found for it (so it reaches wsgi_app's except block, which calls handle_exception).",
+      "States that handle_exception sends the got_request_exception signal and re-raises the original exception when PROPAGATE_EXCEPTIONS is true (which defaults to testing or debug mode).",
+      "States that otherwise handle_exception logs it (log_exception), wraps it in an InternalServerError, uses a registered 500/InternalServerError handler if one exists, and returns finalize_request(..., from_error_handler=True), so after_request/process_response still runs.",
+      "States that teardown runs regardless: wsgi_app's finally block calls ctx.pop(error) with the error."
+    ]
+  },
+  {
+    "id": "zod-object-parse",
+    "repository": "zod-v3",
+    "language": "TypeScript",
+    "question": "In zod v3, how does ZodObject parse an input object? Cover how unknown keys are treated under strip, strict, passthrough and catchall, how nested field errors get their `path`, and what makes the whole parse abort versus return a 'dirty' result.",
+    "rubric": [
+      "States that a non-object input adds an invalid_type issue and returns INVALID (aborted) immediately.",
+      "States that unknown keys are stripped silently under strip, copied through unchanged under passthrough, and under strict an unrecognized_keys issue listing the extra keys is added and the status is marked dirty.",
+      "States that when a catchall schema (not ZodNever) is set, each extra key's value is validated through the catchall schema.",
+      "States that each declared shape key is parsed by its own validator with a ParseInputLazyPath that extends the parent path with the key, which is how issue.path is built.",
+      "States that issues are accumulated in the context (addIssueToContext pushes to ctx.common.issues) rather than thrown, and that ParseStatus.mergeObjectSync returns INVALID if any key/value is aborted while a dirty key/value marks the result dirty.",
+      "Mentions that mergeObjectSync only assigns a property when its value is not undefined or the key was present in the input (alwaysSet), and skips the key __proto__."
+    ]
+  },
+  {
+    "id": "petclinic-pet-form",
+    "repository": "spring-petclinic",
+    "language": "Java",
+    "question": "In Spring PetClinic, a user submits POST /owners/{ownerId}/pets/new with a pet whose name already exists for that owner and whose birth date is in the future. Trace how it is processed: where field validation happens, what extra checks the controller does, what is returned, and how a duplicate that slips past those checks is still handled.",
+    "rubric": [
+      "States that PetController's @InitBinder(\"pet\") installs PetValidator on the data binder (and disallows binding of id), and @Valid triggers PetValidator.validate (name required and at most 30 chars, type required for new pets, birthDate required).",
+      "States that processCreationForm rejects a duplicate name via owner.getPet(name, true) for a new pet with result.rejectValue(\"name\", \"duplicate\", \"already exists\").",
+      "States that processCreationForm rejects a birth date after today with result.rejectValue(\"birthDate\", \"typeMismatch.birthDate\").",
+      "States that if result.hasErrors() the method returns the form view pets/createOrUpdatePetForm and nothing is saved (no redirect).",
+      "States that a duplicate not caught earlier surfaces as a DataIntegrityViolationException from owners.saveAndFlush(owner); isDuplicatePetNameViolation decides whether it becomes a name/duplicate field error with the form re-shown, otherwise it is rethrown."
+    ]
+  },
+  {
+    "id": "ignore-precedence",
+    "repository": "ripgrep-ignore",
+    "language": "Rust",
+    "question": "In the ripgrep `ignore` crate's directory matcher (crates/ignore/src/dir.rs), how is precedence decided for a path between --glob overrides, .ignore/custom ignore files, .gitignore, .git/info/exclude, the global gitignore, file-type filters, and hidden-file filtering?",
+    "rubric": [
+      "States that overrides have the highest precedence: in Ignore::matched, if an override matches (ignore or whitelist), that result is returned immediately.",
+      "States that matched_ignore combines the ignore-file matches in the order custom ignore files, then .ignore, then .gitignore, then .git/info/exclude, then global gitignore, then explicit ignores (e.g. via .or chaining).",
+      "States that within each kind, matchers are collected walking from the current directory up through its parents and the first non-None match (nearest directory) wins.",
+      "States that the file-type matcher is consulted after the ignore rules: an Ignore from either returns immediately, while a whitelist match is remembered but does not short-circuit.",
+      "States that hidden filtering is applied in matched_dir_entry only when no other rule matched (m.is_none()), the hidden option is on and the entry is hidden.",
+      "States that .gitignore, exclude and global gitignore rules apply only when a git repository is present or require_git is disabled (any_git)."
+    ]
+  },
+  {
+    "id": "cobra-run-order",
+    "repository": "cobra",
+    "language": "Go",
+    "question": "In cobra, when a user runs `app sub --flag arg`, explain the order in which Command.execute runs flag parsing, argument validation, required-flag validation and the hooks (PersistentPreRun, PreRun, Run, PostRun, PersistentPostRun). If several parent commands define a persistent hook, which ones run?",
+    "rubric": [
+      "States that execute parses flags first (ParseFlags) and handles the help and version flags before anything else runs.",
+      "States that ValidateArgs runs before any hook, and that required-flag and flag-group validation (ValidateRequiredFlags, ValidateFlagGroups) happens after PersistentPreRun and PreRun but before Run.",
+      "States the hook order PersistentPreRun(E), PreRun(E), Run(E), PostRun(E), PersistentPostRun(E).",
+      "States that by default only the nearest persistent pre/post hook is run, found by walking from the command up through its parents, and the loop stops after the first one, unless EnableTraverseRunHooks is set, in which case all parents' hooks run (pre hooks root-first).",
+      "States that the E variants (RunE, PreRunE, ...) take precedence over the non-E ones and that an error returned by any step stops execution so later hooks do not run."
+    ]
+  },
+  {
+    "id": "serilog-write-path",
+    "repository": "serilog",
+    "language": "C#",
+    "question": "In Serilog, when application code calls logger.Information(\"Hello {Name}\", name), trace what happens until a sink receives an event: the level check, how the message template is parsed and cached, how arguments are bound to properties, how enrichers and the sink are invoked, and what happens if an enricher throws.",
+    "rubric": [
+      "States that Information(...) delegates to Logger.Write(level, exception, messageTemplate, propertyValues) and returns early if IsEnabled(level) is false (minimum level / level switch) or the template is null.",
+      "States that the template is parsed through MessageTemplateProcessor.Process using MessageTemplateCache, which caches parsed templates (max 1000 entries, cleared when full; templates longer than 1024 chars are not cached).",
+      "States that arguments are bound to properties by PropertyBinder.ConstructProperties (positional or named properties).",
+      "States that a LogEvent is created with timestamp, level, exception, parsed template and bound properties (plus the current Activity trace and span ids) and then passed to PostLevelCheckEmit.",
+      "States that PostLevelCheckEmit calls the enricher inside a try/catch (an enricher exception is caught and written to SelfLog, not propagated) and then calls _sink.Emit(logEvent)."
+    ]
+  }
+]
