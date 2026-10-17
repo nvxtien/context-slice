@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { ProjectIndex } from "../src/indexer/index.js";
 import { estimateTokens } from "../src/planner/budget.js";
-import { buildPreview } from "../src/workflow/preview.js";
+import { buildPreview, leanPreview } from "../src/workflow/preview.js";
 import { WorkflowError } from "../src/workflow/errors.js";
 
 function indexedFixture() {
@@ -110,4 +111,25 @@ test("preview keeps benchmark implementations out of the developer context path"
   );
   assert.doesNotMatch(source, /benchmarks\//);
   assert.doesNotMatch(source, /manual-context/);
+});
+
+test("leanPreview keeps each snippet once and drops accounting tables", () => {
+  const root = mkdtempSync(join(tmpdir(), "context-slice-lean-"));
+  writeFileSync(
+    join(root, "app.py"),
+    "def helper():\n    return 1\n\n\ndef main():\n    return helper()\n",
+  );
+  const index = new ProjectIndex(root);
+  index.rebuild();
+  const full = buildPreview(index, "explain main", {});
+  const lean = leanPreview(full) as Record<string, unknown>;
+  assert.equal("rendered" in lean, false);
+  assert.equal("baseline" in lean, false);
+  assert.equal("composition" in lean, false);
+  assert.equal("freshness" in lean, false);
+  assert.deepEqual(
+    (lean.included as { rendered: string }[]).map((item) => item.rendered),
+    full.included.map((item) => item.rendered),
+  );
+  assert.ok(JSON.stringify(lean).length < JSON.stringify(full).length);
 });

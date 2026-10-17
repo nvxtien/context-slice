@@ -9,11 +9,11 @@ import { ProjectFileWatcher } from "../storage/file-watcher.js";
 import { packageInfo } from "../package-info.js";
 import { estimateTokens } from "../planner/budget.js";
 import { renderSignature, renderSkeleton } from "../render/compact-context.js";
-import { buildPreview } from "../workflow/preview.js";
+import { buildPreview, leanPreview } from "../workflow/preview.js";
 import { resolveRepositoryRoot } from "../workflow/repository.js";
 
 const result = (value: unknown) => ({
-  content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
+  content: [{ type: "text" as const, text: JSON.stringify(value) }],
 });
 
 function assertRevision(value: string): string {
@@ -208,9 +208,9 @@ export async function startMcpServer(root?: string) {
     async ({ task, budget, depth }) => {
       const refreshed = await ready();
       return result({
-        refresh: refreshed,
+        refresh: { freshness: { state: refreshed.freshness.state } },
         repositoryRoot: index.root,
-        ...buildPreview(index, task, { budget, depth }),
+        ...leanPreview(buildPreview(index, task, { budget, depth })),
       });
     },
   );
@@ -227,9 +227,11 @@ export async function startMcpServer(root?: string) {
       const refreshed = await ready();
       const target = one(symbol);
       return result({
-        refresh: refreshed,
+        refresh: { freshness: { state: refreshed.freshness.state } },
         repositoryRoot: index.root,
-        ...buildPreview(index, target.id, { budget, depth, intent }),
+        ...leanPreview(
+          buildPreview(index, target.id, { budget, depth, intent }),
+        ),
         intent,
       });
     },

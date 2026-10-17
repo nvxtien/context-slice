@@ -433,3 +433,42 @@ export function buildPreview(
     baseline: wholeFileBaseline(index, included, estimatedTokens),
   };
 }
+
+/** Maximum unresolved-call names and omitted symbols listed in an agent-facing response; the rest are only counted. */
+const LEAN_UNRESOLVED_LIMIT = 15;
+const LEAN_OMITTED_LIMIT = 8;
+
+/**
+ * The preview as served to an MCP client. `included[].rendered` already carries every source
+ * snippet, so the joined top-level `rendered`, the full target record, the token-accounting
+ * tables (`composition`, `baseline`), the unresolved-call evidence and the ids of omitted symbols are dropped: they only
+ * repeat or explain what the client has, and cost tokens on every call.
+ */
+export function leanPreview(preview: PreviewResult) {
+  const { target } = preview;
+  return {
+    task: preview.task,
+    target: {
+      id: target.id,
+      qualifiedName: target.qualifiedName ?? target.name,
+      filePath: target.filePath,
+      signature: target.signature,
+    },
+    budget: preview.budget,
+    estimatedTokens: preview.estimatedTokens,
+    confidence: preview.confidence,
+    included: preview.included,
+    omitted: preview.omitted
+      .slice(0, LEAN_OMITTED_LIMIT)
+      .map(({ symbol, reason, estimatedTokens }) => ({
+        symbol,
+        reason,
+        estimatedTokens,
+      })),
+    omittedCount: preview.omitted.length,
+    unresolved: preview.unresolved
+      .slice(0, LEAN_UNRESOLVED_LIMIT)
+      .map((call) => call.calleeName),
+    unresolvedCount: preview.unresolved.length,
+  };
+}
