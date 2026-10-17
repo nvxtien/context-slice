@@ -25,41 +25,27 @@ and reports what was included or left out.
 In short: instead of giving an AI assistant the whole repository, give it a
 small slice of the codebase.
 
-> **Read the results below before expecting savings.** Slices are 85-98%
-> smaller than the whole files they come from, but in end-to-end tests with
-> Claude Code an agent that uses Grep and ranged reads was as accurate and
-> cheaper without ContextSlice. See [What the measurements show](#what-the-measurements-show).
+> **Read the results below before expecting savings.** In end-to-end tests
+> with Claude Code, an agent that uses Grep and ranged reads was as accurate
+> and cheaper without ContextSlice. See
+> [What the measurements show](#what-the-measurements-show).
 
 ## What the measurements show
 
-### Slice size versus whole files
+### Does the slice keep what a task needs?
 
-Measured on pinned open-source repositories, per task (locate, explain,
-change, impact). The baseline is the whole files a developer would read to
-answer the task by hand. Reduction is the median across tasks; recall is the
-share of required source facts still present in the slice at an 8192-token
-budget.
-
-| Language   | Tasks | Median context reduction | Required-fact recall |
-| ---------- | ----- | ------------------------ | -------------------- |
-| Java       | 15    | 94.55%                   | 100%                 |
-| Python     | 15    | 94.14%                   | 100%                 |
-| Rust       | 15    | 93.52%                   | 100%                 |
-| Go         | 8     | 94.48%                   | 100%                 |
-| TypeScript | 15    | 86.39%                   | 100%                 |
-| JavaScript | 8     | 92.80%                   | 100%                 |
-| C          | 8     | 97.78%                   | 100%                 |
-| C++        | 8     | 94.00%                   | 100%                 |
-| C#         | 8     | 98.54%                   | 100%                 |
-| Kotlin     | 8     | 84.78%                   | 100%                 |
-
-This shows the slice keeps the required facts and is much smaller than whole
-files. It does **not** show that an agent spends less, because an agent rarely
-reads whole files. Tasks differ per language and the samples are small (8
-tasks on one to two repositories for Go, JavaScript, C, C++, C# and Kotlin),
-so rows are not comparable with each other. Per-task numbers are in
+Yes, on the tasks we checked. For 108 hand-written tasks (locate, explain,
+change, impact) on pinned open-source repositories in Java, Python, Rust, Go,
+TypeScript, JavaScript, C, C++, C# and Kotlin, every source fact a task
+requires was present in the slice at an 8192-token budget (100% required-fact
+recall). Per-language and per-task numbers are in
 [`benchmarks/results/`](benchmarks/results/); the `benchmark:*` scripts in
 `package.json` reproduce them.
+
+The same results also report how much smaller the slice is than the whole
+files it comes from (84-99% depending on language). We do not present that as
+a saving: an agent rarely reads whole files, so it says little about what an
+agent spends. The next section measures that directly.
 
 ### End to end with Claude Code
 
