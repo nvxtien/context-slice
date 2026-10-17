@@ -1,12 +1,12 @@
 {
   "version": "1.10-kotlin-tasks",
-  "generatedAt": "2026-10-12T19:56:45.256Z",
+  "generatedAt": "2026-10-17T08:11:22.622Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
   },
   "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
-  "note": "Small sample (n=2 tasks, kotlin-csv only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
+  "note": "Small sample (n=8 tasks, kotlin-csv only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
   "repositories": [
     {
       "repository": "kotlin-csv",
@@ -24,10 +24,10 @@
       "callEdgesExact": 776,
       "callEdgesUnresolved": 1804,
       "performance": {
-        "coldIndexMs": 238,
-        "warmIndexMs": 24,
-        "singleFileRefreshMs": 32,
-        "previewMs": 29,
+        "coldIndexMs": 314,
+        "warmIndexMs": 23,
+        "singleFileRefreshMs": 33,
+        "previewMs": 19,
         "filesIndexed": 83
       }
     },
@@ -48,9 +48,9 @@
       "callEdgesExact": 1664,
       "callEdgesUnresolved": 4678,
       "performance": {
-        "coldIndexMs": 615,
-        "warmIndexMs": 42,
-        "singleFileRefreshMs": 50,
+        "coldIndexMs": 649,
+        "warmIndexMs": 41,
+        "singleFileRefreshMs": 48,
         "previewMs": null,
         "filesIndexed": 191
       }
@@ -71,9 +71,9 @@
       "callEdgesExact": 4207,
       "callEdgesUnresolved": 6265,
       "performance": {
-        "coldIndexMs": 1238,
-        "warmIndexMs": 87,
-        "singleFileRefreshMs": 100,
+        "coldIndexMs": 1330,
+        "warmIndexMs": 83,
+        "singleFileRefreshMs": 94,
         "previewMs": null,
         "filesIndexed": 337
       }
@@ -161,29 +161,271 @@
           "attribution": "PRESERVED"
         }
       ]
+    },
+    {
+      "task": "kcsv-parse-quoted-field",
+      "repository": "kotlin-csv",
+      "category": "explain",
+      "targetSymbol": "RowParser.parseQuotedField",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 1590,
+      "manualFiles": 1,
+      "suppliedContextTokens": 255,
+      "contextItems": 2,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.839622641509434,
+      "metrics": {
+        "contextWindowReduction": 0.839622641509434,
+        "inputTokenReduction": 0.839622641509434,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.00784313725490196,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0311279296875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "double",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "escape",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "kcsv-after-quote-end",
+      "repository": "kotlin-csv",
+      "category": "explain",
+      "targetSymbol": "RowParser.parseAfterQuoteEnd",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 1590,
+      "manualFiles": 1,
+      "suppliedContextTokens": 242,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8477987421383648,
+      "metrics": {
+        "contextWindowReduction": 0.8477987421383648,
+        "inputTokenReduction": 0.8477987421383648,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008264462809917356,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.029541015625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "flush",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "error",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "kcsv-is-line-terminator-impact",
+      "repository": "kotlin-csv",
+      "category": "impact",
+      "targetSymbol": "RowParser.isLineTerminator",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 1590,
+      "manualFiles": 1,
+      "suppliedContextTokens": 229,
+      "contextItems": 2,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8559748427672956,
+      "metrics": {
+        "contextWindowReduction": 0.8559748427672956,
+        "inputTokenReduction": 0.8559748427672956,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008733624454148471,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0279541015625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "definition",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "caller",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "kcsv-flush-field",
+      "repository": "kotlin-csv",
+      "category": "change",
+      "targetSymbol": "RowParser.flushField",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 1590,
+      "manualFiles": 1,
+      "suppliedContextTokens": 241,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8484276729559749,
+      "metrics": {
+        "contextWindowReduction": 0.8484276729559749,
+        "inputTokenReduction": 0.8484276729559749,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008298755186721992,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0294189453125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "add",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "clear",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "kcsv-chunk-parse",
+      "repository": "kotlin-csv",
+      "category": "explain",
+      "targetSymbol": "parseRowsWithMetadataFromChunks",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 553,
+      "manualFiles": 1,
+      "suppliedContextTokens": 245,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.5569620253164558,
+      "metrics": {
+        "contextWindowReduction": 0.5569620253164558,
+        "inputTokenReduction": 0.5569620253164558,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.00816326530612245,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0299072265625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "bom",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "require",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "kcsv-iterator-cursor",
+      "repository": "kotlin-csv",
+      "category": "locate",
+      "targetSymbol": "IteratorCharCursor.advance",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 579,
+      "manualFiles": 1,
+      "suppliedContextTokens": 173,
+      "contextItems": 4,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.7012089810017271,
+      "metrics": {
+        "contextWindowReduction": 0.7012089810017271,
+        "inputTokenReduction": 0.7012089810017271,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.005780346820809248,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0211181640625,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "unboxed",
+          "attribution": "PRESERVED"
+        }
+      ]
     }
   ],
   "summary": {
     "overall": {
-      "tasks": 2,
+      "tasks": 8,
       "requiredFactRecall": 1,
       "retrievalRecall": 1,
-      "medianContextReduction": 0.8959402706486235,
-      "medianManualTokens": 2143,
-      "medianContextTokens": 423,
-      "medianMinimumSufficientBudget": 512,
+      "medianContextReduction": 0.8477987421383648,
+      "medianManualTokens": 1590,
+      "medianContextTokens": 242,
+      "medianMinimumSufficientBudget": 256,
       "wholeFileFallbackRate": 0,
       "wholeModuleFallbackRate": 0
     },
     "byRepository": {
       "kotlin-csv": {
-        "tasks": 2,
+        "tasks": 8,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.8959402706486235,
-        "medianManualTokens": 2143,
-        "medianContextTokens": 423,
-        "medianMinimumSufficientBudget": 512,
+        "medianContextReduction": 0.8477987421383648,
+        "medianManualTokens": 1590,
+        "medianContextTokens": 242,
+        "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
@@ -212,24 +454,46 @@
     },
     "byCategory": {
       "explain": {
-        "tasks": 1,
+        "tasks": 4,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.8959402706486235,
-        "medianManualTokens": 2143,
-        "medianContextTokens": 223,
+        "medianContextReduction": 0.8477987421383648,
+        "medianManualTokens": 1590,
+        "medianContextTokens": 245,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "locate": {
-        "tasks": 1,
+        "tasks": 2,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
         "medianContextReduction": 0.7339622641509433,
         "medianManualTokens": 1590,
         "medianContextTokens": 423,
         "medianMinimumSufficientBudget": 512,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "impact": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.8559748427672956,
+        "medianManualTokens": 1590,
+        "medianContextTokens": 229,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "change": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.8484276729559749,
+        "medianManualTokens": 1590,
+        "medianContextTokens": 241,
+        "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       }
@@ -240,25 +504,25 @@
   "performance": [
     {
       "repository": "kotlin-csv",
-      "coldIndexMs": 238,
-      "warmIndexMs": 24,
-      "singleFileRefreshMs": 32,
-      "previewMs": 29,
+      "coldIndexMs": 314,
+      "warmIndexMs": 23,
+      "singleFileRefreshMs": 33,
+      "previewMs": 19,
       "filesIndexed": 83
     },
     {
       "repository": "koin-core",
-      "coldIndexMs": 615,
-      "warmIndexMs": 42,
-      "singleFileRefreshMs": 50,
+      "coldIndexMs": 649,
+      "warmIndexMs": 41,
+      "singleFileRefreshMs": 48,
       "previewMs": null,
       "filesIndexed": 191
     },
     {
       "repository": "ktor-http-server",
-      "coldIndexMs": 1238,
-      "warmIndexMs": 87,
-      "singleFileRefreshMs": 100,
+      "coldIndexMs": 1330,
+      "warmIndexMs": 83,
+      "singleFileRefreshMs": 94,
       "previewMs": null,
       "filesIndexed": 337
     }

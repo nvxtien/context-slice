@@ -1,16 +1,74 @@
 [
   {
     "taskId": "fmt-buffered-file-close",
-    "files": ["src/os.cc"],
+    "files": [
+      "src/os.cc"
+    ],
     "reasoning": {
       "src/os.cc": "defines buffered_file::close out of class"
     }
   },
   {
     "taskId": "fmt-buffered-file-descriptor",
-    "files": ["src/os.cc"],
+    "files": [
+      "src/os.cc"
+    ],
     "reasoning": {
       "src/os.cc": "defines buffered_file::descriptor out of class"
+    }
+  },
+  {
+    "taskId": "fmt-file-close",
+    "files": [
+      "src/os.cc"
+    ],
+    "reasoning": {
+      "src/os.cc": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "fmt-file-size",
+    "files": [
+      "src/os.cc"
+    ],
+    "reasoning": {
+      "src/os.cc": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "fmt-file-read",
+    "files": [
+      "src/os.cc"
+    ],
+    "reasoning": {
+      "src/os.cc": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "fmt-file-dup",
+    "files": [
+      "src/os.cc"
+    ],
+    "reasoning": {
+      "src/os.cc": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "fmt-file-fdopen",
+    "files": [
+      "src/os.cc"
+    ],
+    "reasoning": {
+      "src/os.cc": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "fmt-getpagesize",
+    "files": [
+      "src/os.cc"
+    ],
+    "reasoning": {
+      "src/os.cc": "file declaring the target symbol and its direct collaborators"
     }
   }
 ]

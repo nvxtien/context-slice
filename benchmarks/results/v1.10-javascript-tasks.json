@@ -1,0 +1,471 @@
+{
+  "version": "1.10-javascript-tasks",
+  "generatedAt": "2026-10-17T08:11:09.687Z",
+  "environment": {
+    "node": "v22.12.0",
+    "platform": "darwin"
+  },
+  "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
+  "note": "Small sample (n=8 tasks, express and chalk); not comparable to the larger Rust/Java/TypeScript/Python samples.",
+  "repositories": [
+    {
+      "repository": "express",
+      "scale": "medium",
+      "kind": "backend",
+      "commit": "7ef98448f8b38099ab1ded55e458538ad47a51e7",
+      "scope": "whole repository (CommonJS: require()/module.exports throughout, no ES imports)",
+      "files": {
+        ".js": 141
+      },
+      "parseErrors": 0,
+      "symbols": 2024,
+      "callEdges": 11697,
+      "callEdgesExact": 308,
+      "callEdgesUnresolved": 11389,
+      "performance": {
+        "coldIndexMs": 672,
+        "warmIndexMs": 38,
+        "singleFileRefreshMs": 49,
+        "previewMs": 16,
+        "filesIndexed": 141
+      }
+    },
+    {
+      "repository": "chalk",
+      "scale": "small",
+      "kind": "library",
+      "commit": "47fc05abd46171b235e24174cd2dba83d25bf037",
+      "scope": "whole repository (modern ESM: import/export throughout)",
+      "files": {
+        ".js": 13,
+        ".d.ts": 1
+      },
+      "parseErrors": 0,
+      "symbols": 175,
+      "callEdges": 548,
+      "callEdgesExact": 98,
+      "callEdgesUnresolved": 450,
+      "performance": {
+        "coldIndexMs": 55,
+        "warmIndexMs": 3,
+        "singleFileRefreshMs": 10,
+        "previewMs": 2,
+        "filesIndexed": 14
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task": "express-app-handle",
+      "repository": "express",
+      "category": "explain",
+      "targetSymbol": "handle",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 3489,
+      "manualFiles": 1,
+      "suppliedContextTokens": 151,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9567211235310977,
+      "metrics": {
+        "contextWindowReduction": 0.9567211235310977,
+        "inputTokenReduction": 0.9567211235310977,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.013245033112582781,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0184326171875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "powered-by",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "delegate",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "express-app-use-empty",
+      "repository": "express",
+      "category": "locate",
+      "targetSymbol": "use",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 3489,
+      "manualFiles": 1,
+      "suppliedContextTokens": 298,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9145887073660075,
+      "metrics": {
+        "contextWindowReduction": 0.9145887073660075,
+        "inputTokenReduction": 0.9145887073660075,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.003355704697986577,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.036376953125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "throw",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "express-res-json",
+      "repository": "express",
+      "category": "explain",
+      "targetSymbol": "json",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 6265,
+      "manualFiles": 1,
+      "suppliedContextTokens": 95,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9848363926576217,
+      "metrics": {
+        "contextWindowReduction": 0.9848363926576217,
+        "inputTokenReduction": 0.9848363926576217,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.021052631578947368,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0115966796875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "content-type",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "send",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "express-res-send-string",
+      "repository": "express",
+      "category": "explain",
+      "targetSymbol": "send",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 6265,
+      "manualFiles": 1,
+      "suppliedContextTokens": 595,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9050279329608939,
+      "metrics": {
+        "contextWindowReduction": 0.9050279329608939,
+        "inputTokenReduction": 0.9050279329608939,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0033613445378151263,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0726318359375,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "charset",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "html",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "chalk-assert-level",
+      "repository": "chalk",
+      "category": "locate",
+      "targetSymbol": "assertValidLevel",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 2084,
+      "manualFiles": 1,
+      "suppliedContextTokens": 150,
+      "contextItems": 2,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9280230326295585,
+      "metrics": {
+        "contextWindowReduction": 0.9280230326295585,
+        "inputTokenReduction": 0.9280230326295585,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.006666666666666667,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.018310546875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "throw",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "chalk-create-styler",
+      "repository": "chalk",
+      "category": "explain",
+      "targetSymbol": "createStyler",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 2084,
+      "manualFiles": 1,
+      "suppliedContextTokens": 129,
+      "contextItems": 2,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9380998080614203,
+      "metrics": {
+        "contextWindowReduction": 0.9380998080614203,
+        "inputTokenReduction": 0.9380998080614203,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.015503875968992248,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0157470703125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "open",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "close",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "chalk-apply-style",
+      "repository": "chalk",
+      "category": "explain",
+      "targetSymbol": "applyStyle",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 2084,
+      "manualFiles": 1,
+      "suppliedContextTokens": 324,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.8445297504798465,
+      "metrics": {
+        "contextWindowReduction": 0.8445297504798465,
+        "inputTokenReduction": 0.8445297504798465,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.006172839506172839,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.03955078125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "reopen",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "wrap",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "chalk-apply-style-impact",
+      "repository": "chalk",
+      "category": "impact",
+      "targetSymbol": "applyStyle",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 2084,
+      "manualFiles": 1,
+      "suppliedContextTokens": 451,
+      "contextItems": 2,
+      "minimumSufficientBudget": 512,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.7835892514395393,
+      "metrics": {
+        "contextWindowReduction": 0.7835892514395393,
+        "inputTokenReduction": 0.7835892514395393,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.004434589800443459,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0550537109375,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "definition",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "caller",
+          "attribution": "PRESERVED"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "overall": {
+      "tasks": 8,
+      "requiredFactRecall": 1,
+      "retrievalRecall": 1,
+      "medianContextReduction": 0.9280230326295585,
+      "medianManualTokens": 3489,
+      "medianContextTokens": 298,
+      "medianMinimumSufficientBudget": 256,
+      "wholeFileFallbackRate": 0,
+      "wholeModuleFallbackRate": 0
+    },
+    "byRepository": {
+      "express": {
+        "tasks": 4,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9567211235310977,
+        "medianManualTokens": 6265,
+        "medianContextTokens": 298,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "chalk": {
+        "tasks": 4,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9280230326295585,
+        "medianManualTokens": 2084,
+        "medianContextTokens": 324,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    },
+    "byCategory": {
+      "explain": {
+        "tasks": 5,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9380998080614203,
+        "medianManualTokens": 3489,
+        "medianContextTokens": 151,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "locate": {
+        "tasks": 2,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9280230326295585,
+        "medianManualTokens": 3489,
+        "medianContextTokens": 298,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "impact": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.7835892514395393,
+        "medianManualTokens": 2084,
+        "medianContextTokens": 451,
+        "medianMinimumSufficientBudget": 512,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      }
+    }
+  },
+  "failureAttribution": {},
+  "findings": [],
+  "performance": [
+    {
+      "repository": "express",
+      "coldIndexMs": 672,
+      "warmIndexMs": 38,
+      "singleFileRefreshMs": 49,
+      "previewMs": 16,
+      "filesIndexed": 141
+    },
+    {
+      "repository": "chalk",
+      "coldIndexMs": 55,
+      "warmIndexMs": 3,
+      "singleFileRefreshMs": 10,
+      "previewMs": 2,
+      "filesIndexed": 14
+    }
+  ]
+}

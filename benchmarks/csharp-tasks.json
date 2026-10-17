@@ -5,7 +5,9 @@
     "category": "explain",
     "task": "What does Logger's ILogEventSink.Emit do before handing the event to the configured sink?",
     "targetSymbol": "Logger.Emit",
-    "groundTruthFiles": ["src/Serilog/Core/Logger.cs"],
+    "groundTruthFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ],
     "groundTruth": "Manual source inspection at the pinned commit",
     "requiredFacts": [
       {
@@ -13,7 +15,9 @@
         "description": "PostLevelCheckEmit enriches the event via the enricher and message template processor",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["_enricher.Enrich(logEvent, _messageTemplateProcessor)"]
+          "patterns": [
+            "_enricher.Enrich(logEvent, _messageTemplateProcessor)"
+          ]
         }
       },
       {
@@ -21,11 +25,15 @@
         "description": "PostLevelCheckEmit forwards the enriched event to the configured sink",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["_sink.Emit(logEvent)"]
+          "patterns": [
+            "_sink.Emit(logEvent)"
+          ]
         }
       }
     ],
-    "baselineFiles": ["src/Serilog/Core/Logger.cs"]
+    "baselineFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ]
   },
   {
     "id": "serilog-dispose",
@@ -33,7 +41,9 @@
     "category": "locate",
     "task": "How does Logger.Dispose release its resources?",
     "targetSymbol": "Logger.Dispose",
-    "groundTruthFiles": ["src/Serilog/Core/Logger.cs"],
+    "groundTruthFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ],
     "groundTruth": "Manual source inspection at the pinned commit",
     "requiredFacts": [
       {
@@ -41,10 +51,220 @@
         "description": "Dispose invokes the stored dispose delegate through a null-conditional call",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["_dispose?.Invoke()"]
+          "patterns": [
+            "_dispose?.Invoke()"
+          ]
         }
       }
     ],
-    "baselineFiles": ["src/Serilog/Core/Logger.cs"]
+    "baselineFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ]
+  },
+  {
+    "id": "serilog-is-enabled",
+    "repository": "serilog",
+    "category": "explain",
+    "task": "How does Logger.IsEnabled decide whether a level is enabled?",
+    "targetSymbol": "Logger.IsEnabled",
+    "groundTruthFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "minimum",
+        "description": "levels below the logger minimum are disabled",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (level < _minimumLevel)"
+          ]
+        }
+      },
+      {
+        "id": "switch",
+        "description": "an attached level switch is consulted",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "level >= _levelSwitch.MinimumLevel"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ]
+  },
+  {
+    "id": "serilog-post-level-check",
+    "repository": "serilog",
+    "category": "explain",
+    "task": "What does Logger.PostLevelCheckEmit do with an event?",
+    "targetSymbol": "Logger.PostLevelCheckEmit",
+    "groundTruthFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "enrich",
+        "description": "the event is enriched",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "_enricher.Enrich(logEvent, _messageTemplateProcessor);"
+          ]
+        }
+      },
+      {
+        "id": "emit",
+        "description": "then emitted to the sink",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "_sink.Emit(logEvent);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ]
+  },
+  {
+    "id": "serilog-post-level-check-impact",
+    "repository": "serilog",
+    "category": "impact",
+    "task": "Which code is affected if Logger.PostLevelCheckEmit changes?",
+    "targetSymbol": "Logger.PostLevelCheckEmit",
+    "groundTruthFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "write",
+        "description": "Write(LogEvent) calls it and records a metric",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "SelfMetrics.PipelineEventEmitted.Add(1);"
+          ]
+        }
+      },
+      {
+        "id": "emit",
+        "description": "ILogEventSink.Emit calls it after a null check",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "Guard.AgainstNull(logEvent);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/Serilog/Core/Logger.cs"
+    ]
+  },
+  {
+    "id": "serilog-effective-level",
+    "repository": "serilog",
+    "category": "explain",
+    "task": "How does LevelOverrideMap.GetEffectiveLevel resolve a context's level?",
+    "targetSymbol": "LevelOverrideMap.GetEffectiveLevel",
+    "groundTruthFiles": [
+      "src/Serilog/Core/LevelOverrideMap.cs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "override",
+        "description": "a matching override uses the minimum level and its switch",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "minimumLevel = LevelAlias.Minimum;"
+          ]
+        }
+      },
+      {
+        "id": "default",
+        "description": "otherwise the defaults apply",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "minimumLevel = _defaultMinimumLevel;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/Serilog/Core/LevelOverrideMap.cs"
+    ]
+  },
+  {
+    "id": "serilog-secondary-emit",
+    "repository": "serilog",
+    "category": "locate",
+    "task": "Where does SecondaryLoggerSink.Emit copy the event before forwarding it?",
+    "targetSymbol": "SecondaryLoggerSink.Emit",
+    "groundTruthFiles": [
+      "src/Serilog/Core/Sinks/SecondaryLoggerSink.cs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "copy",
+        "description": "the event is copied before being written to the secondary logger",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "var copy = logEvent.Copy();"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/Serilog/Core/Sinks/SecondaryLoggerSink.cs"
+    ]
+  },
+  {
+    "id": "serilog-ensure-valid-name",
+    "repository": "serilog",
+    "category": "change",
+    "task": "Where would you change how LogEventProperty rejects invalid property names?",
+    "targetSymbol": "LogEventProperty.EnsureValidName",
+    "groundTruthFiles": [
+      "src/Serilog/Events/LogEventProperty.cs"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "null",
+        "description": "null names are rejected first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "Guard.AgainstNull(name);"
+          ]
+        }
+      },
+      {
+        "id": "invalid",
+        "description": "empty or whitespace names throw ArgumentException",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (!IsValidName(name)) throw new ArgumentException("
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/Serilog/Events/LogEventProperty.cs"
+    ]
   }
 ]

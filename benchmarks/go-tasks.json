@@ -1,0 +1,292 @@
+[
+  {
+    "id": "mux-servehttp-redirect",
+    "repository": "gorilla-mux",
+    "category": "locate",
+    "task": "Where does Router.ServeHTTP redirect a request whose path is not in canonical form?",
+    "targetSymbol": "Router.ServeHTTP",
+    "groundTruthFiles": [
+      "mux.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "redirect",
+        "description": "non-canonical paths get a 301 response",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "w.WriteHeader(http.StatusMovedPermanently)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go"
+    ]
+  },
+  {
+    "id": "mux-servehttp-fallback",
+    "repository": "gorilla-mux",
+    "category": "explain",
+    "task": "What does Router.ServeHTTP do when no handler was found?",
+    "targetSymbol": "Router.ServeHTTP",
+    "groundTruthFiles": [
+      "mux.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "method-mismatch",
+        "description": "a method mismatch yields the 405 handler",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "handler = methodNotAllowedHandler()"
+          ]
+        }
+      },
+      {
+        "id": "not-found",
+        "description": "otherwise the stdlib 404 handler is used",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "handler = http.NotFoundHandler()"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go"
+    ]
+  },
+  {
+    "id": "mux-route-match-method",
+    "repository": "gorilla-mux",
+    "category": "explain",
+    "task": "How does Route.Match report that only the HTTP method failed to match?",
+    "targetSymbol": "Route.Match",
+    "groundTruthFiles": [
+      "route.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "mismatch",
+        "description": "a failing methodMatcher records ErrMethodMismatch",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "matchErr = ErrMethodMismatch"
+          ]
+        }
+      },
+      {
+        "id": "record",
+        "description": "the error is stored on the RouteMatch",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "match.MatchErr = matchErr"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "route.go"
+    ]
+  },
+  {
+    "id": "mux-walk-explain",
+    "repository": "gorilla-mux",
+    "category": "explain",
+    "task": "How does Router.walk descend into sub-routers and honour SkipRouter?",
+    "targetSymbol": "Router.walk",
+    "groundTruthFiles": [
+      "mux.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "skip",
+        "description": "SkipRouter skips descending into a route",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if err == SkipRouter {"
+          ]
+        }
+      },
+      {
+        "id": "subrouter",
+        "description": "sub-routers held as matchers are walked recursively",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if h, ok := sr.(*Router); ok {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go"
+    ]
+  },
+  {
+    "id": "mux-requestwithvars-impact",
+    "repository": "gorilla-mux",
+    "category": "impact",
+    "task": "Which code is affected if requestWithVars changes?",
+    "targetSymbol": "requestWithVars",
+    "groundTruthFiles": [
+      "mux.go",
+      "test_helpers.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "requestWithVars is a package-private helper",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "func requestWithVars(r *http.Request, vars map[string]string) *http.Request {"
+          ]
+        }
+      },
+      {
+        "id": "servehttp",
+        "description": "Router.ServeHTTP calls it when the route is omitted from context",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "req = requestWithVars(req, match.Vars)"
+          ]
+        }
+      },
+      {
+        "id": "helper",
+        "description": "the SetURLVars test helper calls it",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return requestWithVars(r, val)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go",
+      "test_helpers.go"
+    ]
+  },
+  {
+    "id": "chi-routehttp-explain",
+    "repository": "chi",
+    "category": "explain",
+    "task": "How does Mux.routeHTTP pick the handler and what happens for an unsupported method?",
+    "targetSymbol": "Mux.routeHTTP",
+    "groundTruthFiles": [
+      "mux.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "method-map",
+        "description": "the method is looked up in methodMap",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "method, ok := methodMap[rctx.RouteMethod]"
+          ]
+        }
+      },
+      {
+        "id": "find",
+        "description": "the tree is searched for the route",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "mx.tree.FindRoute(rctx, method, routePath)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go"
+    ]
+  },
+  {
+    "id": "chi-servehttp-pool",
+    "repository": "chi",
+    "category": "explain",
+    "task": "How does Mux.ServeHTTP manage its routing context between requests?",
+    "targetSymbol": "Mux.ServeHTTP",
+    "groundTruthFiles": [
+      "mux.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "get",
+        "description": "a context is taken from the pool",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "rctx = mx.pool.Get().(*Context)"
+          ]
+        }
+      },
+      {
+        "id": "put",
+        "description": "it is returned after serving",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "mx.pool.Put(rctx)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go"
+    ]
+  },
+  {
+    "id": "chi-handle-change",
+    "repository": "chi",
+    "category": "change",
+    "task": "Where would you change how Mux.handle validates routing patterns?",
+    "targetSymbol": "Mux.handle",
+    "groundTruthFiles": [
+      "mux.go"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "panic",
+        "description": "patterns must begin with a slash",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "panic(fmt.Sprintf(\"chi: routing pattern must begin with '/' in '%s'\", pattern))"
+          ]
+        }
+      },
+      {
+        "id": "insert",
+        "description": "the route is inserted into the tree",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return mx.tree.InsertRoute(method, pattern, h)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "mux.go"
+    ]
+  }
+]

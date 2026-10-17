@@ -5,7 +5,9 @@
     "category": "explain",
     "task": "How does cJSON_ParseWithLengthOpts allocate the root item and dispatch value parsing?",
     "targetSymbol": "cJSON_ParseWithLengthOpts",
-    "groundTruthFiles": ["cJSON.c"],
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
     "groundTruth": "Manual source inspection at the pinned commit",
     "requiredFacts": [
       {
@@ -13,7 +15,9 @@
         "description": "cJSON_New_Item allocates the item via the hooks' allocate function",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["hooks->allocate(sizeof(cJSON))"]
+          "patterns": [
+            "hooks->allocate(sizeof(cJSON))"
+          ]
         }
       },
       {
@@ -27,7 +31,9 @@
         }
       }
     ],
-    "baselineFiles": ["cJSON.c"]
+    "baselineFiles": [
+      "cJSON.c"
+    ]
   },
   {
     "id": "cjson-parse-length",
@@ -35,7 +41,9 @@
     "category": "locate",
     "task": "Where does cJSON_Parse compute the buffer length before delegating to the length-aware parser?",
     "targetSymbol": "cJSON_Parse",
-    "groundTruthFiles": ["cJSON.c"],
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
     "groundTruth": "Manual source inspection at the pinned commit",
     "requiredFacts": [
       {
@@ -43,10 +51,230 @@
         "description": "cJSON_ParseWithOpts derives buffer_length from strlen plus the null terminator",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["strlen(value) + sizeof(\"\")"]
+          "patterns": [
+            "strlen(value) + sizeof(\"\")"
+          ]
         }
       }
     ],
-    "baselineFiles": ["cJSON.c"]
+    "baselineFiles": [
+      "cJSON.c"
+    ]
+  },
+  {
+    "id": "cjson-delete-recursion",
+    "repository": "cjson",
+    "category": "explain",
+    "task": "How does cJSON_Delete free a tree, and what does it skip for reference items?",
+    "targetSymbol": "cJSON_Delete",
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "child",
+        "description": "children are freed recursively unless the item is a reference",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (!(item->type & cJSON_IsReference) && (item->child != NULL))"
+          ]
+        }
+      },
+      {
+        "id": "free",
+        "description": "the item itself is released through the allocator hooks",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "global_hooks.deallocate(item);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "cJSON.c"
+    ]
+  },
+  {
+    "id": "cjson-ensure-noalloc",
+    "repository": "cjson",
+    "category": "explain",
+    "task": "When does ensure refuse to grow a print buffer?",
+    "targetSymbol": "ensure",
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "noalloc",
+        "description": "a noalloc buffer is never reallocated",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (p->noalloc) {"
+          ]
+        }
+      },
+      {
+        "id": "limit",
+        "description": "requests above INT_MAX are rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (needed > INT_MAX)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "cJSON.c"
+    ]
+  },
+  {
+    "id": "cjson-parse-array-depth",
+    "repository": "cjson",
+    "category": "locate",
+    "task": "Where does parse_array enforce the nesting limit?",
+    "targetSymbol": "parse_array",
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "depth",
+        "description": "parsing fails once depth reaches CJSON_NESTING_LIMIT",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (input_buffer->depth >= CJSON_NESTING_LIMIT)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "cJSON.c"
+    ]
+  },
+  {
+    "id": "cjson-add-item-array",
+    "repository": "cjson",
+    "category": "explain",
+    "task": "How does add_item_to_array append an item and what inputs does it reject?",
+    "targetSymbol": "add_item_to_array",
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "reject",
+        "description": "null arguments and self-insertion are rejected",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if ((item == NULL) || (array == NULL) || (array == item))"
+          ]
+        }
+      },
+      {
+        "id": "append",
+        "description": "a non-empty list is extended through suffix_object",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "suffix_object(child->prev, item);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "cJSON.c"
+    ]
+  },
+  {
+    "id": "cjson-add-item-impact",
+    "repository": "cjson",
+    "category": "impact",
+    "task": "Which code is affected if add_item_to_array changes?",
+    "targetSymbol": "add_item_to_array",
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "add_item_to_array is a static helper",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "static cJSON_bool add_item_to_array(cJSON *array, cJSON *item)"
+          ]
+        }
+      },
+      {
+        "id": "object",
+        "description": "add_item_to_object appends the item via it",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return add_item_to_array(object, item);"
+          ]
+        }
+      },
+      {
+        "id": "reference",
+        "description": "adding a reference wraps the item first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return add_item_to_array(array, create_reference(item, &global_hooks));"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "cJSON.c"
+    ]
+  },
+  {
+    "id": "cjson-detach-via-pointer",
+    "repository": "cjson",
+    "category": "change",
+    "task": "Where would you change how cJSON_DetachItemViaPointer unlinks the first element?",
+    "targetSymbol": "cJSON_DetachItemViaPointer",
+    "groundTruthFiles": [
+      "cJSON.c"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "first",
+        "description": "the parent's child pointer moves to the next item",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "parent->child = item->next;"
+          ]
+        }
+      },
+      {
+        "id": "last",
+        "description": "removing the last item moves the tail link",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "parent->child->prev = item->prev;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "cJSON.c"
+    ]
   }
 ]

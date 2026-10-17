@@ -1,16 +1,74 @@
 [
   {
     "taskId": "cjson-parse-dispatch",
-    "files": ["cJSON.c"],
+    "files": [
+      "cJSON.c"
+    ],
     "reasoning": {
       "cJSON.c": "single amalgamated source file; declares cJSON_ParseWithLengthOpts, cJSON_New_Item and parse_value"
     }
   },
   {
     "taskId": "cjson-parse-length",
-    "files": ["cJSON.c"],
+    "files": [
+      "cJSON.c"
+    ],
     "reasoning": {
       "cJSON.c": "single amalgamated source file; declares cJSON_Parse and cJSON_ParseWithOpts"
+    }
+  },
+  {
+    "taskId": "cjson-delete-recursion",
+    "files": [
+      "cJSON.c"
+    ],
+    "reasoning": {
+      "cJSON.c": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "cjson-ensure-noalloc",
+    "files": [
+      "cJSON.c"
+    ],
+    "reasoning": {
+      "cJSON.c": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "cjson-parse-array-depth",
+    "files": [
+      "cJSON.c"
+    ],
+    "reasoning": {
+      "cJSON.c": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "cjson-add-item-array",
+    "files": [
+      "cJSON.c"
+    ],
+    "reasoning": {
+      "cJSON.c": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "cjson-add-item-impact",
+    "files": [
+      "cJSON.c"
+    ],
+    "reasoning": {
+      "cJSON.c": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "cjson-detach-via-pointer",
+    "files": [
+      "cJSON.c"
+    ],
+    "reasoning": {
+      "cJSON.c": "file declaring the target symbol and its direct collaborators"
     }
   }
 ]

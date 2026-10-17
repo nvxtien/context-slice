@@ -16,7 +16,9 @@
         "description": "parseRowsWithMetadata breaks out of its sequence builder loop when nextRow returns null",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["parser.nextRow() ?: break"]
+          "patterns": [
+            "parser.nextRow() ?: break"
+          ]
         }
       },
       {
@@ -24,7 +26,9 @@
         "description": "parseField enters the quoted-field path when the cursor sits on the quote character",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["next()\n            parseQuotedField()"]
+          "patterns": [
+            "next()\n            parseQuotedField()"
+          ]
         }
       }
     ],
@@ -49,7 +53,9 @@
         "description": "parseUnquotedField calls appendUnquotedEscape when the current char is the escape code",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["c == escapeCode -> appendUnquotedEscape()"]
+          "patterns": [
+            "c == escapeCode -> appendUnquotedEscape()"
+          ]
         }
       },
       {
@@ -57,12 +63,220 @@
         "description": "next() advances the cursor by delegating to CharCursor.advance",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["return cursor.advance()"]
+          "patterns": [
+            "return cursor.advance()"
+          ]
         }
       }
     ],
     "baselineFiles": [
       "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  },
+  {
+    "id": "kcsv-parse-quoted-field",
+    "repository": "kotlin-csv",
+    "category": "explain",
+    "task": "How does RowParser.parseQuotedField handle a doubled quote?",
+    "targetSymbol": "RowParser.parseQuotedField",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "double",
+        "description": "a doubled quote appends one quote char",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "sb.append(quoteChar)"
+          ]
+        }
+      },
+      {
+        "id": "escape",
+        "description": "a distinct escape char is handled separately",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "c == escapeCode && escapeCode != quoteCode -> appendQuotedEscape()"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  },
+  {
+    "id": "kcsv-after-quote-end",
+    "repository": "kotlin-csv",
+    "category": "explain",
+    "task": "What does RowParser.parseAfterQuoteEnd accept after a closing quote?",
+    "targetSymbol": "RowParser.parseAfterQuoteEnd",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "flush",
+        "description": "delimiters and terminators flush a quoted field",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "flushField(quoted = true)"
+          ]
+        }
+      },
+      {
+        "id": "error",
+        "description": "anything else is a format exception",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "\"must appear delimiter or line terminator after quote end\""
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  },
+  {
+    "id": "kcsv-is-line-terminator-impact",
+    "repository": "kotlin-csv",
+    "category": "impact",
+    "task": "Which code is affected if RowParser.isLineTerminator changes?",
+    "targetSymbol": "RowParser.isLineTerminator",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "isLineTerminator is a private helper",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "private fun isLineTerminator(c: Int): Boolean ="
+          ]
+        }
+      },
+      {
+        "id": "caller",
+        "description": "the field parsers branch on it",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "isLineTerminator(c) -> {"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  },
+  {
+    "id": "kcsv-flush-field",
+    "repository": "kotlin-csv",
+    "category": "change",
+    "task": "Where would you change how RowParser.flushField records a finished field?",
+    "targetSymbol": "RowParser.flushField",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "add",
+        "description": "the field and its quoted flag are stored",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "fields.add(ParsedCsvField(sb.toString(), quoted))"
+          ]
+        }
+      },
+      {
+        "id": "clear",
+        "description": "the buffer is cleared",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "sb.clear()"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ]
+  },
+  {
+    "id": "kcsv-chunk-parse",
+    "repository": "kotlin-csv",
+    "category": "explain",
+    "task": "What does parseRowsWithMetadataFromChunks do before parsing and why can it fail?",
+    "targetSymbol": "parseRowsWithMetadataFromChunks",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "bom",
+        "description": "a leading BOM is skipped when requested",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (stripBom && cursor.cur == BOM_CHAR_CODE) cursor.advance()"
+          ]
+        }
+      },
+      {
+        "id": "require",
+        "description": "the buffer must hold a surrogate pair",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "require(bufferSize >= 2)"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt"
+    ]
+  },
+  {
+    "id": "kcsv-iterator-cursor",
+    "repository": "kotlin-csv",
+    "category": "locate",
+    "task": "Where does IteratorCharCursor.advance avoid boxing characters?",
+    "targetSymbol": "IteratorCharCursor.advance",
+    "groundTruthFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/CharCursor.kt"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "unboxed",
+        "description": "a CharIterator is read via nextChar",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "chars != null -> if (chars.hasNext()) chars.nextChar().code else EOF"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/CharCursor.kt"
     ]
   }
 ]

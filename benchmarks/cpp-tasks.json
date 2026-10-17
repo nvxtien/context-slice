@@ -5,7 +5,9 @@
     "category": "locate",
     "task": "How does buffered_file::close release the underlying FILE handle?",
     "targetSymbol": "buffered_file.close",
-    "groundTruthFiles": ["src/os.cc"],
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
     "groundTruth": "Manual source inspection at the pinned commit",
     "requiredFacts": [
       {
@@ -13,11 +15,15 @@
         "description": "close() releases the FILE* via fclose through the FMT_SYSTEM wrapper",
         "verification": {
           "type": "source-fragment",
-          "patterns": ["FMT_SYSTEM(fclose(file_))"]
+          "patterns": [
+            "FMT_SYSTEM(fclose(file_))"
+          ]
         }
       }
     ],
-    "baselineFiles": ["src/os.cc"]
+    "baselineFiles": [
+      "src/os.cc"
+    ]
   },
   {
     "id": "fmt-buffered-file-descriptor",
@@ -25,7 +31,9 @@
     "category": "explain",
     "task": "What does buffered_file::descriptor throw when it cannot get the file descriptor?",
     "targetSymbol": "buffered_file.descriptor",
-    "groundTruthFiles": ["src/os.cc"],
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
     "groundTruth": "Manual source inspection at the pinned commit",
     "requiredFacts": [
       {
@@ -39,6 +47,214 @@
         }
       }
     ],
-    "baselineFiles": ["src/os.cc"]
+    "baselineFiles": [
+      "src/os.cc"
+    ]
+  },
+  {
+    "id": "fmt-file-close",
+    "repository": "fmt",
+    "category": "explain",
+    "task": "How does file::close release the descriptor and report errors?",
+    "targetSymbol": "file.close",
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "close",
+        "description": "the descriptor is closed without retrying",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "int result = FMT_POSIX_CALL(close(fd_));"
+          ]
+        }
+      },
+      {
+        "id": "noop",
+        "description": "closing an already closed file is a no-op",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "if (fd_ == -1) return;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/os.cc"
+    ]
+  },
+  {
+    "id": "fmt-file-size",
+    "repository": "fmt",
+    "category": "explain",
+    "task": "How does file::size obtain the size on POSIX?",
+    "targetSymbol": "file.size",
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "stat",
+        "description": "fstat fills a struct stat",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "Stat file_stat = Stat();"
+          ]
+        }
+      },
+      {
+        "id": "error",
+        "description": "a failure throws a system_error",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "FMT_THROW(system_error(errno, FMT_STRING(\"cannot get file attributes\")));"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/os.cc"
+    ]
+  },
+  {
+    "id": "fmt-file-read",
+    "repository": "fmt",
+    "category": "locate",
+    "task": "Where does file::read retry the underlying read call?",
+    "targetSymbol": "file.read",
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "retry",
+        "description": "read is wrapped in FMT_RETRY",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "FMT_RETRY(result, FMT_POSIX_CALL(read(fd_, buffer, convert_rwcount(count))));"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/os.cc"
+    ]
+  },
+  {
+    "id": "fmt-file-dup",
+    "repository": "fmt",
+    "category": "explain",
+    "task": "How does file::dup duplicate a descriptor?",
+    "targetSymbol": "file.dup",
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "dup",
+        "description": "dup is called without retry",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "int new_fd = FMT_POSIX_CALL(dup(fd));"
+          ]
+        }
+      },
+      {
+        "id": "wrap",
+        "description": "the new descriptor is wrapped in a file",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return file(new_fd);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/os.cc"
+    ]
+  },
+  {
+    "id": "fmt-file-fdopen",
+    "repository": "fmt",
+    "category": "change",
+    "task": "Where would you change how file::fdopen transfers ownership of the descriptor?",
+    "targetSymbol": "file.fdopen",
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "wrap",
+        "description": "the FILE* is wrapped in a buffered_file",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "buffered_file bf(f);"
+          ]
+        }
+      },
+      {
+        "id": "return",
+        "description": "the buffered_file is returned",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return bf;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/os.cc"
+    ]
+  },
+  {
+    "id": "fmt-getpagesize",
+    "repository": "fmt",
+    "category": "explain",
+    "task": "How does getpagesize obtain the page size on POSIX?",
+    "targetSymbol": "getpagesize",
+    "groundTruthFiles": [
+      "src/os.cc"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "sysconf",
+        "description": "sysconf reports the page size",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "long size = FMT_POSIX_CALL(sysconf(_SC_PAGESIZE));"
+          ]
+        }
+      },
+      {
+        "id": "error",
+        "description": "a negative size throws",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "FMT_STRING(\"cannot get memory page size\")"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "src/os.cc"
+    ]
   }
 ]

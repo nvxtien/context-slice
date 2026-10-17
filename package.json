@@ -44,7 +44,9 @@
     "benchmark:v110-c-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-c-tasks.ts",
     "benchmark:v110-cpp-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-cpp-tasks.ts",
     "benchmark:v110-csharp-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-csharp-tasks.ts",
-    "benchmark:v110-kotlin-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-kotlin-tasks.ts"
+    "benchmark:v110-kotlin-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-kotlin-tasks.ts",
+    "benchmark:v110-go-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-go-tasks.ts",
+    "benchmark:v110-javascript-tasks": "npm run benchmark:checkouts && tsx benchmarks/v1.10-javascript-tasks.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

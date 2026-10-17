@@ -1,0 +1,270 @@
+[
+  {
+    "id": "express-app-handle",
+    "repository": "express",
+    "category": "explain",
+    "task": "What does app.handle do before delegating to the router?",
+    "targetSymbol": "handle",
+    "groundTruthFiles": [
+      "lib/application.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "powered-by",
+        "description": "sets the X-Powered-By header",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "res.setHeader('X-Powered-By', 'Express');"
+          ]
+        }
+      },
+      {
+        "id": "delegate",
+        "description": "hands the request to the router",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "this.router.handle(req, res, done);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "lib/application.js"
+    ]
+  },
+  {
+    "id": "express-app-use-empty",
+    "repository": "express",
+    "category": "locate",
+    "task": "Where does app.use reject a call without middleware?",
+    "targetSymbol": "use",
+    "groundTruthFiles": [
+      "lib/application.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "throw",
+        "description": "a TypeError is thrown when no middleware is given",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "throw new TypeError('app.use() requires a middleware function')"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "lib/application.js"
+    ]
+  },
+  {
+    "id": "express-res-json",
+    "repository": "express",
+    "category": "explain",
+    "task": "How does res.json produce its response?",
+    "targetSymbol": "json",
+    "groundTruthFiles": [
+      "lib/response.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "content-type",
+        "description": "Content-Type defaults to application/json",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "this.set('Content-Type', 'application/json');"
+          ]
+        }
+      },
+      {
+        "id": "send",
+        "description": "the serialized body is sent through res.send",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return this.send(body);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "lib/response.js"
+    ]
+  },
+  {
+    "id": "express-res-send-string",
+    "repository": "express",
+    "category": "explain",
+    "task": "How does res.send treat a string body's Content-Type?",
+    "targetSymbol": "send",
+    "groundTruthFiles": [
+      "lib/response.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "charset",
+        "description": "an existing type gets utf-8 charset",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "this.set('Content-Type', setCharset(type, 'utf-8'));"
+          ]
+        }
+      },
+      {
+        "id": "html",
+        "description": "otherwise the type defaults to html",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "this.type('html');"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "lib/response.js"
+    ]
+  },
+  {
+    "id": "chalk-assert-level",
+    "repository": "chalk",
+    "category": "locate",
+    "task": "Where is an invalid chalk color level rejected?",
+    "targetSymbol": "assertValidLevel",
+    "groundTruthFiles": [
+      "source/index.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "throw",
+        "description": "levels outside 0-3 throw",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "throw new Error('The `level` should be an integer from 0 to 3');"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "source/index.js"
+    ]
+  },
+  {
+    "id": "chalk-create-styler",
+    "repository": "chalk",
+    "category": "explain",
+    "task": "How does createStyler combine a style with its parent's codes?",
+    "targetSymbol": "createStyler",
+    "groundTruthFiles": [
+      "source/index.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "open",
+        "description": "open codes are concatenated parent first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "openAll = parent.openAll + open;"
+          ]
+        }
+      },
+      {
+        "id": "close",
+        "description": "close codes are concatenated child first",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "closeAll = close + parent.closeAll;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "source/index.js"
+    ]
+  },
+  {
+    "id": "chalk-apply-style",
+    "repository": "chalk",
+    "category": "explain",
+    "task": "How does applyStyle wrap a string and handle nested escape codes?",
+    "targetSymbol": "applyStyle",
+    "groundTruthFiles": [
+      "source/index.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "reopen",
+        "description": "existing close codes are replaced by re-opening codes",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "string = stringReplaceAll(string, styler.close, styler.open);"
+          ]
+        }
+      },
+      {
+        "id": "wrap",
+        "description": "the result is wrapped in the combined open and close codes",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return openAll + string + closeAll;"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "source/index.js"
+    ]
+  },
+  {
+    "id": "chalk-apply-style-impact",
+    "repository": "chalk",
+    "category": "impact",
+    "task": "Which code is affected if applyStyle changes?",
+    "targetSymbol": "applyStyle",
+    "groundTruthFiles": [
+      "source/index.js"
+    ],
+    "groundTruth": "Manual source inspection at the pinned commit",
+    "requiredFacts": [
+      {
+        "id": "definition",
+        "description": "applyStyle is a module-level arrow function",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "applyStyle = (self, string) => {"
+          ]
+        }
+      },
+      {
+        "id": "caller",
+        "description": "createBuilder's builder calls it on the single-argument path",
+        "verification": {
+          "type": "source-fragment",
+          "patterns": [
+            "return applyStyle(builder, '' + arguments_[0]);"
+          ]
+        }
+      }
+    ],
+    "baselineFiles": [
+      "source/index.js"
+    ]
+  }
+]

@@ -18,5 +18,59 @@
     "reasoning": {
       "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "defines appendUnquotedEscape, its caller parseUnquotedField, and the next() it calls"
     }
+  },
+  {
+    "taskId": "kcsv-parse-quoted-field",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "kcsv-after-quote-end",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "kcsv-is-line-terminator-impact",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "kcsv-flush-field",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/RowParser.kt": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "kcsv-chunk-parse",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/SequenceParser.kt": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "kcsv-iterator-cursor",
+    "files": [
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/CharCursor.kt"
+    ],
+    "reasoning": {
+      "src/commonMain/kotlin/com/jsoizo/kotlincsv/reader/internal/CharCursor.kt": "file declaring the target symbol and its direct collaborators"
+    }
   }
 ]

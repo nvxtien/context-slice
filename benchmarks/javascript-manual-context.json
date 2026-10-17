@@ -1,0 +1,74 @@
+[
+  {
+    "taskId": "express-app-handle",
+    "files": [
+      "lib/application.js"
+    ],
+    "reasoning": {
+      "lib/application.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "express-app-use-empty",
+    "files": [
+      "lib/application.js"
+    ],
+    "reasoning": {
+      "lib/application.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "express-res-json",
+    "files": [
+      "lib/response.js"
+    ],
+    "reasoning": {
+      "lib/response.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "express-res-send-string",
+    "files": [
+      "lib/response.js"
+    ],
+    "reasoning": {
+      "lib/response.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chalk-assert-level",
+    "files": [
+      "source/index.js"
+    ],
+    "reasoning": {
+      "source/index.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chalk-create-styler",
+    "files": [
+      "source/index.js"
+    ],
+    "reasoning": {
+      "source/index.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chalk-apply-style",
+    "files": [
+      "source/index.js"
+    ],
+    "reasoning": {
+      "source/index.js": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chalk-apply-style-impact",
+    "files": [
+      "source/index.js"
+    ],
+    "reasoning": {
+      "source/index.js": "file declaring the target symbol and its direct collaborators"
+    }
+  }
+]

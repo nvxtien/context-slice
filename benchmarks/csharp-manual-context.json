@@ -1,16 +1,74 @@
 [
   {
     "taskId": "serilog-emit-dispatch",
-    "files": ["src/Serilog/Core/Logger.cs"],
+    "files": [
+      "src/Serilog/Core/Logger.cs"
+    ],
     "reasoning": {
       "src/Serilog/Core/Logger.cs": "defines Logger.Emit and the PostLevelCheckEmit helper it calls"
     }
   },
   {
     "taskId": "serilog-dispose",
-    "files": ["src/Serilog/Core/Logger.cs"],
+    "files": [
+      "src/Serilog/Core/Logger.cs"
+    ],
     "reasoning": {
       "src/Serilog/Core/Logger.cs": "defines Logger.Dispose"
+    }
+  },
+  {
+    "taskId": "serilog-is-enabled",
+    "files": [
+      "src/Serilog/Core/Logger.cs"
+    ],
+    "reasoning": {
+      "src/Serilog/Core/Logger.cs": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "serilog-post-level-check",
+    "files": [
+      "src/Serilog/Core/Logger.cs"
+    ],
+    "reasoning": {
+      "src/Serilog/Core/Logger.cs": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "serilog-post-level-check-impact",
+    "files": [
+      "src/Serilog/Core/Logger.cs"
+    ],
+    "reasoning": {
+      "src/Serilog/Core/Logger.cs": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "serilog-effective-level",
+    "files": [
+      "src/Serilog/Core/LevelOverrideMap.cs"
+    ],
+    "reasoning": {
+      "src/Serilog/Core/LevelOverrideMap.cs": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "serilog-secondary-emit",
+    "files": [
+      "src/Serilog/Core/Sinks/SecondaryLoggerSink.cs"
+    ],
+    "reasoning": {
+      "src/Serilog/Core/Sinks/SecondaryLoggerSink.cs": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "serilog-ensure-valid-name",
+    "files": [
+      "src/Serilog/Events/LogEventProperty.cs"
+    ],
+    "reasoning": {
+      "src/Serilog/Events/LogEventProperty.cs": "file declaring the target symbol and its direct collaborators"
     }
   }
 ]

@@ -1,0 +1,76 @@
+[
+  {
+    "taskId": "mux-servehttp-redirect",
+    "files": [
+      "mux.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "mux-servehttp-fallback",
+    "files": [
+      "mux.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "mux-route-match-method",
+    "files": [
+      "route.go"
+    ],
+    "reasoning": {
+      "route.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "mux-walk-explain",
+    "files": [
+      "mux.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "mux-requestwithvars-impact",
+    "files": [
+      "mux.go",
+      "test_helpers.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators",
+      "test_helpers.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chi-routehttp-explain",
+    "files": [
+      "mux.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chi-servehttp-pool",
+    "files": [
+      "mux.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators"
+    }
+  },
+  {
+    "taskId": "chi-handle-change",
+    "files": [
+      "mux.go"
+    ],
+    "reasoning": {
+      "mux.go": "file declaring the target symbol and its direct collaborators"
+    }
+  }
+]

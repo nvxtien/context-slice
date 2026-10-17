@@ -1,12 +1,12 @@
 {
   "version": "1.10-csharp-tasks",
-  "generatedAt": "2026-10-12T19:38:25.074Z",
+  "generatedAt": "2026-10-17T08:11:18.914Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
   },
   "tokenAccounting": "estimated deterministic context size; not assistant telemetry",
-  "note": "Small sample (n=2 tasks, serilog only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
+  "note": "Small sample (n=8 tasks, serilog only); not comparable to the larger Rust/Java/TypeScript/Python samples.",
   "repositories": [
     {
       "repository": "serilog",
@@ -17,16 +17,16 @@
       "files": {
         ".cs": 216
       },
-      "parseErrors": 31,
-      "symbols": 2043,
-      "callEdges": 4104,
-      "callEdgesExact": 787,
-      "callEdgesUnresolved": 2888,
+      "parseErrors": 25,
+      "symbols": 2141,
+      "callEdges": 4217,
+      "callEdgesExact": 828,
+      "callEdgesUnresolved": 2955,
       "performance": {
-        "coldIndexMs": 703,
-        "warmIndexMs": 31,
-        "singleFileRefreshMs": 38,
-        "previewMs": 29,
+        "coldIndexMs": 855,
+        "warmIndexMs": 32,
+        "singleFileRefreshMs": 39,
+        "previewMs": 21,
         "filesIndexed": 216
       }
     },
@@ -39,15 +39,15 @@
       "files": {
         ".cs": 369
       },
-      "parseErrors": 29,
-      "symbols": 2818,
-      "callEdges": 3131,
-      "callEdgesExact": 381,
-      "callEdgesUnresolved": 2459,
+      "parseErrors": 26,
+      "symbols": 2832,
+      "callEdges": 3149,
+      "callEdgesExact": 387,
+      "callEdgesUnresolved": 2469,
       "performance": {
-        "coldIndexMs": 1026,
+        "coldIndexMs": 1035,
         "warmIndexMs": 33,
-        "singleFileRefreshMs": 37,
+        "singleFileRefreshMs": 35,
         "previewMs": null,
         "filesIndexed": 369
       }
@@ -61,14 +61,14 @@
       "files": {
         ".cs": 783
       },
-      "parseErrors": 57,
-      "symbols": 6369,
-      "callEdges": 7744,
-      "callEdgesExact": 1833,
-      "callEdgesUnresolved": 5735,
+      "parseErrors": 8,
+      "symbols": 6702,
+      "callEdges": 8254,
+      "callEdgesExact": 2002,
+      "callEdgesUnresolved": 6030,
       "performance": {
-        "coldIndexMs": 2389,
-        "warmIndexMs": 86,
+        "coldIndexMs": 2427,
+        "warmIndexMs": 70,
         "singleFileRefreshMs": 88,
         "previewMs": null,
         "filesIndexed": 783
@@ -153,28 +153,270 @@
           "attribution": "PRESERVED"
         }
       ]
+    },
+    {
+      "task": "serilog-is-enabled",
+      "repository": "serilog",
+      "category": "explain",
+      "targetSymbol": "Logger.IsEnabled",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 17232,
+      "manualFiles": 1,
+      "suppliedContextTokens": 234,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9864206128133705,
+      "metrics": {
+        "contextWindowReduction": 0.9864206128133705,
+        "inputTokenReduction": 0.9864206128133705,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.008547008547008548,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.028564453125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "minimum",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "switch",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "serilog-post-level-check",
+      "repository": "serilog",
+      "category": "explain",
+      "targetSymbol": "Logger.PostLevelCheckEmit",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 17232,
+      "manualFiles": 1,
+      "suppliedContextTokens": 187,
+      "contextItems": 2,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9891480965645311,
+      "metrics": {
+        "contextWindowReduction": 0.9891480965645311,
+        "inputTokenReduction": 0.9891480965645311,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0106951871657754,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0228271484375,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "enrich",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "emit",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "serilog-post-level-check-impact",
+      "repository": "serilog",
+      "category": "impact",
+      "targetSymbol": "Logger.PostLevelCheckEmit",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 17232,
+      "manualFiles": 1,
+      "suppliedContextTokens": 995,
+      "contextItems": 7,
+      "minimumSufficientBudget": 1024,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.9422585886722377,
+      "metrics": {
+        "contextWindowReduction": 0.9422585886722377,
+        "inputTokenReduction": 0.9422585886722377,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0020100502512562816,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.1214599609375,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "write",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "emit",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "serilog-effective-level",
+      "repository": "serilog",
+      "category": "explain",
+      "targetSymbol": "LevelOverrideMap.GetEffectiveLevel",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 786,
+      "manualFiles": 1,
+      "suppliedContextTokens": 219,
+      "contextItems": 1,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.7213740458015268,
+      "metrics": {
+        "contextWindowReduction": 0.7213740458015268,
+        "inputTokenReduction": 0.7213740458015268,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.0091324200913242,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0267333984375,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "override",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "default",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "serilog-secondary-emit",
+      "repository": "serilog",
+      "category": "locate",
+      "targetSymbol": "SecondaryLoggerSink.Emit",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 1,
+      "requiredFactsPreserved": 1,
+      "requiredFactRecall": 1,
+      "manualTokens": 492,
+      "manualFiles": 1,
+      "suppliedContextTokens": 209,
+      "contextItems": 3,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.5752032520325203,
+      "metrics": {
+        "contextWindowReduction": 0.5752032520325203,
+        "inputTokenReduction": 0.5752032520325203,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.004784688995215311,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0255126953125,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "copy",
+          "attribution": "PRESERVED"
+        }
+      ]
+    },
+    {
+      "task": "serilog-ensure-valid-name",
+      "repository": "serilog",
+      "category": "change",
+      "targetSymbol": "LogEventProperty.EnsureValidName",
+      "targetFound": true,
+      "targetResolution": "resolved",
+      "targetCandidates": 1,
+      "targetFileParsed": true,
+      "retrievalRecall": 1,
+      "requiredFactsTotal": 2,
+      "requiredFactsPreserved": 2,
+      "requiredFactRecall": 1,
+      "manualTokens": 806,
+      "manualFiles": 1,
+      "suppliedContextTokens": 255,
+      "contextItems": 4,
+      "minimumSufficientBudget": 256,
+      "wholeFileFallback": false,
+      "wholeModuleFallback": false,
+      "reduction": 0.6836228287841191,
+      "metrics": {
+        "contextWindowReduction": 0.6836228287841191,
+        "inputTokenReduction": 0.6836228287841191,
+        "wholeFileAvoidanceRate": 1,
+        "developerContextEfficiency": 0.00784313725490196,
+        "contextWasteRatio": 0,
+        "contextBudgetPressure": 0.0311279296875,
+        "requiredFactRecall": 1
+      },
+      "facts": [
+        {
+          "id": "null",
+          "attribution": "PRESERVED"
+        },
+        {
+          "id": "invalid",
+          "attribution": "PRESERVED"
+        }
+      ]
     }
   ],
   "summary": {
     "overall": {
-      "tasks": 2,
+      "tasks": 8,
       "requiredFactRecall": 1,
       "retrievalRecall": 1,
-      "medianContextReduction": 0.9990714948932219,
+      "medianContextReduction": 0.9853760445682451,
       "medianManualTokens": 17232,
-      "medianContextTokens": 252,
+      "medianContextTokens": 234,
       "medianMinimumSufficientBudget": 256,
       "wholeFileFallbackRate": 0,
       "wholeModuleFallbackRate": 0
     },
     "byRepository": {
       "serilog": {
-        "tasks": 2,
+        "tasks": 8,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9990714948932219,
+        "medianContextReduction": 0.9853760445682451,
         "medianManualTokens": 17232,
-        "medianContextTokens": 252,
+        "medianContextTokens": 234,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -204,23 +446,45 @@
     },
     "byCategory": {
       "explain": {
-        "tasks": 1,
+        "tasks": 4,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9853760445682451,
+        "medianContextReduction": 0.9864206128133705,
         "medianManualTokens": 17232,
-        "medianContextTokens": 252,
+        "medianContextTokens": 234,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
       },
       "locate": {
-        "tasks": 1,
+        "tasks": 2,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
         "medianContextReduction": 0.9990714948932219,
         "medianManualTokens": 17232,
-        "medianContextTokens": 16,
+        "medianContextTokens": 209,
+        "medianMinimumSufficientBudget": 256,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "impact": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.9422585886722377,
+        "medianManualTokens": 17232,
+        "medianContextTokens": 995,
+        "medianMinimumSufficientBudget": 1024,
+        "wholeFileFallbackRate": 0,
+        "wholeModuleFallbackRate": 0
+      },
+      "change": {
+        "tasks": 1,
+        "requiredFactRecall": 1,
+        "retrievalRecall": 1,
+        "medianContextReduction": 0.6836228287841191,
+        "medianManualTokens": 806,
+        "medianContextTokens": 255,
         "medianMinimumSufficientBudget": 256,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -232,24 +496,24 @@
   "performance": [
     {
       "repository": "serilog",
-      "coldIndexMs": 703,
-      "warmIndexMs": 31,
-      "singleFileRefreshMs": 38,
-      "previewMs": 29,
+      "coldIndexMs": 855,
+      "warmIndexMs": 32,
+      "singleFileRefreshMs": 39,
+      "previewMs": 21,
       "filesIndexed": 216
     },
     {
       "repository": "polly",
-      "coldIndexMs": 1026,
+      "coldIndexMs": 1035,
       "warmIndexMs": 33,
-      "singleFileRefreshMs": 37,
+      "singleFileRefreshMs": 35,
       "previewMs": null,
       "filesIndexed": 369
     },
     {
       "repository": "aspnetcore-http",
-      "coldIndexMs": 2389,
-      "warmIndexMs": 86,
+      "coldIndexMs": 2427,
+      "warmIndexMs": 70,
       "singleFileRefreshMs": 88,
       "previewMs": null,
       "filesIndexed": 783

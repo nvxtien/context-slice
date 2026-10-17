@@ -1,6 +1,6 @@
 {
   "version": "1.5-phase3",
-  "generatedAt": "2026-09-26T14:34:24.073Z",
+  "generatedAt": "2026-10-17T08:11:24.543Z",
   "environment": {
     "node": "v22.12.0",
     "platform": "darwin"
@@ -15,20 +15,21 @@
       "commit": "6fd031c82ba5a4204b4ce6eae73dacb00dc072ec",
       "scope": "whole repository (library crate plus walkdir-list binary crate)",
       "files": {
+        ".c": 1,
         ".py": 1,
         ".rs": 8
       },
       "parseErrors": 0,
-      "symbols": 218,
-      "callEdges": 1160,
-      "callEdgesExact": 566,
-      "callEdgesUnresolved": 355,
+      "symbols": 220,
+      "callEdges": 1165,
+      "callEdgesExact": 573,
+      "callEdgesUnresolved": 353,
       "performance": {
-        "coldIndexMs": 214,
-        "warmIndexMs": 34,
-        "singleFileRefreshMs": 48,
-        "previewMs": 6,
-        "filesIndexed": 9
+        "coldIndexMs": 224,
+        "warmIndexMs": 5,
+        "singleFileRefreshMs": 36,
+        "previewMs": 4,
+        "filesIndexed": 10
       }
     },
     {
@@ -46,10 +47,10 @@
       "callEdgesExact": 367,
       "callEdgesUnresolved": 197,
       "performance": {
-        "coldIndexMs": 221,
-        "warmIndexMs": 47,
-        "singleFileRefreshMs": 45,
-        "previewMs": 8,
+        "coldIndexMs": 211,
+        "warmIndexMs": 5,
+        "singleFileRefreshMs": 14,
+        "previewMs": 3,
         "filesIndexed": 28
       }
     },
@@ -64,14 +65,14 @@
       },
       "parseErrors": 0,
       "symbols": 580,
-      "callEdges": 3708,
-      "callEdgesExact": 1309,
-      "callEdgesUnresolved": 1417,
+      "callEdges": 3707,
+      "callEdgesExact": 1316,
+      "callEdgesUnresolved": 1409,
       "performance": {
-        "coldIndexMs": 532,
-        "warmIndexMs": 116,
-        "singleFileRefreshMs": 107,
-        "previewMs": 13,
+        "coldIndexMs": 506,
+        "warmIndexMs": 11,
+        "singleFileRefreshMs": 24,
+        "previewMs": 6,
         "filesIndexed": 13
       }
     }
@@ -235,19 +236,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 13087,
       "manualFiles": 3,
-      "suppliedContextTokens": 256,
-      "contextItems": 6,
-      "minimumSufficientBudget": 256,
+      "suppliedContextTokens": 403,
+      "contextItems": 9,
+      "minimumSufficientBudget": 512,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9804386031940093,
+      "reduction": 0.9692060823718194,
       "metrics": {
-        "contextWindowReduction": 0.9804386031940093,
-        "inputTokenReduction": 0.9804386031940093,
+        "contextWindowReduction": 0.9692060823718194,
+        "inputTokenReduction": 0.9692060823718194,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.01171875,
+        "developerContextEfficiency": 0.007444168734491315,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.03125,
+        "contextBudgetPressure": 0.0491943359375,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -754,19 +755,19 @@
       "requiredFactRecall": 1,
       "manualTokens": 13223,
       "manualFiles": 2,
-      "suppliedContextTokens": 1216,
-      "contextItems": 5,
+      "suppliedContextTokens": 1300,
+      "contextItems": 6,
       "minimumSufficientBudget": 2048,
       "wholeFileFallback": false,
       "wholeModuleFallback": false,
-      "reduction": 0.9080390229146185,
+      "reduction": 0.9016864554185888,
       "metrics": {
-        "contextWindowReduction": 0.9080390229146185,
-        "inputTokenReduction": 0.9080390229146185,
+        "contextWindowReduction": 0.9016864554185888,
+        "inputTokenReduction": 0.9016864554185888,
         "wholeFileAvoidanceRate": 1,
-        "developerContextEfficiency": 0.003289473684210526,
+        "developerContextEfficiency": 0.003076923076923077,
         "contextWasteRatio": 0,
-        "contextBudgetPressure": 0.1484375,
+        "contextBudgetPressure": 0.15869140625,
         "requiredFactRecall": 1
       },
       "facts": [
@@ -874,9 +875,9 @@
         "tasks": 3,
         "requiredFactRecall": 1,
         "retrievalRecall": 1,
-        "medianContextReduction": 0.9080390229146185,
+        "medianContextReduction": 0.9016864554185888,
         "medianManualTokens": 13223,
-        "medianContextTokens": 1216,
+        "medianContextTokens": 1300,
         "medianMinimumSufficientBudget": 2048,
         "wholeFileFallbackRate": 0,
         "wholeModuleFallbackRate": 0
@@ -888,26 +889,26 @@
   "performance": [
     {
       "repository": "walkdir",
-      "coldIndexMs": 214,
-      "warmIndexMs": 34,
-      "singleFileRefreshMs": 48,
-      "previewMs": 6,
-      "filesIndexed": 9
+      "coldIndexMs": 224,
+      "warmIndexMs": 5,
+      "singleFileRefreshMs": 36,
+      "previewMs": 4,
+      "filesIndexed": 10
     },
     {
       "repository": "mini-redis",
-      "coldIndexMs": 221,
-      "warmIndexMs": 47,
-      "singleFileRefreshMs": 45,
-      "previewMs": 8,
+      "coldIndexMs": 211,
+      "warmIndexMs": 5,
+      "singleFileRefreshMs": 14,
+      "previewMs": 3,
       "filesIndexed": 28
     },
     {
       "repository": "ripgrep-ignore",
-      "coldIndexMs": 532,
-      "warmIndexMs": 116,
-      "singleFileRefreshMs": 107,
-      "previewMs": 13,
+      "coldIndexMs": 506,
+      "warmIndexMs": 11,
+      "singleFileRefreshMs": 24,
+      "previewMs": 6,
       "filesIndexed": 13
     }
   ]
